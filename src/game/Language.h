@@ -88,7 +88,8 @@ enum MangosStrings
     LANG_SYSTEMMESSAGE_GAMEMASTER       = 61,
     LANG_SYSTEMMESSAGE_ADMINISTRATOR    = 62,
     LANG_SYSANNOUNCE_COLOR              = 63,
-    // Room for more level 0              64-99 not used
+    LANG_CONNECTED_PLAYERS              = 64,
+    // Room for more level 0              65-99 not used
 
     // level 1 chat
     LANG_GLOBAL_NOTIFY                  = 100,
