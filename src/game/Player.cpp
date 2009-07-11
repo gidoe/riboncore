@@ -6290,7 +6290,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     uint32 oldZoneId  = m_zoneUpdateId;
 
-	if(m_zoneUpdateId != newZone)
+    if(m_zoneUpdateId != newZone)
         SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
 
     m_zoneUpdateId    = newZone;
@@ -6461,7 +6461,9 @@ void Player::CheckDuelDistance(time_t currTime)
 
 bool Player::IsOutdoorPvPActive()
 {
-    return (isAlive() && !HasInvisibilityAura() && !HasStealthAura() && (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP) || sWorld.IsPvPRealm())  && !m_movementInfo.HasMovementFlag(MOVEMENTFLAG_FLYING2) && !isInFlight());
+    return (isAlive() && !HasInvisibilityAura() && !HasStealthAura() &&
+           (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP) || sWorld.IsPvPRealm()) &&
+           !m_movementInfo.HasMovementFlag(MOVEMENTFLAG_FLYING2) && !isInFlight());
 }
 
 void Player::DuelComplete(DuelCompleteType type)
