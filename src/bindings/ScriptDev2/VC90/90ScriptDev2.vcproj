@@ -2486,6 +2486,14 @@
 					<Filter
 						Name="Ulduar"
 						>
+						<File
+							RelativePath="..\scripts\zone\ulduar\ulduar\boss_flame_leviathan.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\scripts\zone\ulduar\ulduar\def_ulduar.h"
+							>
+						</File>
 					</Filter>
 				</Filter>
 				<Filter

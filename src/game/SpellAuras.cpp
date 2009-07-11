@@ -4536,6 +4536,9 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
                 break;
             default: break;
         }
+        // If no flags are given and it procs due to proc chance
+        if (!GetSpellProto()->procFlags && GetSpellProto()->procChance >= 100)
+            m_target->CastSpell(m_target,GetSpellProto()->EffectTriggerSpell[GetEffIndex()],true);
     }
 }
 
@@ -7444,8 +7447,9 @@ void Aura::UnregisterSingleCastAura()
         }
         else
         {
-            sLog.outError("Couldn't find the caster of the single target aura, may crash later!");
-            assert(false);
+            //Temp Crashfix.
+            //sLog.outError("Couldn't find the caster of the single target aura, may crash later!");
+            //assert(false);
         }
         m_isSingleTargetAura = false;
     }

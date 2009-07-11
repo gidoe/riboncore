@@ -1,6 +1,4 @@
-/*
- * Copyright (C) 2008 - 2009 Trinity <http://www.trinitycore.org/>
- *
+/* Copyright (C) 2006 - 2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +6,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "precompiled.h"
@@ -33,21 +31,22 @@
 
 #define SPELL_SEARING_FLAME     62402
 
-struct MANGOS_DLL_DECL boss_flame_leviathanAI : public BossAI
+struct MANGOS_DLL_DECL boss_flame_leviathanAI : public ScriptedAI
 {
-    boss_flame_leviathanAI(Creature *c) : BossAI(c, BOSS_LEVIATHAN)
-    {
+    boss_flame_leviathanAI(Creature* pCreature) : ScriptedAI(pCreature)
+	{
         assert(c->isVehicle());
-    }
+        Reset();
+	}
+
+    void Reset(){}
 
     void UpdateAI(const uint32 diff)
     {
-        if(!UpdateVictim())
+        if(!m_creature->SelectHostilTarget() || !m_creature->getVictim() )
             return;
 
-        events.Update(diff);
-
-        if(me->hasUnitState(UNIT_STAT_CASTING))
+        if(m_creature->hasUnitState(UNIT_STAT_STUNNED))
             return;
 
         DoMeleeAttackIfReady();
@@ -57,37 +56,37 @@ struct MANGOS_DLL_DECL boss_flame_leviathanAI : public BossAI
 
 struct MANGOS_DLL_DECL boss_flame_leviathan_seatAI : public ScriptedAI
 {
-    boss_flame_leviathan_seatAI(Creature *c) : ScriptedAI(c)
+    boss_flame_leviathan_seatAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         assert(c->isVehicle());
     }
 
     void Reset()
     {
-        if(const CreatureInfo *cInfo = me->GetCreatureInfo())
-            me->SetDisplayId(cInfo->DisplayID_H[1]); // A for gm, H1 invisible
+        if(const CreatureInfo *cInfo = m_creature->GetCreatureInfo())
+            m_creature->SetDisplayId(cInfo->DisplayID_H[1]); // A for gm, H1 invisible
     }
 
     void UpdateAI(const uint32 diff)
     {
-        if(!UpdateVictim())
+        if(!m_creature->SelectHostilTarget() || !m_creature->getVictim() )
             return;
 
-        if(me->hasUnitState(UNIT_STAT_CASTING))
+        if(m_creature->hasUnitState(UNIT_STAT_STUNNED))
             return;
 
         DoMeleeAttackIfReady();
     }
 };
 
-CreatureAI* GetAI_boss_flame_leviathan(Creature *_Creature)
+CreatureAI* GetAI_boss_flame_leviathan(Creature* pCreature)
 {
-    return new boss_flame_leviathanAI (_Creature);
+    return new boss_flame_leviathanAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_flame_leviathan_seat(Creature *_Creature)
+CreatureAI* GetAI_boss_flame_leviathan_seat(Creature* pCreature)
 {
-    return new boss_flame_leviathan_seatAI (_Creature);
+    return new boss_flame_leviathan_seatAI(pCreature);
 }
 
 void AddSC_boss_flame_leviathan()
