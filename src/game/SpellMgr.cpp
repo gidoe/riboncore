@@ -1292,6 +1292,10 @@ case SPELLFAMILY_GENERIC:                   // same family case
                    (spellInfo_2->SpellFamilyFlags & UI64LIT(0x1)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x400000)) )
                    return false;
 
+                // Shadow Embrace (two different effects must be stack)
+                if( spellInfo_1->SpellIconID == 2209 && spellInfo_2->SpellIconID == 2209 ||
+                    spellInfo_2->SpellIconID == 2209 && spellInfo_1->SpellIconID == 2209 )
+                    return false;
             }
             // Detect Invisibility and Mana Shield (multi-family check)
             if( spellInfo_2->Id == 132 && spellInfo_1->SpellIconID == 209 && spellInfo_1->SpellVisual[0] == 968 )
