@@ -232,13 +232,6 @@ CREATE TABLE `characters` (
   `death_expire_time` bigint(20) unsigned NOT NULL default '0',
   `taxi_path` text,
   `arena_pending_points` int(10) UNSIGNED NOT NULL default '0',
-  `bgid` int(10) unsigned NOT NULL default '0',
-  `bgteam` int(10) unsigned NOT NULL default '0',
-  `bgmap` int(10) unsigned NOT NULL default '0',
-  `bgx` float NOT NULL default '0',
-  `bgy` float NOT NULL default '0',
-  `bgz` float NOT NULL default '0',
-  `bgo` float NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`),
@@ -345,6 +338,23 @@ LOCK TABLES `character_aura` WRITE;
 /*!40000 ALTER TABLE `character_aura` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_aura` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `character_battleground`
+--
+
+DROP TABLE IF EXISTS `character_battleground`;
+CREATE TABLE `character_battleground` (
+  guid int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
+  bgid int(10) unsigned NOT NULL DEFAULT '0',
+  bgteam int(10) unsigned NOT NULL DEFAULT '0',
+  bgmap int(10) unsigned NOT NULL DEFAULT '0',
+  bgx float NOT NULL DEFAULT '0',
+  bgy float NOT NULL DEFAULT '0',
+  bgz float NOT NULL DEFAULT '0',
+  bgo float NOT NULL DEFAULT '0',
+  PRIMARY KEY (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
 --
 -- Table structure for table `character_declinedname`
