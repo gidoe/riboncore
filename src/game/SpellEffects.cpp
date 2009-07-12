@@ -1205,11 +1205,6 @@ void Spell::EffectDummy(uint32 i)
                 case 58418:                                 // Portal to Orgrimmar
                 case 58420:                                 // Portal to Stormwind
                     return;                                 // implemented in EffectScript[0]
-                case 55004:                                 // Nitro Boosts
-                {
-                    m_caster->CastSpell(m_caster, 54861, true);
-                    return;
-                }
                 // Underbelly Elixir
                 case 59640:
                 {

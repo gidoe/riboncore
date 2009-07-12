@@ -1197,8 +1197,11 @@ case SPELLFAMILY_GENERIC:                   // same family case
                     // Regular and Night Elf Ghost
                     if( (spellInfo_1->Id == 8326 && spellInfo_2->Id == 20584) ||
                         (spellInfo_2->Id == 8326 && spellInfo_1->Id == 20584) )
-                         return false;
-
+                        return false;
+			
+                    //Kindred Spirits (allow stack for auras)
+                    if (spellInfo_1->SpellIconID == 3559 && spellInfo_2->SpellIconID == 3559)
+                        return false;
                     break;
                 }
                 case SPELLFAMILY_MAGE:

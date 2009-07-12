@@ -5597,6 +5597,42 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 target = this;
                 break;
             }
+            // Kindred Spirits
+            if (dummySpell->SpellIconID == 3559)
+            {
+                Unit *pet = GetPet();
+                if (!pet)
+                    return false;
+
+                uint32 trigger_spell_id = 0;
+
+                if (effIndex == 0)
+                {
+                    switch (dummySpell->Id)
+                    {
+                    case 56314: trigger_spell_id = 57447; break;
+                    case 56315: trigger_spell_id = 57452; break;
+                    case 56316: trigger_spell_id = 57453; break;
+                    case 56317: trigger_spell_id = 57457; break;
+                    case 56318: trigger_spell_id = 57458; break;
+                    }
+                }
+                if (effIndex == 1)
+                {
+                    switch (dummySpell->Id)
+                    {
+                    case 56314: trigger_spell_id = 57485; break;
+                    case 56315: trigger_spell_id = 57484; break;
+                    case 56316: trigger_spell_id = 57483; break;
+                    case 56317: trigger_spell_id = 57482; break;
+                    case 56318: trigger_spell_id = 57475; break;
+                    }
+                }
+                target = pet;
+                target->CastSpell(target, trigger_spell_id, true, 0, triggeredByAura);
+
+                break;
+            }
             // Rapid Recuperation
             if ( dummySpell->SpellIconID == 3560 )
             {
