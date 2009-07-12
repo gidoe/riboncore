@@ -458,19 +458,11 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
         return 0;
     }
-<<<<<<< HEAD:src/game/Unit.cpp
-    if (!spellProto || !IsAuraAddedBySpell(SPELL_AURA_MOD_FEAR, spellProto->Id))
+    if (!spellProto || !IsSpellHaveAura(spellProto,SPELL_AURA_MOD_FEAR))
         pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damage, this);
     // root type spells do not dispel the root effect
-    if (!spellProto || !(spellProto->Mechanic == MECHANIC_ROOT || IsAuraAddedBySpell(SPELL_AURA_MOD_ROOT, spellProto->Id)))
-        pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage, this);
-=======
-    if (!spellProto || !IsSpellHaveAura(spellProto,SPELL_AURA_MOD_FEAR))
-        pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damage);
-    // root type spells do not dispel the root effect
     if (!spellProto || !(spellProto->Mechanic == MECHANIC_ROOT || IsSpellHaveAura(spellProto,SPELL_AURA_MOD_ROOT)))
-        pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage);
->>>>>>> 98b173b1c57e1a2856a9ce505ce56e8eca5700eb:src/game/Unit.cpp
+        pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage, this);
 
     // no xp,health if type 8 /critters/
     if(pVictim->GetTypeId() != TYPEID_PLAYER && pVictim->GetCreatureType() == CREATURE_TYPE_CRITTER)
@@ -788,11 +780,12 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                 ((Creature*)pVictim)->AI()->AttackedBy(this);
         }
 
-        // polymorphed, hex and other negative transformed cases
+        // polymorphed, hex and other negative transformed cases <- Temp Change, need more fix.
         if (uint32 morphspell = pVictim->getTransForm())
-            if (IsAuraAddedBySpell(SPELL_AURA_MOD_CONFUSE, morphspell))
+            if (SpellEntry const* morph = sSpellStore.LookupEntry(morphspell))
+                if (IsSpellHaveAura(morph, SPELL_AURA_MOD_CONFUSE))
                 pVictim->RemoveAurasDueToSpell(morphspell);
-            else if (IsAuraAddedBySpell(SPELL_AURA_MOD_PACIFY_SILENCE, morphspell))
+            else if (IsSpellHaveAura(morph, SPELL_AURA_MOD_PACIFY_SILENCE))
                 pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_PACIFY_SILENCE, damage, this);
 
         // Knockout Mechanic
