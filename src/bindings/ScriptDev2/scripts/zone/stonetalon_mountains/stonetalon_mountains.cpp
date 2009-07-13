@@ -17,11 +17,12 @@
 /* ScriptData
 SDName: Stonetalon_Mountains
 SD%Complete: 95
-SDComment: Quest support: 6627 (Braug Dimspirits questions/'answers' might have more to it, need more info)
+SDComment: Quest support: 6627, 6523 (Braug Dimspirits questions/'answers' might have more to it, need more info)
 SDCategory: Stonetalon Mountains
 EndScriptData */
 
 #include "precompiled.h"
+#include "../../npc/npc_escortAI.h"
 
 /*######
 ## npc_braug_dimspirit
@@ -65,6 +66,130 @@ bool GossipSelect_npc_braug_dimspirit(Player* pPlayer, Creature* pCreature, uint
 }
 
 /*######
+## npc_kaya
+######*/
+
+enum
+{
+	FACTION_ESCORTEE_H		=	775,
+
+	NPC_GRIMTOTEM_RUFFIAN	=	11910,
+	NPC_GRIMTOTEM_BRUTE		=	11912,
+	NPC_GRIMTOTEM_SORCERER	=	11913,
+
+	SAY_START				=	-1000357,
+	SAY_AMBUSH				=	-1000358,
+	SAY_END					=	-1000359,
+
+	QUEST_PROTECT_KAYA	=	6523
+};
+
+struct MANGOS_DLL_DECL npc_kayaAI : public npc_escortAI
+{
+    npc_kayaAI(Creature* pCreature) : npc_escortAI(pCreature) 
+	{
+		uiNormFaction = pCreature->getFaction();
+		Reset();
+	}
+
+	bool bWasAmbushed;
+
+	uint32 uiNormFaction;
+
+	uint64 uiSay_Timer;
+
+	Creature* pGrimmTotems[3];
+
+    void Reset()
+	{
+		if(!IsBeingEscorted)
+		{
+			m_creature->setFaction(uiNormFaction);
+			bWasAmbushed = true;	
+			uiSay_Timer = 2000;
+		}
+    }
+
+    void WaypointReached(uint32 i)
+    {
+        Unit* pPlayer = Unit::GetUnit((*m_creature), PlayerGUID);
+
+        if (!pPlayer)
+            return;
+
+        switch (i)
+		{
+			//Ambush
+			case 16:
+				bWasAmbushed = false;
+				pGrimmTotems[0]	=	m_creature->SummonCreature(NPC_GRIMTOTEM_RUFFIAN, -50.75, -500.77, -46.13, 0.4, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
+				pGrimmTotems[1]	=	m_creature->SummonCreature(NPC_GRIMTOTEM_BRUTE, -40.05, -510.89,- 46.05, 1.7, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);	
+				pGrimmTotems[2]	=	m_creature->SummonCreature(NPC_GRIMTOTEM_SORCERER, -32.21, -499.20, -45.35, 2.8, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
+				break;
+
+			// Award quest credit
+            case 18:                
+				DoScriptText(SAY_END,m_creature);
+                if (pPlayer && pPlayer->GetTypeId() == TYPEID_PLAYER)
+                    ((Player*)pPlayer)->GroupEventHappens(QUEST_PROTECT_KAYA,m_creature);
+                break;
+		}
+	}
+
+    void JustDied(Unit* pKiller)
+	{
+        if (PlayerGUID)
+        {
+            // If NPC dies, player fails the quest
+            Unit* pPlayer = Unit::GetUnit((*m_creature), PlayerGUID);
+            if (pPlayer && pPlayer->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)pPlayer)->FailQuest(QUEST_PROTECT_KAYA);
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+	{
+        npc_escortAI::UpdateAI(uiDiff);
+
+		if(!bWasAmbushed)
+		{
+            if(uiSay_Timer < uiDiff)
+			{
+                bWasAmbushed = true;
+				DoScriptText(SAY_AMBUSH,m_creature);
+				for(int i = 0 ; i < 3 ; ++i)
+					if(pGrimmTotems[i])
+						pGrimmTotems[i]->AI()->AttackStart(m_creature);
+                
+            }
+			else 
+				uiSay_Timer -= uiDiff;
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_kaya(Creature* pCreature)
+{
+    npc_kayaAI* kayaAI = new npc_kayaAI(pCreature);
+	kayaAI->FillPointMovementListForCreature();
+
+    return (CreatureAI*)kayaAI;
+}
+
+bool QuestAccept_npc_kaya(Player* pPlayer, Creature* pCreature, Quest const* pQuest){
+    
+	//Casting Spell and Starting the Escort quest is buggy, so this is a hack. Use the spell when it is possible.
+
+	if (pQuest->GetQuestId() == QUEST_PROTECT_KAYA)
+	{
+		((npc_escortAI*)(pCreature->AI()))->Start(false, true, false, pPlayer->GetGUID());
+		pCreature->setFaction(FACTION_ESCORTEE_H);
+		DoScriptText(SAY_START,pCreature);
+	}
+    return true;
+}
+
+/*######
 ## AddSC
 ######*/
 
@@ -76,5 +201,11 @@ void AddSC_stonetalon_mountains()
     newscript->Name = "npc_braug_dimspirit";
     newscript->pGossipHello = &GossipHello_npc_braug_dimspirit;
     newscript->pGossipSelect = &GossipSelect_npc_braug_dimspirit;
+    newscript->RegisterSelf();
+
+	newscript = new Script;
+    newscript->Name = "npc_kaya";
+    newscript->GetAI = &GetAI_npc_kaya;	
+    newscript->pQuestAccept = &QuestAccept_npc_kaya;
     newscript->RegisterSelf();
 }
