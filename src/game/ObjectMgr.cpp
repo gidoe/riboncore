@@ -800,6 +800,7 @@ void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* 
     endAura.effect_idx = 0;
 }
 
+<<<<<<< HEAD:src/game/ObjectMgr.cpp
 void ObjectMgr::ConvertCreatureAddonPassengers(CreatureDataAddon* addon, char const* table, char const* guidEntryStr)
 {
     // Now add the auras, format "spellid effectindex spellid effectindex..."
@@ -887,16 +888,19 @@ void ObjectMgr::ConvertCreatureAddonPassengers(CreatureDataAddon* addon, char co
 }
 
 void ObjectMgr::LoadCreatureAddons()
+=======
+void ObjectMgr::LoadCreatureAddons(SQLStorage& creatureaddons, char const* entryName, char const* comment)
+>>>>>>> f3cde0d091342ea0a09672a87396d5a8077f6aab:src/game/ObjectMgr.cpp
 {
-    sCreatureInfoAddonStorage.Load();
+    creatureaddons.Load();
 
-    sLog.outString( ">> Loaded %u creature template addons", sCreatureInfoAddonStorage.RecordCount );
+    sLog.outString(">> Loaded %u %s", creatureaddons.RecordCount, comment);
     sLog.outString();
 
     // check data correctness and convert 'auras'
-    for(uint32 i = 1; i < sCreatureInfoAddonStorage.MaxEntry; ++i)
+    for(uint32 i = 1; i < creatureaddons.MaxEntry; ++i)
     {
-        CreatureDataAddon const* addon = sCreatureInfoAddonStorage.LookupEntry<CreatureDataAddon>(i);
+        CreatureDataAddon const* addon = creatureaddons.LookupEntry<CreatureDataAddon>(i);
         if(!addon)
             continue;
 
@@ -904,51 +908,51 @@ void ObjectMgr::LoadCreatureAddons()
         {
             if (!sCreatureDisplayInfoStore.LookupEntry(addon->mount))
             {
-                sLog.outErrorDb("Creature (Entry %u) have invalid displayInfoId for mount (%u) defined in `creature_template_addon`.",addon->guidOrEntry, addon->mount);
+                sLog.outErrorDb("Creature (%s %u) have invalid displayInfoId for mount (%u) defined in `%s`.", entryName, addon->guidOrEntry, addon->mount, creatureaddons.GetTableName());
                 const_cast<CreatureDataAddon*>(addon)->mount = 0;
             }
         }
 
         if (!sEmotesStore.LookupEntry(addon->emote))
-            sLog.outErrorDb("Creature (Entry %u) have invalid emote (%u) defined in `creature_template_addon`.",addon->guidOrEntry, addon->emote);
+            sLog.outErrorDb("Creature (%s %u) have invalid emote (%u) defined in `%s`.", entryName, addon->guidOrEntry, addon->emote, creatureaddons.GetTableName());
 
+<<<<<<< HEAD:src/game/ObjectMgr.cpp
         ConvertCreatureAddonAuras(const_cast<CreatureDataAddon*>(addon), "creature_template_addon", "Entry");
         ConvertCreatureAddonPassengers(const_cast<CreatureDataAddon*>(addon), "creature_template_addon", "Entry");
-
-        if(!sCreatureStorage.LookupEntry<CreatureInfo>(addon->guidOrEntry))
-            sLog.outErrorDb("Creature (Entry: %u) does not exist but has a record in `creature_template_addon`",addon->guidOrEntry);
-    }
-
-    sCreatureDataAddonStorage.Load();
-
-    sLog.outString( ">> Loaded %u creature addons", sCreatureDataAddonStorage.RecordCount );
-    sLog.outString();
-
-    // check data correctness and convert 'auras'
-    for(uint32 i = 1; i < sCreatureDataAddonStorage.MaxEntry; ++i)
-    {
-        CreatureDataAddon const* addon = sCreatureDataAddonStorage.LookupEntry<CreatureDataAddon>(i);
-        if(!addon)
-            continue;
-
-        if (addon->mount)
+=======
+        if (addon->move_flags & (MONSTER_MOVE_UNK1|MONSTER_MOVE_UNK4))
         {
-            if (!sCreatureDisplayInfoStore.LookupEntry(addon->mount))
-            {
-                sLog.outErrorDb("Creature (GUID %u) have invalid displayInfoId for mount (%u) defined in `creature_addon`.",addon->guidOrEntry, addon->mount);
-                const_cast<CreatureDataAddon*>(addon)->mount = 0;
-            }
+            sLog.outErrorDb("Creature (%s %u) movement flags mask defined in `%s` include forbidden  flags (" I32FMT ") that can crash client, cleanup at load.", entryName, addon->guidOrEntry, creatureaddons.GetTableName(), (MONSTER_MOVE_UNK1|MONSTER_MOVE_UNK4));
+            const_cast<CreatureDataAddon*>(addon)->move_flags &= ~(MONSTER_MOVE_UNK1|MONSTER_MOVE_UNK4);
         }
+>>>>>>> f3cde0d091342ea0a09672a87396d5a8077f6aab:src/game/ObjectMgr.cpp
 
-        if (!sEmotesStore.LookupEntry(addon->emote))
-            sLog.outErrorDb("Creature (GUID %u) have invalid emote (%u) defined in `creature_addon`.",addon->guidOrEntry, addon->emote);
+        ConvertCreatureAddonAuras(const_cast<CreatureDataAddon*>(addon), creatureaddons.GetTableName(), entryName);
+    }
+}
 
+void ObjectMgr::LoadCreatureAddons()
+{
+    LoadCreatureAddons(sCreatureInfoAddonStorage,"Entry","creature template addons");
+
+    // check entry ids
+    for(uint32 i = 1; i < sCreatureInfoAddonStorage.MaxEntry; ++i)
+        if(CreatureDataAddon const* addon = sCreatureInfoAddonStorage.LookupEntry<CreatureDataAddon>(i))
+            if(!sCreatureStorage.LookupEntry<CreatureInfo>(addon->guidOrEntry))
+                sLog.outErrorDb("Creature (Entry: %u) does not exist but has a record in `%s`",addon->guidOrEntry, sCreatureInfoAddonStorage.GetTableName());
+
+<<<<<<< HEAD:src/game/ObjectMgr.cpp
         ConvertCreatureAddonAuras(const_cast<CreatureDataAddon*>(addon), "creature_addon", "GUIDLow");
         ConvertCreatureAddonPassengers(const_cast<CreatureDataAddon*>(addon), "creature_addon", "GUIDLow");
+=======
+    LoadCreatureAddons(sCreatureDataAddonStorage,"GUID","creature addons");
+>>>>>>> f3cde0d091342ea0a09672a87396d5a8077f6aab:src/game/ObjectMgr.cpp
 
-        if(mCreatureDataMap.find(addon->guidOrEntry)==mCreatureDataMap.end())
-            sLog.outErrorDb("Creature (GUID: %u) does not exist but has a record in `creature_addon`",addon->guidOrEntry);
-    }
+    // check entry ids
+    for(uint32 i = 1; i < sCreatureDataAddonStorage.MaxEntry; ++i)
+        if(CreatureDataAddon const* addon = sCreatureDataAddonStorage.LookupEntry<CreatureDataAddon>(i))
+            if(mCreatureDataMap.find(addon->guidOrEntry)==mCreatureDataMap.end())
+                sLog.outErrorDb("Creature (GUID: %u) does not exist but has a record in `creature_addon`",addon->guidOrEntry);
 }
 
 EquipmentInfo const* ObjectMgr::GetEquipmentInfo(uint32 entry)
