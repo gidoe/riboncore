@@ -800,7 +800,6 @@ void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* 
     endAura.effect_idx = 0;
 }
 
-<<<<<<< HEAD:src/game/ObjectMgr.cpp
 void ObjectMgr::ConvertCreatureAddonPassengers(CreatureDataAddon* addon, char const* table, char const* guidEntryStr)
 {
     // Now add the auras, format "spellid effectindex spellid effectindex..."
@@ -887,10 +886,7 @@ void ObjectMgr::ConvertCreatureAddonPassengers(CreatureDataAddon* addon, char co
     endPassenger.seat_idx = 0;
 }
 
-void ObjectMgr::LoadCreatureAddons()
-=======
 void ObjectMgr::LoadCreatureAddons(SQLStorage& creatureaddons, char const* entryName, char const* comment)
->>>>>>> f3cde0d091342ea0a09672a87396d5a8077f6aab:src/game/ObjectMgr.cpp
 {
     creatureaddons.Load();
 
@@ -916,18 +912,15 @@ void ObjectMgr::LoadCreatureAddons(SQLStorage& creatureaddons, char const* entry
         if (!sEmotesStore.LookupEntry(addon->emote))
             sLog.outErrorDb("Creature (%s %u) have invalid emote (%u) defined in `%s`.", entryName, addon->guidOrEntry, addon->emote, creatureaddons.GetTableName());
 
-<<<<<<< HEAD:src/game/ObjectMgr.cpp
-        ConvertCreatureAddonAuras(const_cast<CreatureDataAddon*>(addon), "creature_template_addon", "Entry");
-        ConvertCreatureAddonPassengers(const_cast<CreatureDataAddon*>(addon), "creature_template_addon", "Entry");
-=======
         if (addon->move_flags & (MONSTER_MOVE_UNK1|MONSTER_MOVE_UNK4))
         {
             sLog.outErrorDb("Creature (%s %u) movement flags mask defined in `%s` include forbidden  flags (" I32FMT ") that can crash client, cleanup at load.", entryName, addon->guidOrEntry, creatureaddons.GetTableName(), (MONSTER_MOVE_UNK1|MONSTER_MOVE_UNK4));
             const_cast<CreatureDataAddon*>(addon)->move_flags &= ~(MONSTER_MOVE_UNK1|MONSTER_MOVE_UNK4);
         }
->>>>>>> f3cde0d091342ea0a09672a87396d5a8077f6aab:src/game/ObjectMgr.cpp
 
         ConvertCreatureAddonAuras(const_cast<CreatureDataAddon*>(addon), creatureaddons.GetTableName(), entryName);
+        ConvertCreatureAddonPassengers(const_cast<CreatureDataAddon*>(addon), creatureaddons.GetTableName(), entryName);
+
     }
 }
 
@@ -941,12 +934,8 @@ void ObjectMgr::LoadCreatureAddons()
             if(!sCreatureStorage.LookupEntry<CreatureInfo>(addon->guidOrEntry))
                 sLog.outErrorDb("Creature (Entry: %u) does not exist but has a record in `%s`",addon->guidOrEntry, sCreatureInfoAddonStorage.GetTableName());
 
-<<<<<<< HEAD:src/game/ObjectMgr.cpp
-        ConvertCreatureAddonAuras(const_cast<CreatureDataAddon*>(addon), "creature_addon", "GUIDLow");
-        ConvertCreatureAddonPassengers(const_cast<CreatureDataAddon*>(addon), "creature_addon", "GUIDLow");
-=======
     LoadCreatureAddons(sCreatureDataAddonStorage,"GUID","creature addons");
->>>>>>> f3cde0d091342ea0a09672a87396d5a8077f6aab:src/game/ObjectMgr.cpp
+    //ConvertCreatureAddonPassengers(const_cast<CreatureDataAddon*>, "creature_addon", "GUIDLow");<- this is not right.
 
     // check entry ids
     for(uint32 i = 1; i < sCreatureDataAddonStorage.MaxEntry; ++i)

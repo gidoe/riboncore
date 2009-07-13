@@ -2511,6 +2511,17 @@ void Spell::cast(bool skipCheck)
                 AddPrecastSpell(23230);                     // Blood Fury - Healing Reduction
             break;
         }
+        case SPELLFAMILY_DRUID:
+        {
+            if (m_spellInfo->SpellIconID == 2852 && (m_spellInfo->AttributesEx & 0x28020)) // Berserk
+                AddPrecastSpell(58923); // Hit 3 targets at once with mangle in dire bear form
+            break;
+        }
+        {
+            if(m_spellInfo->Id == 16857 && (m_caster->m_form == FORM_BEAR || m_caster->m_form == FORM_DIREBEAR)) //Faerie Fire(Feral)
+                AddPrecastSpell(60089);
+            break;
+        }
         case SPELLFAMILY_MAGE:
         {
             // Ice Block
@@ -2549,12 +2560,6 @@ void Spell::cast(bool skipCheck)
             // Heroism
             else if (m_spellInfo->Id == 32182)
                 AddPrecastSpell(57723);                     // Exhaustion
-            break;
-        }
-        case SPELLFAMILY_DRUID:
-        {
-            if(m_spellInfo->Id == 16857 && (m_caster->m_form == FORM_BEAR || m_caster->m_form == FORM_DIREBEAR)) //Faerie Fire(Feral)
-                AddPrecastSpell(60089);
             break;
         }
         case SPELLFAMILY_WARLOCK:
