@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Ebon_Hold
-SD%Complete: 90
+SD%Complete: 80
 SDComment: Quest support: 12848, 12733, 12739(and 12742 to 12750)
 SDCategory: Ebon Hold
 EndScriptData */
@@ -484,6 +484,11 @@ struct MANGOS_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
         }
     }
 };
+
+CreatureAI* GetAI_npc_a_special_surprise(Creature* pCreature)
+{
+    return new npc_a_special_surpriseAI(pCreature);
+}
 
 /*######
 ## npc_death_knight_initiate
@@ -1073,10 +1078,9 @@ enum salanar
 {
     SPELL_REALM_OF_SHADOWS          = 52275,
     //SPELL_DEATH_RACE_COMPLETE       = 52361,
-    SPELL_HORSEMANS_CALL            = 52362, // testing
+    SPELL_HORSEMANS_CALL            = 52362, // not working
     NPC_ACHERUS_DEATHCHARGER        = 28782,
-    NPC_DARK_RIDER_OF_ACHERUS       = 28768,
-    REALM_OF_SHADOWS                = 52693
+    NPC_DARK_RIDER_OF_ACHERUS       = 28768
 };
 
 bool GossipHello_npc_salanar_the_horseman(Player* pPlayer, Creature* pCreature)
@@ -1085,7 +1089,7 @@ bool GossipHello_npc_salanar_the_horseman(Player* pPlayer, Creature* pCreature)
         pPlayer->PrepareQuestMenu( pCreature->GetGUID() );
 
     if (pPlayer->GetQuestStatus(12687) == QUEST_STATUS_INCOMPLETE)
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Send me into the Realm of Shadows.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        pPlayer->ADD_GOSSIP_ITEM( 0, "Send me into the Realm of Shadows.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
     pPlayer->SEND_GOSSIP_MENU(pCreature->GetNpcTextId(), pCreature->GetGUID());
 
@@ -1104,47 +1108,6 @@ bool GossipSelect_npc_salanar_the_horseman(Player* pPlayer, Creature *pCreature,
     }
     return true;
 }
-
-struct MANGOS_DLL_DECL npc_salanar_the_horsemanAI : public ScriptedAI
-{
-    npc_salanar_the_horsemanAI(Creature *c) : ScriptedAI(c) {}
-
-    void MoveInLineOfSight(Unit *who)
-    {
-        ScriptedAI::MoveInLineOfSight(who);
-
-        if(who->GetTypeId() == TYPEID_UNIT && ((Creature*)who)->isVehicle() && m_creature->IsWithinDistInMap(who, 10.0f))
-        {
-            if( Unit *charmer = who->GetCharmer() )
-            {
-                if( charmer->GetTypeId() == TYPEID_PLAYER )
-                {
-                    switch(m_creature->GetEntry())
-                    {
-                        // for quest Grand Theft Palomino(12680)
-                        case 28653:
-                            if( ((Player*)charmer)->GetQuestStatus(12680) == QUEST_STATUS_INCOMPLETE )
-                                ((Player*)charmer)->KilledMonster(28767, m_creature->GetGUID());
-                            break;
-                        // for quest Into the Realm of Shadows(12687)
-                        case 28788:
-                            if( ((Player*)charmer)->GetQuestStatus(12687) == QUEST_STATUS_INCOMPLETE )
-                            {
-                                if(((Player*)charmer)->HasAura(REALM_OF_SHADOWS))
-                                    charmer->RemoveAurasDueToSpell(REALM_OF_SHADOWS);
-                                ((Player*)charmer)->GroupEventHappens(12687, m_creature);
-                            }
-                            break;
-                        default:
-                            return;
-                    }
-                    ((Player*)charmer)->ExitVehicle();
-                    ((Creature*)who)->Respawn();
-                }
-            }
-        }
-    }
-};
 
 /*######
 ## Mob Dark Rider of Acherus
@@ -3257,11 +3220,6 @@ CreatureAI* GetAI_mob_dark_rider_of_acherus(Creature* pCreature)
     return new mob_dark_rider_of_acherusAI (pCreature);
 }
 
-CreatureAI* GetAI_npc_a_special_surprise(Creature* pCreature)
-{
-    return new npc_a_special_surpriseAI (pCreature);
-}
-
 CreatureAI* GetAI_mob_scarlet_miner(Creature* pCreature)
 {
     return new mob_scarlet_minerAI (pCreature);
@@ -3304,6 +3262,7 @@ CreatureAI* GetAI_npc_the_lich_king_tirion_dawn(Creature* pCreature)
 {
     return new npc_the_lich_king_tirion_dawnAI (pCreature);
 }
+
 
 void AddSC_ebon_hold()
 {

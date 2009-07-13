@@ -55,6 +55,7 @@ m_latency(0), m_TutorialsChanged(false)
         m_Address = sock->GetRemoteAddress ();
         sock->AddReference ();
         loginDatabase.PExecute("UPDATE account SET online = 1 WHERE id = %u;", GetAccountId());
+        CharacterDatabase.PExecute("UPDATE characters SET online = 0 WHERE account = %u AND online <> 0;", GetAccountId()); // really need this?
     }
 }
 
@@ -79,8 +80,8 @@ WorldSession::~WorldSession()
         WorldPacket *packet = _recvQueue.next ();
         delete packet;
     }
-    loginDatabase.PExecute("UPDATE account SET online = 0 WHERE id = %u;", GetAccountId()); 
-    CharacterDatabase.PExecute("UPDATE characters SET online = 0 WHERE account = %u;", GetAccountId()); 
+    loginDatabase.PExecute("UPDATE account SET online = 0 WHERE id = %u;", GetAccountId());
+    CharacterDatabase.PExecute("UPDATE characters SET online = 0 WHERE account = %u;", GetAccountId());
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
