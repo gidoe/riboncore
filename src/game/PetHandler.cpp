@@ -187,6 +187,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 return;
 
             pet->clearUnitState(UNIT_STAT_FOLLOW);
+            pet->InterruptNonMeleeSpells(false);
 
             Spell *spell = new Spell(pet, spellInfo, false);
 

@@ -467,6 +467,11 @@ struct SpellProcEventEntry
     uint32      cooldown;                                   // hidden cooldown used for some spell proc events, applied to _triggered_spell_
 };
 
+struct SpellProcItemEnchantEntry
+{
+	float chance; 
+};
+
 struct SpellBonusEntry
 {
     float  direct_damage;
@@ -476,6 +481,7 @@ struct SpellBonusEntry
 
 typedef UNORDERED_MAP<uint32, SpellProcEventEntry> SpellProcEventMap;
 typedef UNORDERED_MAP<uint32, SpellBonusEntry>     SpellBonusMap;
+typedef UNORDERED_MAP<uint32, SpellProcItemEnchantEntry>   SpellProcItemEnchantMap;
 
 #define ELIXIR_BATTLE_MASK    0x1
 #define ELIXIR_GUARDIAN_MASK  0x2
@@ -714,6 +720,15 @@ class SpellMgr
             return NULL;
         }
 
+        // Spell proc item enchant
+        SpellProcItemEnchantEntry const* GetSpellProcItemEnchant(uint32 spellId) const
+        {
+            SpellProcItemEnchantMap::const_iterator itr = mSpellProcItemEnchantMap.find(spellId);
+            if( itr != mSpellProcItemEnchantMap.end( ) )
+                return &itr->second;
+            return NULL;
+        }
+
         static bool IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spellProcEvent, uint32 EventProcFlag, SpellEntry const * procSpell, uint32 procFlags, uint32 procExtra, bool active);
 
         // Spell bonus data
@@ -942,6 +957,7 @@ class SpellMgr
         void LoadSpellAffects();
         void LoadSpellElixirs();
         void LoadSpellProcEvents();
+        void LoadSpellProcItemEnchant();
         void LoadSpellBonusess();
         void LoadSpellTargetPositions();
         void LoadSpellThreats();
@@ -961,6 +977,7 @@ class SpellMgr
         SpellAffectMap     mSpellAffectMap;
         SpellElixirMap     mSpellElixirs;
         SpellProcEventMap  mSpellProcEventMap;
+        SpellProcItemEnchantMap mSpellProcItemEnchantMap;
         SpellBonusMap      mSpellBonusMap;
         SkillLineAbilityMap mSkillLineAbilityMap;
         SpellPetAuraMap     mSpellPetAuraMap;

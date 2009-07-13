@@ -7127,7 +7127,13 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
                 continue;
             }
 
+            SpellProcItemEnchantEntry const * spellProcItem;
+            spellProcItem = spellmgr.GetSpellProcItemEnchant(spellInfo->Id);
             float chance = pEnchant->amount[s] != 0 ? float(pEnchant->amount[s]) : GetWeaponProcChance();
+            if (spellProcItem && spellProcItem->chance)
+            {
+                chance = spellProcItem->chance;
+            }
             if (roll_chance_f(chance))
             {
                 if(IsPositiveSpell(pEnchant->spellid[s]))

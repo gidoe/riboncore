@@ -889,6 +889,48 @@ void SpellMgr::LoadSpellProcEvents()
         sLog.outString( ">> Loaded %u extra spell proc event conditions", count );
 }
 
+void SpellMgr::LoadSpellProcItemEnchant()
+{
+    mSpellProcItemEnchantMap.clear();                             // need for reload case
+    uint32 count = 0;
+    //                                                0      1                       
+    QueryResult *result = WorldDatabase.Query("SELECT entry, chance FROM spell_proc_item_enchant");
+    if( !result )
+    {
+        barGoLink bar( 1 );
+        bar.step();
+        sLog.outString();
+        sLog.outString( ">> Loaded %u spell proc item enchant data", count);
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+        uint32 entry = fields[0].GetUInt32();
+
+        const SpellEntry *spell = sSpellStore.LookupEntry(entry);
+        if (!spell)
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_proc_item_enchant` does not exist", entry);
+            continue;
+        }
+
+        SpellProcItemEnchantEntry spie;
+
+        spie.chance = fields[1].GetFloat();
+
+        mSpellProcItemEnchantMap[entry] = spie;
+    } while( result->NextRow() );
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u extra spell proc enchant item",  count);
+}
+
 void SpellMgr::LoadSpellBonusess()
 {
     mSpellBonusMap.clear();                             // need for reload case
