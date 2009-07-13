@@ -123,5 +123,5 @@ RealmsStateUpdateDelay = 20
 WrongPass.MaxCount = 0
 WrongPass.BanTime = 600
 WrongPass.BanType = 0
-AccountCaching = 1
-AccountReloadingDelay = 1
+AccountCaching = 0
+AccountReloadingDelay = 0

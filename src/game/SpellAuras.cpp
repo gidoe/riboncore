@@ -1388,6 +1388,14 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         if(apply)
             m_target->CastSpell(m_target,49772,true);
     }
+    else if(m_spellProto->SpellFamilyName==SPELLFAMILY_DRUID && (m_spellmod->mask2 & UI64LIT(0x20000)))
+    {
+        m_target->RemoveAurasDueToSpell(66530);
+
+        // Aura 66530 is immediately applied ONLY when "Improved Barkskin" is learned in Caster/Travel Form
+        if(apply && (m_target->m_form == FORM_NONE || m_target->m_form == FORM_TRAVEL))
+            m_target->CastSpell(m_target,66530,true);
+    }
 }
 void Aura::HandleAddTargetTrigger(bool apply, bool /*Real*/)
 {
@@ -2933,14 +2941,28 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         case FORM_FLIGHT_EPIC:
         case FORM_FLIGHT:
         case FORM_MOONKIN:
+        {
             // remove movement affects
             m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
-            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
+            Unit::AuraList slowingAuras = m_target->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+            for (Unit::AuraList::iterator iter = slowingAuras.begin(); iter != slowingAuras.end(); ++iter)
+            {
+                const SpellEntry* aurSpellInfo = (*iter)->GetSpellProto();
 
+                // If spell that caused this aura has Croud Control or Daze effect
+                if((GetAllSpellMechanicMask(aurSpellInfo) & MECHANIC_NOT_REMOVED_BY_SHAPESHIFT) ||
+                    // some Daze spells have these parameters instead of MECHANIC_DAZE
+                    (aurSpellInfo->SpellIconID == 15 && aurSpellInfo->Dispel == 0))
+                    continue;
+
+                // All OK, remove aura now
+                m_target->RemoveAurasDueToSpellByCancel(aurSpellInfo->Id);
+            }
             // and polymorphic affects
             if(m_target->IsPolymorphed())
                 m_target->RemoveAurasDueToSpell(m_target->getTransForm());
             break;
+        }
         default:
            break;
     }
@@ -5852,6 +5874,20 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             }
         }
     }
+    
+    // Improved Barkskin - apply/remove armor bonus due to shapeshift
+    if (m_target->HasAura(63410) || m_target->HasAura(63411))
+    {
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(66530);
+        // Aura 66530 must not be revised if we (de)shift from/to Travel Form
+        if (spellInfo && !(spellInfo->Stances & (1<<form)))
+        {
+            if (apply) // We shapeshift to some form except Travel
+                m_target->RemoveAurasDueToSpell(66530);
+            else // We shapeshift to Caster form
+                m_target->CastSpell(m_target,66530,true);
+        }
+    }
 
     /*double healthPercentage = (double)m_target->GetHealth() / (double)m_target->GetMaxHealth();
     m_target->SetHealth(uint32(ceil((double)m_target->GetMaxHealth() * healthPercentage)));*/
@@ -6168,70 +6204,6 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
         DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellProto());
 
         m_modifier.m_amount += (int32)DoneActualBenefit;
-    }
-
-    if (!apply && caster &&
-        // Power Word: Shield
-        m_spellProto->SpellFamilyName == SPELLFAMILY_PRIEST && m_spellProto->Mechanic == MECHANIC_SHIELD &&
-        (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000001)) &&
-        // completely absorbed or dispelled
-        ((m_removeMode == AURA_REMOVE_BY_DEFAULT && !m_modifier.m_amount) || m_removeMode == AURA_REMOVE_BY_DISPEL))
-    {
-        Unit::AuraList const& vDummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
-        for(Unit::AuraList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); itr++)
-        {
-            SpellEntry const* vSpell = (*itr)->GetSpellProto();
-
-            // Rapture (main spell)
-            if(vSpell->SpellFamilyName == SPELLFAMILY_PRIEST && vSpell->SpellIconID == 2894 && vSpell->Effect[1])
-            {
-                switch((*itr)->GetEffIndex())
-                {
-                    case 0:
-                    {
-                        // energize caster
-                        int32 manapct1000 = 5 * ((*itr)->GetModifier()->m_amount + spellmgr.GetSpellRank(vSpell->Id));
-                        int32 basepoints0 = caster->GetMaxPower(POWER_MANA) * manapct1000 / 1000;
-                        caster->CastCustomSpell(caster, 47755, &basepoints0, NULL, NULL, true);
-                        break;
-                    }
-                    case 1:
-                    {
-                        // energize target
-                        if (!roll_chance_i((*itr)->GetModifier()->m_amount) || caster->HasAura(63853))
-                            break;
-
-                        switch(m_target->getPowerType())
-                        {
-                            case POWER_RUNIC_POWER:
-                                m_target->CastSpell(m_target, 63652, true, NULL, NULL, m_caster_guid);
-                                break;
-                            case POWER_RAGE:
-                                m_target->CastSpell(m_target, 63653, true, NULL, NULL, m_caster_guid);
-                                break;
-                            case POWER_MANA:
-                            {
-                                int32 basepoints0 = m_target->GetMaxPower(POWER_MANA) * 2 / 100;
-                                m_target->CastCustomSpell(m_target, 63654, &basepoints0, NULL, NULL, true);
-                                break;
-                            }
-                            case POWER_ENERGY:
-                                m_target->CastSpell(m_target, 63655, true, NULL, NULL, m_caster_guid);
-                                break;
-                            default:
-                                break;
-                        }
-
-                        //cooldwon aura
-                        caster->CastSpell(caster, 63853, true);
-                        break;
-                    }
-                    default:
-                        sLog.outError("Changes in R-dummy spell???: effect 3");
-                        break;
-                }
-            }
-        }
     }
 }
 

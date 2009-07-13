@@ -1113,6 +1113,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
             return m_Auras.find(spellEffectPair(spellId, effIndex)) != m_Auras.end();
         }
         bool HasAura(uint32 spellId) const;
+        bool IsLastAura(uint32 spellId, uint32 effIndex) const;
 
         const uint64& GetAuraUpdateMask() const { return m_auraUpdateMask; }
         void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (uint64(1) << slot); }
