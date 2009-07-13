@@ -443,8 +443,9 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                     m_caster->SetPower(POWER_ENERGY,0);
                 }
                 // Rake
-                else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000001000))
+                else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000001000) && m_spellInfo->Effect[2]==SPELL_EFFECT_ADD_COMBO_POINTS)
                 {
+                    // $AP*0.01 bonus
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100);
                 }
                 // Swipe
@@ -452,6 +453,7 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                 {
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.08f);
                 }
+<<<<<<< HEAD:src/game/SpellEffects.cpp
                 //Improved Insect Swarm
                 else if(m_spellInfo->SpellFamilyFlags & 0x0000000000000001LL && m_spellInfo->SpellIconID==263)
                 {
@@ -477,6 +479,8 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                 {
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.15f);
                 }
+=======
+>>>>>>> ab1515854c6b49cdf39fa1aabef2a151a75d4215:src/game/SpellEffects.cpp
                 break;
             }
             case SPELLFAMILY_ROGUE:
