@@ -2104,6 +2104,11 @@ void Spell::EffectTriggerSpell(uint32 i)
             if(((Player*)m_caster)->HasSpellCooldown(spellId))
                 ((Player*)m_caster)->RemoveSpellCooldown(spellId);
 
+            // prevent interrupt message
+            m_caster->m_currentSpells[CURRENT_GENERIC_SPELL]->finish();
+            //inerrupt anything that might aggro creatures again
+            m_caster->InterruptNonMeleeSpells(true);
+
             m_caster->CastSpell(m_caster, spellId, true);
             return;
         }
