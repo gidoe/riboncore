@@ -1317,7 +1317,7 @@ Network.TcpNodelay = 1
 
 AutoBroadcast.On = 1
 AutoBroadcast.Center = 0
-AutoBroadcast.Timer = 90000
+AutoBroadcast.Timer = 900000
 
 ###################################################################################################################
 # AUCTION HOUSE BOT SETTINGS

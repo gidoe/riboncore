@@ -462,10 +462,10 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
         return 0;
     }
-    if (!spellProto || !IsSpellHaveAura(spellProto,SPELL_AURA_MOD_FEAR))
+    if (!spellProto || !IsSpellHaveAura(spellProto, SPELL_AURA_MOD_FEAR))
         pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damage, this);
     // root type spells do not dispel the root effect
-    if (!spellProto || !(spellProto->Mechanic == MECHANIC_ROOT || IsSpellHaveAura(spellProto,SPELL_AURA_MOD_ROOT)))
+    if (!spellProto || !(spellProto->Mechanic == MECHANIC_ROOT || IsSpellHaveAura(spellProto, SPELL_AURA_MOD_ROOT)))
         pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage, this);
 
     // no xp,health if type 8 /critters/
@@ -784,12 +784,11 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                 ((Creature*)pVictim)->AI()->AttackedBy(this);
         }
 
-        // polymorphed, hex and other negative transformed cases <- Temp Change, need more fix.
-        if (uint32 morphspell = pVictim->getTransForm())
-            if (SpellEntry const* morph = sSpellStore.LookupEntry(morphspell))
-                if (IsSpellHaveAura(morph, SPELL_AURA_MOD_CONFUSE))
-                pVictim->RemoveAurasDueToSpell(morphspell);
-            else if (IsSpellHaveAura(morph, SPELL_AURA_MOD_PACIFY_SILENCE))
+        // polymorphed, hex and other negative transformed cases
+        if (const SpellEntry *morphspell = sSpellStore.LookupEntry(pVictim->getTransForm()))
+            if (IsSpellHaveAura(morphspell, SPELL_AURA_MOD_CONFUSE))
+                pVictim->RemoveAurasDueToSpell(morphspell->Id);
+            else if (IsSpellHaveAura(morphspell, SPELL_AURA_MOD_PACIFY_SILENCE))
                 pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_PACIFY_SILENCE, damage, this);
 
         // Knockout Mechanic

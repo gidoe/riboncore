@@ -1,3 +1,4 @@
+
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -1986,42 +1987,6 @@ void Aura::TriggerSpell()
 //                }
  //               break;
  //           }
-            case SPELLFAMILY_HUNTER:
-            {
-                switch (auraId)
-                {
-                    // Sniper training
-                    case 53302:
-                    case 53303:
-                    case 53304:
-                        if (target->GetTypeId() != TYPEID_PLAYER)
-                            return;
-                        
-                        trigger_spell_id = 64418 + auraId - 53302;                       
-                       
-                        if (((Player*)target)->isMoving())
-                        {
-                            m_modifier.m_amount = 6;
-                            return;
-                        }
-                        
-                        // We are standing at the moment
-                        if (m_modifier.m_amount > 0)
-                        {
-                            --m_modifier.m_amount;
-                            return;
-                        }
-
-                        // If aura is active - no need to continue
-                        if (target->HasAura(trigger_spell_id))
-                            return;
-                            
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            }
             case SPELLFAMILY_DRUID:
             {
                 switch(auraId)
@@ -2051,11 +2016,32 @@ void Aura::TriggerSpell()
                 }
                 break;
             }
+            case SPELLFAMILY_HUNTER:
+            {
+                switch(auraId)
+                {
+                    // Sniper training
+                    case 53302:
+                    case 53303:
+                    case 53304:
+                        if (m_target->GetTypeId() != TYPEID_PLAYER)
+                            return;
 
-//            case SPELLFAMILY_HUNTER:
-//            {
-//                switch(auraId)
-//                {
+                        if (((Player*)m_target)->isMoving())
+                        {
+                            GetModifier()->m_amount = m_target->CalculateSpellDamage(m_spellProto,m_effIndex,m_currentBasePoints,m_target);
+                            return;
+                        }
+
+                        if (GetModifier()->m_amount > 0)
+                        {
+                            --GetModifier()->m_amount;
+                            return;
+                        }
+
+                        trigger_spell_id = 64418 + auraId - 53302;
+
+                        break;
 //                    //Frost Trap Aura
 //                    case 13810:
 //                        return;
@@ -2082,11 +2068,11 @@ void Aura::TriggerSpell()
 //                    case 30648:         // Tame Greater Timberstrider
 //                    case 30652:         // Tame Nightstalker
 //                        return;
-//                    default:
-//                        break;
-//                }
-//                break;
-//            }
+                    default:
+                        break;
+                }
+                break;
+            }
             case SPELLFAMILY_SHAMAN:
             {
                 switch(auraId)

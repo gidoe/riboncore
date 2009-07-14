@@ -5939,7 +5939,8 @@ void Player::RewardReputation(Unit *pVictim, float rate)
     if(!Rep)
         return;
 
-    uint32  tabardFactionID = 0;
+    uint32 tabardFactionID = 0;
+
     // Northrend tabards reputation bonus
     if (HasAura(57818) && (Rep->repfaction1 == 1037) && (Rep->repfaction2 == 1052))
     {
