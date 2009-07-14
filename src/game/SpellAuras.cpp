@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -2120,6 +2120,45 @@ void Aura::TriggerSpell()
                 caster->CastCustomSpell(target, trigger_spell_id, &m_modifier.m_amount, NULL, NULL, true, NULL, this);
                 return;
             }
+            // Intense Cold
+            case 48094:
+            {
+                if (!caster)
+                    return;
+
+                std::list<Unit*> targets;
+                {
+                    float radius = 50.00f;
+
+                    CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(),caster->GetPositionY()));
+                    Cell cell(p);
+                    cell.data.Part.reserved = ALL_DISTRICT;
+
+                    MaNGOS::AnyUnfriendlyVisibleUnitInObjectRangeCheck u_check(caster, caster, radius);
+                    MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyVisibleUnitInObjectRangeCheck> checker(caster,targets, u_check);
+
+                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyVisibleUnitInObjectRangeCheck>, GridTypeMapContainer > grid_object_checker(checker);
+                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyVisibleUnitInObjectRangeCheck>, WorldTypeMapContainer > world_object_checker(checker);
+
+                    CellLock<GridReadGuard> cell_lock(cell, p);
+
+                    cell_lock->Visit(cell_lock, grid_object_checker,  *caster->GetMap());
+                    cell_lock->Visit(cell_lock, world_object_checker, *caster->GetMap());
+                }
+
+                if(targets.empty())
+                    return;
+
+                for(std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                {
+                    if (!(*itr))
+                        continue;
+
+                    (*itr)->CastSpell((*itr), triggeredSpellInfo, true, 0, this);
+                }
+
+                return;
+            }
         }
     }
 
@@ -2332,6 +2371,25 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 return;
             }
         }
+
+        // Vampiric touch
+        if (caster && m_spellProto->SpellFamilyName == SPELLFAMILY_PRIEST &&
+            m_spellProto->SpellFamilyFlags & UI64LIT(0x0000040000000000) &&
+            m_removeMode == AURA_REMOVE_BY_DISPEL)
+        {
+            if (Aura *dot = m_target->GetAura(SPELL_AURA_PERIODIC_DAMAGE, m_spellProto->SpellFamilyName, m_spellProto->SpellFamilyFlags, m_spellProto->SpellFamilyFlags2, GetCasterGUID()))
+            {
+                int32 bp0 = dot->GetModifier()->m_amount;
+                bp0 = 4 * caster->SpellDamageBonus(m_target, GetSpellProto(), bp0, DOT, GetStackAmount());
+                m_target->CastCustomSpell(m_target, 64085, &bp0, NULL, NULL, true, NULL, this, GetCasterGUID());
+            }
+            return;
+        }
+
+        // Haunt
+        if (caster && m_spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK &&
+            m_spellProto->SpellFamilyFlags & UI64LIT(0x4000000000000))
+            caster->CastCustomSpell(caster, 48210, &GetModifier()->m_amount, NULL, NULL, true, NULL, this);
     }
 
     // AT APPLY & REMOVE
@@ -3884,6 +3942,8 @@ void Aura::HandleModStealth(bool apply, bool Real)
 
     if (apply)
     {
+        pTarget->RemoveAllAttackers();
+
         // drop flag at stealth in bg
          pTarget->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
 
@@ -3980,9 +4040,10 @@ void Aura::HandleInvisibility(bool apply, bool Real)
 {
     if(apply)
     {
+        m_target->RemoveAllAttackers();
         m_target->m_invisibilityMask |= (1 << m_modifier.m_miscvalue);
 
-         m_target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
+        m_target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
 
         if(Real && m_target->GetTypeId()==TYPEID_PLAYER)
         {
@@ -4554,6 +4615,24 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
             case 28200:                                     // Ascendance (Talisman of Ascendance trinket)
                 SetAuraCharges(6);
                 break;
+            case 61846:                                     // Aspect of the Dragonhawk
+            case 61847:
+                if (!GetCaster())
+                    break;
+                GetCaster()->CastSpell(GetCaster(), 61848, true);
+                break;
+            default: break;
+        }
+    }
+    else
+    {
+        switch (GetId())
+        {
+            case 61846:                                     // Aspect of the Dragonhawk
+            case 61847:
+                if (!GetCaster())
+                    break;
+                GetCaster()->RemoveAurasDueToSpell(61848);
             default: break;
         }
         // If no flags are given and it procs due to proc chance
@@ -4615,6 +4694,26 @@ void Aura::HandlePeriodicEnergize(bool apply, bool Real)
     if (GetId() == 57669 ||
         GetId() == 61782)
         m_modifier.m_amount = m_target->GetMaxPower(POWER_MANA) * 25 / 10000;
+
+    // King of the jungle (Enrage)
+    if (GetId() == 5229)
+    {
+        if (apply)
+        {
+            Unit::AuraList const &dummy = m_target->GetAurasByType(SPELL_AURA_DUMMY);
+            for(Unit::AuraList::const_iterator i = dummy.begin(); i != dummy.end(); i++)
+            {
+                if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
+                    (*i)->GetMiscValue() == 126)
+                {
+                    m_target->CastCustomSpell(m_target, 51185, &(*i)->GetModifier()->m_amount, NULL, NULL, true);
+                    break;
+                }
+            }
+        }
+        else
+            m_target->RemoveAurasDueToSpell(51185);
+    }
 }
 
 void Aura::HandleAuraPowerBurn(bool apply, bool /*Real*/)
@@ -6204,8 +6303,82 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
         }
 
         DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellProto());
-
         m_modifier.m_amount += (int32)DoneActualBenefit;
+
+        // Glyph of Power Word: Shield
+        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_PRIEST && GetSpellProto()->SpellFamilyFlags == 0x1LL && caster->HasAura(55672))
+        {
+            int32 healamount = m_modifier.m_amount * caster->GetAura(55672, 0)->GetModifier()->m_amount / 100;
+            caster->CastCustomSpell(GetTarget(), 56160, &healamount, NULL, NULL, true);
+        }
+    }
+
+    if (!apply && caster)
+    {
+        // Power Word: Shield
+        if (m_spellProto->SpellFamilyName == SPELLFAMILY_PRIEST && m_spellProto->Mechanic == MECHANIC_SHIELD &&
+            (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000001)) &&
+            // completely absorbed or dispelled
+            ((m_removeMode == AURA_REMOVE_BY_DEFAULT && !m_modifier.m_amount) || m_removeMode == AURA_REMOVE_BY_DISPEL))
+        {
+            Unit::AuraList const& vDummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
+            for(Unit::AuraList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); itr++)
+            {
+                SpellEntry const* vSpell = (*itr)->GetSpellProto();
+
+                // Rapture (main spell)
+                if(vSpell->SpellFamilyName == SPELLFAMILY_PRIEST && vSpell->SpellIconID == 2894 && vSpell->Effect[1])
+                {
+                    switch((*itr)->GetEffIndex())
+                    {
+                        case 0:
+                        {
+                            // energize caster
+                            int32 manapct1000 = 5 * ((*itr)->GetModifier()->m_amount + spellmgr.GetSpellRank(vSpell->Id));
+                            int32 basepoints0 = caster->GetMaxPower(POWER_MANA) * manapct1000 / 1000;
+                            caster->CastCustomSpell(caster, 47755, &basepoints0, NULL, NULL, true);
+                            break;
+                        }
+                        case 1:
+                        {
+                            // energize target
+                            if (!roll_chance_i((*itr)->GetModifier()->m_amount) || caster->HasAura(63853))
+                                break;
+
+                            switch(m_target->getPowerType())
+                            {
+                                case POWER_RUNIC_POWER:
+                                    m_target->CastSpell(m_target, 63652, true, NULL, NULL, m_caster_guid);
+                                    break;
+                                case POWER_RAGE:
+                                    m_target->CastSpell(m_target, 63653, true, NULL, NULL, m_caster_guid);
+                                    break;
+                                case POWER_MANA:
+                                {
+                                    int32 basepoints0 = m_target->GetMaxPower(POWER_MANA) * 2 / 100;
+                                    m_target->CastCustomSpell(m_target, 63654, &basepoints0, NULL, NULL, true);
+                                    break;
+                                }
+                                case POWER_ENERGY:
+                                    m_target->CastSpell(m_target, 63655, true, NULL, NULL, m_caster_guid);
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            //cooldwon aura
+                            caster->CastSpell(caster, 63853, true);
+                            break;
+                        }
+                        default:
+                            sLog.outError("Changes in R-dummy spell???: effect 3");
+                            break;
+                    }
+                }
+            }
+        }
+        else if(GetSpellProto()->Id == 57350)
+            caster->CastSpell(caster, 60242, true, NULL, this);
     }
 }
 

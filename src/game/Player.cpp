@@ -5931,7 +5931,6 @@ int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep, in
 //Calculates how many reputation points player gains in victim's enemy factions
 void Player::RewardReputation(Unit *pVictim, float rate)
 {
-    uint32  tabardFactionID = 0;
     if(!pVictim || pVictim->GetTypeId() == TYPEID_PLAYER)
         return;
 
@@ -5940,11 +5939,12 @@ void Player::RewardReputation(Unit *pVictim, float rate)
     if(!Rep)
         return;
 
+    uint32  tabardFactionID = 0;
     // Northrend tabards reputation bonus
-    if(HasAura(57818) && (Rep->repfaction1 == 1037) && (Rep->repfaction2 == 1052))
+    if (HasAura(57818) && (Rep->repfaction1 == 1037) && (Rep->repfaction2 == 1052))
     {
-        Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_TABARD );
-        if(pItem)
+        Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_TABARD);
+        if (pItem)
             tabardFactionID = pItem->GetProto()->RequiredReputationFaction;
     }
 

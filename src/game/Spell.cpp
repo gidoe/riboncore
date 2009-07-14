@@ -571,6 +571,9 @@ void Spell::FillTargetMap()
                     case TARGET_AREAEFFECT_INSTANT:         // All 17/7 pairs used for dest teleportation, A processed in effect code
                         SetTargetMap(i, m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
                         break;
+                    case TARGET_AREAEFFECT_CUSTOM:
+                        // We MUST select custom target. May be some SetCustomTargetMap(i, tmpUnitMap)
+                        break;
                     default:
                         SetTargetMap(i, m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
                         SetTargetMap(i, m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
@@ -1172,8 +1175,8 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
     Unit* realCaster = m_originalCaster ? m_originalCaster : m_caster;
 
     // Recheck immune (only for delayed spells)
-    if (m_spellInfo->speed && (
-        unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo)) ||
+    if( m_spellInfo->speed && (
+        unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo), m_spellInfo) ||
         unit->IsImmunedToSpell(m_spellInfo)))
     {
         realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
@@ -1789,9 +1792,9 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,UnitList& TagUnitMap)
         case TARGET_ALL_RAID_AROUND_CASTER:
         {
             if(m_spellInfo->Id == 57669)                    // Replenishment (special target selection)
-                FillRaidOrPartyManaPriorityTargets(TagUnitMap, m_caster, radius, 10, true, false, false);
+                FillRaidOrPartyManaPriorityTargets(TagUnitMap, m_caster, radius, 10, true, false, true);
             else if (m_spellInfo->Id==52759)                //Ancestral Awakening (special target selection)
-                FillRaidOrPartyHealthPriorityTargets(TagUnitMap, m_caster, radius, 1, true, false, false);
+                FillRaidOrPartyHealthPriorityTargets(TagUnitMap, m_caster, radius, 1, true, false, true);
             else
                 FillRaidOrPartyTargets(TagUnitMap, m_caster, radius, true, true, true);
             break;
@@ -2501,11 +2504,12 @@ void Spell::cast(bool skipCheck)
     {
         case SPELLFAMILY_GENERIC:
         {
-            if (m_spellInfo->Mechanic == MECHANIC_BANDAGE)  // Bandages
-                AddPrecastSpell(11196);                     // Recently Bandaged
-            else if(m_spellInfo->SpellIconID == 1662 && m_spellInfo->AttributesEx & 0x20)
-                                                            // Blood Fury (Racial)
-                AddPrecastSpell(23230);                     // Blood Fury - Healing Reduction
+            if (m_spellInfo->Mechanic == MECHANIC_BANDAGE)                                // Bandages
+                AddPrecastSpell(11196);                                                   // Recently Bandaged
+            else if(m_spellInfo->SpellIconID == 1662 && m_spellInfo->AttributesEx & 0x20) // Blood Fury (Racial)
+                AddPrecastSpell(23230);                                                   // Blood Fury - Healing Reduction
+            else if(m_spellInfo->Id == 20594)                                             // Stoneform
+                AddPrecastSpell(65116);                                                   // Stoneform (Armor increased)
             break;
         }
         case SPELLFAMILY_DRUID:
@@ -2530,11 +2534,12 @@ void Spell::cast(bool skipCheck)
         {
             // Power Word: Shield
             if (m_spellInfo->Mechanic == MECHANIC_SHIELD &&
-                (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000000001)))
-                AddPrecastSpell(6788);                      // Weakened Soul
-            // Dispersion (transform)
-            if (m_spellInfo->Id == 47585)
-                AddPrecastSpell(60069);                     // Dispersion (mana regen)
+                (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000000001))) // Power Word: Shield
+                AddPrecastSpell(6788);                                         // Weakened Soul
+            else if (m_spellInfo->Id == 47585)                                 // Dispersion (transform)
+                AddPrecastSpell(60069);                                        // Dispersion (mana regen)
+            else if (m_spellInfo->Id == 33206)                                 // Pain Suppression (Damage modifier)
+                AddPrecastSpell(44416);                                        // Pain Suppression (Threat modifier)
             break;
         }
         case SPELLFAMILY_PALADIN:
@@ -2605,6 +2610,19 @@ void Spell::cast(bool skipCheck)
 
             m_currentBasePoints[0] = basepnts;
         }
+    }
+    // King of the jungle (Tiger's fury energize)
+    else if(m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellIconID == 1181)
+    {
+        Unit::AuraList const &dummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+        for(Unit::AuraList::const_iterator i = dummy.begin(); i != dummy.end(); i++)
+            if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
+                (*i)->GetMiscValue() == 126)
+            {
+                int32 basepoints = (*i)->GetSpellProto()->EffectBasePoints[(*i)->GetEffIndex()+1];
+                m_caster->CastCustomSpell(m_caster, 51178, &basepoints, NULL, NULL, true);
+                break;
+            }
     }
 
     // traded items have trade slot instead of guid in m_itemTargetGUID
@@ -2818,7 +2836,7 @@ void Spell::SendSpellCooldown()
     }
 
     // have infinity cooldown but set at aura apply
-    if(m_spellInfo->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
+    if(m_spellInfo->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE || m_IsTriggeredSpell)
         return;
 
     _player->AddSpellAndCategoryCooldowns(m_spellInfo,m_CastItem ? m_CastItem->GetEntry() : 0, this);
@@ -4732,6 +4750,10 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             case SPELL_AURA_MOUNTED:
             {
+                Unit::AuraList mounts = m_caster->GetAurasByType(SPELL_AURA_MOUNTED);
+                if (!mounts.empty())
+                    return SPELL_FAILED_NOT_ON_MOUNTED;
+
                 if (m_caster->IsInWater())
                     return SPELL_FAILED_ONLY_ABOVEWATER;
 

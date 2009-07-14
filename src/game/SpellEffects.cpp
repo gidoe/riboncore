@@ -421,6 +421,9 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                     if(unitTarget->HasAuraState(AURA_STATE_IMMOLATE))
                         damage += int32(damage*0.25f);
                 }
+                // Haunt
+                else if(m_spellInfo->SpellFamilyFlags & UI64LIT(0x4000000000000))
+                    m_caster->CastCustomSpell(unitTarget, 50091, &damage, NULL, NULL, true);
                 break;
             }
             case SPELLFAMILY_PRIEST:
@@ -1168,7 +1171,13 @@ void Spell::EffectDummy(uint32 i)
                     if (unitTarget)
                         ((Player*)m_caster)->RemovePet((Pet*)unitTarget,PET_SAVE_NOT_IN_SLOT);
                     return;
-		  }
+                }
+                case 50091:                                 // Haunt
+                {
+                    if (Aura *haunt = unitTarget->GetAura(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, UI64LIT(0x4000000000000), 0, m_caster->GetGUID()))
+                        haunt->GetModifier()->m_amount = damage;
+                    return;
+                }
                 case 51582:                                 //Rocket Boots Engaged (Rocket Boots Xtreme and Rocket Boots Xtreme Lite)
                 {
                     if(m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -2715,11 +2724,20 @@ void Spell::EffectHeal( uint32 /*i*/ )
             if (m_caster->GetPet() || ((Player*)m_caster)->FindGuardianWithEntry(26125) || ((Player*)m_caster)->FindGuardianWithEntry(27829))
                 // Health bonus is X% from max health, not flat X
                 addhealth = int32(caster->GetMaxHealth()*damage/100.0f);
+        // Chain Heal consumes Riptide
+        else if(m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellFamilyFlags == UI64LIT(0x100))
+        {
+            if (Aura *riptide = unitTarget->GetAura(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_SHAMAN, 0, 0x10, m_caster->GetGUID()))
+            {
+                addhealth += addhealth * riptide->GetSpellProto()->EffectBasePoints[2] / 100;
+                unitTarget->RemoveAurasDueToSpell(riptide->GetId());
+            }
         }
         else
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, addhealth, HEAL);
 
         m_healing+=addhealth;
+        }
     }
 }
 
