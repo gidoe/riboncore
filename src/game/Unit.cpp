@@ -1560,7 +1560,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
     {
         // on weapon hit casts
         if(GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
-            ((Player*)this)->CastItemCombatSpell(pVictim, damageInfo->attackType);
+            ((Player*)this)->CastItemCombatSpell(pVictim, damageInfo->attackType, damageInfo->procVictim, damageInfo->procEx);
 
         // victim's damage shield
         std::set<Aura*> alreadyDone;

@@ -1193,6 +1193,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Spell Proc Event conditions..." );
     spellmgr.LoadSpellProcEvents();
 
+    sLog.outString( "Loading Enchant Spells Proc datas...");
+    spellmgr.LoadSpellEnchantProcData();
+
     sLog.outString( "Loading Spell Bonus Data..." );
     spellmgr.LoadSpellBonusess();
 
