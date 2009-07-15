@@ -3258,7 +3258,7 @@ void Spell::EffectOpenLock(uint32 effIndex)
         // these objects must have been spawned by outdoorpvp!
         else if(gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_GOOBER && sOutdoorPvPMgr.HandleOpenGo(player, gameObjTarget->GetGUID()))
             return;
-        lockId = gameObjTarget->GetLockId();
+        lockId = goInfo->GetLockId();
         guid = gameObjTarget->GetGUID();
     }
     else if(itemTarget)
@@ -4585,7 +4585,6 @@ void Spell::EffectSummonPet(uint32 i)
                 return;
 
             OldSummon->GetMap()->Remove((Creature*)OldSummon,false);
-            OldSummon->SetMapId(m_caster->GetMapId());
 
             float px, py, pz;
             m_caster->GetClosePoint(px, py, pz, OldSummon->GetObjectSize());
@@ -5156,7 +5155,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
         }
     }
 
-    if(uint32 linkedEntry = pGameObj->GetLinkedGameObjectEntry())
+    if(uint32 linkedEntry = pGameObj->GetGOInfo()->GetLinkedGameObjectEntry())
     {
         GameObject* linkedGO = new GameObject;
         if(linkedGO->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), linkedEntry, map,
@@ -7121,7 +7120,7 @@ void Spell::EffectTransmitted(uint32 effIndex)
     data << uint64(pGameObj->GetGUID());
     m_caster->SendMessageToSet(&data,true);
 
-    if(uint32 linkedEntry = pGameObj->GetLinkedGameObjectEntry())
+    if(uint32 linkedEntry = pGameObj->GetGOInfo()->GetLinkedGameObjectEntry())
     {
         GameObject* linkedGO = new GameObject;
         if(linkedGO->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), linkedEntry, cMap,

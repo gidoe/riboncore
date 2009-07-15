@@ -573,7 +573,7 @@ bool Player::Create( uint32 guidlow, const std::string& name, uint8 race, uint8 
     for (int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
         m_items[i] = NULL;
 
-    SetMapId(info->mapId);
+    SetLocationMapId(info->mapId);
     Relocate(info->positionX,info->positionY,info->positionZ);
 
     ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(class_);
@@ -582,6 +582,8 @@ bool Player::Create( uint32 guidlow, const std::string& name, uint8 race, uint8 
         sLog.outError("Class %u not found in DBC (Wrong DBC files?)",class_);
         return false;
     }
+
+    SetMap(MapManager::Instance().CreateMap(info->mapId, this));
 
     uint8 powertype = cEntry->powerType;
 
@@ -7485,7 +7487,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
         if (go->getLootState() == GO_READY)
         {
-            uint32 lootid =  go->GetLootId();
+            uint32 lootid =  go->GetGOInfo()->GetLootId();
             if((go->GetEntry() == BG_AV_OBJECTID_MINE_N || go->GetEntry() == BG_AV_OBJECTID_MINE_S))
                 if( BattleGround *bg = GetBattleGround())
                     if(bg->GetTypeID() == BATTLEGROUND_AV)
@@ -12397,7 +12399,11 @@ void Player::PrepareQuestMenu( uint64 guid )
     }
     else
     {
-        GameObject *pGameObject = GetMap()->GetGameObject(guid);
+        //we should obtain map pointer from GetMap() in 99% of cases. Special case
+        //only for quests which cast teleport spells on player
+        Map * _map = IsInWorld() ? GetMap() : MapManager::Instance().FindMap(GetMapId(), GetInstanceId());
+        ASSERT(_map);
+        GameObject *pGameObject = _map->GetGameObject(guid);
         if( pGameObject )
         {
             pObject = (Object*)pGameObject;
@@ -14206,7 +14212,8 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
     m_name = fields[2].GetCppString();
 
     Relocate(fields[3].GetFloat(),fields[4].GetFloat(),fields[5].GetFloat());
-    SetMapId(fields[6].GetUInt32());
+    SetLocationMapId(fields[6].GetUInt32());
+
     // the instance id is not needed at character enum
 
     m_Played_time[0] = fields[7].GetUInt32();
@@ -14233,7 +14240,7 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
 
 void Player::_LoadBattleGround(QueryResult *result)
 {
-    ////                                                     0     1       2      3    4    5    6
+/*    ////                                                     0     1       2      3    4    5    6
     //QueryResult *result = CharacterDatabase.PQuery("SELECT bgid, bgteam, bgmap, bgx, bgy, bgz, bgo FROM character_bgcoord WHERE guid = '%u'", GUID_LOPART(m_guid));
 
     if(result)
@@ -14270,7 +14277,7 @@ void Player::_LoadBattleGround(QueryResult *result)
             if(!mapEntry || mapEntry->IsBattleGroundOrArena())
             {
                 // return to BG master
-                SetMapId(fieldsbg[2].GetUInt32());
+                SetLocationMapId(fieldsbg[2].GetUInt32());
                 Relocate(fieldsbg[3].GetFloat(),fieldsbg[4].GetFloat(),fieldsbg[5].GetFloat(),fieldsbg[6].GetFloat());
 
                 // check entry point and fix to homebind if need
@@ -14279,7 +14286,7 @@ void Player::_LoadBattleGround(QueryResult *result)
                     RelocateToHomebind();
             }
         }
-    }
+    }*/
 }
 
 void Player::_LoadDeclinedNames(QueryResult* result)
@@ -14536,7 +14543,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     // init saved position, and fix it later if problematic
     uint32 transGUID = fields[31].GetUInt32();
     Relocate(fields[13].GetFloat(),fields[14].GetFloat(),fields[15].GetFloat(),fields[17].GetFloat());
-    SetMapId(fields[16].GetUInt32());
+    SetLocationMapId(fields[16].GetUInt32());
     SetDifficulty(fields[39].GetUInt32());                  // may be changed in _LoadGroup
 
     _LoadGroup(holder->GetResult(PLAYER_LOGIN_QUERY_LOADGROUP));
@@ -14580,7 +14587,62 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         m_movementInfo.t_o = 0.0f;
     }
 
+/*<<<<<<< HEAD:src/game/Player.cpp
     _LoadBattleGround(holder->GetResult(PLAYER_LOGIN_QUERY_LOADBATTLEGROUND));
+*/
+    uint32 bgid = fields[41].GetUInt32();
+    uint32 bgteam = fields[42].GetUInt32();
+
+    if(bgid)                                                //saved in BattleGround
+    {
+        SetBattleGroundEntryPoint(fields[43].GetUInt32(),fields[44].GetFloat(),fields[45].GetFloat(),fields[46].GetFloat(),fields[47].GetFloat());
+
+        // check entry point and fix to homebind if need
+        MapEntry const* mapEntry = sMapStore.LookupEntry(m_bgEntryPoint.mapid);
+        if(!mapEntry || mapEntry->Instanceable() || !MapManager::IsValidMapCoord(m_bgEntryPoint))
+            SetBattleGroundEntryPoint(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ,0.0f);
+
+        BattleGround *currentBg = sBattleGroundMgr.GetBattleGround(bgid, BATTLEGROUND_TYPE_NONE);
+
+        if(currentBg && currentBg->IsPlayerInBattleGround(GetGUID()))
+        {
+            BattleGroundQueueTypeId bgQueueTypeId = sBattleGroundMgr.BGQueueTypeId(currentBg->GetTypeID(), currentBg->GetArenaType());
+            AddBattleGroundQueueId(bgQueueTypeId);
+
+            SetBattleGroundId(currentBg->GetInstanceID(), currentBg->GetTypeID());
+            SetBGTeam(bgteam);
+
+            //join player to battleground group
+            currentBg->EventPlayerLoggedIn(this, GetGUID());
+            currentBg->AddOrSetPlayerToCorrectBgGroup(this, GetGUID(), bgteam);
+
+            SetInviteForBattleGroundQueueType(bgQueueTypeId,currentBg->GetInstanceID());
+        }
+        else
+        {
+            const WorldLocation& _loc = GetBattleGroundEntryPoint();
+            SetLocationMapId(_loc.mapid);
+            Relocate(_loc.coord_x, _loc.coord_y, _loc.coord_z, _loc.orientation);
+            //RemoveArenaAuras(true);
+        }
+    }
+    else
+    {
+        MapEntry const* mapEntry = sMapStore.LookupEntry(GetMapId());
+        // if server restart after player save in BG or area
+        // player can have current coordinates in to BG/Arean map, fix this
+        if(!mapEntry || mapEntry->IsBattleGroundOrArena())
+        {
+            // return to BG master
+            SetLocationMapId(fields[43].GetUInt32());
+            Relocate(fields[44].GetFloat(),fields[45].GetFloat(),fields[46].GetFloat(),fields[47].GetFloat());
+
+            // check entry point and fix to homebind if need
+            mapEntry = sMapStore.LookupEntry(GetMapId());
+            if(!mapEntry || mapEntry->IsBattleGroundOrArena() || !IsPositionValid())
+                RelocateToHomebind();
+        }
+    }
 
     if (transGUID != 0)
     {
@@ -14626,7 +14688,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
                 m_transport = *iter;
                 m_transport->AddPassenger(this);
-                SetMapId(m_transport->GetMapId());
+                SetLocationMapId(m_transport->GetMapId());
                 break;
             }
         }
@@ -14659,11 +14721,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     // NOW player must have valid map
     // load the player's map here if it's not already loaded
-    Map *map = GetMap();
-
-    // since the player may not be bound to the map yet, make sure subsequent
-    // getmap calls won't create new maps
-    SetInstanceId(map->GetInstanceId());
+    SetMap(MapManager::Instance().CreateMap(GetMapId(), this));
 
     // if the player is in an instance and it has been reset in the meantime teleport him to the entrance
     if(GetInstanceId() && !sInstanceSaveManager.GetInstanceSave(GetInstanceId()))
@@ -14843,15 +14901,19 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         {
             sLog.outError("Character %u have wrong data in taxi destination list, teleport to homebind.",GetGUIDLow());
             RelocateToHomebind();
-            SaveRecallPosition();                           // save as recall also to prevent recall and fall from sky
         }
         else                                                // have start node, to it
         {
             sLog.outError("Character %u have too short taxi destination list, teleport to original node.",GetGUIDLow());
-            SetMapId(nodeEntry->map_id);
+            SetLocationMapId(nodeEntry->map_id);
             Relocate(nodeEntry->x, nodeEntry->y, nodeEntry->z,0.0f);
-            SaveRecallPosition();                           // save as recall also to prevent recall and fall from sky
         }
+
+        //we can be relocated from taxi and still have an outdated Map pointer!
+        //so we need to get a new Map pointer!
+        SetMap(MapManager::Instance().CreateMap(GetMapId(), this));
+        SaveRecallPosition();                           // save as recall also to prevent recall and fall from sky
+
         m_taxi.ClearTaxiDestinations();
     }
     else if(uint32 node_id = m_taxi.GetTaxiSource())
@@ -15032,6 +15094,31 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
             int32 remaintime = (int32)fields[6].GetUInt32();
             int32 remaincharges = (int32)fields[7].GetUInt32();
 
+            bool IsReal = false; 
+            QueryResult *resultGUID = CharacterDatabase.PQuery("SELECT guid FROM characters"); 
+ 
+            if(resultGUID) 
+            { 
+                Field *fields = result->Fetch(); 
+                uint64 r_guid = fields[0].GetUInt64(); 
+         
+                do 
+                { 
+                   if (r_guid == caster_guid) 
+                      IsReal = true; 
+                   continue; 
+                } 
+                while( resultGUID->NextRow() ); 
+                delete resultGUID; 
+            } 
+ 
+            if(!IsReal) 
+            { 
+                CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = '%u'",caster_guid ); 
+                sLog.outError("Prevent server freeze"); 
+                continue; 
+            } 
+ 
             SpellEntry const* spellproto = sSpellStore.LookupEntry(spellid);
             if(!spellproto)
             {
