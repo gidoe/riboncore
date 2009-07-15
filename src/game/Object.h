@@ -368,6 +368,12 @@ class MANGOS_DLL_SPEC WorldObject : public Object
             m_positionZ = z;
         }
 
+        void Relocate(WorldLocation const & _loc)
+        {
+            SetLocationMapId(_loc.mapid);
+            Relocate(_loc.coord_x, _loc.coord_y, _loc.coord_z, _loc.orientation);
+        }
+
         void SetOrientation(float orientation) { m_orientation = orientation; }
 
         float GetPositionX( ) const { return m_positionX; }

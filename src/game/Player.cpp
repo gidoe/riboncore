@@ -14240,7 +14240,7 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
 
 void Player::_LoadBattleGround(QueryResult *result)
 {
-/*    ////                                                     0     1       2      3    4    5    6
+    ////                                                     0     1       2      3    4    5    6
     //QueryResult *result = CharacterDatabase.PQuery("SELECT bgid, bgteam, bgmap, bgx, bgy, bgz, bgo FROM character_bgcoord WHERE guid = '%u'", GUID_LOPART(m_guid));
 
     if(result)
@@ -14286,7 +14286,7 @@ void Player::_LoadBattleGround(QueryResult *result)
                     RelocateToHomebind();
             }
         }
-    }*/
+    }
 }
 
 void Player::_LoadDeclinedNames(QueryResult* result)
@@ -14587,62 +14587,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         m_movementInfo.t_o = 0.0f;
     }
 
-/*<<<<<<< HEAD:src/game/Player.cpp
     _LoadBattleGround(holder->GetResult(PLAYER_LOGIN_QUERY_LOADBATTLEGROUND));
-*/
-    uint32 bgid = fields[41].GetUInt32();
-    uint32 bgteam = fields[42].GetUInt32();
-
-    if(bgid)                                                //saved in BattleGround
-    {
-        SetBattleGroundEntryPoint(fields[43].GetUInt32(),fields[44].GetFloat(),fields[45].GetFloat(),fields[46].GetFloat(),fields[47].GetFloat());
-
-        // check entry point and fix to homebind if need
-        MapEntry const* mapEntry = sMapStore.LookupEntry(m_bgEntryPoint.mapid);
-        if(!mapEntry || mapEntry->Instanceable() || !MapManager::IsValidMapCoord(m_bgEntryPoint))
-            SetBattleGroundEntryPoint(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ,0.0f);
-
-        BattleGround *currentBg = sBattleGroundMgr.GetBattleGround(bgid, BATTLEGROUND_TYPE_NONE);
-
-        if(currentBg && currentBg->IsPlayerInBattleGround(GetGUID()))
-        {
-            BattleGroundQueueTypeId bgQueueTypeId = sBattleGroundMgr.BGQueueTypeId(currentBg->GetTypeID(), currentBg->GetArenaType());
-            AddBattleGroundQueueId(bgQueueTypeId);
-
-            SetBattleGroundId(currentBg->GetInstanceID(), currentBg->GetTypeID());
-            SetBGTeam(bgteam);
-
-            //join player to battleground group
-            currentBg->EventPlayerLoggedIn(this, GetGUID());
-            currentBg->AddOrSetPlayerToCorrectBgGroup(this, GetGUID(), bgteam);
-
-            SetInviteForBattleGroundQueueType(bgQueueTypeId,currentBg->GetInstanceID());
-        }
-        else
-        {
-            const WorldLocation& _loc = GetBattleGroundEntryPoint();
-            SetLocationMapId(_loc.mapid);
-            Relocate(_loc.coord_x, _loc.coord_y, _loc.coord_z, _loc.orientation);
-            //RemoveArenaAuras(true);
-        }
-    }
-    else
-    {
-        MapEntry const* mapEntry = sMapStore.LookupEntry(GetMapId());
-        // if server restart after player save in BG or area
-        // player can have current coordinates in to BG/Arean map, fix this
-        if(!mapEntry || mapEntry->IsBattleGroundOrArena())
-        {
-            // return to BG master
-            SetLocationMapId(fields[43].GetUInt32());
-            Relocate(fields[44].GetFloat(),fields[45].GetFloat(),fields[46].GetFloat(),fields[47].GetFloat());
-
-            // check entry point and fix to homebind if need
-            mapEntry = sMapStore.LookupEntry(GetMapId());
-            if(!mapEntry || mapEntry->IsBattleGroundOrArena() || !IsPositionValid())
-                RelocateToHomebind();
-        }
-    }
 
     if (transGUID != 0)
     {
