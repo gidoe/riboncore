@@ -16,8 +16,7 @@
 
 /* ScriptData
 SDName: Boss Loken
-SDAuthor: ckegg
-SD%Complete: 95%
+SD%Complete: 60%
 SDComment: Missing intro. Remove hack of Pulsing Shockwave when core supports. Aura is not working (59414)
 SDCategory: Halls of Lightning
 EndScriptData */
@@ -27,85 +26,94 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                              = -1602015,
-    SAY_INTRO_1                            = -1602016,
-    SAY_INTRO_2                            = -1602017,
-    SAY_SLAY_1                             = -1602018,
-    SAY_SLAY_2                             = -1602019,
-    SAY_SLAY_3                             = -1602020,
-    SAY_DEATH                              = -1602021,
-    SAY_NOVA_1                             = -1602022,
-    SAY_NOVA_2                             = -1602023,
-    SAY_NOVA_3                             = -1602024,
-    SAY_75HEALTH                           = -1602025,
-    SAY_50HEALTH                           = -1602026,
-    SAY_25HEALTH                           = -1602027,
+    SAY_AGGRO                           = -1602018,
+    SAY_INTRO_1                         = -1602019,
+    SAY_INTRO_2                         = -1602020,
+    SAY_SLAY_1                          = -1602021,
+    SAY_SLAY_2                          = -1602022,
+    SAY_SLAY_3                          = -1602023,
+    SAY_DEATH                           = -1602024,
+    SAY_NOVA_1                          = -1602025,
+    SAY_NOVA_2                          = -1602026,
+    SAY_NOVA_3                          = -1602027,
+    SAY_75HEALTH                        = -1602028,
+    SAY_50HEALTH                        = -1602029,
+    SAY_25HEALTH                        = -1602030,
+    EMOTE_NOVA                          = -1602031,
 
-    SPELL_ARC_LIGHTNING                    = 52921,
-    SPELL_LIGHTNING_NOVA_N                 = 52960,
-    SPELL_LIGHTNING_NOVA_H                 = 59835,
+    SPELL_ARC_LIGHTNING                 = 52921,
+    SPELL_LIGHTNING_NOVA_N              = 52960,
+    SPELL_LIGHTNING_NOVA_H              = 59835,
 
-    SPELL_PULSING_SHOCKWAVE_N              = 52961,
-    SPELL_PULSING_SHOCKWAVE_H              = 59836,
-    SPELL_PULSING_SHOCKWAVE_AURA           = 59414
+    SPELL_PULSING_SHOCKWAVE_N           = 52961,
+    SPELL_PULSING_SHOCKWAVE_H           = 59836,
+    SPELL_PULSING_SHOCKWAVE_AURA        = 59414
 };
 
 /*######
 ## Boss Loken
 ######*/
+
 struct MANGOS_DLL_DECL boss_lokenAI : public ScriptedAI
 {
     boss_lokenAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
-    	pInstance = ((ScriptedInstance*)pCreature->GetInstanceData());
-    	m_bIsHeroic = pCreature->GetMap()->IsHeroic();
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_bIsHeroic = pCreature->GetMap()->IsHeroic();
         Reset();
     }
 
-    ScriptedInstance *pInstance;
+    ScriptedInstance* m_pInstance;
 
     bool m_bIsHeroic;
     bool m_bIsAura;
-
-    uint8 m_uiHealthCheck[3];
 
     uint32 m_uiArcLightning_Timer;
     uint32 m_uiLightningNova_Timer;
     uint32 m_uiPulsingShockwave_Timer;
     uint32 m_uiResumePulsingShockwave_Timer;
-    uint32 m_uiHealCheck_Timer;
+
+    uint32 m_uiHealthAmountModifier;
 
     void Reset()
     {
-    	m_bIsAura = false;
+        m_bIsAura = false;
 
         m_uiArcLightning_Timer = 15000;
         m_uiLightningNova_Timer = 20000;
         m_uiPulsingShockwave_Timer = 2000;
         m_uiResumePulsingShockwave_Timer = 15000;
-        m_uiHealCheck_Timer = 1000;
 
-        m_uiHealthCheck[0] = 75;
-        m_uiHealthCheck[1] = 50;
-        m_uiHealthCheck[2] = 25;
+        m_uiHealthAmountModifier = 1;
 
-        m_creature->RemoveAllAuras();
-
-        if(pInstance)
-            pInstance->SetData(DATA_LOKEN_EVENT, NOT_STARTED);
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_LOKEN, NOT_STARTED);
     }
 
-    void Aggro(Unit* who)
+    void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (!who || m_creature->getVictim())
-            return;
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_LOKEN, IN_PROGRESS);
+    }
 
-        m_creature->SetInCombatWithZone();
+    void JustDied(Unit* pKiller)
+    {
+        DoScriptText(SAY_DEATH, m_creature);
 
-        if(pInstance)
-            pInstance->SetData(DATA_LOKEN_EVENT, IN_PROGRESS);
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_LOKEN, DONE);
+    }
+
+    void KilledUnit(Unit* pVictim)
+    {
+        switch(rand()%3)
+        {
+            case 0: DoScriptText(SAY_SLAY_1, m_creature);break;
+            case 1: DoScriptText(SAY_SLAY_2, m_creature);break;
+            case 2: DoScriptText(SAY_SLAY_3, m_creature);break;
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) 
@@ -114,10 +122,10 @@ struct MANGOS_DLL_DECL boss_lokenAI : public ScriptedAI
         if (!m_creature->SelectHostilTarget() || !m_creature->getVictim())
             return;
 
-        if(m_bIsAura)
+        if (m_bIsAura)
         {
             // workaround for PULSING_SHOCKWAVE
-            if (m_uiPulsingShockwave_Timer < uiDiff)
+            /*if (m_uiPulsingShockwave_Timer < uiDiff)
             {
                 Map *map = m_creature->GetMap();
                 if (map->IsDungeon())
@@ -136,31 +144,40 @@ struct MANGOS_DLL_DECL boss_lokenAI : public ScriptedAI
                             if (m_fDist <= 1.0f) // Less than 1 yard
                                 dmg = (m_bIsHeroic ? 850 : 800); // need to correct damage
                             else // Further from 1 yard
-                                dmg = ((m_bIsHeroic ? 250 : 200) * m_fDist) + (m_bIsHeroic ? 850 : 800); // need to correct damage
+                                dmg = round((m_bIsHeroic ? 250 : 200) * m_fDist) + (m_bIsHeroic ? 850 : 800); // need to correct damage
 
                             m_creature->CastCustomSpell(i->getSource(), (m_bIsHeroic ? 59837 : 52942), &dmg, 0, 0, false);
                         }
                 }
                 m_uiPulsingShockwave_Timer = 2000;
-            }else m_uiPulsingShockwave_Timer -= uiDiff;
+            }else m_uiPulsingShockwave_Timer -= uiDiff;*/
         }
         else
         {
-            if(m_uiResumePulsingShockwave_Timer < uiDiff)
+            if (m_uiResumePulsingShockwave_Timer < uiDiff)
             {
-      	        //DoCast(m_creature, m_bIsHeroic ? SPELL_PULSING_SHOCKWAVE_H : SPELL_PULSING_SHOCKWAVE_N); // need core support
+                //breaks at movement, can we assume when it's time, this spell is casted and also must stop movement?
+                //m_creature->CastSpell(m_creature, SPELL_PULSING_SHOCKWAVE_AURA, true);
+
+                  //DoCast(m_creature, m_bIsHeroic ? SPELL_PULSING_SHOCKWAVE_H : SPELL_PULSING_SHOCKWAVE_N); // need core support
                 m_bIsAura = true;
                 m_uiResumePulsingShockwave_Timer = 0;
-            }else m_uiResumePulsingShockwave_Timer -= uiDiff;
+            }
+            else
+                m_uiResumePulsingShockwave_Timer -= uiDiff;
         }
 
-        if(m_uiArcLightning_Timer < uiDiff)
+        if (m_uiArcLightning_Timer < uiDiff)
         {
-            DoCast(SelectUnit(SELECT_TARGET_RANDOM, 0), SPELL_ARC_LIGHTNING);
-            m_uiArcLightning_Timer = 15000 + rand()%1000;
-        }else m_uiArcLightning_Timer -= uiDiff;
+            if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                DoCast(pTarget, SPELL_ARC_LIGHTNING);
 
-        if(m_uiLightningNova_Timer < uiDiff)
+            m_uiArcLightning_Timer = 15000 + rand()%1000;
+        }
+        else
+            m_uiArcLightning_Timer -= uiDiff;
+
+        if (m_uiLightningNova_Timer < uiDiff)
         {
             switch(rand()%3)
             {
@@ -168,58 +185,36 @@ struct MANGOS_DLL_DECL boss_lokenAI : public ScriptedAI
                 case 1: DoScriptText(SAY_NOVA_2, m_creature);break;
                 case 2: DoScriptText(SAY_NOVA_3, m_creature);break;
             }
+
             DoCast(m_creature, m_bIsHeroic ? SPELL_LIGHTNING_NOVA_H : SPELL_LIGHTNING_NOVA_N);
+
             m_bIsAura = false;
             m_uiResumePulsingShockwave_Timer = (m_bIsHeroic ? 4000 : 5000); // Pause Pulsing Shockwave aura
             m_uiLightningNova_Timer = 20000 + rand()%1000;
-        }else m_uiLightningNova_Timer -= uiDiff;
+        }
+        else
+            m_uiLightningNova_Timer -= uiDiff;
 
-        // Health check -----------------------------------------------------------------------------
-        if (m_uiHealCheck_Timer < uiDiff)
+        // Health check
+        if ((m_creature->GetHealth()*100 / m_creature->GetMaxHealth()) < (100-(25*m_uiHealthAmountModifier)))
         {
-            for(uint8 i = 0; i < 3; i++)
+            switch(m_uiHealthAmountModifier)
             {
-                if (m_uiHealthCheck[i] && (m_creature->GetHealth()*100 / m_creature->GetMaxHealth()) <= m_uiHealthCheck[i])
-                {
-                    switch(i)
-                    {
-                        case 0: DoScriptText(SAY_75HEALTH, m_creature);break;
-                        case 1: DoScriptText(SAY_50HEALTH, m_creature);break;
-                        case 2: DoScriptText(SAY_25HEALTH, m_creature);break;
-                    }
-                    m_uiHealthCheck[i] = 0; // deactive
-                }
+                case 1: DoScriptText(SAY_75HEALTH, m_creature); break;
+                case 2: DoScriptText(SAY_50HEALTH, m_creature); break;
+                case 3: DoScriptText(SAY_25HEALTH, m_creature); break;
             }
-            m_uiHealCheck_Timer = 1000;
-        } else m_uiHealCheck_Timer -= uiDiff;
+
+            ++m_uiHealthAmountModifier;
+        }
 
         DoMeleeAttackIfReady();
     }
-
-    void JustDied(Unit* killer)
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if(pInstance)
-            pInstance->SetData(DATA_LOKEN_EVENT, DONE);
-    }
-
-    void KilledUnit(Unit *victim)
-    {
-        if(victim == m_creature)
-            return;
-        switch(rand()%3)
-        {
-            case 0: DoScriptText(SAY_SLAY_1, m_creature);break;
-            case 1: DoScriptText(SAY_SLAY_2, m_creature);break;
-            case 2: DoScriptText(SAY_SLAY_3, m_creature);break;
-        }
-    }
 };
 
-CreatureAI* GetAI_boss_loken(Creature *_Creature)
+CreatureAI* GetAI_boss_loken(Creature* pCreature)
 {
-    return new boss_lokenAI (_Creature);
+    return new boss_lokenAI(pCreature);
 }
 
 void AddSC_boss_loken()
@@ -227,7 +222,7 @@ void AddSC_boss_loken()
     Script *newscript;
 
     newscript = new Script;
-    newscript->Name="boss_loken";
-    newscript->GetAI = GetAI_boss_loken;
+    newscript->Name = "boss_loken";
+    newscript->GetAI = &GetAI_boss_loken;
     newscript->RegisterSelf();
 }

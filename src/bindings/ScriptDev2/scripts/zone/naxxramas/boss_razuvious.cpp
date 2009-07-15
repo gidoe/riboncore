@@ -22,7 +22,6 @@ SDCategory: Naxxramas
 EndScriptData */
 
 #include "precompiled.h"
-#include "def_naxxramas.h"
 
 //Razuvious - NO TEXT sound only
 //8852 aggro01 - Hah hah, I'm just getting warmed up!
@@ -51,26 +50,12 @@ EndScriptData */
 #define SOUND_DEATH     8860
 #define SOUND_AGGROMIX  8847
 
-#define SPELL_UNBALANCING_STRIKE     55470
-#define SPELL_DISRUPTING_SHOUT       55543
-#define SPELL_HOPELESS               29125
-#define SPELL_JAGGED_KNIFE           55550
-
-#define NPC_DEATH_KNIGHT_UNDERSTUDY  16803
+#define SPELL_UNBALANCINGSTRIKE     26613
+#define SPELL_DISRUPTINGSHOUT       29107
 
 struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
 {
-    boss_razuviousAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsHeroicMode = pCreature->GetMap()->IsHeroic();
-        Reset();
-    }
-
-    ScriptedInstance* m_pInstance;
-    bool m_bIsHeroicMode;
-
-    std::list<uint64> DeathKnightList;
+    boss_razuviousAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
     uint32 UnbalancingStrike_Timer;
     uint32 DisruptingShout_Timer;
@@ -81,9 +66,6 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
         UnbalancingStrike_Timer = 30000;                    //30 seconds
         DisruptingShout_Timer = 25000;                      //25 seconds
         CommandSound_Timer = 40000;                         //40 seconds
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, NOT_STARTED);
     }
 
     void KilledUnit(Unit* Victim)
@@ -105,22 +87,6 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
     void JustDied(Unit* Killer)
     {
         DoPlaySoundToSet(m_creature, SOUND_DEATH);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, DONE);
-
-        if (!DeathKnightList.empty())
-        {
-            for(std::list<uint64>::iterator itr = DeathKnightList.begin(); itr != DeathKnightList.end(); ++itr)
-            {
-                Creature* pDeathKnight = NULL;
-                pDeathKnight = ((Creature*)Unit::GetUnit(*m_creature, *itr));
-
-                if (pDeathKnight)
-                    if (pDeathKnight->isAlive())
-                        pDeathKnight->CastSpell(pDeathKnight, SPELL_HOPELESS, true);
-            }
-        }
     }
 
     void Aggro(Unit *who)
@@ -137,28 +103,6 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
                 DoPlaySoundToSet(m_creature, SOUND_AGGRO3);
                 break;
         }
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, IN_PROGRESS);
-
-        FindDeathKnight();
-
-        if (!DeathKnightList.empty())
-        {
-            for(std::list<uint64>::iterator itr = DeathKnightList.begin(); itr != DeathKnightList.end(); ++itr)
-            {
-                if (Creature* pDeathKnight = ((Creature*)Unit::GetUnit(*m_creature, *itr)))
-                {
-                    if (pDeathKnight->isDead())
-                    {
-                        pDeathKnight->RemoveCorpse();
-                        pDeathKnight->Respawn();
-                    }
-
-                    pDeathKnight->AI()->AttackStart(who);
-                }
-            }
-        }
     }
 
     void UpdateAI(const uint32 diff)
@@ -169,14 +113,14 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
         //UnbalancingStrike_Timer
         if (UnbalancingStrike_Timer < diff)
         {
-            DoCast(m_creature->getVictim(),SPELL_UNBALANCING_STRIKE);
+            DoCast(m_creature->getVictim(),SPELL_UNBALANCINGSTRIKE);
             UnbalancingStrike_Timer = 30000;
         }else UnbalancingStrike_Timer -= diff;
 
         //DisruptingShout_Timer
         if (DisruptingShout_Timer < diff)
         {
-            DoCast(m_creature->getVictim(), SPELL_DISRUPTING_SHOUT);
+            DoCast(m_creature->getVictim(), SPELL_DISRUPTINGSHOUT);
             DisruptingShout_Timer = 25000;
         }else DisruptingShout_Timer -= diff;
 
@@ -207,23 +151,7 @@ struct MANGOS_DLL_DECL boss_razuviousAI : public ScriptedAI
 
         DoMeleeAttackIfReady();
     }
-
-    void FindDeathKnight()
-    {
-        std::list<Creature*> DeathKnight;
-        GetCreatureListWithEntryInGrid(DeathKnight, m_creature, NPC_DEATH_KNIGHT_UNDERSTUDY, 50.0f);
-
-        if (!DeathKnight.empty())
-        {
-            DeathKnightList.clear();
-
-            for(std::list<Creature*>::iterator itr = DeathKnight.begin(); itr != DeathKnight.end(); ++itr)
-                DeathKnightList.push_back((*itr)->GetGUID());
-        }
-    }
-
 };
-
 CreatureAI* GetAI_boss_razuvious(Creature* pCreature)
 {
     return new boss_razuviousAI(pCreature);

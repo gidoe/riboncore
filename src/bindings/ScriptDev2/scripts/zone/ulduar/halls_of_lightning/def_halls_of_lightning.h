@@ -7,25 +7,26 @@
 
 enum
 {
-    NPC_BJARNGRIM         = 28586,
-    NPC_VOLKHAN           = 28587,
-    NPC_IONAR             = 28546,
-    NPC_LOKEN             = 28923,
+    DATA_BJARNGRIM          = 1,
+    DATA_IONAR              = 2,
+    DATA_LOKEN              = 3,
+    DATA_VOLKHAN            = 4,
 
-    GO_BJARNGRIM_DOOR     = 191416,
-    GO_VOLKHAN_DOOR       = 191325,
-    GO_IONAR_DOOR         = 191326,
-    GO_LOKEN_DOOR         = 191324,
+    TYPE_BJARNGRIM          = 10,
+    TYPE_IONAR              = 11,
+    TYPE_LOKEN              = 12,
+    TYPE_VOLKHAN            = 13,
 
-    DATA_BJARNGRIM        = 1,
-    DATA_IONAR            = 2,
-    DATA_LOKEN            = 3,
-    DATA_VOLKHAN          = 4,
+    NPC_BJARNGRIM           = 28586,
+    NPC_VOLKHAN             = 28587,
+    NPC_IONAR               = 28546,
+    NPC_LOKEN               = 28923,
 
-    DATA_BJARNGRIM_EVENT  = 10,
-    DATA_IONAR_EVENT      = 11,
-    DATA_LOKEN_EVENT      = 12,
-    DATA_VOLKHAN_EVENT    = 13
+    GO_BJARNGRIM_DOOR       = 191416,                       //_doors10
+    GO_VOLKHAN_DOOR         = 191325,                       //_doors07
+    GO_IONAR_DOOR           = 191326,                       //_doors05
+    GO_LOKEN_DOOR           = 191324,                       //_doors02
+    GO_LOKEN_THRONE         = 192654
 };
 
 #endif

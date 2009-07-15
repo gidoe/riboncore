@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="UEScripts"
+	Name="Scripts"
 	ProjectGUID="{4295C8A9-79B7-4354-8064-F05FB9CA0C96}"
 	RootNamespace="ScriptDev2"
 	Keyword="Win32Proj"
@@ -2308,10 +2308,6 @@
 						>
 					</File>
 					<File
-						RelativePath="..\scripts\zone\blackrock_depths\boss_moira_bronzebeard.cpp"
-						>
-					</File>
-					<File
 						RelativePath="..\scripts\zone\blackrock_depths\boss_tomb_of_seven.cpp"
 						>
 					</File>
@@ -2490,14 +2486,6 @@
 					<Filter
 						Name="Ulduar"
 						>
-						<File
-							RelativePath="..\scripts\zone\ulduar\ulduar\boss_flame_leviathan.cpp"
-							>
-						</File>
-						<File
-							RelativePath="..\scripts\zone\ulduar\ulduar\def_ulduar.h"
-							>
-						</File>
 					</Filter>
 				</Filter>
 				<Filter
@@ -2534,30 +2522,6 @@
 					<Filter
 						Name="Utgarde Pinnacle"
 						>
-						<File
-							RelativePath="..\scripts\zone\utgarde_keep\utgarde_pinnacle\boss_palehoof.cpp"
-							>
-						</File>
-						<File
-							RelativePath="..\scripts\zone\utgarde_keep\utgarde_pinnacle\boss_skadi.cpp"
-							>
-						</File>
-						<File
-							RelativePath="..\scripts\zone\utgarde_keep\utgarde_pinnacle\boss_svala.cpp"
-							>
-						</File>
-						<File
-							RelativePath="..\scripts\zone\utgarde_keep\utgarde_pinnacle\boss_ymiron.cpp"
-							>
-						</File>
-						<File
-							RelativePath="..\scripts\zone\utgarde_keep\utgarde_pinnacle\def_pinnacle.h"
-							>
-						</File>
-						<File
-							RelativePath="..\scripts\zone\utgarde_keep\utgarde_pinnacle\instance_pinnacle.cpp"
-							>
-						</File>
 					</Filter>
 				</Filter>
 				<Filter
@@ -2660,10 +2624,6 @@
 		</File>
 		<File
 			RelativePath="..\revision.h"
-			>
-		</File>
-		<File
-			RelativePath="..\scriptdev2.conf.dist.in"
 			>
 		</File>
 		<File

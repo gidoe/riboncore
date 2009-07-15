@@ -16,9 +16,8 @@
 
 /* ScriptData
 SDName: Boss General Bjarngrim
-SDAuthor: ckegg
-SD%Complete: 90%
-SDComment: Waypoint needed.
+SD%Complete: 70%
+SDComment: Waypoint needed, we expect boss to always have 2x Stormforged Lieutenant following
 SDCategory: Halls of Lightning
 EndScriptData */
 
@@ -28,71 +27,72 @@ EndScriptData */
 enum
 {
     //Yell
-    SAY_AGGRO                                = -1602000,
-    SAY_SLAY_1                               = -1602001,
-    SAY_SLAY_2                               = -1602002,
-    SAY_SLAY_3                               = -1602003,
-    SAY_DEATH                                = -1602004,
-    SAY_BATTLE_STANCE                        = -1602005,
-    SAY_BERSEKER_STANCE                      = -1602006,
-    SAY_DEFENSIVE_STANCE                     = -1602007,
+    SAY_AGGRO                               = -1602000,
+    SAY_SLAY_1                              = -1602001,
+    SAY_SLAY_2                              = -1602002,
+    SAY_SLAY_3                              = -1602003,
+    SAY_DEATH                               = -1602004,
+    SAY_BATTLE_STANCE                       = -1602005,
+    EMOTE_BATTLE_STANCE                     = -1602006,
+    SAY_BERSEKER_STANCE                     = -1602007,
+    EMOTE_BERSEKER_STANCE                   = -1602008,
+    SAY_DEFENSIVE_STANCE                    = -1602009,
+    EMOTE_DEFENSIVE_STANCE                  = -1602010,
 
-    SPELL_DEFENSIVE_STANCE                   = 53790,
-    SPELL_DEFENSIVE_AURA                     = 41105,
-    SPELL_SPELL_REFLECTION                   = 36096,
-    SPELL_PUMMEL                             = 12555,
-    SPELL_KNOCK_AWAY                         = 52029,
-    SPELL_IRONFORM                           = 52022,
+    SPELL_DEFENSIVE_STANCE                  = 53790,
+    //SPELL_DEFENSIVE_AURA                    = 41105,
+    SPELL_SPELL_REFLECTION                  = 36096,
+    SPELL_PUMMEL                            = 12555,
+    SPELL_KNOCK_AWAY                        = 52029,
+    SPELL_IRONFORM                          = 52022,
 
-    SPELL_BERSEKER_STANCE                    = 53791,
-    SPELL_BERSEKER_AURA                      = 41107,
-    SPELL_INTERCEPT                          = 58769,
-    SPELL_WHIRLWIND                          = 52027,
-    SPELL_CLEAVE                             = 15284,
+    SPELL_BERSEKER_STANCE                   = 53791,
+    //SPELL_BERSEKER_AURA                     = 41107,
+    SPELL_INTERCEPT                         = 58769,
+    SPELL_WHIRLWIND                         = 52027,
+    SPELL_CLEAVE                            = 15284,
 
-    SPELL_BATTLE_STANCE                      = 53792,
-    SPELL_BATTLE_AURA                        = 41106,
-    SPELL_MORTAL_STRIKE                      = 16856,
-    SPELL_SLAM                               = 52026,
+    SPELL_BATTLE_STANCE                     = 53792,
+    //SPELL_BATTLE_AURA                       = 41106,
+    SPELL_MORTAL_STRIKE                     = 16856,
+    SPELL_SLAM                              = 52026,
 
     //OTHER SPELLS
-    SPELL_CHARGE_UP                          = 52098,
-    SPELL_TEMPORARY_ELECTRICAL_CHARGE        = 52092,
+    //SPELL_CHARGE_UP                         = 52098,      // only used when starting walk from one platform to the other
+    //SPELL_TEMPORARY_ELECTRICAL_CHARGE       = 52092,      // triggered part of above
 
-    NPC_STORMFORGED_LIEUTENANT               = 29240,
-    SPELL_ARC_WELD                           = 59085,
-    SPELL_RENEW_STEEL_N                      = 52774,
-    SPELL_RENEW_STEEL_H                      = 59160,
+    NPC_STORMFORGED_LIEUTENANT              = 29240,
+    SPELL_ARC_WELD                          = 59085,
+    SPELL_RENEW_STEEL_N                     = 52774,
+    SPELL_RENEW_STEEL_H                     = 59160,
 
-    EQUIP_SWORD                              = 37871,
-    EQUIP_SHIELD                             = 35642,
-    EQUIP_MACE                               = 43623,
+    EQUIP_SWORD                             = 37871,
+    EQUIP_SHIELD                            = 35642,
+    EQUIP_MACE                              = 43623,
+
+    STANCE_DEFENSIVE                        = 0,
+    STANCE_BERSERKER                        = 1,
+    STANCE_BATTLE                           = 2
 };
 
 /*######
-## Boss General Bjarngrim
+## boss_bjarngrim
 ######*/
+
 struct MANGOS_DLL_DECL boss_bjarngrimAI : public ScriptedAI
 {
     boss_bjarngrimAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
-    	pInstance = ((ScriptedInstance*)pCreature->GetInstanceData());
-    	m_bIsHeroic = pCreature->GetMap()->IsHeroic();
-
-        SpellEntry* TempSpell = (SpellEntry*)GetSpellStore()->LookupEntry(SPELL_RENEW_STEEL_H); // Use script target
-        if (TempSpell && TempSpell->EffectImplicitTargetB[0] != 38)
-        {
-               TempSpell->EffectImplicitTargetB[0] = 38;
-               TempSpell->EffectImplicitTargetB[1] = 0;
-        }
-
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_bIsHeroic = pCreature->GetMap()->IsHeroic();
+        m_uiStance = STANCE_DEFENSIVE;
         Reset();
     }
 
-    ScriptedInstance *pInstance;
+    ScriptedInstance* m_pInstance;
 
     bool m_bIsHeroic;
-    bool IsChangingStance;
+    bool m_bIsChangingStance;
 
     uint8 m_uiChargingStatus;
     uint8 m_uiStance;
@@ -116,12 +116,11 @@ struct MANGOS_DLL_DECL boss_bjarngrimAI : public ScriptedAI
 
     void Reset()
     {
-    	IsChangingStance = false;
+        m_bIsChangingStance = false;
 
-    	m_uiChargingStatus = 0;
+        m_uiChargingStatus = 0;
         m_uiCharge_Timer = 1000;
 
-        m_uiStance = 0;
         m_uiChangeStance_Timer = 20000 + rand()%5000;
 
         m_uiReflection_Timer = 8000;
@@ -136,299 +135,295 @@ struct MANGOS_DLL_DECL boss_bjarngrimAI : public ScriptedAI
         m_uiMortalStrike_Timer = 8000;
         m_uiSlam_Timer = 10000;
 
-        for(uint8 i = 0; i<2; i++)
+        for(uint8 i = 0; i < 2; ++i)
         {
             if (Creature* pStormforgedLieutenant = ((Creature*)Unit::GetUnit((*m_creature), m_uiStormforgedLieutenantGUID[i])))
             {
                 if (!pStormforgedLieutenant->isAlive())
                     pStormforgedLieutenant->Respawn();
-                pStormforgedLieutenant->GetMotionMaster()->MoveChase(m_creature);
-            }
-            else if (Creature* pStormforgedLieutenant = m_creature->SummonCreature(NPC_STORMFORGED_LIEUTENANT, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000))
-            {
-                m_uiStormforgedLieutenantGUID[i] = pStormforgedLieutenant->GetGUID();
-                pStormforgedLieutenant->GetMotionMaster()->MoveChase(m_creature);
             }
         }
 
-        DoCast(m_creature, SPELL_DEFENSIVE_AURA);
-        DoCast(m_creature, SPELL_DEFENSIVE_STANCE);
-        m_creature->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, uint32(EQUIP_SWORD));
-        m_creature->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, uint32(EQUIP_SHIELD));
+        if (m_uiStance != STANCE_DEFENSIVE)
+        {
+            DoRemoveStanceAura(m_uiStance);
+            DoCast(m_creature, SPELL_DEFENSIVE_STANCE);
+            m_uiStance = STANCE_DEFENSIVE;
+        }
 
-        if(pInstance)
-            pInstance->SetData(DATA_BJARNGRIM_EVENT, NOT_STARTED);
+        SetEquipmentSlots(false, EQUIP_SWORD, EQUIP_SHIELD, EQUIP_NO_CHANGE);
+
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_BJARNGRIM, NOT_STARTED);
     }
 
-    void Aggro(Unit* who)
+    void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
-        m_creature->SetInCombatWithZone();
 
-        for(uint8 i = 0; i<2; i++)
-            if (Creature* pStormforgedLieutenant = ((Creature*)Unit::GetUnit((*m_creature), m_uiStormforgedLieutenantGUID[i])))
-                pStormforgedLieutenant->AI()->AttackStart(who);
+        //must get both lieutenants here and make sure they are with him
+        m_creature->CallForHelp(30.0f);
 
-        if(pInstance)
-            pInstance->SetData(DATA_BJARNGRIM_EVENT, IN_PROGRESS);
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_BJARNGRIM, IN_PROGRESS);
     }
 
-    void UpdateAI(const uint32 diff)
+    void KilledUnit(Unit* pVictim)
     {
-        // Charge up
-        if(!m_creature->isInCombat())
+        switch(rand()%3)
         {
-            if(m_uiCharge_Timer < diff)
-            {
-                if (m_uiChargingStatus == 0)
-                {
-                    DoCast(m_creature, SPELL_CHARGE_UP);
-                    m_uiChargingStatus = 1;
-                    m_uiCharge_Timer = 5500;
-                }
-                else if (m_uiChargingStatus == 1)
-                {
-                    m_creature->InterruptNonMeleeSpells(true);
-                    DoCast(m_creature, SPELL_TEMPORARY_ELECTRICAL_CHARGE);
-                    m_uiChargingStatus = 2;
-                    m_uiCharge_Timer = 20000 + rand()%5000;
-                }
-                else if (m_uiChargingStatus == 2)
-                {
-                    if (m_creature->HasAura(SPELL_TEMPORARY_ELECTRICAL_CHARGE, 0))
-                        m_creature->RemoveAurasDueToSpell(SPELL_TEMPORARY_ELECTRICAL_CHARGE);
-                    m_uiChargingStatus = 0;
-                    m_uiCharge_Timer = 5000 + rand()%1000;
-                }
-            }else m_uiCharge_Timer -= diff;
-            return;
+            case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
+            case 1: DoScriptText(SAY_SLAY_2, m_creature); break;
+            case 2: DoScriptText(SAY_SLAY_3, m_creature); break;
         }
+    }
 
+    void JustDied(Unit* pKiller)
+    {
+        DoScriptText(SAY_DEATH, m_creature);
+
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_BJARNGRIM, DONE);
+    }
+
+    //TODO: remove when removal is done by mangos
+    void DoRemoveStanceAura(uint8 uiStance)
+    {
+        switch(uiStance)
+        {
+            case STANCE_DEFENSIVE:
+                m_creature->RemoveAurasDueToSpell(SPELL_DEFENSIVE_STANCE);
+                break;
+            case STANCE_BERSERKER:
+                m_creature->RemoveAurasDueToSpell(SPELL_BERSEKER_STANCE);
+                break;
+            case STANCE_BATTLE:
+                m_creature->RemoveAurasDueToSpell(SPELL_BATTLE_STANCE);
+                break;
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
         //Return since we have no target
         if (!m_creature->SelectHostilTarget() || !m_creature->getVictim())
             return;
 
         // Change stance
-        if(m_uiChangeStance_Timer < diff)
+        if (m_uiChangeStance_Timer < uiDiff)
         {
-        	if (!IsChangingStance)
-        	{
-                uint8 m_uiTempStance;
-                m_uiTempStance = rand()%3;
-                while (m_uiStance == m_uiTempStance)
-                    m_uiTempStance = rand()%3;
-                m_uiStance = m_uiTempStance;
+            //wait for current spell to finish before change stance
+            if (m_creature->IsNonMeleeSpellCasted(false))
+                return;
 
-                m_creature->InterruptNonMeleeSpells(true);
-                if (m_creature->HasAura(SPELL_DEFENSIVE_AURA, 0))
-                    m_creature->RemoveAurasDueToSpell(SPELL_DEFENSIVE_AURA);
-                if (m_creature->HasAura(SPELL_BERSEKER_AURA, 0))
-                    m_creature->RemoveAurasDueToSpell(SPELL_BERSEKER_AURA);
-                if (m_creature->HasAura(SPELL_BATTLE_AURA, 0))
-                    m_creature->RemoveAurasDueToSpell(SPELL_BATTLE_AURA);
+            DoRemoveStanceAura(m_uiStance);
 
-                switch(m_uiStance)
-                {
-                    case 0:
-                        DoScriptText(SAY_DEFENSIVE_STANCE, m_creature);
-                        DoCast(m_creature, SPELL_DEFENSIVE_STANCE);
-                        m_creature->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, uint32(EQUIP_SWORD));
-                        m_creature->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, uint32(EQUIP_SHIELD));
-                        break;
-                    case 1:
-                        DoScriptText(SAY_BERSEKER_STANCE, m_creature);
-                        DoCast(m_creature, SPELL_BERSEKER_STANCE);
-                        m_creature->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, uint32(EQUIP_SWORD));
-                        m_creature->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, uint32(EQUIP_SWORD));
-                        break;
-                    case 2:
-                        DoScriptText(SAY_BATTLE_STANCE, m_creature);
-                        DoCast(m_creature, SPELL_BATTLE_STANCE);
-                        m_creature->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, uint32(EQUIP_MACE));
-                        m_creature->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, uint32(0));
-                        break;
-                }
-                IsChangingStance = true;
-                m_uiChangeStance_Timer = 500;
-            }
-            else
+            int uiTempStance = rand()%(3-1);
+
+            if (uiTempStance >= m_uiStance)
+                ++uiTempStance;
+
+            m_uiStance = uiTempStance;
+
+            switch(m_uiStance)
             {
-                switch(m_uiStance)
-                {
-                    case 0:
-                        DoCast(m_creature, SPELL_DEFENSIVE_AURA);
-                        break;
-                    case 1:
-                        DoCast(m_creature, SPELL_BERSEKER_AURA);
-                        break;
-                    case 2:
-                        DoCast(m_creature, SPELL_BATTLE_AURA);
-                        break;
-                }
-                IsChangingStance = false;
-                m_uiChangeStance_Timer = 20000 + rand()%5000;
+                case STANCE_DEFENSIVE:
+                    DoScriptText(SAY_DEFENSIVE_STANCE, m_creature);
+                    DoScriptText(EMOTE_DEFENSIVE_STANCE, m_creature);
+                    DoCast(m_creature, SPELL_DEFENSIVE_STANCE);
+                    SetEquipmentSlots(false, EQUIP_SWORD, EQUIP_SHIELD, EQUIP_NO_CHANGE);
+                    break;
+                case STANCE_BERSERKER:
+                    DoScriptText(SAY_BERSEKER_STANCE, m_creature);
+                    DoScriptText(EMOTE_BERSEKER_STANCE, m_creature);
+                    DoCast(m_creature, SPELL_BERSEKER_STANCE);
+                    SetEquipmentSlots(false, EQUIP_SWORD, EQUIP_SWORD, EQUIP_NO_CHANGE);
+                    break;
+                case STANCE_BATTLE:
+                    DoScriptText(SAY_BATTLE_STANCE, m_creature);
+                    DoScriptText(EMOTE_BATTLE_STANCE, m_creature);
+                    DoCast(m_creature, SPELL_BATTLE_STANCE);
+                    SetEquipmentSlots(false, EQUIP_MACE, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
+                    break;
             }
+
+            m_uiChangeStance_Timer = 20000 + rand()%5000;
             return;
-        }else m_uiChangeStance_Timer -= diff;
-
-        // Defensive
-        if (m_uiStance == 0)
-        {
-            if(m_uiReflection_Timer < diff)
-            {
-                DoCast(m_creature, SPELL_SPELL_REFLECTION);
-                m_uiReflection_Timer = 8000 + rand()%1000;
-            }else m_uiReflection_Timer -= diff;
-
-            if(m_uiKnockAway_Timer < diff)
-            {
-                DoCast(m_creature, SPELL_KNOCK_AWAY);
-                m_uiKnockAway_Timer = 20000 + rand()%1000;
-            }else m_uiKnockAway_Timer -= diff;
-
-            if(m_uiPummel_Timer < diff)
-            {
-                DoCast(m_creature->getVictim(), SPELL_PUMMEL);
-                m_uiPummel_Timer = 10000 + rand()%1000;
-            }else m_uiPummel_Timer -= diff;
-
-            if(m_uiIronform_Timer < diff)
-            {
-                DoCast(m_creature, SPELL_IRONFORM);
-                m_uiIronform_Timer = 25000 + rand()%1000;
-            }else m_uiIronform_Timer -= diff;
         }
+        else
+            m_uiChangeStance_Timer -= uiDiff;
 
-        // Berseker
-        if (m_uiStance == 1)
+        switch(m_uiStance)
         {
-            if(m_uiIntercept_Timer < diff)
+            case STANCE_DEFENSIVE:
             {
-                DoCast(m_creature->getVictim(), SPELL_INTERCEPT);
-                m_uiIntercept_Timer = 45000 + rand()%1000;
-            }else m_uiIntercept_Timer -= diff;
+                if (m_uiReflection_Timer < uiDiff)
+                {
+                    DoCast(m_creature, SPELL_SPELL_REFLECTION);
+                    m_uiReflection_Timer = 8000 + rand()%1000;
+                }
+                else
+                    m_uiReflection_Timer -= uiDiff;
 
-            if(m_uiWhirlwind_Timer < diff)
-            {
-                DoCast(m_creature, SPELL_WHIRLWIND);
-                m_uiWhirlwind_Timer = 10000 + rand()%1000;
-            }else m_uiWhirlwind_Timer -= diff;
+                if (m_uiKnockAway_Timer < uiDiff)
+                {
+                    DoCast(m_creature, SPELL_KNOCK_AWAY);
+                    m_uiKnockAway_Timer = 20000 + rand()%1000;
+                }
+                else
+                    m_uiKnockAway_Timer -= uiDiff;
 
-            if(m_uiCleave_Timer < diff)
-            {
-                DoCast(m_creature->getVictim(), SPELL_CLEAVE);
-                m_uiCleave_Timer = 8000 + rand()%1000;
-            }else m_uiCleave_Timer -= diff;
-        }
+                if (m_uiPummel_Timer < uiDiff)
+                {
+                    DoCast(m_creature->getVictim(), SPELL_PUMMEL);
+                    m_uiPummel_Timer = 10000 + rand()%1000;
+                }
+                else
+                    m_uiPummel_Timer -= uiDiff;
 
-        // Battle
-        if (m_uiStance == 2)
-        {
-            if(m_uiMortalStrike_Timer < diff)
-            {
-                DoCast(m_creature->getVictim(), SPELL_MORTAL_STRIKE);
-                m_uiMortalStrike_Timer = 20000 + rand()%1000;
-            }else m_uiMortalStrike_Timer -= diff;
+                if (m_uiIronform_Timer < uiDiff)
+                {
+                    DoCast(m_creature, SPELL_IRONFORM);
+                    m_uiIronform_Timer = 25000 + rand()%1000;
+                }
+                else
+                    m_uiIronform_Timer -= uiDiff;
 
-            if(m_uiSlam_Timer < diff)
+                break;
+            }
+            case STANCE_BERSERKER:
             {
-                DoCast(m_creature->getVictim(), SPELL_SLAM);
-                m_uiSlam_Timer = 15000 + rand()%1000;
-            }else m_uiSlam_Timer -= diff;
+                if (m_uiIntercept_Timer < uiDiff)
+                {
+                    //not much point is this, better random target and more often?
+                    DoCast(m_creature->getVictim(), SPELL_INTERCEPT);
+                    m_uiIntercept_Timer = 45000 + rand()%1000;
+                }
+                else
+                    m_uiIntercept_Timer -= uiDiff;
+
+                if (m_uiWhirlwind_Timer < uiDiff)
+                {
+                    DoCast(m_creature, SPELL_WHIRLWIND);
+                    m_uiWhirlwind_Timer = 10000 + rand()%1000;
+                }
+                else
+                    m_uiWhirlwind_Timer -= uiDiff;
+
+                if (m_uiCleave_Timer < uiDiff)
+                {
+                    DoCast(m_creature->getVictim(), SPELL_CLEAVE);
+                    m_uiCleave_Timer = 8000 + rand()%1000;
+                }
+                else
+                    m_uiCleave_Timer -= uiDiff;
+
+                break;
+            }
+            case STANCE_BATTLE:
+            {
+                if (m_uiMortalStrike_Timer < uiDiff)
+                {
+                    DoCast(m_creature->getVictim(), SPELL_MORTAL_STRIKE);
+                    m_uiMortalStrike_Timer = 20000 + rand()%1000;
+                }
+                else
+                    m_uiMortalStrike_Timer -= uiDiff;
+
+                if (m_uiSlam_Timer < uiDiff)
+                {
+                    DoCast(m_creature->getVictim(), SPELL_SLAM);
+                    m_uiSlam_Timer = 15000 + rand()%1000;
+                }
+                else
+                    m_uiSlam_Timer -= uiDiff;
+
+                break;
+            }
         }
 
         DoMeleeAttackIfReady();
     }
-
-    void JustDied(Unit* killer)
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if(pInstance)
-            pInstance->SetData(DATA_BJARNGRIM_EVENT, DONE);
-    }
-
-    void KilledUnit(Unit *victim)
-    {
-        if(victim == m_creature)
-            return;
-        switch(rand()%3)
-        {
-            case 0: DoScriptText(SAY_SLAY_1, m_creature);break;
-            case 1: DoScriptText(SAY_SLAY_2, m_creature);break;
-            case 2: DoScriptText(SAY_SLAY_3, m_creature);break;
-        }
-    }
 };
 
 /*######
-## Mob Stormforged Lieutenant
+## mob_stormforged_lieutenant
 ######*/
+
 struct MANGOS_DLL_DECL mob_stormforged_lieutenantAI : public ScriptedAI
 {
     mob_stormforged_lieutenantAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
-    	pInstance = ((ScriptedInstance*)pCreature->GetInstanceData());
-    	m_bIsHeroic = pCreature->GetMap()->IsHeroic();
+        m_pInstance = ((ScriptedInstance*)pCreature->GetInstanceData());
+        m_bIsHeroic = pCreature->GetMap()->IsHeroic();
         Reset();
     }
 
-    ScriptedInstance *pInstance;
+    ScriptedInstance* m_pInstance;
     bool m_bIsHeroic;
 
-    uint32 ArcWeld_Timer;
-    uint32 RenewSteel_Timer;
+    uint32 m_uiArcWeld_Timer;
+    uint32 m_uiRenewSteel_Timer;
 
     void Reset()
     {
-        ArcWeld_Timer = 20000 + rand()%1000;
-        RenewSteel_Timer = 10000 + rand()%1000;
+        m_uiArcWeld_Timer = 20000 + rand()%1000;
+        m_uiRenewSteel_Timer = 10000 + rand()%1000;
     }
 
-    void Aggro(Unit* who)
+    void Aggro(Unit* pWho)
     {
-        if(pInstance)
-            if (Creature* pBjarngrim = (Creature*)Unit::GetUnit(*m_creature, pInstance->GetData64(DATA_BJARNGRIM)))
-                if (!pBjarngrim->getVictim())
-                    pBjarngrim->AI()->AttackStart(who);
+        if (m_pInstance)
+        {
+            if (Creature* pBjarngrim = m_pInstance->instance->GetCreature(m_pInstance->GetData64(DATA_BJARNGRIM)))
+            {
+                if (pBjarngrim->isAlive() && !pBjarngrim->getVictim())
+                    pBjarngrim->AI()->AttackStart(pWho);
+            }
+        }
     }
 
-    void UpdateAI(const uint32 diff)
+    void UpdateAI(const uint32 uiDiff)
     {
         //Return since we have no target
         if (!m_creature->SelectHostilTarget() || !m_creature->getVictim())
             return;
 
-        if(ArcWeld_Timer < diff)
+        if (m_uiArcWeld_Timer < uiDiff)
         {
             DoCast(m_creature->getVictim(), SPELL_ARC_WELD);
-            ArcWeld_Timer = 20000 + rand()%1000;
-        }else ArcWeld_Timer -= diff;
+            m_uiArcWeld_Timer = 20000 + rand()%1000;
+        }
+        else
+            m_uiArcWeld_Timer -= uiDiff;
 
-        if(RenewSteel_Timer < diff)
+        if (m_uiRenewSteel_Timer < uiDiff)
         {
-            if (pInstance)
-                if (Creature* pBjarngrim = (Creature*)Unit::GetUnit(*m_creature, pInstance->GetData64(DATA_BJARNGRIM)))
+            if (m_pInstance)
+            {
+                if (Creature* pBjarngrim = m_pInstance->instance->GetCreature(m_pInstance->GetData64(DATA_BJARNGRIM)))
+                {
                     if (pBjarngrim->isAlive())
                         DoCast(pBjarngrim, m_bIsHeroic ? SPELL_RENEW_STEEL_H : SPELL_RENEW_STEEL_N);
-            RenewSteel_Timer = 10000 + rand()%4000;
-        }else RenewSteel_Timer -= diff;
+                }
+            }
+            m_uiRenewSteel_Timer = 10000 + rand()%4000;
+        }
+        else
+            m_uiRenewSteel_Timer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
-
-    void JustDied(Unit* killer) {}
-    void KilledUnit(Unit *victim) {}
 };
 
-CreatureAI* GetAI_boss_bjarngrim(Creature *_Creature)
+CreatureAI* GetAI_boss_bjarngrim(Creature* pCreature)
 {
-    return new boss_bjarngrimAI (_Creature);
+    return new boss_bjarngrimAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_stormforged_lieutenant(Creature *_Creature)
+CreatureAI* GetAI_mob_stormforged_lieutenant(Creature* pCreature)
 {
-    return new mob_stormforged_lieutenantAI (_Creature);
+    return new mob_stormforged_lieutenantAI(pCreature);
 }
 
 void AddSC_boss_bjarngrim()
@@ -436,12 +431,12 @@ void AddSC_boss_bjarngrim()
     Script *newscript;
 
     newscript = new Script;
-    newscript->Name="boss_bjarngrim";
-    newscript->GetAI = GetAI_boss_bjarngrim;
+    newscript->Name = "boss_bjarngrim";
+    newscript->GetAI = &GetAI_boss_bjarngrim;
     newscript->RegisterSelf();
 
     newscript = new Script;
-    newscript->Name="mob_stormforged_lieutenant";
-    newscript->GetAI = GetAI_mob_stormforged_lieutenant;
+    newscript->Name = "mob_stormforged_lieutenant";
+    newscript->GetAI = &GetAI_mob_stormforged_lieutenant;
     newscript->RegisterSelf();
 }

@@ -16,8 +16,7 @@
 
 /* ScriptData
 SDName: Instance_Halls_of_Lightning
-SDAuthor: ckegg
-SD%Complete: 99%
+SD%Complete: 90%
 SDComment: All ready.
 SDCategory: Halls of Lightning
 EndScriptData */
@@ -47,23 +46,25 @@ struct MANGOS_DLL_DECL instance_halls_of_lightning : public ScriptedInstance
     uint64 m_uiVolkhanDoorGUID;
     uint64 m_uiIonarDoorGUID;
     uint64 m_uiLokenDoorGUID;
+    uint64 m_uiLokenGlobeGUID;
 
-    uint32 Encounters[ENCOUNTERS];
+    uint32 m_auiEncounter[ENCOUNTERS];
 
    void Initialize()
    {
-       m_uiGeneralBjarngrimGUID   = 0;
-       m_uiVolkhanGUID            = 0;
-       m_uiIonarGUID              = 0;
-       m_uiLokenGUID              = 0;
+       m_uiGeneralBjarngrimGUID = 0;
+       m_uiVolkhanGUID          = 0;
+       m_uiIonarGUID            = 0;
+       m_uiLokenGUID            = 0;
 
-       m_uiBjarngrimDoorGUID      = 0;
-       m_uiVolkhanDoorGUID        = 0;
-       m_uiIonarDoorGUID          = 0;
-       m_uiLokenDoorGUID          = 0;
+       m_uiBjarngrimDoorGUID    = 0;
+       m_uiVolkhanDoorGUID      = 0;
+       m_uiIonarDoorGUID        = 0;
+       m_uiLokenDoorGUID        = 0;
+       m_uiLokenGlobeGUID       = 0;
 
        for(uint8 i = 0; i < ENCOUNTERS; ++i)
-           Encounters[i] = NOT_STARTED;
+           m_auiEncounter[i] = NOT_STARTED;
     }
 
     void OnCreatureCreate(Creature* pCreature)
@@ -74,13 +75,13 @@ struct MANGOS_DLL_DECL instance_halls_of_lightning : public ScriptedInstance
                 m_uiGeneralBjarngrimGUID = pCreature->GetGUID();
                 break;
             case NPC_VOLKHAN:
-                m_uiVolkhanGUID          = pCreature->GetGUID();
+                m_uiVolkhanGUID = pCreature->GetGUID();
                 break;
             case NPC_IONAR:
-                m_uiIonarGUID            = pCreature->GetGUID();
+                m_uiIonarGUID = pCreature->GetGUID();
                 break;
             case NPC_LOKEN:
-                m_uiLokenGUID            = pCreature->GetGUID();
+                m_uiLokenGUID = pCreature->GetGUID();
                 break;
         }
     }
@@ -91,15 +92,26 @@ struct MANGOS_DLL_DECL instance_halls_of_lightning : public ScriptedInstance
         {
             case GO_BJARNGRIM_DOOR:
                 m_uiBjarngrimDoorGUID = pGo->GetGUID();
+                if (m_auiEncounter[0] == DONE)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
                 break;
             case GO_VOLKHAN_DOOR:
-                m_uiVolkhanDoorGUID   = pGo->GetGUID();
+                m_uiVolkhanDoorGUID = pGo->GetGUID();
+                if (m_auiEncounter[1] == DONE)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
                 break;
             case GO_IONAR_DOOR:
-                m_uiIonarDoorGUID     = pGo->GetGUID();
+                m_uiIonarDoorGUID = pGo->GetGUID();
+                if (m_auiEncounter[2] == DONE)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
                 break;
             case GO_LOKEN_DOOR:
-                m_uiLokenDoorGUID     = pGo->GetGUID();
+                m_uiLokenDoorGUID = pGo->GetGUID();
+                if (m_auiEncounter[3] == DONE)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
+                break;
+            case GO_LOKEN_THRONE:
+                m_uiLokenGlobeGUID = pGo->GetGUID();
                 break;
         }
     }
@@ -108,25 +120,31 @@ struct MANGOS_DLL_DECL instance_halls_of_lightning : public ScriptedInstance
     {
         switch(uiType)
         {
-            case DATA_BJARNGRIM_EVENT:
-                if(uiData == DONE)
-                    OpenDoor(m_uiBjarngrimDoorGUID);
-                Encounters[0] = uiData;
+            case TYPE_BJARNGRIM:
+                if (uiData == DONE)
+                    DoUseDoorOrButton(m_uiBjarngrimDoorGUID);
+                m_auiEncounter[0] = uiData;
                 break;
-            case DATA_VOLKHAN_EVENT:
-                if(uiData == DONE)
-                    OpenDoor(m_uiVolkhanDoorGUID);
-                Encounters[1] = uiData;
+            case TYPE_VOLKHAN:
+                if (uiData == DONE)
+                    DoUseDoorOrButton(m_uiVolkhanDoorGUID);
+                m_auiEncounter[1] = uiData;
                 break;
-            case DATA_IONAR_EVENT:
-                if(uiData == DONE)
-                    OpenDoor(m_uiIonarDoorGUID);
-                Encounters[2] = uiData;
+            case TYPE_IONAR:
+                if (uiData == DONE)
+                    DoUseDoorOrButton(m_uiIonarDoorGUID);
+                m_auiEncounter[2] = uiData;
                 break;
-            case DATA_LOKEN_EVENT:
-                if(uiData == DONE)
-                    OpenDoor(m_uiLokenDoorGUID);
-                Encounters[3] = uiData;
+            case TYPE_LOKEN:
+                if (uiData == DONE)
+                {
+                    DoUseDoorOrButton(m_uiLokenDoorGUID);
+
+                    //Appears to be type 5 GO with animation. Need to figure out how this work, code below only placeholder
+                    if (GameObject* pGlobe = instance->GetGameObject(m_uiLokenGlobeGUID))
+                        pGlobe->SetGoState(GO_STATE_ACTIVE);
+                }
+                m_auiEncounter[3] = uiData;
                 break;
         }
     }
@@ -135,14 +153,14 @@ struct MANGOS_DLL_DECL instance_halls_of_lightning : public ScriptedInstance
     {
         switch(uiType)
         {
-            case DATA_BJARNGRIM_EVENT:
-                return Encounters[0];
-            case DATA_VOLKHAN_EVENT:
-                return Encounters[1];
-            case DATA_IONAR_EVENT:
-                return Encounters[2];
-            case DATA_LOKEN_EVENT:
-                return Encounters[3];
+            case TYPE_BJARNGRIM:
+                return m_auiEncounter[0];
+            case TYPE_VOLKHAN:
+                return m_auiEncounter[1];
+            case TYPE_IONAR:
+                return m_auiEncounter[2];
+            case TYPE_LOKEN:
+                return m_auiEncounter[3];
         }
         return 0;
     }
@@ -162,12 +180,6 @@ struct MANGOS_DLL_DECL instance_halls_of_lightning : public ScriptedInstance
         }
         return 0;
     }
-
-    void OpenDoor(uint64 uiDoorGUID)
-    {
-        if (GameObject* pDoors = instance->GetGameObject(uiDoorGUID))
-            pDoors->SetGoState(GO_STATE_ACTIVE);
-    }
 };
 
 InstanceData* GetInstanceData_instance_halls_of_lightning(Map* pMap)
@@ -180,6 +192,6 @@ void AddSC_instance_halls_of_lightning()
     Script *newscript;
     newscript = new Script;
     newscript->Name = "instance_halls_of_lightning";
-    newscript->GetInstanceData = GetInstanceData_instance_halls_of_lightning;
+    newscript->GetInstanceData = &GetInstanceData_instance_halls_of_lightning;
     newscript->RegisterSelf();
 }

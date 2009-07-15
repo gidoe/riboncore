@@ -16,9 +16,8 @@
 
 /* ScriptData
 SDName: Boss Volkhan
-SDAuthor: ckegg
-SD%Complete: 98%
-SDComment: Ready for review
+SD%Complete: 60%
+SDComment: Not considered complete. Some events may fail and need further development
 SDCategory: Halls of Lightning
 EndScriptData */
 
@@ -27,204 +26,112 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                                = -1602028,
-    SAY_SLAY_1                               = -1602029,
-    SAY_SLAY_2                               = -1602030,
-    SAY_SLAY_3                               = -1602031,
-    SAY_DEATH                                = -1602032,
-    SAY_STOMP_1                              = -1602033,
-    SAY_STOMP_2                              = -1602034,
-    SAY_FORGE_1                              = -1602035,
-    SAY_FORGE_2                              = -1602036,
+    SAY_AGGRO                               = -1602032,
+    SAY_SLAY_1                              = -1602033,
+    SAY_SLAY_2                              = -1602034,
+    SAY_SLAY_3                              = -1602035,
+    SAY_DEATH                               = -1602036,
+    SAY_STOMP_1                             = -1602037,
+    SAY_STOMP_2                             = -1602038,
+    SAY_FORGE_1                             = -1602039,
+    SAY_FORGE_2                             = -1602040,
+    EMOTE_TO_ANVIL                          = -1602041,
+    EMOTE_SHATTER                           = -1602042,
 
-    SPELL_HEAT_N                             = 52387,
-    SPELL_HEAT_H                             = 59528,
-    SPELL_SHATTERING_STOMP_N                 = 52237,
-    SPELL_SHATTERING_STOMP_H                 = 59529,
-    SPELL_TEMPER                             = 52238,
-    SPELL_TEMPER2                            = 52654, // not sure
-    SPELL_TEMPER_VISUAL                      = 52661,
+    SPELL_HEAT_N                            = 52387,
+    SPELL_HEAT_H                            = 59528,
+    SPELL_SHATTERING_STOMP_N                = 52237,
+    SPELL_SHATTERING_STOMP_H                = 59529,
 
-    NPC_VOLKHANS_ANVIL                       = 28823,
+    //unclear how "directions" of spells must be. Last, summoning GO, what is it for? Script depend on:
+    SPELL_TEMPER                            = 52238,        //TARGET_SCRIPT boss->anvil
+    SPELL_TEMPER_DUMMY                      = 52654,        //TARGET_SCRIPT anvil->boss
+
+    //SPELL_TEMPER_VISUAL                     = 52661,        //summons GO
+
+    SPELL_SUMMON_MOLTEN_GOLEM               = 52405,
 
     //Molten Golem
-    NPC_MOLTEN_GOLEM                         = 28695,
-    SPELL_BLAST_WAVE                         = 23113,
-    SPELL_IMMOLATION_STRIKE_N                = 52433,
-    SPELL_IMMOLATION_STRIKE_H                = 59530,
-    SPELL_SHATTER_N                          = 52429,
-    SPELL_SHATTER_H                          = 59527
+    SPELL_BLAST_WAVE                        = 23113,
+    SPELL_IMMOLATION_STRIKE_N               = 52433,
+    SPELL_IMMOLATION_STRIKE_H               = 59530,
+    SPELL_SHATTER_N                         = 52429,
+    SPELL_SHATTER_H                         = 59527,
+
+    NPC_VOLKHAN_ANVIL                       = 28823,
+    NPC_MOLTEN_GOLEM                        = 28695,
+    NPC_BRITTLE_GOLEM                       = 28681,
+
+    POINT_ID_ANVIL                          = 0,
+    MAX_GOLEM                               = 2
 };
 
 /*######
 ## Boss Volkhan
 ######*/
+
 struct MANGOS_DLL_DECL boss_volkhanAI : public ScriptedAI
 {
     boss_volkhanAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
-    	pInstance = ((ScriptedInstance*)pCreature->GetInstanceData());
-    	m_bIsHeroic = pCreature->GetMap()->IsHeroic();
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_bIsHeroic = pCreature->GetMap()->IsHeroic();
         Reset();
     }
 
-    ScriptedInstance *pInstance;
+    ScriptedInstance* m_pInstance;
 
     std::list<uint64> m_lGolemGUIDList;
 
     bool m_bIsHeroic;
+    bool m_bHasTemper;
     bool m_bIsStriking;
-
-    uint8 m_uiHealthCheck[4];
+    bool m_bCanShatterGolem;
 
     uint32 m_uiPause_Timer;
     uint32 m_uiShatteringStomp_Timer;
     uint32 m_uiShatter_Timer;
-    uint32 m_uiHealCheck_Timer;
+
+    uint32 m_uiHealthAmountModifier;
 
     void Reset()
     {
-    	m_bIsStriking = false;
+        m_bIsStriking = false;
+        m_bHasTemper = false;
+        m_bCanShatterGolem = false;
 
-        m_uiPause_Timer = 0;
-        m_uiShatteringStomp_Timer = 80000;
-        m_uiShatter_Timer = 0;
-        m_uiHealCheck_Timer = 1000;
+        m_uiPause_Timer = 3500;
+        m_uiShatteringStomp_Timer = 0;
+        m_uiShatter_Timer = 5000;
 
-        m_uiHealthCheck[0] = 80;
-        m_uiHealthCheck[1] = 60;
-        m_uiHealthCheck[2] = 40;
-        m_uiHealthCheck[3] = 20;
+        m_uiHealthAmountModifier = 1;
 
         DespawnGolem();
         m_lGolemGUIDList.clear();
 
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-
-        if(pInstance)
-            pInstance->SetData(DATA_VOLKHAN_EVENT, NOT_STARTED);
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_VOLKHAN, NOT_STARTED);
     }
 
     void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (!pWho || m_creature->getVictim())
-            return;
-
-        if (pWho->isTargetableForAttack() && pWho->isInAccessablePlaceFor(m_creature) && m_creature->IsHostileTo(pWho))
-            AttackStart(pWho);
-
-        if(pInstance)
-            pInstance->SetData(DATA_VOLKHAN_EVENT, IN_PROGRESS);
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_VOLKHAN, IN_PROGRESS);
     }
 
     void AttackStart(Unit* pWho)
     {
-        if (m_bIsStriking)
-            return;
-
-        if (!pWho || pWho == m_creature)
-            return;
-
         if (m_creature->Attack(pWho, true))
         {
-            m_creature->SetInCombatWithZone();
-            DoStartMovement(pWho);
+            m_creature->AddThreat(pWho, 0.0f);
+            m_creature->SetInCombatWith(pWho);
+            pWho->SetInCombatWith(m_creature);
+
+            if (!m_bHasTemper)
+                m_creature->GetMotionMaster()->MoveChase(pWho);
         }
-    }
-
-    void MovementInform(uint32 uiType, uint32 uiPointId)
-    {
-        if(uiType != POINT_MOTION_TYPE)
-                return;
-
-        switch(uiPointId)
-        {
-            case 0:
-            	m_creature->SetSpeed(MOVE_RUN, 1.0f);
-                DoCast(m_creature, SPELL_TEMPER);
-                m_uiPause_Timer = 1000;
-                break;
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff)
-    {
-        // Striking workaround (SPELL_TEMPER is not spawn adds)
-        if (m_bIsStriking)
-        {
-            if (m_uiPause_Timer < uiDiff)
-            {
-                for(uint8 i = 0; i < 2; ++i)
-                {
-                    if (Creature* pTemp = m_creature->SummonCreature(NPC_MOLTEN_GOLEM, 1323.061, -90.179, 56.717, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
-                    {
-                        m_lGolemGUIDList.push_back(pTemp->GetGUID());
-                        pTemp->AI()->AttackStart(SelectUnit(SELECT_TARGET_RANDOM, 0));
-                        DoCast(pTemp, m_bIsHeroic ? SPELL_HEAT_H : SPELL_HEAT_N);
-                    }
-                }
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                m_bIsStriking = false;
-                m_uiPause_Timer = 0;
-            } else m_uiPause_Timer -= uiDiff;
-            return;
-        }
-
-        //Return since we have no target
-        if (!m_creature->SelectHostilTarget() || !m_creature->getVictim())
-            return;
-
-        if(m_uiShatteringStomp_Timer < uiDiff)
-        {
-            switch(rand()%2)
-            {
-                case 0: DoScriptText(SAY_STOMP_1, m_creature);break;
-                case 1: DoScriptText(SAY_STOMP_2, m_creature);break;
-            }
-            DoCast(m_creature, m_bIsHeroic ? SPELL_SHATTERING_STOMP_H : SPELL_SHATTERING_STOMP_N);
-            m_uiShatteringStomp_Timer = 80000;
-            m_uiShatter_Timer = 3000;
-        }else m_uiShatteringStomp_Timer -= uiDiff;
-
-        // Shatter Golems 3 seconds after Shattering Stomp
-        if (m_uiShatter_Timer)
-            if(m_uiShatter_Timer < uiDiff)
-            {
-                ShatterGolem();
-                m_uiShatter_Timer = 0;
-            }else m_uiShatter_Timer -= uiDiff;
-
-        // Health check -----------------------------------------------------------------------------
-        if (m_uiHealCheck_Timer < uiDiff)
-        {
-            for(uint8 i = 0; i < 4; i++)
-            {
-                if (m_uiHealthCheck[i] && (m_creature->GetHealth()*100 / m_creature->GetMaxHealth()) <= m_uiHealthCheck[i])
-                {
-                    switch(rand()%2)
-                    {
-                        case 0: DoScriptText(SAY_FORGE_1, m_creature);break;
-                        case 1: DoScriptText(SAY_FORGE_2, m_creature);break;
-                    }
-                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE); // If don't do this, Volkhan won't run because players keep hitting him
-                    m_creature->InterruptNonMeleeSpells(true);
-                    m_creature->GetMotionMaster()->Clear(false);
-                    m_creature->StopMoving();
-                    m_creature->AttackStop();
-                    // workaround for SPELL_TEMPER
-                    m_creature->SetSpeed(MOVE_RUN, 2.0f);
-                    m_creature->GetMotionMaster()->MovePoint(0, 1325.911, -93.036, 56.717);
-                    m_bIsStriking = true;
-                    m_uiHealthCheck[i] = 0; // deactive
-                }
-            }
-            m_uiHealCheck_Timer = 1000;
-        } else m_uiHealCheck_Timer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 
     void JustDied(Unit* pKiller)
@@ -232,19 +139,17 @@ struct MANGOS_DLL_DECL boss_volkhanAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
         DespawnGolem();
 
-        if(pInstance)
-            pInstance->SetData(DATA_VOLKHAN_EVENT, DONE);
+        if (m_pInstance)
+            m_pInstance->SetData(TYPE_VOLKHAN, DONE);
     }
 
     void KilledUnit(Unit* pVictim)
     {
-        if(pVictim == m_creature)
-            return;
         switch(rand()%3)
         {
-            case 0: DoScriptText(SAY_SLAY_1, m_creature);break;
-            case 1: DoScriptText(SAY_SLAY_2, m_creature);break;
-            case 2: DoScriptText(SAY_SLAY_3, m_creature);break;
+            case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
+            case 1: DoScriptText(SAY_SLAY_2, m_creature); break;
+            case 2: DoScriptText(SAY_SLAY_3, m_creature); break;
         }
     }
 
@@ -254,9 +159,13 @@ struct MANGOS_DLL_DECL boss_volkhanAI : public ScriptedAI
             return;
 
         for(std::list<uint64>::iterator itr = m_lGolemGUIDList.begin(); itr != m_lGolemGUIDList.end(); ++itr)
-        	if (Creature* pTemp = (Creature*)Unit::GetUnit(*m_creature, *itr))
+        {
+            if (Creature* pTemp = (Creature*)Unit::GetUnit(*m_creature, *itr))
+            {
                 if (pTemp->isAlive())
                     pTemp->ForcedDespawn();
+            }
+        }
 
         m_lGolemGUIDList.clear();
     }
@@ -267,41 +176,200 @@ struct MANGOS_DLL_DECL boss_volkhanAI : public ScriptedAI
             return;
 
         for(std::list<uint64>::iterator itr = m_lGolemGUIDList.begin(); itr != m_lGolemGUIDList.end(); ++itr)
+        {
             if (Creature* pTemp = (Creature*)Unit::GetUnit(*m_creature, *itr))
-                if (pTemp->isAlive() && pTemp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE)) // only Shatters frozen golems
-                    pTemp->CastSpell(pTemp, m_bIsHeroic ? SPELL_SHATTER_H : SPELL_SHATTER_N, true);
+            {
+                 // only shatter brittle golems
+                if (pTemp->isAlive() && pTemp->GetEntry() == NPC_BRITTLE_GOLEM)
+                    pTemp->CastSpell(pTemp, m_bIsHeroic ? SPELL_SHATTER_H : SPELL_SHATTER_N, false);
+            }
+        }
     }
-};
 
-/*######
-## Npc Volkhans Anvil
-######*/
-struct MANGOS_DLL_DECL npc_volkhans_anvilAI : public ScriptedAI
-{
-    npc_volkhans_anvilAI(Creature *pCreature) : ScriptedAI(pCreature)
+    void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
     {
-        Reset();
+        if (pSpell->Id == SPELL_TEMPER_DUMMY)
+            m_bIsStriking = true;
     }
-    void Reset() {}
-    void Aggro(Unit* pWho) { return; } // don't aggro
-    void AttackStart(Unit* pWho) { return; }
-    void UpdateAI(const uint32 diff) {}
-    void JustDied(Unit* pKiller) {}
+
+    void JustSummoned(Creature* pSummoned)
+    {
+        if (pSummoned->GetEntry() == NPC_MOLTEN_GOLEM)
+        {
+            m_lGolemGUIDList.push_back(pSummoned->GetGUID());
+
+            if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                pSummoned->AI()->AttackStart(pTarget);
+
+            //why healing when just summoned?
+            pSummoned->CastSpell(pSummoned, m_bIsHeroic ? SPELL_HEAT_H : SPELL_HEAT_N, false, NULL, NULL, m_creature->GetGUID());
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        //Return since we have no target
+        if (!m_creature->SelectHostilTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_bIsStriking)
+        {
+            if (m_uiPause_Timer < uiDiff)
+            {
+                if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() != TARGETED_MOTION_TYPE)
+                {
+                    if (m_creature->getVictim())
+                        m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                }
+
+                m_bHasTemper = false;
+                m_bIsStriking = false;
+                m_uiPause_Timer = 3500;
+            }
+            else
+                m_uiPause_Timer -= uiDiff;
+
+            return;
+        }
+
+        // When to start shatter? After 60, 40 or 20% hp?
+        if (!m_bHasTemper && m_uiHealthAmountModifier >= 3)
+        {
+            if (m_uiShatteringStomp_Timer < uiDiff)
+            {
+                //should he stomp even if he has no brittle golem to shatter?
+
+                switch(rand()%2)
+                {
+                    case 0: DoScriptText(SAY_STOMP_1, m_creature); break;
+                    case 1: DoScriptText(SAY_STOMP_2, m_creature); break;
+                }
+
+                DoCast(m_creature, m_bIsHeroic ? SPELL_SHATTERING_STOMP_H : SPELL_SHATTERING_STOMP_N);
+
+                DoScriptText(EMOTE_SHATTER, m_creature);
+
+                m_uiShatteringStomp_Timer = 30000;
+                m_bCanShatterGolem = true;
+            }
+            else
+                m_uiShatteringStomp_Timer -= uiDiff;
+        }
+
+        // Shatter Golems 3 seconds after Shattering Stomp
+        if (m_bCanShatterGolem)
+        {
+            if (m_uiShatter_Timer < uiDiff)
+            {
+                ShatterGolem();
+                m_uiShatter_Timer = 3000;
+                m_bCanShatterGolem = false;
+            }
+            else
+                m_uiShatter_Timer -= uiDiff;
+        }
+
+        // Health check
+        if (!m_bCanShatterGolem && (m_creature->GetHealth()*100 / m_creature->GetMaxHealth()) < (100-(20*m_uiHealthAmountModifier)))
+        {
+            ++m_uiHealthAmountModifier;
+
+            if (m_creature->IsNonMeleeSpellCasted(false))
+                m_creature->InterruptNonMeleeSpells(false);
+
+            switch(rand()%2)
+            {
+                case 0: DoScriptText(SAY_FORGE_1, m_creature); break;
+                case 1: DoScriptText(SAY_FORGE_2, m_creature); break;
+            }
+
+            m_bHasTemper = true;
+
+            m_creature->CastSpell(m_creature, SPELL_TEMPER, false);
+        }
+
+        DoMeleeAttackIfReady();
+    }
 };
 
+CreatureAI* GetAI_boss_volkhan(Creature* pCreature)
+{
+    return new boss_volkhanAI(pCreature);
+}
+
+bool EffectDummyCreature_boss_volkhan(Unit* pCaster, uint32 uiSpellId, uint32 uiEffIndex, Creature* pCreatureTarget)
+{
+    //always check spellid and effectindex
+    if (uiSpellId == SPELL_TEMPER_DUMMY && uiEffIndex == 0)
+    {
+        if (pCaster->GetEntry() != NPC_VOLKHAN_ANVIL || pCreatureTarget->GetEntry() != NPC_VOLKHAN)
+            return true;
+
+        for(uint8 i = 0; i < MAX_GOLEM; ++i)
+        {
+            pCreatureTarget->CastSpell(pCaster, SPELL_SUMMON_MOLTEN_GOLEM, true);
+
+            //TODO: remove this line of hack when summon effect implemented
+            pCreatureTarget->SummonCreature(NPC_MOLTEN_GOLEM,
+                pCaster->GetPositionX(), pCaster->GetPositionY(), pCaster->GetPositionZ(), 0.0f,
+                TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
+        }
+
+        //always return true when we are handling this spell and effect
+        return true;
+    }
+
+    return false;
+}
+
 /*######
-## Mob Molten Golem
+## npc_volkhan_anvil
 ######*/
+
+bool EffectDummyCreature_npc_volkhan_anvil(Unit* pCaster, uint32 uiSpellId, uint32 uiEffIndex, Creature* pCreatureTarget)
+{
+    //always check spellid and effectindex
+    if (uiSpellId == SPELL_TEMPER && uiEffIndex == 0)
+    {
+        if (pCaster->GetEntry() != NPC_VOLKHAN || pCreatureTarget->GetEntry() != NPC_VOLKHAN_ANVIL)
+            return true;
+
+        DoScriptText(EMOTE_TO_ANVIL, pCaster);
+
+        float fX, fY, fZ;
+        pCreatureTarget->GetContactPoint(pCaster, fX, fY, fZ, INTERACTION_DISTANCE);
+
+        pCaster->AttackStop();
+
+        if (pCaster->GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE)
+            pCaster->GetMotionMaster()->MovementExpired();
+
+        ((Creature*)pCaster)->GetMap()->CreatureRelocation((Creature*)pCaster, fX, fY, fZ, pCreatureTarget->GetOrientation());
+        ((Creature*)pCaster)->SendMonsterMove(fX, fY, fZ, 0, ((Creature*)pCaster)->GetMonsterMoveFlags(), 1);
+
+        pCreatureTarget->CastSpell(pCaster, SPELL_TEMPER_DUMMY, false);
+
+        //always return true when we are handling this spell and effect
+        return true;
+    }
+
+    return false;
+}
+
+/*######
+## mob_molten_golem
+######*/
+
 struct MANGOS_DLL_DECL mob_molten_golemAI : public ScriptedAI
 {
     mob_molten_golemAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
-    	pInstance = ((ScriptedInstance*)pCreature->GetInstanceData());
-    	m_bIsHeroic = pCreature->GetMap()->IsHeroic();
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_bIsHeroic = pCreature->GetMap()->IsHeroic();
         Reset();
     }
 
-    ScriptedInstance *pInstance;
+    ScriptedInstance* m_pInstance;
 
     bool m_bIsHeroic;
     bool m_bIsFrozen;
@@ -321,98 +389,85 @@ struct MANGOS_DLL_DECL mob_molten_golemAI : public ScriptedAI
 
     void AttackStart(Unit* pWho)
     {
-        if (m_bIsFrozen)
-            return;
-
-        if (!pWho || pWho == m_creature)
-            return;
-
         if (m_creature->Attack(pWho, true))
         {
-            m_creature->SetInCombatWithZone();
-            DoStartMovement(pWho);
+            m_creature->AddThreat(pWho, 0.0f);
+            m_creature->SetInCombatWith(pWho);
+            pWho->SetInCombatWith(m_creature);
+
+            if (!m_bIsFrozen)
+                m_creature->GetMotionMaster()->MoveChase(pWho);
+        }
+    }
+
+    void DamageTaken(Unit* pDoneBy, uint32 &uiDamage)
+    {
+        if (m_bIsFrozen)
+        {
+            //workaround for now, brittled should be immune to any kind of attacks
+            uiDamage = 0;
+            return;
+        }
+
+        if (uiDamage > m_creature->GetHealth())
+        {
+            m_bIsFrozen = true;
+
+            if (m_creature->IsNonMeleeSpellCasted(false))
+                m_creature->InterruptNonMeleeSpells(false);
+
+            m_creature->RemoveAllAuras();
+            m_creature->AttackStop();
+
+            if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE)
+                m_creature->GetMotionMaster()->MovementExpired();
+
+            uiDamage = m_creature->GetHealth()-1;
+
+            m_creature->UpdateEntry(NPC_BRITTLE_GOLEM);
+            m_creature->SetHealth(1);
         }
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
     {
-        if (m_bIsFrozen && (pSpell->Id == SPELL_SHATTER_N || pSpell->Id == SPELL_SHATTER_H))
+        //this is the dummy effect of the spells
+        if (pSpell->Id == SPELL_SHATTER_N || pSpell->Id == SPELL_SHATTER_H)
         {
-            //DoCast(m_creature, m_bIsHeroic ? SPELL_SHATTER_H : SPELL_SHATTER_N);
-            //m_creature->ForcedDespawn();
-            m_uiDeathDelay_Timer = 1000; // delay for shatter effect
-        }
-    }
-
-    void DamageTaken(Unit* done_by, uint32 &damage)
-    {
-        if (damage > m_creature->GetHealth() && !m_bIsFrozen)
-        {
-            m_bIsFrozen = true;
-            m_creature->RemoveAllAuras();
-            m_creature->InterruptNonMeleeSpells(true);
-            m_creature->GetMotionMaster()->Clear(false);
-            m_creature->StopMoving();
-            m_creature->AttackStop();
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            m_creature->SetStandState(UNIT_STAND_STATE_SIT);
-        }
-        if (m_bIsFrozen)
-        {
-            damage = 0;
-            return;
+            if (m_creature->GetEntry() == NPC_BRITTLE_GOLEM)
+                m_creature->ForcedDespawn();
         }
     }
 
     void UpdateAI(const uint32 uiDiff)
     {
-        // Is frozen
-    	if (m_bIsFrozen)
-    	{
-    	    if (m_uiDeathDelay_Timer)
-                if(m_uiDeathDelay_Timer < uiDiff)
-                {
-                    m_creature->ForcedDespawn();
-                    m_uiDeathDelay_Timer = 0;
-                }else m_uiDeathDelay_Timer -= uiDiff;
-    	    return;
-    	}
-
-        //Return since we have no target
-        if (!m_creature->SelectHostilTarget() || !m_creature->getVictim())
+        //Return since we have no target or if we are frozen
+        if (!m_creature->SelectHostilTarget() || !m_creature->getVictim() || m_bIsFrozen)
             return;
 
-        if(m_uiBlast_Timer < uiDiff)
+        if (m_uiBlast_Timer < uiDiff)
         {
             DoCast(m_creature, SPELL_BLAST_WAVE);
             m_uiBlast_Timer = 20000;
-        }else m_uiBlast_Timer -= uiDiff;
+        }
+        else
+            m_uiBlast_Timer -= uiDiff;
 
-        if(m_uiImmolation_Timer < uiDiff)
+        if (m_uiImmolation_Timer < uiDiff)
         {
             DoCast(m_creature->getVictim(), m_bIsHeroic ? SPELL_IMMOLATION_STRIKE_H : SPELL_IMMOLATION_STRIKE_N);
             m_uiImmolation_Timer = 5000;
-        }else m_uiImmolation_Timer -= uiDiff;
+        }
+        else
+            m_uiImmolation_Timer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
-    void JustDied(Unit* pKiller) {}
 };
 
-CreatureAI* GetAI_mob_molten_golem(Creature *_Creature)
+CreatureAI* GetAI_mob_molten_golem(Creature* pCreature)
 {
-    return new mob_molten_golemAI (_Creature);
-}
-
-CreatureAI* GetAI_npc_volkhans_anvil(Creature *_Creature)
-{
-    return new npc_volkhans_anvilAI (_Creature);
-}
-
-CreatureAI* GetAI_boss_volkhan(Creature *_Creature)
-{
-    return new boss_volkhanAI (_Creature);
+    return new mob_molten_golemAI(pCreature);
 }
 
 void AddSC_boss_volkhan()
@@ -420,17 +475,18 @@ void AddSC_boss_volkhan()
     Script *newscript;
 
     newscript = new Script;
-    newscript->Name="boss_volkhan";
-    newscript->GetAI = GetAI_boss_volkhan;
+    newscript->Name = "boss_volkhan";
+    newscript->GetAI = &GetAI_boss_volkhan;
+    newscript->pEffectDummyCreature = &EffectDummyCreature_boss_volkhan;
     newscript->RegisterSelf();
 
     newscript = new Script;
-    newscript->Name="npc_volkhans_anvil";
-    newscript->GetAI = GetAI_npc_volkhans_anvil;
+    newscript->Name = "npc_volkhan_anvil";
+    newscript->pEffectDummyCreature = &EffectDummyCreature_npc_volkhan_anvil;
     newscript->RegisterSelf();
 
     newscript = new Script;
-    newscript->Name="mob_molten_golem";
-    newscript->GetAI = GetAI_mob_molten_golem;
+    newscript->Name = "mob_molten_golem";
+    newscript->GetAI = &GetAI_mob_molten_golem;
     newscript->RegisterSelf();
 }

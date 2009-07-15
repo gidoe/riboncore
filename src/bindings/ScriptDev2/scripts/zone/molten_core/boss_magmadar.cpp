@@ -16,133 +16,67 @@
 
 /* ScriptData
 SDName: Boss_Magmadar
-SD%Complete: 80
-SDComment: Magma Spit has to be tested
+SD%Complete: 75
+SDComment: Conflag on ground nyi, fear causes issues without VMAPs
 SDCategory: Molten Core
 EndScriptData */
 
 #include "precompiled.h"
-#include "def_molten_core.h"
 
-enum
-{
-	EMOTE_FRENZY			=	-1409001,
+#define EMOTE_FRENZY                -1409001
 
-	SPELL_FRENZY			=	19451,
-	//SPELL_MAGMA_SPIT		=	19450,
-	SPELL_MAGMA_SPIT_AURA	=	19449,
-	SPELL_PANIC				=	19408,
-	SPELL_LAVA_BOMB			=	19411
-};
+#define SPELL_FRENZY                19451
+#define SPELL_MAGMASPIT             19449                   //This is actually a buff he gives himself
+#define SPELL_PANIC                 19408
+#define SPELL_LAVABOMB              19411                   //This calls a dummy server side effect that isn't implemented yet
+#define SPELL_LAVABOMB_ALT          19428                   //This is the spell that the lava bomb casts
 
 struct MANGOS_DLL_DECL boss_magmadarAI : public ScriptedAI
 {
-    boss_magmadarAI(Creature* pCreature) : ScriptedAI(pCreature)
-	{
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
-    }
+    boss_magmadarAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
-    ScriptedInstance* m_pInstance;
-
-    uint32 uiFrenzy_Timer;
-    uint32 uiPanic_Timer;
-    uint32 uiLavabomb_Timer;
-	//uint32 uiMagmaSpit_Timer;
-
-	bool bHasMagmaSpitAura;
+    uint32 Frenzy_Timer;
+    uint32 Panic_Timer;
+    uint32 Lavabomb_Timer;
 
     void Reset()
     {
-		if(m_pInstance)
-		{
-			m_pInstance->SetData(DATA_MAGMADAR_PROGRESS, NOT_STARTED);
+        Frenzy_Timer = 30000;
+        Panic_Timer = 20000;
+        Lavabomb_Timer = 12000;
 
-			uiFrenzy_Timer = 15000;
-			uiPanic_Timer = 20000;
-			uiLavabomb_Timer = 12000;
-		//	uiMagmaSpit_Timer = 20000;
-			if(bHasMagmaSpitAura)
-				m_creature->RemoveAurasDueToSpell(SPELL_MAGMA_SPIT_AURA);
-
-			bHasMagmaSpitAura = false;
-		}
+        m_creature->CastSpell(m_creature,SPELL_MAGMASPIT,true);
     }
-
-    void Aggro(Unit* pWho)
-    {
-		if(m_pInstance)
-			m_pInstance->SetData(DATA_MAGMADAR_PROGRESS, IN_PROGRESS);
-    }
-
-	void JustDied(Unit* Killer)
-    {
-		if(m_pInstance)
-		{
-			m_pInstance->SetData(DATA_MAGMADAR_PROGRESS, DONE);
-
-			if(m_pInstance->GetData(DATA_ALL_BOSSES_DEAD) == 1)
-				m_creature->SummonCreature(12018,758.762,-1166.332,-119.181,3.54182,TEMPSUMMON_TIMED_DESPAWN,3600000);
-		}
-    }
-/*
-	 void DamageDeal(Unit* pDone_to, uint32 &uiDamage) 
-	 {
-		if(m_creature->IsWithinDistInMap(pDone_to, ATTACK_DISTANCE) && rand()%5 == 0)
-			DoCast(m_creature->getVictim(),SPELL_MAGMA_SPIT);
-
-	 }
-*/
 
     void UpdateAI(const uint32 diff)
     {
-        if (!m_creature->SelectHostilTarget() || !m_creature->getVictim() || !m_pInstance)
+        if (!m_creature->SelectHostilTarget() || !m_creature->getVictim())
             return;
 
-		if(!bHasMagmaSpitAura)
-		{
-			DoCast(m_creature,SPELL_MAGMA_SPIT_AURA);
-			bHasMagmaSpitAura = true;
-		}
-
-        if (uiFrenzy_Timer < diff)
+        //Frenzy_Timer
+        if (Frenzy_Timer < diff)
         {
             DoScriptText(EMOTE_FRENZY, m_creature);
-
             DoCast(m_creature,SPELL_FRENZY);
-            uiFrenzy_Timer = 15000;
-        }
-		else 
-			uiFrenzy_Timer -= diff;
+            Frenzy_Timer = 15000;
+        }else Frenzy_Timer -= diff;
 
-        if (uiPanic_Timer < diff)
+        //Panic_Timer
+        if (Panic_Timer < diff)
         {
-            DoCast(m_creature,SPELL_PANIC);
-            uiPanic_Timer = 35000;
-        }
-		else 
-			uiPanic_Timer -= diff;
+            DoCast(m_creature->getVictim(),SPELL_PANIC);
+            Panic_Timer = 35000;
+        }else Panic_Timer -= diff;
 
         //Lavabomb_Timer
-        if (uiLavabomb_Timer < diff)
+        if (Lavabomb_Timer < diff)
         {
-            if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM,0))
-                DoCast(pTarget,SPELL_LAVA_BOMB);
+            if (Unit* target = SelectUnit(SELECT_TARGET_RANDOM,0))
+                DoCast(target,SPELL_LAVABOMB_ALT);
 
-            uiLavabomb_Timer = 12000;
-        }
-		else 
-			uiLavabomb_Timer -= diff;
+            Lavabomb_Timer = 12000;
+        }else Lavabomb_Timer -= diff;
 
-		/*if (uiMagmaSpit_Timer < diff)
-		{
-			DoCast(m_creature->getVictim(),SPELL_MAGMA_SPIT);
-
-            uiMagmaSpit_Timer = 12000;
-        }
-		else
-			uiMagmaSpit_Timer -= diff;
-		*/
         DoMeleeAttackIfReady();
     }
 };
@@ -154,8 +88,7 @@ CreatureAI* GetAI_boss_magmadar(Creature* pCreature)
 
 void AddSC_boss_magmadar()
 {
-    Script* newscript;
-
+    Script *newscript;
     newscript = new Script;
     newscript->Name = "boss_magmadar";
     newscript->GetAI = &GetAI_boss_magmadar;

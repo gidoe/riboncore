@@ -147,7 +147,6 @@ extern void AddSC_boss_gorosh_the_dervish();
 extern void AddSC_boss_grizzle();
 extern void AddSC_boss_high_interrogator_gerstahn();
 extern void AddSC_boss_magmus();
-extern void AddSC_boss_moira_bronzebeard();
 extern void AddSC_boss_tomb_of_seven();
 extern void AddSC_instance_blackrock_depths();
 
@@ -497,6 +496,7 @@ extern void AddSC_stratholme();
 //Sunken Temple
 
 //Sunwell Plateau
+extern void AddSC_boss_brutallus();
 extern void AddSC_boss_kalecgos();
 extern void AddSC_instance_sunwell_plateau();
 
@@ -559,7 +559,6 @@ extern void AddSC_boss_ironaya();
 extern void AddSC_uldaman();
 
 //Ulduar
-// Halls of Lightning
 extern void AddSC_boss_bjarngrim();
 extern void AddSC_boss_ionar();
 extern void AddSC_boss_loken();
@@ -578,13 +577,6 @@ extern void AddSC_boss_keleseth();
 extern void AddSC_boss_skarvald_and_dalronn();
 extern void AddSC_instance_utgarde_keep();
 extern void AddSC_utgarde_keep();
-
-//Utgarde Pinnacle
-extern void AddSC_boss_palehoof();
-extern void AddSC_boss_skadi();
-extern void AddSC_boss_svala();
-extern void AddSC_boss_ymiron();
-extern void AddSC_instance_pinnacle();
 
 //Wailing caverns
 
@@ -1049,7 +1041,6 @@ void ScriptsInit()
     AddSC_boss_grizzle();
     AddSC_boss_high_interrogator_gerstahn();
     AddSC_boss_magmus();
-    AddSC_boss_moira_bronzebeard();
     AddSC_boss_tomb_of_seven();
     AddSC_instance_blackrock_depths();
 
@@ -1398,6 +1389,7 @@ void ScriptsInit()
     //Sunken Temple
 
     //Sunwell Plateau
+    AddSC_boss_brutallus();
     AddSC_boss_kalecgos();
     AddSC_instance_sunwell_plateau();
 
@@ -1422,7 +1414,7 @@ void ScriptsInit()
     AddSC_boss_kaelthas();
     AddSC_boss_void_reaver();
     AddSC_boss_high_astromancer_solarian();
-	 AddSC_boss_alar();
+    AddSC_boss_alar();
     AddSC_instance_the_eye();
     AddSC_the_eye();
 
@@ -1460,7 +1452,6 @@ void ScriptsInit()
     AddSC_uldaman();
 
     //Ulduar
-    // Halls of Lightning
     AddSC_boss_bjarngrim();
     AddSC_boss_ionar();
     AddSC_boss_loken();
@@ -1479,13 +1470,6 @@ void ScriptsInit()
     AddSC_boss_skarvald_and_dalronn();
     AddSC_instance_utgarde_keep();
     AddSC_utgarde_keep();
-
-    //Utgarde Pinnacle
-    AddSC_boss_palehoof();
-    AddSC_boss_skadi();
-    AddSC_boss_svala();
-    AddSC_boss_ymiron();
-    AddSC_instance_pinnacle();
 
     //Wailing caverns
 
