@@ -78,6 +78,7 @@ void Vehicle::Update(uint32 diff)
 
 bool Vehicle::Create(uint32 guidlow, Map *map, uint32 phaseMask, uint32 Entry, uint32 vehicleId, uint32 team, const CreatureData *data)
 {
+<<<<<<< HEAD:src/game/Vehicle.cpp
     SetMapId(map->GetId());
     SetInstanceId(map->GetInstanceId());
     SetPhaseMask(phaseMask,false);
@@ -88,6 +89,9 @@ bool Vehicle::Create(uint32 guidlow, Map *map, uint32 phaseMask, uint32 Entry, u
         sLog.outErrorDb("Creature entry %u does not exist.", Entry);
         return false;
     }
+=======
+    SetMap(map);
+>>>>>>> e1ed64b70c6a31a065128e8ca2892d1f1ab98ad8:src/game/Vehicle.cpp
 
     Object::_Create(guidlow, Entry, HIGHGUID_VEHICLE);
 
