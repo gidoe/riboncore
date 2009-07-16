@@ -5496,19 +5496,21 @@ void Aura::HandleAuraModCritPercent(bool apply, bool Real)
     // with spell->EquippedItemClass and  EquippedItemSubClassMask and EquippedItemInventoryTypeMask
     // m_modifier.m_miscvalue comparison with item generated damage types
 
+    float amount = float(m_modifier.m_amount);
+
     if (GetSpellProto()->EquippedItemClass == -1)
     {
         if(IsStacking())
         {
-            ((Player*)m_target)->HandleBaseModValue(CRIT_PERCENTAGE,         FLAT_MOD, m_amount, apply);
-            ((Player*)m_target)->HandleBaseModValue(OFFHAND_CRIT_PERCENTAGE, FLAT_MOD, m_amount, apply);
-            ((Player*)m_target)->HandleBaseModValue(RANGED_CRIT_PERCENTAGE,  FLAT_MOD, m_amount, apply);
+            ((Player*)m_target)->HandleBaseModValue(CRIT_PERCENTAGE,         FLAT_MOD, amount, apply);
+            ((Player*)m_target)->HandleBaseModValue(OFFHAND_CRIT_PERCENTAGE, FLAT_MOD, amount, apply);
+            ((Player*)m_target)->HandleBaseModValue(RANGED_CRIT_PERCENTAGE,  FLAT_MOD, amount, apply);
         }
         else
         {
             float current = ((Player*)m_target)->GetBaseModValue(NONSTACKING_CRIT_PERCENTAGE, FLAT_MOD);
 
-            if(m_amount < current)
+            if(amount < current)
                 return;
 
             // unapply old aura
@@ -5520,16 +5522,16 @@ void Aura::HandleAuraModCritPercent(bool apply, bool Real)
             }
 
             if(!apply)
-                m_amount = m_target->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_CRIT_PERCENT, true);
+                amount = m_target->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_CRIT_PERCENT, true);
 
-            if(m_amount)
+            if(amount)
             {
-                ((Player*)m_target)->HandleBaseModValue(CRIT_PERCENTAGE,         FLAT_MOD, m_amount, true);
-                ((Player*)m_target)->HandleBaseModValue(OFFHAND_CRIT_PERCENTAGE, FLAT_MOD, m_amount, true);
-                ((Player*)m_target)->HandleBaseModValue(RANGED_CRIT_PERCENTAGE,  FLAT_MOD, m_amount, true);
+                ((Player*)m_target)->HandleBaseModValue(CRIT_PERCENTAGE,         FLAT_MOD, amount, true);
+                ((Player*)m_target)->HandleBaseModValue(OFFHAND_CRIT_PERCENTAGE, FLAT_MOD, amount, true);
+                ((Player*)m_target)->HandleBaseModValue(RANGED_CRIT_PERCENTAGE,  FLAT_MOD, amount, true);
             }
 
-            ((Player*)m_target)->SetBaseModValue(NONSTACKING_CRIT_PERCENTAGE, FLAT_MOD, m_amount);
+            ((Player*)m_target)->SetBaseModValue(NONSTACKING_CRIT_PERCENTAGE, FLAT_MOD, amount);
         }
     }
     else
@@ -7113,7 +7115,7 @@ void Aura::PeriodicDummyTick()
                     if ((*i)->GetId() == GetId())
                     {
                         (*i)->GetModifier()->m_amount = m_modifier.m_amount;
-                        ((Player*)m_target)->UpdateManaRegen();
+                        m_target->HandleStatModifier(UNIT_MOD_MANA_REGEN, TOTAL_VALUE, float((*i)->GetModifier()->m_amount), true);
                         // Disable continue
                         m_isPeriodic = false;
                         return;

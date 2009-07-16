@@ -3661,7 +3661,7 @@ float Unit::CheckAuraStackingAndApply(Aura *Aur, UnitMods unitMod, UnitModifierT
     {
         if(modifierType == TOTAL_VALUE)
             modifierType = NONSTACKING_VALUE;
-       else if(modifierType == TOTAL_PCT)
+        else if(modifierType == TOTAL_PCT)
             modifierType = NONSTACKING_PCT;
         // need a sanity check here?
 
@@ -3673,7 +3673,7 @@ float Unit::CheckAuraStackingAndApply(Aura *Aur, UnitMods unitMod, UnitModifierT
         if(!apply)                                          // aura removed is the aura that is currently in effect, must find second highest nonstacking aura's m_amount
         {
             if(miscMask)
-               amount = (float)GetMaxPositiveAuraModifierByMiscMask(Aur->GetModifier()->m_auraname, miscMask, true);
+                amount = (float)GetMaxPositiveAuraModifierByMiscMask(Aur->GetModifier()->m_auraname, miscMask, true);
             else if(miscValue)
                 amount = (float)GetMaxPositiveAuraModifierByMiscValue(Aur->GetModifier()->m_auraname, miscValue-1, true);
             else

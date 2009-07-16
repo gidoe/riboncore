@@ -123,7 +123,7 @@ void Player::UpdateSpellDamageAndHealingBonus()
     // Get damage bonus for all schools
     // PLAYER_FIELD_MOD_DAMAGE_DONE_NEG field handled in Aura::HandleModDamageDone
     for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
-        SetStatInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i, SpellBaseDamageBonus(SpellSchoolMask(1 << i)));
+        SetStatInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i, SpellBaseDamageBonus(SpellSchoolMask(1 << i)) - GetInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+i));
 }
 
 bool Player::UpdateAllStats()
