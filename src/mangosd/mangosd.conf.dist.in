@@ -896,18 +896,18 @@ Channel.SilentlyGMJoin = 0
 #                 1 (enable)
 #
 #    GM.InGMList.Level
-#        Max GM level showed in GM list (if visible) in non-GM state (.gm off)
-#                 0 (only players)
+#        GM-level 1 up to GM.InGMList.Level showed in GM list, if visible (.gm visible on) and in GM-state (.gm on)
+#                 0 (show always 'no gm online')
 #                 1 (only moderators)
-#                 2 (only gamemasters)
-#        Default: 3 (anyone)
+#                 2 (moderators, gamemasters)
+#        Default: 3 (moderators, gamemasters, admins)
 #
 #    GM.InWhoList.Level
-#        Max GM level showed in who list (if visible).
-#                 0 (only players)
-#                 1 (only moderators)
-#                 2 (only gamemasters)
-#        Default: 3 (anyone)
+#        GM-level 0 up to GM.InWhoList.Level showed in who list (if visible).
+#        Default: 0 (only players)
+#                 1 (players, moderators)
+#                 2 (players, moderators, gamemasters)
+#                 3 (players, moderators, gamemasters, admins)
 #
 #    GM.LogTrade
 #        Include GM trade and trade slot enchanting operations in GM log if it enable
@@ -936,7 +936,7 @@ GM.AcceptTickets         = 2
 GM.Chat                  = 2
 GM.WhisperingTo          = 2
 GM.InGMList.Level        = 3
-GM.InWhoList.Level       = 3
+GM.InWhoList.Level       = 0
 GM.LogTrade              = 1
 GM.StartLevel            = 1
 GM.LowerSecurity         = 0
@@ -1423,7 +1423,7 @@ AuctionHouseBot.UseBuyPriceForBuyer = 0
 #
 ###################################################################################################################
 
-Console.Enable = 1
+Console.Enable = 0
 Ra.Enable = 0
 Ra.IP = 0.0.0.0
 Ra.Port = 3443
