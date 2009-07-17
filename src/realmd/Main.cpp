@@ -162,7 +162,7 @@ extern int main(int argc, char **argv)
     }
 
     sLog.outString( "%s [realm-daemon]", _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR,REVISION_ID) );
-    sLog.outString( "[UECore-Revision]: 190\n\n");
+    sLog.outString( "[UECore-Revision]: 191\n\n");
 
     sLog.outString("Using configuration file %s.", cfg_file);
 
