@@ -896,8 +896,13 @@ Channel.SilentlyGMJoin = 0
 #                 1 (enable)
 #
 #    GM.InGMList.Level
+<<<<<<< HEAD:src/mangosd/mangosd.conf.dist.in
 #        GM-level 1 up to GM.InGMList.Level showed in GM list, if visible (.gm visible on) and in GM-state (.gm on)
 #                 0 (show always 'no gm online')
+=======
+#        Max GM level showed in GM list (if visible) in non-GM state (.gm off)
+#                 0 (none)
+>>>>>>> e407ebe6700da4a121b822d21ef51d00af2cc9b6:src/mangosd/mangosd.conf.dist.in
 #                 1 (only moderators)
 #                 2 (moderators, gamemasters)
 #        Default: 3 (moderators, gamemasters, admins)
