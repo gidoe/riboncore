@@ -3111,7 +3111,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_LIMITONLY;
             break;
         }
-<<<<<<< HEAD:src/game/SpellMgr.cpp
         case SPELLFAMILY_PALADIN:
         {
             // Turn Evil
@@ -3119,8 +3118,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_FEAR_BLIND;
             break;
         }
-=======
->>>>>>> e407ebe6700da4a121b822d21ef51d00af2cc9b6:src/game/SpellMgr.cpp
         case SPELLFAMILY_DEATHKNIGHT:
         {
             // Hungering Cold (no flags)

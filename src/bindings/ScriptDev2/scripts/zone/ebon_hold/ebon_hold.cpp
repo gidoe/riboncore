@@ -817,7 +817,7 @@ struct MANGOS_DLL_DECL npc_unworthy_initiateAI : public ScriptedAI
         if (m_creature->GetEntry() != NPC_INITATE_QCREDIT)
         {
             if (Player* pPlayer = m_creature->GetLootRecipient())
-                pPlayer->KilledMonster(NPC_INITATE_QCREDIT,0);
+                pPlayer->KilledMonsterCredit(NPC_INITATE_QCREDIT,0);
         }
     }
 
@@ -1216,7 +1216,7 @@ struct MANGOS_DLL_DECL mob_scarlet_minerAI : public ScriptedAI
             {
                 // spell 52490 Scarlet Miner Ghoul Transform doesn't work, hack it
                 Unit* pGhoul = m_creature->SummonCreature(NPC_SCARLET_GHOUL, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 60000);
-                ((Player*)pCaster)->KilledMonster(NPC_SCARLET_GHOUL,pGhoul->GetGUID());
+                ((Player*)pCaster)->KilledMonsterCredit(NPC_SCARLET_GHOUL,pGhoul->GetGUID());
                 m_creature->setDeathState(JUST_DIED);
                 m_creature->RemoveCorpse();
             }

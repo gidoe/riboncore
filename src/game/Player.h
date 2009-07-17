@@ -1025,7 +1025,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetAcceptTicket(bool on) { if(on) m_ExtraFlags |= PLAYER_EXTRA_GM_ACCEPT_TICKETS; else m_ExtraFlags &= ~PLAYER_EXTRA_GM_ACCEPT_TICKETS; }
         bool isAcceptWhispers() const { return m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS; }
         void SetAcceptWhispers(bool on) { if(on) m_ExtraFlags |= PLAYER_EXTRA_ACCEPT_WHISPERS; else m_ExtraFlags &= ~PLAYER_EXTRA_ACCEPT_WHISPERS; }
-        bool isGameMaster() const { return (m_ExtraFlags & PLAYER_EXTRA_GM_ON) && (this->GetSession()->GetSecurity() > SEC_PLAYER); }
+        bool isGameMaster() const { return m_ExtraFlags & PLAYER_EXTRA_GM_ON; }
         void SetGameMaster(bool on);
         bool isGMChat() const { return GetSession()->GetSecurity() >= SEC_MODERATOR && (m_ExtraFlags & PLAYER_EXTRA_GM_CHAT); }
         void SetGMChat(bool on) { if(on) m_ExtraFlags |= PLAYER_EXTRA_GM_CHAT; else m_ExtraFlags &= ~PLAYER_EXTRA_GM_CHAT; }
@@ -1306,13 +1306,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void GroupEventHappens( uint32 questId, WorldObject const* pEventObject );
         void ItemAddedQuestCheck( uint32 entry, uint32 count );
         void ItemRemovedQuestCheck( uint32 entry, uint32 count );
-<<<<<<< HEAD:src/game/Player.h
-        void KilledMonster( uint32 entry1, uint32 entry2, uint32 entry3, uint64 guid );
-        void KilledMonster( uint32 entry, uint64 guid );
-=======
         void KilledMonster( CreatureInfo const* cInfo, uint64 guid );
         void KilledMonsterCredit( uint32 entry, uint64 guid );
->>>>>>> e407ebe6700da4a121b822d21ef51d00af2cc9b6:src/game/Player.h
         void CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id );
         void TalkedToCreature( uint32 entry, uint64 guid );
         void MoneyChanged( uint32 value );

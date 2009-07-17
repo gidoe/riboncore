@@ -13762,19 +13762,6 @@ void Player::ItemRemovedQuestCheck( uint32 entry, uint32 count )
     UpdateForQuestWorldObjects();
 }
 
-<<<<<<< HEAD:src/game/Player.cpp
-void Player::KilledMonster( uint32 entry1, uint32 entry2, uint32 entry3, uint64 guid )
-{
-    if(entry1)
-        KilledMonster(entry1,guid);
-    if(entry2)
-        KilledMonster(entry2,guid);
-    if(entry3)
-        KilledMonster(entry3,guid);
-}
-
-void Player::KilledMonster( uint32 entry, uint64 guid )
-=======
 void Player::KilledMonster( CreatureInfo const* cInfo, uint64 guid )
 {
     if(cInfo->Entry)
@@ -13786,7 +13773,6 @@ void Player::KilledMonster( CreatureInfo const* cInfo, uint64 guid )
 }
 
 void Player::KilledMonsterCredit( uint32 entry, uint64 guid )
->>>>>>> e407ebe6700da4a121b822d21ef51d00af2cc9b6:src/game/Player.cpp
 {
     uint32 addkillcount = 1;
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, entry, addkillcount);
@@ -19374,11 +19360,7 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
                     {
                         // normal creature (not pet/etc) can be only in !PvP case
                         if(pVictim->GetTypeId()==TYPEID_UNIT)
-<<<<<<< HEAD:src/game/Player.cpp
-                            pGroupGuy->KilledMonster(pVictim->GetEntry(),((Creature*)pVictim)->GetCreatureInfo()->KillCredit[0],((Creature*)pVictim)->GetCreatureInfo()->KillCredit[1], pVictim->GetGUID());
-=======
                             pGroupGuy->KilledMonster(((Creature*)pVictim)->GetCreatureInfo(), pVictim->GetGUID());
->>>>>>> e407ebe6700da4a121b822d21ef51d00af2cc9b6:src/game/Player.cpp
                     }
                 }
             }
@@ -19405,11 +19387,7 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
 
             // normal creature (not pet/etc) can be only in !PvP case
             if(pVictim->GetTypeId()==TYPEID_UNIT)
-<<<<<<< HEAD:src/game/Player.cpp
-                KilledMonster(pVictim->GetEntry(),((Creature*)pVictim)->GetCreatureInfo()->KillCredit[0],((Creature*)pVictim)->GetCreatureInfo()->KillCredit[1], pVictim->GetGUID());
-=======
                 KilledMonster(((Creature*)pVictim)->GetCreatureInfo(), pVictim->GetGUID());
->>>>>>> e407ebe6700da4a121b822d21ef51d00af2cc9b6:src/game/Player.cpp
         }
     }
     return xp || honored_kill;

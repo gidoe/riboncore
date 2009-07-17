@@ -6655,6 +6655,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     uint32 trigger_spell_id = auraSpellInfo->EffectTriggerSpell[triggeredByAura->GetEffIndex()];
     Unit*  target = NULL;
     int32  basepoints0 = 0;
+    int32  basepoints1 = 0;
 
     if(triggeredByAura->GetModifier()->m_auraname == SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE)
         basepoints0 = triggerAmount;
@@ -7342,6 +7343,36 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 return false;
             break;
         }
+        // Demonic Pact
+        case 48090:
+        {
+            // As the spell is proced from pet's attack - find owner
+            Unit* owner = this->GetOwner();
+            if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
+                return false;
+
+            // This spell doesn't stack, but refreshes duration. So we receive current bonuses to minus them later.
+            // Don't forget that +spd and +heal bonuses are equal, so there is no need to receive them individually.
+            int32 curBonus = 0;
+            if (Aura* aur = owner->GetAura(48090,0))
+                curBonus = aur->GetModifier()->m_amount;
+
+            // Don't know what school damage we really need, so let's take max from fire and shadow damage.
+            int32 fire = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE) - curBonus;
+            int32 shadow = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW) - curBonus;
+            int32 spellDamage  = (fire > shadow) ? fire : shadow;
+
+            // Define basepoints0/1 values according to Warlock's spell power
+            AuraList const& dummyAuras = owner->GetAurasByType(SPELL_AURA_DUMMY);
+            for (AuraList::const_iterator i = dummyAuras.begin(); i != dummyAuras.end(); ++i)
+                if ((*i)->GetSpellProto()->SpellIconID == 3220)
+                {
+                    basepoints0 = basepoints1 = int32(spellDamage * (*i)->GetModifier()->m_amount / 100);
+                    break;
+                }
+
+            break;
+        }
         // Sword and Board
         case 50227:
         {
@@ -7429,7 +7460,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         return false;
 
     if(basepoints0)
-        CastCustomSpell(target,trigger_spell_id,&basepoints0,NULL,NULL,true,castItem,triggeredByAura);
+        CastCustomSpell(target,trigger_spell_id,&basepoints0,basepoints1 ? &basepoints1 : NULL,NULL,true,castItem,triggeredByAura);
     else
         CastSpell(target,trigger_spell_id,true,castItem,triggeredByAura);
 

@@ -160,11 +160,7 @@ struct CreatureInfo
 {
     uint32  Entry;
     uint32  HeroicEntry;
-<<<<<<< HEAD:src/game/Creature.h
-    uint32  KillCredit[2];
-=======
     uint32  KillCredit[MAX_KILL_CREDIT];
->>>>>>> e407ebe6700da4a121b822d21ef51d00af2cc9b6:src/game/Creature.h
     uint32  DisplayID_A[2];
     uint32  DisplayID_H[2];
     char*   Name;
