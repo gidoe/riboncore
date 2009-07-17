@@ -44,10 +44,7 @@
   #else
     #define _FULLVERSION _VERSION " (Win32)"
   #endif
-  #define _SCRIPTDEV2_CONFIG  "scriptdev2.conf"
-#else
-  #define _FULLVERSION _VERSION " (Unix)"
-  #define _SCRIPTDEV2_CONFIG  "@sysconfdir@/scriptdev2.conf"
+
 #endif
 
 #endif

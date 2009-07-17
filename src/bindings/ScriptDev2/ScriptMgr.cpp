@@ -10,6 +10,10 @@
 #include "ObjectMgr.h"
 #include "ProgressBar.h"
 
+#ifndef _SCRIPTDEV2_CONFIG
+# define _SCRIPTDEV2_CONFIG  "mangosd.conf"
+#endif _SCRIPTDEV2_CONFIG
+
 int num_sc_scripts;
 Script *m_scripts[MAX_SCRIPTS];
 
@@ -629,15 +633,15 @@ void LoadDatabase()
     //Get db string from file
     char const* sd2dbstring = NULL;
 
-    if (!SD2Config.GetString("ScriptDev2DatabaseInfo", &sd2dbstring))
+    if (!SD2Config.GetString("ScriptsDatabaseInfo", &sd2dbstring))
     {
-        error_log("SD2: Missing Scriptdev2 database info from configuration file. Load database aborted.");
+        error_log("SD2: Missing Scripts database info from configuration file. Load database aborted.");
         return;
     }
 
     //Initialize connection to DB
     if (sd2dbstring && SD2Database.Initialize(sd2dbstring))
-        outstring_log("SD2: ScriptDev2 database: %s",sd2dbstring);
+        outstring_log("SD2: Scripts database: %s",sd2dbstring);
     else
     {
         error_log("SD2: Unable to connect to Database. Load database aborted.");

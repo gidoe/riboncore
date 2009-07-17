@@ -1,7 +1,7 @@
 #####################################
 # MaNGOS Configuration file         #
 #####################################
-ConfVersion=2009070901
+ConfVersion=2009071701
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -24,6 +24,7 @@ ConfVersion=2009070901
 #    LoginDatabaseInfo
 #    WorldDatabaseInfo
 #    CharacterDatabaseInfo
+#    ScriptsDatabaseInfo
 #        Database connection settings for the world server.
 #        Default:
 #                ---MYSQL---
@@ -52,6 +53,7 @@ LogsDir = "Logs"
 LoginDatabaseInfo     = "127.0.0.1;3306;root;mangos;realmd"
 WorldDatabaseInfo     = "127.0.0.1;3306;root;mangos;mangos"
 CharacterDatabaseInfo = "127.0.0.1;3306;root;mangos;characters"
+ScriptsDatabaseInfo   = "127.0.0.1;3306;root;mangos;mangos"
 MaxPingTime = 30
 WorldServerPort = 8085
 BindIP = "0.0.0.0"
