@@ -1275,6 +1275,10 @@ case SPELLFAMILY_GENERIC:                   // same family case
                if( (spellInfo_1->SpellFamilyFlags & UI64LIT(0x1)) && (spellInfo_2->SpellFamilyFlags & UI64LIT(0x400000)) ||
                    (spellInfo_2->SpellFamilyFlags & UI64LIT(0x1)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x400000)) )
                    return false;
+
+                // All metamorphosis effects are stackable, I hope 
+                if (spellInfo_1->SpellIconID == 3314 && spellInfo_2->SpellIconID == 3314) 
+                    return false; 
             }
             // Detect Invisibility and Mana Shield (multi-family check)
             if( spellInfo_2->Id == 132 && spellInfo_1->SpellIconID == 209 && spellInfo_1->SpellVisual[0] == 968 )
@@ -3065,11 +3069,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_CONTROL_ROOT;
             break;
         }
-        case SPELLFAMILY_PRIEST:
-            // Shackle Undead
-            if (spellproto->SpellFamilyFlags & UI64LIT(0x400100040000000))
-                return DIMINISHING_CONTROL_STUN;
-            break;
         case SPELLFAMILY_ROGUE:
         {
             // Blind
@@ -3081,6 +3080,17 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Crippling poison - Limit to 10 seconds in PvP (No SpellFamilyFlags)
             else if (spellproto->SpellIconID == 163)
                 return DIMINISHING_LIMITONLY;
+            break;
+        }
+        case SPELLFAMILY_PRIEST:
+        {
+            // Vampiric Embrace
+            if (spellproto->SpellFamilyFlags & UI64LIT(0x00000000004))
+                return DIMINISHING_LIMITONLY;
+            break;
+            // Shackle Undead
+            if (spellproto->SpellFamilyFlags & UI64LIT(0x400100040000000))
+                return DIMINISHING_CONTROL_STUN;
             break;
         }
         case SPELLFAMILY_WARLOCK:
@@ -3181,6 +3191,13 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
             // Faerie Fire - limit to 40 seconds in PvP (3.1)
             if (spellproto->SpellFamilyFlags & UI64LIT(0x00000000400))
                 return 40000;
+            break;
+        }
+        case SPELLFAMILY_PRIEST:
+        {
+            // Vampiric Embrace - limit to 60 seconds in PvP (3.1)
+            if (spellproto->SpellFamilyFlags & UI64LIT(0x00000000004))
+                return 60000;
             break;
         }
         default:
