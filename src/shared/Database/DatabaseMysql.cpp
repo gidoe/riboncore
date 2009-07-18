@@ -179,7 +179,7 @@ bool DatabaseMysql::Initialize(const char *infoString)
 #else
         sLog.outDetail("Your mySQL client lib version does not support reconnecting after a timeout.");
         sLog.outDetail("If this causes you any trouble we advice you to upgrade");
-        sLog.outDetail("your mySQL client libs to at least mySQL 5.0.13 to resolve this problem.");
+        sLog.outDetail("your mySQL client libs to at least mySQL 6.0.9 to resolve this problem.");
 #endif
         return true;
     }
