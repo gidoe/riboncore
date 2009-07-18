@@ -149,16 +149,9 @@
 				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\mangosd;..\..\dep\ACE_wrappers"
-<<<<<<< HEAD:win/VC90/mangosd.vcproj
-				PreprocessorDefinitions="VERSION=&quot;0.14.0-DEV&quot;;WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI"
-				IgnoreStandardIncludePath="false"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
-=======
 				PreprocessorDefinitions="VERSION=&quot;0.14.0-DEV&quot;;WIN32;NDEBUG;_CONSOLE;ENABLE_CLI;_SECURE_SCL=0"
 				StringPooling="true"
 				RuntimeLibrary="2"
->>>>>>> 1442d2386b37ddc0525099bf9659944f5c359cb8:win/VC90/mangosd.vcproj
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
 				PrecompiledHeaderFile=".\mangosd__$(PlatformName)_$(ConfigurationName)\mangosd.pch"
