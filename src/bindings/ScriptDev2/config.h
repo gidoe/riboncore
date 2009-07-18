@@ -22,10 +22,6 @@
 #include "Platform/CompilerDefs.h"
 #include "revision.h"
 
-// Format is YYYYMMDDRR where RR is the change in the conf file
-// for that day.
-#define SD2_CONF_VERSION    2009070901
-
 #ifdef WIN32
   #define MANGOS_DLL_EXPORT extern "C" __declspec(dllexport)
 #elif defined( __GNUC__ )
@@ -36,15 +32,6 @@
 
 #ifndef _VERSION
   #define _VERSION "Revision [" REVISION_ID "] " REVISION_DATE " " REVISION_TIME
-#endif
-
-#if PLATFORM == PLATFORM_WINDOWS
-  #ifdef _WIN64
-    #define _FULLVERSION _VERSION " (Win64)"
-  #else
-    #define _FULLVERSION _VERSION " (Win32)"
-  #endif
-
 #endif
 
 #endif

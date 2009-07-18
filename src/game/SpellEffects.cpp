@@ -287,6 +287,9 @@ void Spell::EffectInstaKill(uint32 /*i*/)
         m_caster->CastSpell(m_caster, spellID, true);
     }
 
+    if(m_spellInfo->Id==52479)                              // Gift of the Harvester
+        return;                                             // Implemented in ScriptEffect
+
     if(m_caster == unitTarget)                              // prevent interrupt message
         finish();
 
@@ -5558,6 +5561,60 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                         ((Player*)m_caster)->learnSpell(discoveredSpell, false);
                     return;
                 }
+                case 52481:
+				case 52482:
+                case 52479:                                 // Gift of the Harvester
+                {
+                    Unit* ok = NULL;
+
+                    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(),m_caster->GetPositionY()));
+                    Cell cell(p);
+                    cell.data.Part.reserved = ALL_DISTRICT;
+
+                    MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster, 28822, true, 8);
+                    MaNGOS::UnitSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> checker(m_caster,ok, u_check);
+
+                    CellLock<GridReadGuard> cell_lock(cell, p);
+
+                    TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck>, GridTypeMapContainer > grid_object_checker(checker);
+                    cell_lock->Visit(cell_lock, grid_object_checker, *m_caster->GetMap());
+
+                    if(!ok)
+                    {
+                        MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster, 28819, true, 8);
+                        MaNGOS::UnitSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> checker(m_caster,ok, u_check);
+
+                        CellLock<GridReadGuard> cell_lock(cell, p);
+
+                        TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck>, GridTypeMapContainer > grid_object_checker(checker);
+                        cell_lock->Visit(cell_lock, grid_object_checker, *m_caster->GetMap());
+                    }
+
+                    if(ok)
+                    {
+                        uint32 health = ok->GetHealth();
+                        m_caster->DealDamage(ok, health, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+
+                        uint32 roll = urand(0, 99);
+
+                        if(roll < 25)                           // 25%
+							for(int i = 0; i < 5; ++i)
+							{
+								unitTarget->CastSpell(unitTarget, 52490, true);
+							}
+                        else
+                        {
+                            Creature* pCreature = m_caster->SummonCreature(28845, ok->GetPositionX(), ok->GetPositionY(), ok->GetPositionZ(), ok->GetOrientation(),TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,180000);
+                            if (!pCreature)
+                                return;
+
+                            //if(pCreature->AI())
+                                //pCreature->AI()->AttackStart(m_caster);
+                        }
+                    }
+
+                    return;
+                }
                 // Recall Eye of Acherus
                 case 52694:
                 {
@@ -6498,7 +6555,7 @@ void Spell::EffectMomentMove(uint32 i)
     if(unitTarget->isInFlight())
         return;
 
-    if (m_spellInfo->rangeIndex == 1)                       //self range
+    if( m_spellInfo->rangeIndex == 1)                       //self range
     {
         float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
 

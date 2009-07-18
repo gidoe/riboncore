@@ -10,6 +10,8 @@
 #include "ObjectMgr.h"
 #include "ProgressBar.h"
 
+#define _FULLVERSION "ScriptDev2"
+
 #ifndef _SCRIPTDEV2_CONFIG
 # define _SCRIPTDEV2_CONFIG  "mangosd.conf"
 #endif _SCRIPTDEV2_CONFIG
@@ -909,14 +911,10 @@ void ScriptsInit()
     if (!SD2Config.SetSource(_SCRIPTDEV2_CONFIG))
     {
         CanLoadDB = false;
-        error_log("SD2: Unable to open configuration file. Database will be unaccessible. Configuration values will use default.");
+        error_log("Scripts: Unable to open configuration file. Database will be unaccessible. Configuration values will use default.");
     }
     else
         outstring_log("SD2: Using configuration file %s",_SCRIPTDEV2_CONFIG);
-
-    //Check config file version
-    if (SD2Config.GetIntDefault("ConfVersion", 0) != SD2_CONF_VERSION)
-        error_log("SD2: Configuration file version doesn't match expected version. Some config variables may be wrong or missing.");
 
     outstring_log("");
 
