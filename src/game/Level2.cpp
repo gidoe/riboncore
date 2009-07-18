@@ -557,6 +557,36 @@ bool ChatHandler::HandleGameObjectDeleteCommand(const char* args)
     return true;
 }
 
+//refresh selected object
+bool ChatHandler::HandleGameObjectRefreshCommand(const char* args)
+{
+    // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hgameobject");
+    if(!cId)
+        return false;
+
+    uint32 lowguid = atoi(cId);
+    if(!lowguid)
+        return false;
+
+    GameObject* obj = NULL;
+
+    // by DB guid
+    if (GameObjectData const* go_data = objmgr.GetGOData(lowguid))
+        obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid,go_data->id);
+
+    if(!obj)
+    {
+        PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, lowguid);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    obj->Refresh();
+    PSendSysMessage(LANG_COMMAND_REFRESHOBJECT, obj->GetGUIDLow());
+    return true;
+}
+
 //turn selected object
 bool ChatHandler::HandleGameObjectTurnCommand(const char* args)
 {
