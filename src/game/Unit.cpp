@@ -8259,8 +8259,13 @@ int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellPro
 
     Unit* unit = this;
 
+<<<<<<< HEAD:src/game/Unit.cpp
 	if( GetTypeId()==TYPEID_UNIT && ((Creature*)this)->isTotem() && ((Totem*)this)->GetTotemType()!=TOTEM_STATUE)
 		unit = GetOwner();
+=======
+    if( GetTypeId()==TYPEID_UNIT && ((Creature*)this)->isTotem() && ((Totem*)this)->GetTotemType()!=TOTEM_STATUE)
+        unit = GetOwner();
+>>>>>>> d50307b1a4f8b599db616de8a171b8127c95098e:src/game/Unit.cpp
 
     if (unit->GetTypeId()==TYPEID_PLAYER)
     {

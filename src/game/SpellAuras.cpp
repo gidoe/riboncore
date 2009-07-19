@@ -2179,6 +2179,7 @@ void Aura::TriggerSpell()
                 caster->CastCustomSpell(target, trigger_spell_id, &m_modifier.m_amount, NULL, NULL, true, NULL, this);
                 return;
             }
+<<<<<<< HEAD:src/game/SpellAuras.cpp
             // Intense Cold
             case 48094:
             {
@@ -2218,6 +2219,12 @@ void Aura::TriggerSpell()
 
                 return;
             }
+=======
+            // Ground Slam
+            case 33525:
+                target->CastSpell(target, trigger_spell_id, true);
+                return;
+>>>>>>> d50307b1a4f8b599db616de8a171b8127c95098e:src/game/SpellAuras.cpp
         }
     }
 
@@ -4440,11 +4447,21 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool /*apply*/, bool Real)
     m_target->UpdateSpeed(MOVE_SWIM, true);
 }
 
-void Aura::HandleAuraModDecreaseSpeed(bool /*apply*/, bool Real)
+void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
 {
     // all applied/removed only at real aura add/remove
     if(!Real)
         return;
+
+    if (apply)
+    {
+        // Gronn Lord's Grasp, becomes stoned
+        if (GetId() == 33572)
+        {
+            if (GetStackAmount() >= 5 && !m_target->HasAura(33652))
+                m_target->CastSpell(m_target, 33652, true);
+        }
+    }
 
     m_target->UpdateSpeed(MOVE_RUN, true);
     m_target->UpdateSpeed(MOVE_SWIM, true);
@@ -4918,7 +4935,11 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 // Rake
                 if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000001000) && m_spellProto->Effect[2]==SPELL_EFFECT_ADD_COMBO_POINTS)
                 {
+<<<<<<< HEAD:src/game/SpellAuras.cpp
                     // $AP*0.06 bonus per tick
+=======
+                    // $AP*0.18/3 bonus per tick
+>>>>>>> d50307b1a4f8b599db616de8a171b8127c95098e:src/game/SpellAuras.cpp
                     m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 6 / 100);
                     return;
                 }

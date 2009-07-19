@@ -1335,6 +1335,10 @@ case SPELLFAMILY_GENERIC:                   // same family case
                 if( (spellInfo_1->SpellIconID == 313 || spellInfo_1->SpellIconID == 2039) && (spellInfo_2->SpellIconID == 544  || spellInfo_2->SpellIconID == 91) ||
                     (spellInfo_2->SpellIconID == 313 || spellInfo_2->SpellIconID == 2039) && (spellInfo_1->SpellIconID == 544  || spellInfo_1->SpellIconID == 91) )
                     return false;
+
+                // Metamorphosis, diff effects
+                if (spellInfo_1->SpellIconID == 3314 && spellInfo_2->SpellIconID == 3314)
+                    return false;
             }
             // Detect Invisibility and Mana Shield (multi-family check)
             if( spellInfo_1->Id == 132 && spellInfo_2->SpellIconID == 209 && spellInfo_2->SpellVisual[0] == 968 )
@@ -3123,11 +3127,19 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_LIMITONLY;
             break;
         }
+<<<<<<< HEAD:src/game/SpellMgr.cpp
         case SPELLFAMILY_PALADIN:
         {
             // Turn Evil
             if (spellproto->SpellFamilyFlags & UI64LIT(0x0080400000000000))
                 return DIMINISHING_FEAR_BLIND;
+=======
+        case SPELLFAMILY_PRIEST:
+        {
+            // Vampiric Embrace
+            if ((spellproto->SpellFamilyFlags & UI64LIT(0x00000000004)) && spellproto->SpellIconID == 150)
+                return DIMINISHING_LIMITONLY;
+>>>>>>> d50307b1a4f8b599db616de8a171b8127c95098e:src/game/SpellMgr.cpp
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:
@@ -3196,7 +3208,11 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
         case SPELLFAMILY_PRIEST:
         {
             // Vampiric Embrace - limit to 60 seconds in PvP (3.1)
+<<<<<<< HEAD:src/game/SpellMgr.cpp
             if (spellproto->SpellFamilyFlags & UI64LIT(0x00000000004))
+=======
+            if ((spellproto->SpellFamilyFlags & UI64LIT(0x00000000004)) && spellproto->SpellIconID == 150)
+>>>>>>> d50307b1a4f8b599db616de8a171b8127c95098e:src/game/SpellMgr.cpp
                 return 60000;
             break;
         }

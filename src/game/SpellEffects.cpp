@@ -1239,8 +1239,12 @@ void Spell::EffectDummy(uint32 i)
                 case 58418:                                 // Portal to Orgrimmar
                 case 58420:                                 // Portal to Stormwind
                     return;                                 // implemented in EffectScript[0]
+<<<<<<< HEAD:src/game/SpellEffects.cpp
                 // Underbelly Elixir
                 case 59640:
+=======
+                case 59640:                                 // Underbelly Elixir
+>>>>>>> d50307b1a4f8b599db616de8a171b8127c95098e:src/game/SpellEffects.cpp
                 {
                     if(m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
@@ -1248,9 +1252,15 @@ void Spell::EffectDummy(uint32 i)
                     uint32 spell_id = 0;
                     switch(urand(1,3))
                     {
+<<<<<<< HEAD:src/game/SpellEffects.cpp
                         case 1: spell_id = 59843; break;
                         case 2: spell_id = 59645; break;
                         case 3: spell_id = 59831; break;
+=======
+                        case 1: spell_id = 59645; break;
+                        case 2: spell_id = 59831; break;
+                        case 3: spell_id = 59843; break;
+>>>>>>> d50307b1a4f8b599db616de8a171b8127c95098e:src/game/SpellEffects.cpp
                     }
                     m_caster->CastSpell(m_caster,spell_id,true,NULL);
                     return;
@@ -2251,7 +2261,7 @@ void Spell::EffectTriggerSpell(uint32 i)
             m_caster->CastSpell(unitTarget,spellInfo,true,m_CastItem,NULL,m_originalCasterGUID);
     }
     else
-        m_TriggerSpells.push_back(spellInfo);
+        AddTriggeredSpell(spellInfo);
 }
 
 void Spell::EffectTriggerMissileSpell(uint32 effect_idx)
