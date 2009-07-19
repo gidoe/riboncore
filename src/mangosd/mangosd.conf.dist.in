@@ -1,7 +1,7 @@
 #####################################
 # MaNGOS Configuration file         #
 #####################################
-ConfVersion=2009071701
+ConfVersion=2009071901
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -161,6 +161,14 @@ BindIP = "0.0.0.0"
 #        Default: 1 (permit addon channel)
 #                 0 (do not permit addon channel)
 #
+#    RecordUpdateTimeDiffInterval
+#        record update time diff to the log file
+#        update diff can be used as a criterion of performance
+#        diff < 300: good performance
+#        diff > 600: bad performance, may be caused by high cpu usage
+#        Default: 60000 (diff is written into log every 60000 ms or 1 minute.
+#        >0 = Interval
+#        0 = Disable
 ###################################################################################################################
 
 UseProcessors = 0
@@ -184,6 +192,7 @@ TargetPosRecalculateRange = 1.5
 UpdateUptimeInterval = 10
 MaxCoreStuckTime = 0
 AddonChannel = 1
+RecordUpdateTimeDiffInterval = 60000
 
 ###################################################################################################################
 # OpenMP Config
@@ -191,13 +200,13 @@ AddonChannel = 1
 #    OpenMP
 #    MapUpdate.Threads
 #        Number of threads to run if the binary was compiled with OpenMP support.
-#        Default: 8 (recommend)
-#        For stable work 4 (if online ~1000)
+#        Default: 4 (recommend)
+#        If online 2000+ : 8
 #        1 (minimum, normal behavior (single-threaded updates)
 #
 ###################################################################################################################
 
-MapUpdate.Threads = 8
+MapUpdate.Threads = 4
 
 ###################################################################################################################
 # SERVER LOGGING
@@ -300,14 +309,6 @@ MapUpdate.Threads = 8
 #        Default: "" - none colors
 #        Example: "13 7 11 9"
 #
-#    RecordUpdateTimeDiffInterval
-#        record update time diff to the log file
-#        update diff can be used as a criterion of performance
-#        diff < 300: good performance
-#        diff > 600: bad performance, may be caused by high cpu usage
-#        Default: 60000 (diff is written into log every 60000 ms or 1 minute.
-#        >0 = Interval
-#        0 = Disable
 ###################################################################################################################
 
 LogSQL = 1
@@ -331,7 +332,6 @@ GmLogTimestamp = 0
 GmLogPerAccount = 0
 RaLogFile = ""
 LogColors = "10 2 1 9"
-RecordUpdateTimeDiffInterval = 60000
 
 ###################################################################################################################
 # SERVER SETTINGS
@@ -609,7 +609,7 @@ RecordUpdateTimeDiffInterval = 60000
 ###################################################################################################################
 
 GameType = 1
-RealmZone = 1
+RealmZone = 9
 Expansion = 2
 DBC.Locale = 255
 DeclinedNames = 0
@@ -654,7 +654,7 @@ SkillChance.Milling = 0
 OffhandCheckAtTalentsReset = 0
 Event.Announce = 0
 BeepAtStart = 1
-Motd = "Welcome to the Massive Network Game Object Server."
+Motd = "Welcome to the UECore Test Server."
 
 ###################################################################################################################
 # PLAYER INTERACTION
@@ -802,17 +802,17 @@ Corpse.Decay.RARE = 300
 Corpse.Decay.ELITE = 300
 Corpse.Decay.RAREELITE = 300
 Corpse.Decay.WORLDBOSS = 3600
-Rate.Corpse.Decay.Looted = 0.1
-Rate.Creature.Normal.Damage = 0.65
-Rate.Creature.Elite.Elite.Damage = 0.65
-Rate.Creature.Elite.RAREELITE.Damage = 0.65
-Rate.Creature.Elite.WORLDBOSS.Damage = 0.65
-Rate.Creature.Elite.RARE.Damage = 0.65
-Rate.Creature.Normal.SpellDamage = 0.65
-Rate.Creature.Elite.Elite.SpellDamage = 0.65
-Rate.Creature.Elite.RAREELITE.SpellDamage = 0.65
-Rate.Creature.Elite.WORLDBOSS.SpellDamage = 0.65
-Rate.Creature.Elite.RARE.SpellDamage = 0.65
+Rate.Corpse.Decay.Looted = 1
+Rate.Creature.Normal.Damage = 1
+Rate.Creature.Elite.Elite.Damage = 1
+Rate.Creature.Elite.RAREELITE.Damage = 1
+Rate.Creature.Elite.WORLDBOSS.Damage = 1
+Rate.Creature.Elite.RARE.Damage = 1
+Rate.Creature.Normal.SpellDamage = 1
+Rate.Creature.Elite.Elite.SpellDamage = 1
+Rate.Creature.Elite.RAREELITE.SpellDamage = 1
+Rate.Creature.Elite.WORLDBOSS.SpellDamage = 1
+Rate.Creature.Elite.RARE.SpellDamage = 1
 Rate.Creature.Normal.HP = 1
 Rate.Creature.Elite.Elite.HP = 1
 Rate.Creature.Elite.RAREELITE.HP = 1
@@ -1426,7 +1426,7 @@ AuctionHouseBot.UseBuyPriceForBuyer = 0
 ###################################################################################################################
 
 Console.Enable = 1
-Ra.Enable = 0
+Ra.Enable = 1
 Ra.IP = 0.0.0.0
 Ra.Port = 3443
 Ra.MinLevel = 3

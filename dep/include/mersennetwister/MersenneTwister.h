@@ -182,6 +182,7 @@ inline double MTRand::randNorm( const double& mean, const double& variance )
 	return mean + r * cos(phi);
 }
 */
+
 inline MTRand::uint32 MTRand::randInt()
 {
 	// Pull a 32-bit integer from the generator state

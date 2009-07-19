@@ -2397,10 +2397,15 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
 
     // stealth must be removed at cast starting (at show channel bar)
     // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
-    if ( !m_IsTriggeredSpell && isSpellBreakStealth(m_spellInfo) )
+    if (!m_IsTriggeredSpell)
     {
-        m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-        m_caster->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+        m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+
+        if (isSpellBreakStealth(m_spellInfo))
+        {
+            m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            m_caster->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+        }
     }
 
     if(m_IsTriggeredSpell)
@@ -2531,16 +2536,12 @@ void Spell::cast(bool skipCheck)
         {
             // Power Word: Shield
             if (m_spellInfo->Mechanic == MECHANIC_SHIELD &&
-<<<<<<< HEAD:src/game/Spell.cpp
                 (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000000001))) // Power Word: Shield
                 AddPrecastSpell(6788);                                         // Weakened Soul
             else if (m_spellInfo->Id == 47585)                                 // Dispersion (transform)
                 AddPrecastSpell(60069);                                        // Dispersion (mana regen)
             else if (m_spellInfo->Id == 33206)                                 // Pain Suppression (Damage modifier)
                 AddPrecastSpell(44416);                                        // Pain Suppression (Threat modifier)
-=======
-                (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000000001)))
-                AddPrecastSpell(6788);                      // Weakened Soul
 
             switch(m_spellInfo->Id)
             {
@@ -2554,9 +2555,9 @@ void Spell::cast(bool skipCheck)
                 case 25331: AddTriggeredSpell(25329); break;// Holy Nova, rank 7
                 case 48077: AddTriggeredSpell(48075); break;// Holy Nova, rank 8
                 case 48078: AddTriggeredSpell(48076); break;// Holy Nova, rank 9
+                case 33206: AddPrecastSpell(44416); break;  // Pain Suppression
                 default:break;
             }
->>>>>>> d50307b1a4f8b599db616de8a171b8127c95098e:src/game/Spell.cpp
             break;
         }
         case SPELLFAMILY_PALADIN:

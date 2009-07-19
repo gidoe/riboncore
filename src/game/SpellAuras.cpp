@@ -1024,6 +1024,8 @@ void Aura::_AddAura()
                 m_target->ModifyAuraState(AURA_STATE_BLEEDING, true);
         }
     }
+
+    HandleAuraSpecificMods(true);
 }
 
 void Aura::_RemoveAura()
@@ -1165,14 +1167,20 @@ void Aura::_RemoveAura()
                 m_target->ModifyAuraState(AuraState(removeState), false);
         }
 
-        // reset cooldown state for spells
-        if(caster && caster->GetTypeId() == TYPEID_PLAYER)
+        if(caster)
         {
-            if ( GetSpellProto()->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE )
-                // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existed cases)
-                ((Player*)caster)->SendCooldownEvent(GetSpellProto());
+            if(caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                // reset cooldown state for spells
+                if ( GetSpellProto()->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE )
+                    // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existed cases)
+                    ((Player*)caster)->SendCooldownEvent(GetSpellProto());
+            }
+
+            HandleSpellSpecificBoosts(false);
         }
     }
+    HandleAuraSpecificMods(false);
 }
 
 void Aura::SendFakeAuraUpdate(uint32 auraId, bool remove)
@@ -1205,6 +1213,101 @@ void Aura::SendFakeAuraUpdate(uint32 auraId, bool remove)
     }
 
     m_target->SendMessageToSet(&data, true);
+}
+
+void Aura::HandleAuraSpecificMods(bool apply)
+{
+    if (GetSpellSpecific(m_spellProto->Id) == SPELL_PRESENCE)
+    {
+        Aura *bloodPresenceAura=0;  // healing by damage done
+        Aura *frostPresenceAura=0;  // increased health
+        Aura *unholyPresenceAura=0; // increased movement speed, faster rune recovery
+
+        // Improved Presences
+        Unit::AuraList const& vDummyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
+        for(Unit::AuraList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); ++itr)
+        {
+            switch((*itr)->GetId())
+            {
+                // Improved Blood Presence
+                case 50365:
+                case 50371:
+                {
+                    bloodPresenceAura = (*itr);
+                    break;
+                }
+                // Improved Frost Presence
+                case 50384:
+                case 50385:
+                {
+                    frostPresenceAura = (*itr);
+                    break;
+                }
+                // Improved Unholy Presence
+                case 50391:
+                case 50392:
+                {
+                    unholyPresenceAura = (*itr);
+                    break;
+                }
+            }
+        }
+
+        uint32 presence=GetId();
+        if (apply)
+        {
+            // Blood Presence bonus
+            if (presence == SPELL_ID_BLOOD_PRESENCE)
+                m_target->CastSpell(m_target,63611,true);
+            else if (bloodPresenceAura)
+            {
+                int32 basePoints1=bloodPresenceAura->GetAmount();
+                m_target->CastCustomSpell(m_target,63611,NULL,&basePoints1,NULL,true,0,bloodPresenceAura);
+            }
+            // Frost Presence bonus
+            if (presence == SPELL_ID_FROST_PRESENCE)
+                m_target->CastSpell(m_target,61261,true);
+            else if (frostPresenceAura)
+            {
+                int32 basePoints0=frostPresenceAura->GetAmount();
+                m_target->CastCustomSpell(m_target,61261,&basePoints0,NULL,NULL,true,0,frostPresenceAura);
+            }
+            // Unholy Presence bonus
+            if (presence == SPELL_ID_UNHOLY_PRESENCE)
+            {
+                if(unholyPresenceAura)
+                {
+                    // Not listed as any effect, only base points set
+                    int32 basePoints0 = unholyPresenceAura->GetSpellProto()->EffectBasePoints[1];
+                    //m_target->CastCustomSpell(m_target,63622,&basePoints0 ,NULL,NULL,true,0,unholyPresenceAura);
+                    m_target->CastCustomSpell(m_target,65095,&basePoints0 ,NULL,NULL,true,0,unholyPresenceAura);
+                }
+                m_target->CastSpell(m_target,49772, true);
+            }
+            else if (unholyPresenceAura)
+            {
+                int32 basePoints0=unholyPresenceAura->GetAmount();
+                m_target->CastCustomSpell(m_target,49772,&basePoints0,NULL,NULL,true,0,unholyPresenceAura);
+            }
+        }
+        else
+        {
+            // Remove passive auras
+            if (presence == SPELL_ID_BLOOD_PRESENCE || bloodPresenceAura)
+                m_target->RemoveAurasDueToSpell(63611);
+            if (presence == SPELL_ID_FROST_PRESENCE || frostPresenceAura)
+                m_target->RemoveAurasDueToSpell(61261);
+            if (presence == SPELL_ID_UNHOLY_PRESENCE || unholyPresenceAura)
+            {
+                if(presence == SPELL_ID_UNHOLY_PRESENCE && unholyPresenceAura)
+                {
+                    //m_target->RemoveAurasDueToSpell(63622);
+                    m_target->RemoveAurasDueToSpell(65095);
+                }
+                m_target->RemoveAurasDueToSpell(49772);
+            }
+        }
+    }
 }
 
 void Aura::SendAuraUpdate(bool remove)
@@ -1418,6 +1521,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             case 51124:    // Killing Machine
             case 54741:    // Firestarter
             case 57761:    // Fireball!
+            case 64823:    // Elune's Wrath (Balance druid t8 set)
                 SetAuraCharges(1);
                 break;
             case 55166:    // Tidal Force
@@ -2179,7 +2283,6 @@ void Aura::TriggerSpell()
                 caster->CastCustomSpell(target, trigger_spell_id, &m_modifier.m_amount, NULL, NULL, true, NULL, this);
                 return;
             }
-<<<<<<< HEAD:src/game/SpellAuras.cpp
             // Intense Cold
             case 48094:
             {
@@ -2219,12 +2322,10 @@ void Aura::TriggerSpell()
 
                 return;
             }
-=======
             // Ground Slam
             case 33525:
                 target->CastSpell(target, trigger_spell_id, true);
                 return;
->>>>>>> d50307b1a4f8b599db616de8a171b8127c95098e:src/game/SpellAuras.cpp
         }
     }
 
@@ -4935,11 +5036,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 // Rake
                 if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000001000) && m_spellProto->Effect[2]==SPELL_EFFECT_ADD_COMBO_POINTS)
                 {
-<<<<<<< HEAD:src/game/SpellAuras.cpp
-                    // $AP*0.06 bonus per tick
-=======
                     // $AP*0.18/3 bonus per tick
->>>>>>> d50307b1a4f8b599db616de8a171b8127c95098e:src/game/SpellAuras.cpp
                     m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 6 / 100);
                     return;
                 }
@@ -6153,6 +6250,76 @@ void Aura::HandleShapeshiftBoosts(bool apply)
     m_target->SetHealth(uint32(ceil((double)m_target->GetMaxHealth() * healthPercentage)));*/
 }
 
+void Aura::HandleSpellSpecificBoosts(bool apply)
+{
+    SpellSpecific spellSpec = GetSpellSpecific(GetId());
+
+    // spellSpec == SPELL_NORMAL
+    if(!spellSpec)
+        return;
+
+    Unit* caster = GetCaster();
+    uint32 spellId = 0;
+    uint32 spellId2 = 0;
+
+    switch(spellSpec)
+    {
+        case SPELL_AURA:
+            // Only process on player casting paladin aura
+            if(caster->GetGUID() != m_target->GetGUID() || caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+            // Sanctified Retribution and Swift Retribution (they share one aura), but not Retribution Aura (already gets modded)
+            if (GetSpellProto()->SpellFamilyFlags != UI64LIT(0x8))
+                spellId = 63531;
+            // Improved Concentration Aura
+            spellId2 = 63510;
+            break;
+        case SPELL_ASPECT:
+            // Aspect of the Dragonhawk dodge
+            if (GetSpellProto()->SpellFamilyFlags2 & 0x1000)
+                spellId = 61848;
+            break;
+        case SPELL_PRESENCE:
+            // Frost Presence health
+            if (GetId() == 48263)
+                spellId = 61261;
+            // Unholy Presence move speed
+            else if (GetId() == 48265)
+                spellId = 49772;
+            break;
+        case SPELL_WARRIOR_BLEED:
+            spellId = 30069;
+            spellId2 = 30070;
+            break;
+        default:
+            return;
+    }
+
+    if(spellSpec == SPELL_WARRIOR_BLEED)
+    {
+        // Remove Blood Frenzy only if target no longer has any Deep Wound or Rend (applying is handled by procs)
+        if (apply)
+            return;
+
+        // If target still has one of Warrior's bleeds, do nothing
+        Unit::AuraList const& PeriodicDamage = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+        for(Unit::AuraList::const_iterator i = PeriodicDamage.begin(); i != PeriodicDamage.end(); ++i)
+           if((*i)->GetCaster()->GetGUID() == caster->GetGUID() && (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR )
+                return;
+    }
+
+    if (apply)
+    {
+        if (spellId) m_target->CastSpell(m_target, spellId, true);
+        if (spellId2) m_target->CastSpell(m_target, spellId2, true);
+    }
+    else
+    {
+        m_target->RemoveAurasDueToSpell(spellId);
+        m_target->RemoveAurasDueToSpell(spellId2);
+    }
+}
+
 void Aura::HandleAuraEmpathy(bool apply, bool /*Real*/)
 {
     if(m_target->GetTypeId() != TYPEID_UNIT)
@@ -6353,13 +6520,6 @@ void Aura::CleanupTriggeredSpells()
     if (m_spellProto->SpellFamilyName == SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000080000))
     {
         m_target->RemoveAurasDueToSpell(51185);
-    }
-    if (m_spellProto->SpellFamilyName == SPELLFAMILY_WARRIOR && (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000001000000020)))
-    {
-        // Blood Frenzy remove
-        m_target->RemoveAurasDueToSpell(30069);
-        m_target->RemoveAurasDueToSpell(30070);
-        return;
     }
     // Shadow Embrace (remove triggered spell)
     if (m_spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000080000000))

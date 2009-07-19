@@ -6061,6 +6061,15 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                         return true;
                     break;
                 }
+                // Seal of Corruption (damage calc on apply aura)
+                case 53736:
+                {
+                    if(effIndex != 0)                       // effect 1,2 used by seal unleashing code
+                        return false;
+
+                    triggered_spell_id = 53742;
+                    break;
+                }
                 // Paladin Tier 6 Trinket (Ashtongue Talisman of Zeal)
                 case 40470:
                 {
@@ -6518,19 +6527,9 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
             // Frozen Power
             if (dummySpell->SpellIconID == 3780)
             {
-                Unit *caster = triggeredByAura->GetCaster();
-
-                if (!procSpell || !caster)
-                    return false;
-
-                float distance = caster->GetDistance(pVictim);
-                int32 chance = triggerAmount;
-
-                if (distance < 15.0f || !roll_chance_i(chance))
-                    return false;
- 
-                triggered_spell_id = 63685;
-                break;
+                const SpellEntry *freeze = sSpellStore.LookupEntry(63685);
+                if (GetDistance(pVictim) >= freeze->EffectBasePoints[0])
+                    triggered_spell_id = 63685;
             }
             break;
         }
@@ -7148,8 +7147,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                             return false;
                     }
                 }
-                // Blood Presence
-                else if (auraSpellInfo->Id == 48266)
+                // Blood Presence (Improved)
+                else if (auraSpellInfo->Id == 63611)
                 {
                     if (GetTypeId() != TYPEID_PLAYER)
                         return false;
@@ -8259,13 +8258,8 @@ int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellPro
 
     Unit* unit = this;
 
-<<<<<<< HEAD:src/game/Unit.cpp
 	if( GetTypeId()==TYPEID_UNIT && ((Creature*)this)->isTotem() && ((Totem*)this)->GetTotemType()!=TOTEM_STATUE)
 		unit = GetOwner();
-=======
-    if( GetTypeId()==TYPEID_UNIT && ((Creature*)this)->isTotem() && ((Totem*)this)->GetTotemType()!=TOTEM_STATUE)
-        unit = GetOwner();
->>>>>>> d50307b1a4f8b599db616de8a171b8127c95098e:src/game/Unit.cpp
 
     if (unit->GetTypeId()==TYPEID_PLAYER)
     {

@@ -52,11 +52,7 @@ GameObject::GameObject() : WorldObject()
     m_spawnedByDefault = true;
     m_usetimes = 0;
     m_spellId = 0;
-<<<<<<< HEAD:src/game/GameObject.cpp
-    m_charges = 5;
     m_actualHealth = 0;
-=======
->>>>>>> d50307b1a4f8b599db616de8a171b8127c95098e:src/game/GameObject.cpp
     m_cooldownTime = 0;
     m_goInfo = NULL;
 
@@ -164,19 +160,12 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMa
 
     SetGoAnimProgress(animprogress);
 
-<<<<<<< HEAD:src/game/GameObject.cpp
     SetGoArtKit(ArtKit);
-
-    // Spell charges for GAMEOBJECT_TYPE_SPELLCASTER (22)
-    if (goinfo->type == GAMEOBJECT_TYPE_SPELLCASTER)
-        m_charges = goinfo->spellcaster.charges;
 
     // Spell charges for GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING (33)
     if (goinfo->type == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
         m_actualHealth = goinfo->destructibleBuilding.intactNumHits;
 
-=======
->>>>>>> d50307b1a4f8b599db616de8a171b8127c95098e:src/game/GameObject.cpp
     //Notify the map's instance data.
     //Only works if you create the object in it, not if it is moves to that map.
     //Normally non-players do not teleport to other maps.

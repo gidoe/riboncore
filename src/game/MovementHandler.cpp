@@ -58,6 +58,10 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         return;
     }
 
+    //movement anticheat
+    GetPlayer()->m_anti_JustTeleported = 1;
+    //end movement anticheat
+
     // get the destination map entry, not the current one, this will fix homebind and reset greeting
     MapEntry const* mEntry = sMapStore.LookupEntry(loc.mapid);
     InstanceTemplate const* mInstance = objmgr.GetInstanceTemplate(loc.mapid);
@@ -69,8 +73,17 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     GetPlayer()->SetSemaphoreTeleportFar(false);
 
     // relocate the player to the teleport destination
-    GetPlayer()->SetMap(MapManager::Instance().CreateMap(loc.mapid, GetPlayer()));    GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
-    GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
+    Map * newMap = MapManager::Instance().CreateMap(loc.mapid, GetPlayer());
+    if (!newMap)
+    {
+        sLog.outError("Map %d could not be created for player %d, porting player to homebind", loc.mapid, GetPlayer()->GetGUIDLow());
+        GetPlayer()->RelocateToHomebind();
+        newMap = MapManager::Instance().CreateMap(GetPlayer()->GetMapId(), GetPlayer());
+    }
+    else
+        GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
+
+    GetPlayer()->SetMap(newMap);
 
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
     // the CanEnter checks are done in TeleporTo but conditions may change
@@ -419,7 +432,6 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
             if (plMover->m_anti_MistimingCount > World::GetMistimingAlarms())
             {
-                sWorld.SendWorldText(3,"Bye Cheto! ",plMover->GetName());
                 plMover->GetSession()->KickPlayer();
                 return;
             }
@@ -492,7 +504,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 #endif
                 check_passed = false;
             }
- 
+
             //multi jump checks
             if (opcode == MSG_MOVE_JUMP && !plMover->IsInWater())
             {
@@ -580,7 +592,6 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                         {
                             sLog.outError("MA-%s, teleport to plan exception. Exception count: %d ",
                                             plMover->GetName(), plMover->m_anti_TeleToPlane_Count);
-							sWorld.SendWorldText(3,"Bye Cheto! ",plMover->GetName());
                             plMover->GetSession()->KickPlayer();
                             return;
                         }
@@ -716,8 +727,6 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     {
         plMover->m_anti_AlarmCount++;
         WorldPacket data;
-        //GetPlayer()->m_movementInfo.SetMovementFlags(MovementFlags(MOVEMENTFLAG_NONE));
-        plMover->m_movementInfo.SetMovementFlags(MovementFlags(MOVEMENTFLAG_NONE));
         plMover->BuildTeleportAckMsg(&data, plMover->GetPositionX(), plMover->GetPositionY(), plMover->GetPositionZ(), plMover->GetOrientation());
         plMover->GetSession()->SendPacket(&data);
         plMover->BuildHeartBeatMsg(&data);
@@ -1053,7 +1062,7 @@ void WorldSession::HandleMoveKnockBackAck( WorldPacket & recv_data )
 
     //Save movement flags
     _player->m_movementInfo.SetMovementFlags(MovementFlags(movementInfo.flags));
-    //GetPlayer()->m_movementInfo.SetMovementFlags(MovementFlags(MOVEMENTFLAG_NONE));
+
     #ifdef MOVEMENT_ANTICHEAT_DEBUG
     sLog.outBasic("%s CMSG_MOVE_KNOCK_BACK_ACK: tm:%d ftm:%d | %f,%f,%fo(%f) [%X]",GetPlayer()->GetName(),movementInfo.time,movementInfo.fallTime,movementInfo.x,movementInfo.y,movementInfo.z,movementInfo.o,movementInfo.flags);
     sLog.outBasic("%s CMSG_MOVE_KNOCK_BACK_ACK additional: vspeed:%f, hspeed:%f",GetPlayer()->GetName(), movementInfo.j_unk, movementInfo.j_xyspeed);

@@ -151,6 +151,9 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (spellInfo->SpellFamilyFlags & UI64LIT(0x00008000010000))
                 return SPELL_POSITIVE_SHOUT;
 
+            if (spellInfo->SpellFamilyFlags & UI64LIT(0x0000001000000020))
+                return SPELL_WARRIOR_BLEED;
+
             break;
         }
         case SPELLFAMILY_WARLOCK:
@@ -172,7 +175,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
                 return SPELL_STING;
 
             // only hunter aspects have this (but not all aspects in hunter family)
-            if( spellInfo->SpellFamilyFlags & UI64LIT(0x0044000000380000) || spellInfo->SpellFamilyFlags2 & 0x00003010)
+            if( spellInfo->SpellFamilyFlags & UI64LIT(0x0044000000380000) || spellInfo->SpellFamilyFlags2 & 0x00001010)
                 return SPELL_ASPECT;
 
             if( spellInfo->SpellFamilyFlags2 & 0x00000002 )
@@ -188,15 +191,14 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (spellInfo->SpellFamilyFlags & UI64LIT(0x0000000011010002))
                 return SPELL_BLESSING;
 
-            if ((spellInfo->SpellFamilyFlags & UI64LIT(0x00000820180400)) && (spellInfo->AttributesEx3 & 0x200))
+            // Judgement of Wisdom, Judgement of Light, Judgement of Justice
+            if (spellInfo->Id == 20184 || spellInfo->Id == 20185 || spellInfo->Id == 20186)
                 return SPELL_JUDGEMENT;
 
-            for (int i = 0; i < 3; ++i)
-            {
-                // only paladin auras have this (for palaldin class family)
-                if (spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_RAID)
-                    return SPELL_AURA;
-            }
+            // only paladin auras have this (for palaldin class family)
+            if( spellInfo->SpellFamilyFlags2 & 0x00000020 )
+                return SPELL_AURA;
+
             break;
         }
         case SPELLFAMILY_SHAMAN:
@@ -211,7 +213,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             return spellmgr.GetSpellElixirSpecific(spellInfo->Id);
 
         case SPELLFAMILY_DEATHKNIGHT:
-            if ((spellInfo->Attributes & 0x10) && (spellInfo->AttributesEx2 & 0x10) && (spellInfo->AttributesEx4 & 0x200000))
+            if (spellInfo->Id == SPELL_ID_BLOOD_PRESENCE || spellInfo->Id == SPELL_ID_FROST_PRESENCE || spellInfo->Id == SPELL_ID_UNHOLY_PRESENCE)
                 return SPELL_PRESENCE;
             break;
     }
@@ -1483,6 +1485,11 @@ case SPELLFAMILY_GENERIC:                   // same family case
                 // Paladin Seals
                 if( IsSealSpell(spellInfo_1) && IsSealSpell(spellInfo_2) )
                     return true;
+
+                // Swift Retribution / Improved Devotion Aura (talents) and Paladin Auras
+                if( (spellInfo_1->SpellFamilyFlags2 & 0x00000020 || spellInfo_2->SpellFamilyFlags2 & 0x00000020) &&
+                   (spellInfo_1->SpellFamilyFlags2 !=  spellInfo_2->SpellFamilyFlags2) )
+                    return false;
             }
             // Inner Fire and Consecration
             if(spellInfo_2->SpellFamilyName == SPELLFAMILY_PRIEST)
@@ -1516,7 +1523,11 @@ case SPELLFAMILY_GENERIC:                   // same family case
             if( spellInfo_1->Id == 2825 && spellInfo_2->SpellIconID == 38 && spellInfo_2->SpellVisual[0] == 0 )
                 return false;
             break;
-	case SPELLFAMILY_DEATHKNIGHT:
+        case SPELLFAMILY_DEATHKNIGHT:
+            // Presences and triggered effects
+            if( spellInfo_1->Category == 47 || spellInfo_2->Category == 47 )
+                return false;
+            break;
             if (spellInfo_2->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT)
             {
                 // Desecration (speed reduction aura) and Desecration (owner's damage bonus aura)
@@ -3127,20 +3138,11 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_LIMITONLY;
             break;
         }
-<<<<<<< HEAD:src/game/SpellMgr.cpp
         case SPELLFAMILY_PALADIN:
         {
             // Turn Evil
             if (spellproto->SpellFamilyFlags & UI64LIT(0x0080400000000000))
                 return DIMINISHING_FEAR_BLIND;
-=======
-        case SPELLFAMILY_PRIEST:
-        {
-            // Vampiric Embrace
-            if ((spellproto->SpellFamilyFlags & UI64LIT(0x00000000004)) && spellproto->SpellIconID == 150)
-                return DIMINISHING_LIMITONLY;
->>>>>>> d50307b1a4f8b599db616de8a171b8127c95098e:src/game/SpellMgr.cpp
-            break;
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
@@ -3208,11 +3210,7 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry cons
         case SPELLFAMILY_PRIEST:
         {
             // Vampiric Embrace - limit to 60 seconds in PvP (3.1)
-<<<<<<< HEAD:src/game/SpellMgr.cpp
-            if (spellproto->SpellFamilyFlags & UI64LIT(0x00000000004))
-=======
             if ((spellproto->SpellFamilyFlags & UI64LIT(0x00000000004)) && spellproto->SpellIconID == 150)
->>>>>>> d50307b1a4f8b599db616de8a171b8127c95098e:src/game/SpellMgr.cpp
                 return 60000;
             break;
         }
