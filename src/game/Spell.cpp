@@ -2594,6 +2594,7 @@ void Spell::cast(bool skipCheck)
             break;
     }
 
+<<<<<<< HEAD:src/game/Spell.cpp
     // Conflagrate - consumes Immolate or Shadowflame
     if ((m_spellInfo->TargetAuraState == AURA_STATE_IMMOLATE) && m_targets.getUnitTarget())
     {
@@ -2643,6 +2644,8 @@ void Spell::cast(bool skipCheck)
             }
     }
 
+=======
+>>>>>>> 44f1cff2d9338250d718c176bcde44b44e2ea66a:src/game/Spell.cpp
     // traded items have trade slot instead of guid in m_itemTargetGUID
     // set to real guid to be sent later to the client
     m_targets.updateTradeSlotItem();

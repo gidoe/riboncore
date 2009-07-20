@@ -989,8 +989,17 @@ void Aura::_AddAura()
                 m_target->ModifyAuraState(AURA_STATE_JUDGEMENT, true);
 
             // Conflagrate aura state on Immolate and Shadowflame
+<<<<<<< HEAD:src/game/SpellAuras.cpp
             if (m_spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && (m_spellProto->SpellFamilyFlags & 4 || m_spellProto->SpellFamilyFlags2 & 2))
                 m_target->ModifyAuraState(AURA_STATE_IMMOLATE, true);
+=======
+            if (m_spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK &&
+                // Immolate
+                ((m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000004)) ||
+                // Shadowflame
+                (m_spellProto->SpellFamilyFlags2 & 0x00000002)))
+                m_target->ModifyAuraState(AURA_STATE_CONFLAGRATE, true);
+>>>>>>> 44f1cff2d9338250d718c176bcde44b44e2ea66a:src/game/SpellAuras.cpp
 
             // Faerie Fire (druid versions)
             if (m_spellProto->SpellFamilyName == SPELLFAMILY_DRUID && (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000400)))
@@ -1106,6 +1115,7 @@ void Aura::_RemoveAura()
                     removeState = AURA_STATE_JUDGEMENT;     // Update Seals information
                 break;
             case SPELLFAMILY_WARLOCK:
+<<<<<<< HEAD:src/game/SpellAuras.cpp
                 if (m_spellProto->SpellFamilyFlags & UI64LIT(0x4) || m_spellProto->SpellFamilyFlags2 & UI64LIT(0x2))
                 {
                     bool remove = true;
@@ -1123,6 +1133,44 @@ void Aura::_RemoveAura()
 
                     if (remove)
                         removeState = AURA_STATE_IMMOLATE;      // Conflagrate aura state
+=======
+                // Conflagrate aura state on Immolate and Shadowflame
+                // Check Immolate case
+                if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000004))
+                {
+                    //check if there is a Shadowflame DOT present, if not, remove AURA_STATE_CONFLAGRATE
+                    bool removeAuraState=true;
+                    Unit::AuraList const& SFDOT = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for(Unit::AuraList::const_iterator i = SFDOT.begin(); i != SFDOT.end(); ++i)
+                    {
+                        if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK &&
+                            ((*i)->GetSpellProto()->SpellFamilyFlags2 & 0x00000002))
+                        {
+                            removeAuraState=false;
+                            break;
+                        }
+                    }
+                    if(removeAuraState)
+                        removeState = AURA_STATE_CONFLAGRATE;
+                }
+                // Check Shadowflame case
+                else if (m_spellProto->SpellFamilyFlags2 & 0x00000002)
+                {
+                    //check if there is a Immolate DOT present, if not, remove AURA_STATE_CONFLAGRATE
+                    bool removeAuraState=true;
+                    Unit::AuraList const& IMDOT = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for(Unit::AuraList::const_iterator i = IMDOT.begin(); i != IMDOT.end(); ++i)
+                    {
+                        if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK &&
+                            ((*i)->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000004)))
+                        {
+                            removeAuraState=false;
+                            break;
+                        }
+                    }
+                    if(removeAuraState)
+                        removeState = AURA_STATE_CONFLAGRATE;
+>>>>>>> 44f1cff2d9338250d718c176bcde44b44e2ea66a:src/game/SpellAuras.cpp
                 }
                 break;
             case SPELLFAMILY_DRUID:
@@ -2099,6 +2147,49 @@ void Aura::TriggerSpell()
 //                }
  //               break;
  //           }
+            case SPELLFAMILY_HUNTER:
+            {
+                switch (auraId)
+                {
+                    // Sniper training
+                    case 53302:
+                    case 53303:
+                    case 53304:
+                        if (target->GetTypeId() != TYPEID_PLAYER)
+                            return;
+
+                        // Reset reapply counter at move
+                        if (((Player*)target)->isMoving())
+                        {
+                            m_modifier.m_amount = 6;
+                            return;
+                        }
+
+                        // We are standing at the moment
+                        if (m_modifier.m_amount > 0)
+                        {
+                            --m_modifier.m_amount;
+                            return;
+                        }
+
+                        // select rank of buff
+                        switch(auraId)
+                        {
+                            case 53302: trigger_spell_id = 64418; break;
+                            case 53303: trigger_spell_id = 64419; break;
+                            case 53304: trigger_spell_id = 64420; break;
+                        }
+
+                        // If aura is active - no need to continue
+                        if (target->HasAura(trigger_spell_id))
+                            return;
+
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            }
             case SPELLFAMILY_DRUID:
             {
                 switch(auraId)
