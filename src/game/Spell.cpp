@@ -2594,44 +2594,8 @@ void Spell::cast(bool skipCheck)
             break;
     }
 
-<<<<<<< HEAD:src/game/Spell.cpp
-    // Conflagrate - consumes Immolate or Shadowflame
-    if ((m_spellInfo->TargetAuraState == AURA_STATE_IMMOLATE) && m_targets.getUnitTarget())
-    {
-        uint32 immolate = 0;
-        int32  basepnts = 0;
-
-        // for caster applied auras only
-        Unit::AuraList const &mPeriodic = m_targets.getUnitTarget()->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-        for(Unit::AuraList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
-        {
-            if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK &&
-                (*i)->GetCasterGUID()==m_caster->GetGUID())
-            {
-                int32 effbps = 0;
-                if ((*i)->GetSpellProto()->SpellFamilyFlags & 4)
-                    effbps = (*i)->GetModifier()->m_amount * m_spellInfo->EffectBasePoints[1];
-                else if((*i)->GetSpellProto()->SpellFamilyFlags2 & 2)
-                    effbps = (*i)->GetModifier()->m_amount * m_spellInfo->EffectBasePoints[2];
-
-                if (effbps > basepnts)
-                {
-                    immolate = (*i)->GetId();
-                    basepnts = effbps;
-                }
-            }
-        }
-
-        if (immolate)
-        {
-            if (!m_caster->HasAura(56235))
-                m_targets.getUnitTarget()->RemoveAurasDueToSpell(immolate);
-
-            m_currentBasePoints[0] = basepnts;
-        }
-    }
     // King of the jungle (Tiger's fury energize)
-    else if(m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellIconID == 1181)
+    if(m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellIconID == 1181)
     {
         Unit::AuraList const &dummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
         for(Unit::AuraList::const_iterator i = dummy.begin(); i != dummy.end(); i++)
@@ -2644,8 +2608,6 @@ void Spell::cast(bool skipCheck)
             }
     }
 
-=======
->>>>>>> 44f1cff2d9338250d718c176bcde44b44e2ea66a:src/game/Spell.cpp
     // traded items have trade slot instead of guid in m_itemTargetGUID
     // set to real guid to be sent later to the client
     m_targets.updateTradeSlotItem();
