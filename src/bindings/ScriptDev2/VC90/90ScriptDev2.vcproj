@@ -2543,6 +2543,14 @@
 				<Filter
 					Name="Vault of Archavon"
 					>
+					<File
+						RelativePath="..\scripts\zone\vault_of_archavon\boss_emalon.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\scripts\zone\vault_of_archavon\instance_vault_of_archavon.cpp"
+						>
+					</File>
 				</Filter>
 			</Filter>
 		</Filter>

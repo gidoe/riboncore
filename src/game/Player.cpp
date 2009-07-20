@@ -7514,10 +7514,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
         if (go->getLootState() == GO_READY)
         {
             uint32 lootid =  go->GetGOInfo()->GetLootId();
-            if((go->GetEntry() == BG_AV_OBJECTID_MINE_N || go->GetEntry() == BG_AV_OBJECTID_MINE_S))
-                if( BattleGround *bg = GetBattleGround())
-                    if(bg->GetTypeID() == BATTLEGROUND_AV)
-                        if(!(((BattleGroundAV*)bg)->PlayerCanDoMineQuest(go->GetEntry(),GetTeam())))
+            if ((go->GetEntry() == BG_AV_OBJECTID_MINE_N || go->GetEntry() == BG_AV_OBJECTID_MINE_S))
+                if (BattleGround *bg = GetBattleGround())
+                    if (bg->GetTypeID() == BATTLEGROUND_AV)
+                        if (!(((BattleGroundAV*)bg)->PlayerCanDoMineQuest(go->GetEntry(), GetTeam())))
                         {
                             SendLootRelease(guid);
                             return;
@@ -15064,10 +15064,6 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
             int32 maxduration = (int32)fields[5].GetUInt32();
             int32 remaintime = (int32)fields[6].GetUInt32();
             int32 remaincharges = (int32)fields[7].GetUInt32();
-
-            Unit* a_caster = ObjectAccessor::GetObjectInWorld(caster_guid, (Unit*)NULL); 
-            if(!IS_PLAYER_GUID(caster_guid) && !a_caster && !a_caster->IsInWorld()) 
-                continue; 
 
             bool IsReal = false; 
             QueryResult *resultGUID = CharacterDatabase.PQuery("SELECT guid FROM characters"); 
