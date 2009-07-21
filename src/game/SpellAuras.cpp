@@ -6271,6 +6271,9 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
         return;
 
     Unit* caster = GetCaster();
+    if(!caster)
+        return;
+
     uint32 spellId = 0;
     uint32 spellId2 = 0;
 
@@ -6316,7 +6319,7 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
         // If target still has one of Warrior's bleeds, do nothing
         Unit::AuraList const& PeriodicDamage = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
         for(Unit::AuraList::const_iterator i = PeriodicDamage.begin(); i != PeriodicDamage.end(); ++i)
-           if((*i)->GetCaster()->GetGUID() == caster->GetGUID() && (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR )
+           if((*i)->GetCaster() && (*i)->GetCaster()->GetGUID() == caster->GetGUID() && (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR)
                 return;
     }
 

@@ -213,7 +213,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             return spellmgr.GetSpellElixirSpecific(spellInfo->Id);
 
         case SPELLFAMILY_DEATHKNIGHT:
-            if (spellInfo->Id == SPELL_ID_BLOOD_PRESENCE || spellInfo->Id == SPELL_ID_FROST_PRESENCE || spellInfo->Id == SPELL_ID_UNHOLY_PRESENCE)
+            if (spellInfo->Category == 47)
                 return SPELL_PRESENCE;
             break;
     }
