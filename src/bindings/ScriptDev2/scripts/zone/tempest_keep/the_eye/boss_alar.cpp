@@ -114,7 +114,7 @@ struct MANGOS_DLL_DECL boss_alarAI : public ScriptedAI
         m_creature->RemoveMonsterMoveFlag(MONSTER_MOVE_WALK);
 
         if(pInstance)
-            pInstance->SetData(DATA_ALAREVENT, 0);
+            pInstance->SetData(DATA_ALAR, 0);
         
     }
     
@@ -126,7 +126,7 @@ struct MANGOS_DLL_DECL boss_alarAI : public ScriptedAI
     void StartEvent()
     {
         if(pInstance)
-            pInstance->SetData(DATA_ALAREVENT, 1);
+            pInstance->SetData(DATA_ALAR, 1);
         
         CreaturePointMove(0, waypoint[0][0], waypoint[0][1], waypoint[0][2]);
     }
@@ -134,7 +134,7 @@ struct MANGOS_DLL_DECL boss_alarAI : public ScriptedAI
     void JustDied(Unit *victim)
     {
         if(pInstance)
-            pInstance->SetData(DATA_ALAREVENT, 0);
+            pInstance->SetData(DATA_ALAR, 0);
     }
 
     void MoveInLineOfSight(Unit *who)
@@ -333,7 +333,7 @@ struct MANGOS_DLL_DECL boss_alarAI : public ScriptedAI
             Phase2_begin = false;
             Phase1 = false;
             if(pInstance)
-                pInstance->SetData(DATA_ALAREVENT, 2);
+                pInstance->SetData(DATA_ALAR, 2);
         }
 
         if (Phase1)
@@ -540,7 +540,7 @@ struct MANGOS_DLL_DECL mob_ember_of_alarAI : public ScriptedAI
         damage = 0;
         DoCast(m_creature, SPELL_EMBER_BLAST);
         if(pInstance)
-            if (pInstance->GetData(DATA_ALAREVENT) == 2)
+            if (pInstance->GetData(DATA_ALAR) == 2)
             {
                 Unit* Alar = NULL;
                 Alar = Unit::GetUnit((*m_creature), pInstance->GetData64(DATA_ALAR));
