@@ -26,19 +26,6 @@ Copyright (C) 2005-2009 MaNGOS project <http://getmangos.com/>
   file, but you are not obligated to do so.  If you do not wish to do
   so, delete this exception statement from your version.
 
-New GM Levels:
-enum AccountTypes
-{
-    SEC_PLAYER           = 0,
-    SEC_MODERATOR        = 1,
-    SEC_SCRIPTER         = 2,
-    SEC_SUPPORTER        = 3,
-    SEC_UNNAMED          = 4,
-    SEC_GAMEMASTER       = 5,
-    SEC_ADMINISTRATOR    = 6,
-    SEC_CONSOLE          = 7                 // must be always last in list, accounts must have less security level always also
-};
-
 Comments are welcome.
 
 	- theluda <theluda@getmangos.com>
@@ -68,3 +55,5 @@ In case you have checked out MaNGOS from the GIT repository, please run
 $ autoreconf --install --force
 
 prior to building, as you may otherwise not be able to run a build.
+
+Thyros builds no more cores, because the problem does not he gets away, I am sorry for this decision, but do not want the core again to re-make
