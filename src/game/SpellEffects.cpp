@@ -2068,14 +2068,14 @@ void Spell::EffectDummy(uint32 i)
                     return;
                 }
             // Hungering Cold
-            else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000100000000000))
+            if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000100000000000))
             {
                 m_caster->CastSpell(m_caster, 51209, true);
                 return;
             }
             break;
     }
-
+}
     // pet auras
     if(PetAura const* petSpell = spellmgr.GetPetAura(m_spellInfo->Id, i))
     {
