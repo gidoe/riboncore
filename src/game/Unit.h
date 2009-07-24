@@ -1244,8 +1244,12 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         bool AddAura(Aura *aur);
 
+<<<<<<< HEAD:src/game/Unit.h
         float CheckAuraStackingAndApply(Aura *Aur, UnitMods unitMod, UnitModifierType modifierType, float amount, bool apply, int32 miscMask = 0, int32 miscValue = 0);
 
+=======
+        void RemoveAura(Aura* aura);
+>>>>>>> e100ce261407f84f59ccb0217d1ceaf5b8ed80cb:src/game/Unit.h
         void RemoveAura(AuraMap::iterator &i, AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
         void RemoveAura(uint32 spellId, uint32 effindex, Aura* except = NULL);
         void RemoveSingleSpellAurasFromStack(uint32 spellId);
