@@ -6270,10 +6270,6 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
     if(!spellSpec)
         return;
 
-    Unit* caster = GetCaster();
-    if(!caster)
-        return;
-
     uint32 spellId = 0;
     uint32 spellId2 = 0;
 
@@ -6281,17 +6277,17 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
     {
         case SPELL_AURA:
             // Only process on player casting paladin aura
-            if(caster->GetGUID() != m_target->GetGUID() || caster->GetTypeId() != TYPEID_PLAYER)
+            if(GetCasterGUID() != m_target->GetGUID() || !IS_PLAYER_GUID(GetCasterGUID()))
                 return;
             // Sanctified Retribution and Swift Retribution (they share one aura), but not Retribution Aura (already gets modded)
-            if (GetSpellProto()->SpellFamilyFlags != UI64LIT(0x8))
+            if (GetSpellProto()->SpellFamilyFlags != UI64LIT(0x0000000000000008))
                 spellId = 63531;
             // Improved Concentration Aura
             spellId2 = 63510;
             break;
         case SPELL_ASPECT:
             // Aspect of the Dragonhawk dodge
-            if (GetSpellProto()->SpellFamilyFlags2 & 0x1000)
+            if (GetSpellProto()->SpellFamilyFlags2 & 0x00001000)
                 spellId = 61848;
             break;
         case SPELL_PRESENCE:
@@ -6319,7 +6315,7 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
         // If target still has one of Warrior's bleeds, do nothing
         Unit::AuraList const& PeriodicDamage = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
         for(Unit::AuraList::const_iterator i = PeriodicDamage.begin(); i != PeriodicDamage.end(); ++i)
-           if((*i)->GetCaster() && (*i)->GetCaster()->GetGUID() == caster->GetGUID() && (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR)
+            if((*i)->GetCasterGUID() == GetCasterGUID() && (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR)
                 return;
     }
 
@@ -6330,8 +6326,8 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
     }
     else
     {
-        m_target->RemoveAurasDueToSpell(spellId);
-        m_target->RemoveAurasDueToSpell(spellId2);
+        m_target->RemoveAurasByCasterSpell(spellId, GetCasterGUID());
+        m_target->RemoveAurasByCasterSpell(spellId2, GetCasterGUID());
     }
 }
 
