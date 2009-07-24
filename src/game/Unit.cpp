@@ -4070,7 +4070,7 @@ void Unit::RemoveNotOwnSingleTargetAuras()
 
 void Unit::RemoveAura(Aura* aura)
 {
-    AuraMap::iterator i = m_Auras.lower_bound(spellEffectPair(aura->GetId(), aura->GetEffIndex()));
+   AuraMap::iterator i = m_Auras.lower_bound(spellEffectPair(aura->GetId(), aura->GetEffIndex()));
     AuraMap::iterator upperBound = m_Auras.upper_bound(spellEffectPair(aura->GetId(), aura->GetEffIndex()));
     for (; i != upperBound; ++i)
     {

@@ -279,11 +279,6 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         }
     }
 
-    //Nahpalm: This is sent from the client in certain cases, perhaps this needs to be handled
-    //However, I can not think of a case ever.
-    if(!movementInfo.t_guid)
-        return;
-
     if(recv_data.size() != recv_data.rpos())
     {
         sLog.outError("MovementHandler: player %s (guid %d, account %u) sent a packet (opcode %u) that is " SIZEFMTD " bytes larger than it should be. Kicked as cheater.", _player->GetName(), _player->GetGUIDLow(), _player->GetSession()->GetAccountId(), recv_data.GetOpcode(), recv_data.size() - recv_data.rpos());
