@@ -162,6 +162,7 @@ UPDATE creature_template SET ScriptName='npc_susurrus' WHERE entry=17435;
 
 /* BARRENS */
 UPDATE creature_template SET ScriptName='npc_beaten_corpse' WHERE entry=10668;
+UPDATE creature_template SET ScriptName='npc_gilthares' WHERE entry=3465;
 UPDATE creature_template SET ScriptName='npc_sputtervalve' WHERE entry=3442;
 UPDATE creature_template SET ScriptName='npc_taskmaster_fizzule' WHERE entry=7233;
 UPDATE creature_template SET ScriptName='npc_twiggy_flathead' WHERE entry=6248;
@@ -778,6 +779,7 @@ UPDATE creature_template SET ScriptName='npc_oronok_tornheart' WHERE entry=21183
 UPDATE creature_template SET ScriptName='mob_mature_netherwing_drake' WHERE entry=21648;
 UPDATE creature_template SET ScriptName='mob_enslaved_netherwing_drake' WHERE entry=21722;
 UPDATE creature_template SET ScriptName='npc_karynaku' WHERE entry=22112;
+UPDATE creature_template SET ScriptName='npc_wilda' WHERE entry=21027;
 
 /* SHATTRATH */
 UPDATE creature_template SET ScriptName='npc_dirty_larry' WHERE entry=19720;
@@ -946,6 +948,8 @@ UPDATE creature_template SET ScriptName='npc_slim' WHERE entry=19679;
 
 /* THOUSAND NEEDLES */
 UPDATE creature_template SET ScriptName='npc_plucky_johnson' WHERE entry=6626;
+UPDATE creature_template SET ScriptName='npc_paoka_swiftmountain' WHERE entry=10427;
+UPDATE creature_template SET ScriptName='npc_lakota_windsong' WHERE entry=10646;
 
 /* THUNDER BLUFF */
 UPDATE creature_template SET ScriptName='npc_cairne_bloodhoof' WHERE entry=3057;
