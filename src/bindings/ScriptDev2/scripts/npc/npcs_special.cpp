@@ -1288,7 +1288,33 @@ bool GossipSelect_npc_sayge(Player* pPlayer, Creature* pCreature, uint32 sender,
     }
     return true;
 }
+/* Need more Review!
+struct MANGOS_DLL_DECL npc_mirror_image : public ScriptedAI
+{
+    npc_mirror_image(Creature* pCreature) : ScriptedAI(pCreature) {}
+    Unit * owner;
+    void Reset()
+    {
+        if (m_creature->isSummon())
+            owner = ((Summon*)m_creature)->GetOwner();
+        if (!owner)
+            return;
+        m_creature->SetDisplayId(owner->GetDisplayId());
+        owner->SetLevel(owner->getLevel());
+        // Inherit Master's Threat List (not yet implemented)
+        owner->CastSpell((Unit*)NULL, 58838, true);
+        // here mirror image casts on summoner spell (not present in client dbc) 49866
+        // here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcasted by mirror images (stats related?)
+        // Clone Me!
+        owner->CastSpell(m_creature, 45204, false);
+    }
+};
 
+CreatureAI* GetAI_npc_mirror_image(Creature* pCreature)
+{
+    return new npc_mirror_image(pCreature);
+}
+*/
 void AddSC_npcs_special()
 {
     Script *newscript;
@@ -1354,4 +1380,9 @@ void AddSC_npcs_special()
     newscript->pGossipHello = &GossipHello_npc_sayge;
     newscript->pGossipSelect = &GossipSelect_npc_sayge;
     newscript->RegisterSelf();
+
+    /*newscript = new Script;
+    newscript->Name = "npc_mirror_image";
+    newscript->GetAI = &GetAI_npc_mirror_image;
+    newscript->RegisterSelf();*/
 }
