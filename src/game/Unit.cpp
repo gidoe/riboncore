@@ -6539,13 +6539,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 return false;
                 break;
             }
-            // Frozen Power
-            if (dummySpell->SpellIconID == 3780)
-            {
-                const SpellEntry *freeze = sSpellStore.LookupEntry(63685);
-                if (GetDistance(pVictim) >= freeze->EffectBasePoints[0])
-                    triggered_spell_id = 63685;
-            }
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:
@@ -9997,6 +9990,8 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList, 
     if(!u->HasAuraType(SPELL_AURA_DETECT_STEALTH))
     {
         //Calculation if target is in front
+        //Base visible distance for every unit in stealth.
+        float visibleDistance = 10.0f;
 
         //Visible distance based on stealth value (stealth rank 4 300MOD, 10.5 - 3 = 7.5)
         visibleDistance = 10.5f - (GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH)/100.0f);

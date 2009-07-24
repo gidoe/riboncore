@@ -1788,9 +1788,9 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,UnitList& TagUnitMap)
         case TARGET_ALL_RAID_AROUND_CASTER:
         {
             if(m_spellInfo->Id == 57669)                    // Replenishment (special target selection)
-                FillRaidOrPartyManaPriorityTargets(TagUnitMap, m_caster, m_caster, radius, 10, true, false, false);
+                FillRaidOrPartyManaPriorityTargets(TagUnitMap, m_caster, m_caster, radius, 10, true, false, true);
             else if (m_spellInfo->Id==52759)                //Ancestral Awakening (special target selection)
-                FillRaidOrPartyHealthPriorityTargets(TagUnitMap, m_caster, m_caster, radius, 1, true, false, false);
+                FillRaidOrPartyHealthPriorityTargets(TagUnitMap, m_caster, m_caster, radius, 1, true, false, true);
             else
                 FillRaidOrPartyTargets(TagUnitMap, m_caster, m_caster, radius, true, true, true);
             break;
@@ -2410,7 +2410,12 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
     // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
     if (!m_IsTriggeredSpell)
     {
-        m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+        Unit::AuraList invisibility = m_caster->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY);
+        for(Unit::AuraList::const_iterator i = invisibility.begin(); i != invisibility.end(); ++i)
+        {
+            if ((*i)->GetAuraDuration() != -1)
+                m_caster->RemoveAurasDueToSpell((*i)->GetId());
+        }
 
         if (isSpellBreakStealth(m_spellInfo))
         {
@@ -5756,8 +5761,9 @@ bool Spell::CheckTargetCreatureType(Unit* target) const
 {
     uint32 spellCreatureTargetMask = m_spellInfo->TargetCreatureType;
 
-    // Curse of Doom : not find another way to fix spell target check :/
-    if(m_spellInfo->SpellFamilyName==SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags == UI64LIT(0x0200000000))
+    // Curse of Doom & Exorcism : not find another way to fix spell target check :/
+    if ((m_spellInfo->SpellFamilyName==SPELLFAMILY_WARLOCK || m_spellInfo->SpellFamilyName==SPELLFAMILY_PALADIN) &&
+        m_spellInfo->SpellFamilyFlags == UI64LIT(0x0200000000))
     {
         // not allow cast at player
         if(target->GetTypeId()==TYPEID_PLAYER)
