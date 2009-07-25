@@ -2783,14 +2783,9 @@ void Spell::EffectHeal( uint32 i )
             Aura *targetAura = NULL;
             for(Unit::AuraList::const_iterator itr = RejorRegr.begin(); itr != RejorRegr.end(); ++itr)
             {
-<<<<<<< HEAD:src/game/SpellEffects.cpp
-                if((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID
-                    && ((*itr)->GetSpellProto()->SpellFamilyFlags == 0x40 || (*itr)->GetSpellProto()->SpellFamilyFlags == 0x10) )
-=======
-                if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
+                if ((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
                     // Regrowth or Rejuvenation 0x40 | 0x10
-                    ((*i)->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000050)))
->>>>>>> 5b12c496137618a3bdf87fa8b7f299f3b420f5d1:src/game/SpellEffects.cpp
+                    ((*itr)->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000050)))
                 {
                     if(!targetAura || (*itr)->GetAuraDuration() < targetAura->GetAuraDuration())
                         targetAura = *itr;

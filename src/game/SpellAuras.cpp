@@ -6627,9 +6627,6 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
         }
     }
 
-<<<<<<< HEAD:src/game/SpellAuras.cpp
-    if (!apply && caster)
-=======
     // Ice Barrier (remove effect from Shattered Barrier)
     if(!apply && m_spellProto->SpellIconID == 32 && m_spellProto->SpellFamilyName == SPELLFAMILY_MAGE)
     {
@@ -6653,7 +6650,6 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
         (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000001)) &&
         // completely absorbed or dispelled
         ((m_removeMode == AURA_REMOVE_BY_DEFAULT && !m_modifier.m_amount) || m_removeMode == AURA_REMOVE_BY_DISPEL))
->>>>>>> 5b12c496137618a3bdf87fa8b7f299f3b420f5d1:src/game/SpellAuras.cpp
     {
         // Power Word: Shield
         if (m_spellProto->SpellFamilyName == SPELLFAMILY_PRIEST && m_spellProto->Mechanic == MECHANIC_SHIELD &&
