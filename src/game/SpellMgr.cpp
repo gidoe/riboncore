@@ -301,11 +301,19 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
 
     switch(spellId)
     {
+        case 46392:                                         // Focused Assault
+        case 46393:                                         // Brutal Assault
         case 28441:                                         // not positive dummy spell
         case 37675:                                         // Chaos Blast
+        case 41519:                                         // Mark of Stormrage
+        case 34877:                                         // Custodian of Time
+        case 34700:                                         // Allergic Reaction
+        case 31719:                                         // Suspension
+        case 61987:                                         // Avenging Wrath Marker
         case 11196:                                         // Recently Bandadged
             return false;
         case 36032:                                         // Arcane Blast
+        case 12042:                                         // Arcane Power
             return true;
     }
 
