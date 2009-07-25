@@ -1878,6 +1878,14 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffe
                     RemainingDamage -= RemainingDamage * currentAbsorb / 100;
                     continue;
                 }
+                // Unbreakable armor
+                if (spellProto->Id == 51271)
+                {
+                   RemainingDamage -= pVictim->GetArmor() * currentAbsorb / 100;
+                    if (RemainingDamage < 0)
+                        RemainingDamage = 0;
+                    continue;
+                }
                 // Anti-Magic Zone
                 if (spellProto->Id == 50461)
                 {
