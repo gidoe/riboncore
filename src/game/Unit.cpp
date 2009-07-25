@@ -4748,7 +4748,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     triggered_spell_id = 25997;
                     break;
                 }
-
                 // Sweeping Strikes (NPC spells may be)
                 case 18765:
                 case 35429:
