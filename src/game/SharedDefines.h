@@ -254,7 +254,7 @@ enum ItemQualities
 #define SPELL_ATTR_EX_NEGATIVE                    0x00000080            // 7
 #define SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET        0x00000100            // 8 Spell req target not to be in combat state
 #define SPELL_ATTR_EX_UNK9                        0x00000200            // 9
-#define SPELL_ATTR_EX_UNK10                       0x00000400            // 10 no generates threat on cast 100%
+#define SPELL_ATTR_EX_NO_INITIAL_AGGRO            0x00000400            // 10 no generates threat on cast 100%
 #define SPELL_ATTR_EX_UNK11                       0x00000800            // 11
 #define SPELL_ATTR_EX_UNK12                       0x00001000            // 12
 #define SPELL_ATTR_EX_UNK13                       0x00002000            // 13

@@ -1213,7 +1213,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
                 return;
             }
 
-            if (!(m_spellInfo->AttributesEx & SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
+            if (!(m_spellInfo->AttributesEx & SPELL_ATTR_EX_NO_INITIAL_AGGRO))
             {
                 if (!unit->IsStandState() && !unit->hasUnitState(UNIT_STAT_STUNNED))
                     unit->SetStandState(UNIT_STAND_STATE_STAND);
@@ -1242,7 +1242,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
             if (unit->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
                 realCaster->SetContestedPvP();
 
-            if (unit->isInCombat() && !(m_spellInfo->AttributesEx & SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
+            if (unit->isInCombat() && !(m_spellInfo->AttributesEx & SPELL_ATTR_EX_NO_INITIAL_AGGRO))
             {
                 realCaster->SetInCombatState(unit->GetCombatTimer() > 0);
                 unit->getHostilRefManager().threatAssist(realCaster, 0.0f);
