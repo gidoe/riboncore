@@ -15,6 +15,64 @@ enum LiquidType
     LIQUID_TYPE_SLIME = 3
 };
 
+
+//
+// Adt file convertor function and data
+//
+
+// Map file format data
+#define MAP_MAGIC             'SPAM'
+#define MAP_VERSION_MAGIC     '0.2w'
+#define MAP_AREA_MAGIC        'AERA'
+#define MAP_HEIGTH_MAGIC      'TGHM'
+#define MAP_LIQUID_MAGIC      'QILM'
+
+struct map_fileheader{
+    uint32 mapMagic;
+    uint32 versionMagic;
+    uint32 areaMapOffset;
+    uint32 areaMapSize;
+    uint32 heightMapOffset;
+    uint32 heightMapSize;
+    uint32 liquidMapOffset;
+    uint32 liquidMapSize;
+};
+
+#define MAP_AREA_NO_AREA      0x0001
+struct map_areaHeader{
+    uint32 fourcc;
+    uint16 flags;
+    uint16 gridArea;
+};
+
+#define MAP_HEIGHT_NO_HIGHT   0x0001
+#define MAP_HEIGHT_AS_INT16   0x0002
+#define MAP_HEIGHT_AS_INT8    0x0004
+
+struct map_heightHeader{
+    uint32 fourcc;
+    uint32 flags;
+    float  gridHeight;
+    float  gridMaxHeight;
+};
+
+
+
+
+#define MAP_LIQUID_NO_TYPE    0x0001
+#define MAP_LIQUID_NO_HIGHT   0x0002
+
+struct map_liquidHeader{
+    uint32 fourcc;
+    uint16 flags;
+    uint16 liquidType;
+    uint8  offsetX;
+    uint8  offsetY;
+    uint8  width;
+    uint8  height;
+    float  liquidLevel;
+};
+
 //**************************************************************************************
 // ADT file class
 //**************************************************************************************
@@ -242,6 +300,54 @@ public:
 
 };
 
+
+//
+// Adt wmo chunck
+//
+class adt_MWMO
+{
+    union{
+        uint32 fcc;
+        char   fcc_txt[4];
+    };
+public:
+	uint32 size;
+
+	uint32 pad;
+	uint8 *getWMO(uint32 idz){return ((uint8 *)&pad+(idz)) ;}
+};
+
+#ifndef MAP_OBJ
+#define MAP_OBJ
+
+struct SMMapObjDef // 03-29-2005 By ObscuR
+{
+uint32 nameId;		
+uint32 uniqueId;		
+float pos[3];
+float rot[3];
+float extents[6];
+uint32 flags;		
+uint32 doodadSet;
+uint16 nameSet;
+};
+
+#endif
+
+class adt_MODF
+{
+    union{
+        uint32 fcc;
+        char   fcc_txt[4];
+    };
+    uint32 size;
+public:
+ 
+	
+	SMMapObjDef data;
+	int getCount() { return (size-4)/sizeof(SMMapObjDef);}
+};
+
 //
 // Adt file header chunk
 //
@@ -273,6 +379,8 @@ public:
     bool prepareLoadedData();
     adt_MCIN *getMCIN(){ return (adt_MCIN *)((uint8 *)&pad+offsMCIN);}
     adt_MH2O *getMH2O(){ return offsMH2O ? (adt_MH2O *)((uint8 *)&pad+offsMH2O) : 0;}
+	adt_MWMO *getMWMO(){ return offsMapObejcts ? (adt_MWMO *)((uint8 *)&pad+offsMapObejcts) : 0;}
+	adt_MODF *getMODF(){ return offsObjectsDef ? (adt_MODF *)((uint8 *)&pad+offsObjectsDef) : 0;}
 
 };
 

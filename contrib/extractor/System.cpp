@@ -17,6 +17,7 @@
 #include "loadlib/adt.h"
 #include "loadlib/wdt.h"
 #include <fcntl.h>
+#include "wmoJuicer.h"
 
 #if defined( __GNUC__ )
     #define _open   open
@@ -47,6 +48,7 @@ uint16 *LiqType;
 char output_path[128] = ".";
 char input_path[128] = ".";
 uint32 maxAreaId = 0;
+wmoJuicer* juicer;
 
 //**************************************************
 // Extractor options
@@ -233,69 +235,6 @@ void ReadLiquidTypeTableDBC()
     printf("Done! (%u LiqTypes loaded)\n", LiqType_count);
 }
 
-//
-// Adt file convertor function and data
-//
-
-// Map file format data
-#define MAP_MAGIC             'SPAM'
-#define MAP_VERSION_MAGIC     '0.1w'
-#define MAP_AREA_MAGIC        'AERA'
-#define MAP_HEIGTH_MAGIC      'TGHM'
-#define MAP_LIQUID_MAGIC      'QILM'
-
-struct map_fileheader{
-    uint32 mapMagic;
-    uint32 versionMagic;
-    uint32 areaMapOffset;
-    uint32 areaMapSize;
-    uint32 heightMapOffset;
-    uint32 heightMapSize;
-    uint32 liquidMapOffset;
-    uint32 liquidMapSize;
-};
-
-#define MAP_AREA_NO_AREA      0x0001
-struct map_areaHeader{
-    uint32 fourcc;
-    uint16 flags;
-    uint16 gridArea;
-};
-
-#define MAP_HEIGHT_NO_HIGHT   0x0001
-#define MAP_HEIGHT_AS_INT16   0x0002
-#define MAP_HEIGHT_AS_INT8    0x0004
-
-struct map_heightHeader{
-    uint32 fourcc;
-    uint32 flags;
-    float  gridHeight;
-    float  gridMaxHeight;
-};
-
-#define MAP_LIQUID_TYPE_NO_WATER    0x00
-#define MAP_LIQUID_TYPE_WATER       0x01
-#define MAP_LIQUID_TYPE_OCEAN       0x02
-#define MAP_LIQUID_TYPE_MAGMA       0x04
-#define MAP_LIQUID_TYPE_SLIME       0x08
-
-#define MAP_LIQUID_TYPE_DARK_WATER  0x10
-#define MAP_LIQUID_TYPE_WMO_WATER   0x20
-
-
-#define MAP_LIQUID_NO_TYPE    0x0001
-#define MAP_LIQUID_NO_HIGHT   0x0002
-
-struct map_liquidHeader{
-    uint32 fourcc;
-    uint16 flags;
-    uint16 liquidType;
-    uint8  offsetX;
-    uint8  offsetY;
-    uint8  width;
-    uint8  height;
-    float  liquidLevel;
-};
 
 float selectUInt8StepStore(float maxDiff)
 {
@@ -334,8 +273,9 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x)
         return false;
     }
 
-    memset(liquid_show, 0, sizeof(liquid_show));
-    memset(liquid_type, 0, sizeof(liquid_type));
+    //memset(liquid_show, 0, sizeof(liquid_show));
+    //memset(liquid_type, 0, sizeof(liquid_type));
+	juicer->getLiquid(cell_x,cell_y, &liquid_type[0][0], &liquid_show[0][0], &liquid_height[0][0]);
 
     // Prepare map header
     map_fileheader map;
@@ -628,9 +568,17 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x)
                     {
                         int cx = j*ADT_CELL_SIZE + x + h->xOffset;
                         if (height)
-                            liquid_height[cy][cx] = height[pos];
+						{
+							float high=height[pos];
+							if (high> liquid_height[cy][cx])    //Just incase there happens to be a city floating in air over a river ;)
+								liquid_height[cy][cx] = high;
+						}
                         else
-                            liquid_height[cy][cx] = h->heightLevel1;
+						{
+							float high= h->heightLevel1;
+							if (high> liquid_height[cy][cx])
+								liquid_height[cy][cx] = high;
+						}
                         pos++;
                     }
                 }
@@ -686,7 +634,9 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x)
                     for (int x=0; x<= ADT_CELL_SIZE; x++)
                     {
                         int cx = j*ADT_CELL_SIZE + x;
-                        liquid_height[cy][cx] = liquid->liquid[y][x].height;
+						float high=liquid->liquid[y][x].height;
+						if (high> liquid_height[cy][cx])
+                            liquid_height[cy][cx] = high;
                     }
                 }
             }
@@ -841,7 +791,7 @@ void ExtractMapsFromMpq()
     std::string path = output_path;
     path += "/maps/";
     CreateDir(path);
-
+	juicer=new wmoJuicer(path.c_str());
     printf("Convert map files\n");
     for(uint32 z = 0; z < map_count; ++z)
     {
@@ -854,7 +804,7 @@ void ExtractMapsFromMpq()
 //            printf("Error loading %s map wdt data\n", map_ids[z].name);
             continue;
         }
-
+		juicer->Juice(map_ids[z].name, map_ids[z].id, &wdt);
         for(uint32 y = 0; y < WDT_MAP_SIZE; ++y)
         {
             for(uint32 x = 0; x < WDT_MAP_SIZE; ++x)
@@ -866,7 +816,7 @@ void ExtractMapsFromMpq()
                 ConvertADT(mpq_filename, output_filename, y, x);
             }
             // draw progress bar
-            printf("Processing........................%d%%\r", (100 * (y+1)) / WDT_MAP_SIZE);
+            printf("Processing........................%d%%\r", 50+(50 * (y+1)) / WDT_MAP_SIZE);
         }
     }
     delete [] areas;
@@ -1022,3 +972,4 @@ int main(int argc, char * arg[])
 
     return 0;
 }
+
