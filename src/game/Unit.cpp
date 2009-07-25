@@ -4748,10 +4748,15 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     triggered_spell_id = 25997;
                     break;
                 }
-                // Sweeping Strikes
+
+                // Sweeping Strikes (NPC spells may be)
                 case 18765:
                 case 35429:
                 {
+                    // prevent chain of triggered spell from same triggered spell
+                    if(procSpell && procSpell->Id == 26654)
+                        return false;
+
                     target = SelectNearbyTarget();
                     if(!target)
                         return false;
@@ -5316,6 +5321,21 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
             {
                 triggered_spell_id = 59653;
                 basepoints0 = GetShieldBlockValue() * triggerAmount / 100;
+                break;
+            }
+
+            // Sweeping Strikes
+            if (dummySpell->Id == 12328)
+            {
+                // prevent chain of triggered spell from same triggered spell
+                if(procSpell && procSpell->Id == 26654)
+                    return false;
+
+                target = SelectNearbyTarget();
+                if(!target)
+                    return false;
+
+                triggered_spell_id = 26654;
                 break;
             }
             break;
