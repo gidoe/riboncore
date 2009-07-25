@@ -2347,6 +2347,29 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     // AT APPLY
     if(apply)
     {
+        // Overpower
+        if (caster && m_spellProto->SpellFamilyName == SPELLFAMILY_WARRIOR && 
+            m_spellProto->SpellFamilyFlags & 0x4)
+        {
+            // Must be casting target
+            if (!m_target->IsNonMeleeSpellCasted(false))
+                return;
+            if (Aura * aur = caster->GetAura(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARRIOR, 2775, 0))
+            {
+                switch (aur->GetId())
+                {
+                    // Unrelenting Assault, rank 1
+                    case 46859:
+                        caster->CastSpell(m_target,64849,true,NULL,aur);
+                        break;
+                    // Unrelenting Assault, rank 2
+                    case 46860:
+                        caster->CastSpell(m_target,64850,true,NULL,aur);
+                        break;
+                }
+            }
+            return;
+        }
         switch(GetId())
         {
             case 1515:                                      // Tame beast
