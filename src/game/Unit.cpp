@@ -2721,9 +2721,10 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     if (pVictim->GetTypeId()==TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
         return SPELL_MISS_EVADE;
 
-    // Check for immune
-    if (pVictim->IsImmunedToSpell(spell))
-        return SPELL_MISS_IMMUNE;
+    // Dispel is positive when casted on friendly target and negative otherwise
+    if (IsDispelSpell(spell))
+        if (this->IsFriendlyTo(pVictim))
+            return SPELL_MISS_NONE;
 
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
@@ -9360,6 +9361,10 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo)
     if (spellInfo->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY || spellInfo->Id == 32592)                 // unaffected by invulnerability
         return false;
 
+    // Priest's Mass Dispel can not be immuned (but can be resisted)
+    if (spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && spellInfo->SpellFamilyFlags == UI64LIT(0x8000000000))
+        return false;
+
     SpellImmuneList const& dispelList = m_spellImmune[IMMUNITY_DISPEL];
     for(SpellImmuneList::const_iterator itr = dispelList.begin(); itr != dispelList.end(); ++itr)
         if(itr->type == spellInfo->Dispel)
@@ -9377,12 +9382,13 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo)
 
     SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
     for(SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
-    {
         if(itr->type == spellInfo->Mechanic)
-        {
             return true;
-        }
-    }
+
+    SpellImmuneList const& damageList = m_spellImmune[IMMUNITY_DAMAGE];
+    for (SpellImmuneList::const_iterator itr = damageList.begin(); itr != damageList.end(); ++itr)
+        if(itr->type & GetSpellSchoolMask(spellInfo))
+            return true;
 
     return false;
 }
