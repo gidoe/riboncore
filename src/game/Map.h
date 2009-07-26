@@ -41,13 +41,10 @@ class WorldPacket;
 class InstanceData;
 class Group;
 class InstanceSave;
-<<<<<<< HEAD:src/game/Map.h
 class BattleGround;
-=======
+
 struct ScriptInfo;
 struct ScriptAction;
->>>>>>> 114f504b4930d41a2b3113420978479fa777fb74:src/game/Map.h
-
 
 typedef ACE_RW_Thread_Mutex GridRWLock;
 

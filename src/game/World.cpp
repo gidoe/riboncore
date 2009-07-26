@@ -80,7 +80,6 @@ float World::m_MaxVisibleDistanceInFlight     = DEFAULT_VISIBILITY_DISTANCE;
 float World::m_VisibleUnitGreyDistance        = 0;
 float World::m_VisibleObjectGreyDistance      = 0;
 
-<<<<<<< HEAD:src/game/World.cpp
 //movement anticheat
 bool World::m_EnableMvAnticheat = true;
 uint32  World::m_TeleportToPlaneAlarms = 50;
@@ -95,8 +94,6 @@ struct ScriptAction
     ScriptInfo const* script;                               // pointer to static script data
 };
 
-=======
->>>>>>> 114f504b4930d41a2b3113420978479fa777fb74:src/game/World.cpp
 /// World constructor
 World::World()
 {
@@ -1680,11 +1677,6 @@ void World::Update(uint32 diff)
         ///- Update objects when the timer has passed (maps, transport, creatures,...)
         MapManager::Instance().Update(diff);                // As interval = 0
 
-<<<<<<< HEAD:src/game/World.cpp
-        ///- Process necessary scripts
-        if (!m_scriptSchedule.empty())
-            ScriptsProcess();
-
         #if COMPILER != COMPILER_MICROSOFT
         omp_set_num_threads(sWorld.getConfig(CONFIG_NUMTHREADS));
         #pragma omp task nowait
@@ -1700,9 +1692,6 @@ void World::Update(uint32 diff)
         {
             sOutdoorPvPMgr.Update(diff);
         }
-=======
-        sBattleGroundMgr.Update(diff);
->>>>>>> 114f504b4930d41a2b3113420978479fa777fb74:src/game/World.cpp
     }
 
     // execute callbacks from sql queries that were queued recently
