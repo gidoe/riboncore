@@ -7109,17 +7109,6 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType, uint32 
 
             float chance = spellInfo->procChance;
 
-<<<<<<< HEAD:src/game/Player.cpp
-            if(spellData.SpellPPMRate)
-            {
-                uint32 WeaponSpeed = GetAttackTime(attType);
-                chance = GetPPMProcChance(WeaponSpeed, spellData.SpellPPMRate/*, spellInfo*/);
-            }
-            else if(chance > 100.0f)
-            {
-                chance = GetWeaponProcChance();
-            }
-=======
         if(spellData.SpellPPMRate)
         {
             uint32 WeaponSpeed = proto->Delay;
@@ -7129,7 +7118,6 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType, uint32 
         {
             chance = GetWeaponProcChance();
         }
->>>>>>> 9bc86d196475a37cae5def6b8b0eca5022e486f0:src/game/Player.cpp
 
             if (roll_chance_f(chance))
                 CastSpell(Target, spellInfo->Id, true, item);
@@ -7169,27 +7157,6 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType, uint32 
                 continue;
             }
 
-<<<<<<< HEAD:src/game/Player.cpp
-            SpellProcItemEnchantEntry const * spellProcItem;
-            spellProcItem = spellmgr.GetSpellProcItemEnchant(spellInfo->Id);
-            float chance = pEnchant->amount[s] != 0 ? float(pEnchant->amount[s]) : GetWeaponProcChance();
-
-            if (entry && entry->PPMChance)
-            {
-                uint32 WeaponSpeed = GetAttackTime(attType);
-                chance = GetPPMProcChance(WeaponSpeed, entry->PPMChance/*, spellInfo*/);
-            }
-            else if (entry && entry->customChance)
-                chance = entry->customChance;
-
-            // Apply spell mods
-            ApplySpellMod(pEnchant->spellid[s],SPELLMOD_CHANCE_OF_SUCCESS,chance);
-
-            if (spellProcItem && spellProcItem->chance)
-            {
-                chance = spellProcItem->chance;
-            }
-=======
             // Use first rank to access spell item enchant procs
             uint32 firstRank = spellmgr.GetFirstSpellInChain(spellInfo->Id);
             float ppmRate = spellmgr.GetItemEnchantProcChance(firstRank);
@@ -7202,7 +7169,6 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType, uint32 
             ApplySpellMod(spellInfo->Id,SPELLMOD_CHANCE_OF_SUCCESS,chance);
             ApplySpellMod(spellInfo->Id,SPELLMOD_FREQUENCY_OF_SUCCESS,chance);
 
->>>>>>> 9bc86d196475a37cae5def6b8b0eca5022e486f0:src/game/Player.cpp
             if (roll_chance_f(chance))
             {
                 if(IsPositiveSpell(pEnchant->spellid[s]))

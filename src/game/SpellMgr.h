@@ -485,7 +485,6 @@ struct SpellEnchantProcEntry
 
 typedef UNORDERED_MAP<uint32, SpellProcEventEntry> SpellProcEventMap;
 typedef UNORDERED_MAP<uint32, SpellBonusEntry>     SpellBonusMap;
-typedef UNORDERED_MAP<uint32, SpellProcItemEnchantEntry>   SpellProcItemEnchantMap;
 typedef UNORDERED_MAP<uint32, SpellEnchantProcEntry> SpellEnchantProcEventMap;
 
 #define ELIXIR_BATTLE_MASK    0x1
@@ -728,15 +727,6 @@ class SpellMgr
             return NULL;
         }
 
-<<<<<<< HEAD:src/game/SpellMgr.h
-        // Spell proc item enchant
-        SpellProcItemEnchantEntry const* GetSpellProcItemEnchant(uint32 spellId) const
-        {
-            SpellProcItemEnchantMap::const_iterator itr = mSpellProcItemEnchantMap.find(spellId);
-            if( itr != mSpellProcItemEnchantMap.end( ) )
-                return &itr->second;
-            return NULL;
-=======
         // Spell procs from item enchants
         float GetItemEnchantProcChance(uint32 spellid) const
         {
@@ -745,7 +735,6 @@ class SpellMgr
                 return 0.0f;
 
             return itr->second;
->>>>>>> 9bc86d196475a37cae5def6b8b0eca5022e486f0:src/game/SpellMgr.h
         }
 
         static bool IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spellProcEvent, uint32 EventProcFlag, SpellEntry const * procSpell, uint32 procFlags, uint32 procExtra, bool active);
@@ -1005,10 +994,7 @@ class SpellMgr
         SpellThreatMap     mSpellThreatMap;
         SpellProcEventMap  mSpellProcEventMap;
         SpellProcItemEnchantMap mSpellProcItemEnchantMap;
-<<<<<<< HEAD:src/game/SpellMgr.h
         SpellEnchantProcEventMap     mSpellEnchantProcEventMap;
-=======
->>>>>>> 9bc86d196475a37cae5def6b8b0eca5022e486f0:src/game/SpellMgr.h
         SpellBonusMap      mSpellBonusMap;
         SkillLineAbilityMap mSkillLineAbilityMap;
         SpellPetAuraMap     mSpellPetAuraMap;
