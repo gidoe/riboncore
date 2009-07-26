@@ -4816,6 +4816,9 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
                 break;
             default: break;
         }
+        // If no flags are given and it procs due to proc chance
+        if (!GetSpellProto()->procFlags && GetSpellProto()->procChance >= 100)
+            m_target->CastSpell(m_target,GetSpellProto()->EffectTriggerSpell[GetEffIndex()],true);
     }
     else
     {
