@@ -155,6 +155,7 @@ scripts/zone/caverns_of_time/old_hillsbrad/boss_leutenant_drake.cpp \
 scripts/zone/caverns_of_time/old_hillsbrad/def_old_hillsbrad.h \
 scripts/zone/caverns_of_time/old_hillsbrad/instance_old_hillsbrad.cpp \
 scripts/zone/caverns_of_time/old_hillsbrad/old_hillsbrad.cpp \
+scripts/zone/caverns_of_time/culling_of_stratholme/boss_chrono_lord_epoch.cpp \
 scripts/zone/coilfang_resevoir/serpent_shrine/boss_fathomlord_karathress.cpp \
 scripts/zone/coilfang_resevoir/serpent_shrine/boss_hydross_the_unstable.cpp \
 scripts/zone/coilfang_resevoir/serpent_shrine/boss_lady_vashj.cpp \

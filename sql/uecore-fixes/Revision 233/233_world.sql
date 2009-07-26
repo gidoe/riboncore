@@ -1,0 +1,1 @@
+UPDATE creature_template SET scriptname='boss_chrono_lord_epoch' WHERE entry='26532';

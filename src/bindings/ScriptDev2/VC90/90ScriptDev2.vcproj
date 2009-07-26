@@ -2082,6 +2082,10 @@
 					<Filter
 						Name="Culling of Stratholme"
 						>
+						<File
+							RelativePath="..\scripts\zone\caverns_of_time\culling_of_stratholme\boss_chrono_lord_epoch.cpp"
+							>
+						</File>
 					</Filter>
 					<Filter
 						Name="Old Hillsbrad"

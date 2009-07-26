@@ -203,6 +203,9 @@ extern void AddSC_hyjal();
 extern void AddSC_boss_archimonde();
 extern void AddSC_instance_mount_hyjal();
 
+//--Culling of Stratholme
+extern void AddSC_boss_chrono_lord_epoch();
+
 //--Old Hillsbrad
 extern void AddSC_boss_captain_skarloc();
 extern void AddSC_boss_epoch_hunter();
@@ -1096,6 +1099,9 @@ void ScriptsInit()
     AddSC_hyjal();
     AddSC_boss_archimonde();
     AddSC_instance_mount_hyjal();
+
+	//--Culling of Stratholme
+	AddSC_boss_chrono_lord_epoch();
 
     //--Old Hillsbrad
     AddSC_boss_captain_skarloc();
