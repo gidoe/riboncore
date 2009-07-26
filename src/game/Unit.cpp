@@ -696,7 +696,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             if(!cVictim->isPet())
             {
                 cVictim->DeleteThreatList();
-                if (cVictim->GetCreatureInfo()->lootid && !cVictim->loot.empty())
+                if (cVictim->GetCreatureInfo()->lootid)
                     cVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             }
             // Call creature just died function
