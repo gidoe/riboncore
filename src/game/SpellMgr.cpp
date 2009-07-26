@@ -787,6 +787,7 @@ void SpellMgr::LoadSpellProcEvents()
 
 void SpellMgr::LoadSpellProcItemEnchant()
 {
+<<<<<<< HEAD:src/game/SpellMgr.cpp
     mSpellProcItemEnchantMap.clear();                             // need for reload case
     uint32 count = 0;
     //                                                0      1                       
@@ -797,10 +798,28 @@ void SpellMgr::LoadSpellProcItemEnchant()
         bar.step();
         sLog.outString();
         sLog.outString( ">> Loaded %u spell proc item enchant data", count);
+=======
+    mSpellProcItemEnchantMap.clear();                       // need for reload case
+
+    uint32 count = 0;
+
+    //                                                0      1
+    QueryResult *result = WorldDatabase.Query("SELECT entry, ppmRate FROM spell_proc_item_enchant");
+    if( !result )
+    {
+
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outString( ">> Loaded %u proc item enchant definitions", count );
+>>>>>>> 9bc86d196475a37cae5def6b8b0eca5022e486f0:src/game/SpellMgr.cpp
         return;
     }
 
     barGoLink bar( result->GetRowCount() );
+<<<<<<< HEAD:src/game/SpellMgr.cpp
     do
     {
         Field *fields = result->Fetch();
@@ -809,22 +828,54 @@ void SpellMgr::LoadSpellProcItemEnchant()
 
         const SpellEntry *spell = sSpellStore.LookupEntry(entry);
         if (!spell)
+=======
+
+    do
+    {
+        Field *fields = result->Fetch();
+
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+        float ppmRate = fields[1].GetFloat();
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(entry);
+
+        if (!spellInfo)
+>>>>>>> 9bc86d196475a37cae5def6b8b0eca5022e486f0:src/game/SpellMgr.cpp
         {
             sLog.outErrorDb("Spell %u listed in `spell_proc_item_enchant` does not exist", entry);
             continue;
         }
 
+<<<<<<< HEAD:src/game/SpellMgr.cpp
         SpellProcItemEnchantEntry spie;
 
         spie.chance = fields[1].GetFloat();
 
         mSpellProcItemEnchantMap[entry] = spie;
+=======
+        if ( GetFirstSpellInChain(entry) != entry )
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_proc_item_enchant` is not first rank in chain", entry);
+            // prevent loading since it won't have an effect anyway
+            continue;
+        }
+
+        mSpellProcItemEnchantMap[entry] = ppmRate;
+
+        ++count;
+>>>>>>> 9bc86d196475a37cae5def6b8b0eca5022e486f0:src/game/SpellMgr.cpp
     } while( result->NextRow() );
 
     delete result;
 
     sLog.outString();
+<<<<<<< HEAD:src/game/SpellMgr.cpp
     sLog.outString( ">> Loaded %u extra spell proc enchant item",  count);
+=======
+    sLog.outString( ">> Loaded %u proc item enchant definitions", count );
+>>>>>>> 9bc86d196475a37cae5def6b8b0eca5022e486f0:src/game/SpellMgr.cpp
 }
 
 void SpellMgr::LoadSpellBonusess()
@@ -990,12 +1041,50 @@ void SpellMgr::LoadSpellElixirs()
 
 void SpellMgr::LoadSpellThreats()
 {
-    sSpellThreatStore.Free();                               // for reload
+    mSpellThreatMap.clear();                                // need for reload case
 
-    sSpellThreatStore.Load();
+    uint32 count = 0;
 
-    sLog.outString( ">> Loaded %u aggro generating spells", sSpellThreatStore.RecordCount );
+    //                                                0      1
+    QueryResult *result = WorldDatabase.Query("SELECT entry, Threat FROM spell_threat");
+    if( !result )
+    {
+
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outString( ">> Loaded %u aggro generating spells", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        Field *fields = result->Fetch();
+
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+        uint16 Threat = fields[1].GetUInt16();
+
+        if (!sSpellStore.LookupEntry(entry))
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_threat` does not exist", entry);
+            continue;
+        }
+
+        mSpellThreatMap[entry] = Threat;
+
+        ++count;
+    } while( result->NextRow() );
+
+    delete result;
+
     sLog.outString();
+    sLog.outString( ">> Loaded %u aggro generating spells", count );
 }
 
 void SpellMgr::LoadSpellEnchantProcData()

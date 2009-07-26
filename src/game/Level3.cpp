@@ -1007,7 +1007,11 @@ bool ChatHandler::HandleReloadSpellProcItemEnchantCommand(const char*)
 {
     sLog.outString( "Re-Loading Spell Proc Item Enchant..." );
     spellmgr.LoadSpellProcItemEnchant();
+<<<<<<< HEAD:src/game/Level3.cpp
     SendGlobalSysMessage("DB table `spell_proc_item_enchant` (temporarity table for item proc) reloaded.");
+=======
+    SendGlobalSysMessage("DB table `spell_proc_item_enchant` (item enchantment ppm) reloaded.");
+>>>>>>> 9bc86d196475a37cae5def6b8b0eca5022e486f0:src/game/Level3.cpp
     return true;
 }
 

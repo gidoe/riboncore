@@ -7109,6 +7109,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType, uint32 
 
             float chance = spellInfo->procChance;
 
+<<<<<<< HEAD:src/game/Player.cpp
             if(spellData.SpellPPMRate)
             {
                 uint32 WeaponSpeed = GetAttackTime(attType);
@@ -7118,6 +7119,17 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType, uint32 
             {
                 chance = GetWeaponProcChance();
             }
+=======
+        if(spellData.SpellPPMRate)
+        {
+            uint32 WeaponSpeed = proto->Delay;
+            chance = GetPPMProcChance(WeaponSpeed, spellData.SpellPPMRate);
+        }
+        else if(chance > 100.0f)
+        {
+            chance = GetWeaponProcChance();
+        }
+>>>>>>> 9bc86d196475a37cae5def6b8b0eca5022e486f0:src/game/Player.cpp
 
             if (roll_chance_f(chance))
                 CastSpell(Target, spellInfo->Id, true, item);
@@ -7157,6 +7169,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType, uint32 
                 continue;
             }
 
+<<<<<<< HEAD:src/game/Player.cpp
             SpellProcItemEnchantEntry const * spellProcItem;
             spellProcItem = spellmgr.GetSpellProcItemEnchant(spellInfo->Id);
             float chance = pEnchant->amount[s] != 0 ? float(pEnchant->amount[s]) : GetWeaponProcChance();
@@ -7176,6 +7189,20 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType, uint32 
             {
                 chance = spellProcItem->chance;
             }
+=======
+            // Use first rank to access spell item enchant procs
+            uint32 firstRank = spellmgr.GetFirstSpellInChain(spellInfo->Id);
+            float ppmRate = spellmgr.GetItemEnchantProcChance(firstRank);
+
+            float chance = ppmRate
+                ? GetPPMProcChance(proto->Delay, ppmRate)
+                : pEnchant->amount[s] != 0 ? float(pEnchant->amount[s]) : GetWeaponProcChance();
+
+
+            ApplySpellMod(spellInfo->Id,SPELLMOD_CHANCE_OF_SUCCESS,chance);
+            ApplySpellMod(spellInfo->Id,SPELLMOD_FREQUENCY_OF_SUCCESS,chance);
+
+>>>>>>> 9bc86d196475a37cae5def6b8b0eca5022e486f0:src/game/Player.cpp
             if (roll_chance_f(chance))
             {
                 if(IsPositiveSpell(pEnchant->spellid[s]))

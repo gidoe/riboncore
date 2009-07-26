@@ -36,8 +36,6 @@ class Player;
 class Spell;
 struct SpellModifier;
 
-extern SQLStorage sSpellThreatStore;
-
 // only used in code
 enum SpellCategories
 {
@@ -497,6 +495,8 @@ typedef UNORDERED_MAP<uint32, SpellEnchantProcEntry> SpellEnchantProcEventMap;
 #define ELIXIR_SHATTRATH_MASK 0x8
 
 typedef std::map<uint32, uint8> SpellElixirMap;
+typedef std::map<uint32, float> SpellProcItemEnchantMap;
+typedef std::map<uint32, uint16> SpellThreatMap;
 
 // Spell script target related declarations (accessed using SpellMgr functions)
 enum SpellTargetType
@@ -710,6 +710,15 @@ class SpellMgr
                 return SPELL_NORMAL;
         }
 
+        uint16 GetSpellThreat(uint32 spellid) const
+        {
+            SpellThreatMap::const_iterator itr = mSpellThreatMap.find(spellid);
+            if(itr==mSpellThreatMap.end())
+                return 0;
+
+            return itr->second;
+        }
+
         // Spell proc events
         SpellProcEventEntry const* GetSpellProcEvent(uint32 spellId) const
         {
@@ -719,6 +728,7 @@ class SpellMgr
             return NULL;
         }
 
+<<<<<<< HEAD:src/game/SpellMgr.h
         // Spell proc item enchant
         SpellProcItemEnchantEntry const* GetSpellProcItemEnchant(uint32 spellId) const
         {
@@ -726,6 +736,16 @@ class SpellMgr
             if( itr != mSpellProcItemEnchantMap.end( ) )
                 return &itr->second;
             return NULL;
+=======
+        // Spell procs from item enchants
+        float GetItemEnchantProcChance(uint32 spellid) const
+        {
+            SpellProcItemEnchantMap::const_iterator itr = mSpellProcItemEnchantMap.find(spellid);
+            if(itr==mSpellProcItemEnchantMap.end())
+                return 0.0f;
+
+            return itr->second;
+>>>>>>> 9bc86d196475a37cae5def6b8b0eca5022e486f0:src/game/SpellMgr.h
         }
 
         static bool IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spellProcEvent, uint32 EventProcFlag, SpellEntry const * procSpell, uint32 procFlags, uint32 procExtra, bool active);
@@ -982,9 +1002,13 @@ class SpellMgr
         SpellLearnSpellMap mSpellLearnSpells;
         SpellTargetPositionMap mSpellTargetPositions;
         SpellElixirMap     mSpellElixirs;
+        SpellThreatMap     mSpellThreatMap;
         SpellProcEventMap  mSpellProcEventMap;
         SpellProcItemEnchantMap mSpellProcItemEnchantMap;
+<<<<<<< HEAD:src/game/SpellMgr.h
         SpellEnchantProcEventMap     mSpellEnchantProcEventMap;
+=======
+>>>>>>> 9bc86d196475a37cae5def6b8b0eca5022e486f0:src/game/SpellMgr.h
         SpellBonusMap      mSpellBonusMap;
         SkillLineAbilityMap mSkillLineAbilityMap;
         SpellPetAuraMap     mSpellPetAuraMap;

@@ -1201,7 +1201,11 @@ void World::SetInitialWorldSettings()
     spellmgr.LoadSpellBonusess();
 
     sLog.outString( "Loading Spell Proc Item Enchant..." );
+<<<<<<< HEAD:src/game/World.cpp
     spellmgr.LoadSpellProcItemEnchant();
+=======
+    spellmgr.LoadSpellProcItemEnchant();                    // must be after LoadSpellChains
+>>>>>>> 9bc86d196475a37cae5def6b8b0eca5022e486f0:src/game/World.cpp
 
     sLog.outString( "Loading Aggro Spells Definitions...");
     spellmgr.LoadSpellThreats();
