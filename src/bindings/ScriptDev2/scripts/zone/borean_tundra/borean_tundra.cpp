@@ -24,6 +24,7 @@ EndScriptData */
 /* ContentData
 npc_tiare
 npc_surristrasz
+npc_khunok_the_behemoth
 EndContentData */
 
 #include "precompiled.h"
@@ -87,6 +88,42 @@ bool GossipSelect_npc_surristrasz(Player* pPlayer, Creature* pCreature, uint32 s
     return true;
 }
 
+/*######
+## npc_khunok_the_behemoth
+######*/
+
+struct MANGOS_DLL_DECL npc_khunok_the_behemothAI : public ScriptedAI
+{
+    npc_khunok_the_behemothAI(Creature *c) : ScriptedAI(c) {}
+
+	void Reset() { }
+
+    void MoveInLineOfSight(Unit *who)
+    {
+        ScriptedAI::MoveInLineOfSight(who);
+
+        if(who->GetTypeId() != TYPEID_UNIT)
+            return;
+
+        if(who->GetEntry() == 25861 && m_creature->IsWithinDistInMap(who, 10.0f))
+        {
+            if(Unit *owner = who->GetOwner())
+            {
+                if(owner->GetTypeId() == TYPEID_PLAYER)
+                {
+                    DoCast(owner, 46231, true);
+                    ((Creature*)who)->ForcedDespawn();
+                }
+            }
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_khunok_the_behemoth(Creature *_Creature)
+{
+    return new npc_khunok_the_behemothAI(_Creature);
+}
+
 void AddSC_borean_tundra()
 {
     Script *newscript;
@@ -101,5 +138,10 @@ void AddSC_borean_tundra()
     newscript->Name = "npc_surristrasz";
     newscript->pGossipHello =  &GossipHello_npc_surristrasz;
     newscript->pGossipSelect = &GossipSelect_npc_surristrasz;
+    newscript->RegisterSelf();
+
+	newscript = new Script;
+    newscript->Name="npc_khunok_the_behemoth";
+    newscript->GetAI = &GetAI_npc_khunok_the_behemoth;
     newscript->RegisterSelf();
 }
