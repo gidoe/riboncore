@@ -2398,6 +2398,14 @@
 					<Filter
 						Name="Ahn&apos;kahet"
 						>
+						<File
+							RelativePath="..\scripts\zone\azjol-nerub\ahn_kahet\boss_amanitar.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\scripts\zone\azjol-nerub\ahn_kahet\def_ahnkahet.h"
+							>
+						</File>
 					</Filter>
 					<Filter
 						Name="Azjol-Nerub"
