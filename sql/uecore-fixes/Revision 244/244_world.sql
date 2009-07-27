@@ -1,0 +1,1 @@
+update creature_template set scriptname = 'boss_amanitar' where entry = '30258';
