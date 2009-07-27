@@ -3177,16 +3177,35 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         {
             // remove movement affects
             m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
+<<<<<<< HEAD:src/game/SpellAuras.cpp
             Unit::AuraList slowingAuras = m_target->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
             for (Unit::AuraList::iterator iter = slowingAuras.begin(); iter != slowingAuras.end(); ++iter)
             {
                 const SpellEntry* aurSpellInfo = (*iter)->GetSpellProto();
+=======
+            Unit::AuraList const& slowingAuras = m_target->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+            for (Unit::AuraList::const_iterator iter = slowingAuras.begin(); iter != slowingAuras.end();)
+            {
+                SpellEntry const* aurSpellInfo = (*iter)->GetSpellProto();
+>>>>>>> c60ab8eb5815f91bddaba691b5085c2d76e06c58:src/game/SpellAuras.cpp
 
                 // If spell that caused this aura has Croud Control or Daze effect
                 if((GetAllSpellMechanicMask(aurSpellInfo) & MECHANIC_NOT_REMOVED_BY_SHAPESHIFT) ||
                     // some Daze spells have these parameters instead of MECHANIC_DAZE
                     (aurSpellInfo->SpellIconID == 15 && aurSpellInfo->Dispel == 0))
+<<<<<<< HEAD:src/game/SpellAuras.cpp
                     continue;
+=======
+                {
+                    ++iter;
+                    continue;
+                }
+
+                // All OK, remove aura now
+                m_target->RemoveAurasDueToSpellByCancel(aurSpellInfo->Id);
+                iter = slowingAuras.begin();
+            }
+>>>>>>> c60ab8eb5815f91bddaba691b5085c2d76e06c58:src/game/SpellAuras.cpp
 
                 // All OK, remove aura now
                 m_target->RemoveAurasDueToSpellByCancel(aurSpellInfo->Id);
@@ -3194,6 +3213,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             // and polymorphic affects
             if(m_target->IsPolymorphed())
                 m_target->RemoveAurasDueToSpell(m_target->getTransForm());
+
             break;
         }
         default:

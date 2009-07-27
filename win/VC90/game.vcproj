@@ -580,7 +580,15 @@
 				>
 			</File>
 			<File
+<<<<<<< HEAD:win/VC90/game.vcproj
 				RelativePath="..\..\src\game\ChatHandler.cpp"
+=======
+				RelativePath="..\..\src\game\ChannelMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ChannelMgr.h"
+>>>>>>> c60ab8eb5815f91bddaba691b5085c2d76e06c58:win/VC90/game.vcproj
 				>
 			</File>
 			<File

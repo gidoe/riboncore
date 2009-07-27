@@ -117,7 +117,11 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Summons()
     //Drop Existing EventSummon Map
     m_CreatureEventAI_Summon_Map.clear();
 
+<<<<<<< HEAD:src/game/CreatureEventAIMgr.cpp
     //Gather additional data for EventAI
+=======
+    // Gather additional data for EventAI
+>>>>>>> c60ab8eb5815f91bddaba691b5085c2d76e06c58:src/game/CreatureEventAIMgr.cpp
     QueryResult *result = WorldDatabase.Query("SELECT id, position_x, position_y, position_z, orientation, spawntimesecs FROM creature_ai_summons");
     if (result)
     {
@@ -169,7 +173,11 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
     //Drop Existing EventAI List
     m_CreatureEventAI_Event_Map.clear();
 
+<<<<<<< HEAD:src/game/CreatureEventAIMgr.cpp
     //Gather event data
+=======
+    // Gather event data
+>>>>>>> c60ab8eb5815f91bddaba691b5085c2d76e06c58:src/game/CreatureEventAIMgr.cpp
     QueryResult *result = WorldDatabase.Query("SELECT id, creature_id, event_type, event_inverse_phase_mask, event_chance, event_flags, "
         "event_param1, event_param2, event_param3, event_param4, "
         "action1_type, action1_param1, action1_param2, action1_param3, "
