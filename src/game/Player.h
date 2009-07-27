@@ -878,7 +878,9 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADCRITERIAPROGRESS     = 19,
     PLAYER_LOGIN_QUERY_LOADEQUIPMENTSETS        = 20,
     PLAYER_LOGIN_QUERY_LOADBATTLEGROUND         = 21,
-    MAX_PLAYER_LOGIN_QUERY                      = 22
+    PLAYER_LOGIN_QUERY_LOADGLYPHS               = 22,
+
+    MAX_PLAYER_LOGIN_QUERY                      = 23
 };
 
 enum PlayerDelayedOperations
@@ -1474,6 +1476,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RemovePetActionBar();
 
         bool HasSpell(uint32 spell) const;
+        bool HasSpellForSpec(uint32 spell, uint32 spec) const;
         bool HasActiveSpell(uint32 spell) const;            // show in spellbook
         TrainerSpellState GetTrainerSpellState(TrainerSpell const* trainer_spell) const;
         bool IsSpellFitByClassAndRace( uint32 spell_id ) const;
@@ -1505,16 +1508,22 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         // Dual Spec
         uint32 GetActiveSpec() { return m_activeSpec; }
-        void SetActiveSpec(uint32 spec) { m_activeSpec = spec; }
-        uint32 GetSpecsCount() { return m_specsCount; }
-        void SetSpecsCount(uint32 count) { m_specsCount = count; }
-        void ActivateSpec(uint32 specNum);
+        uint32 GetSpecCount() { return m_specCount; }
+        
+        void ActivatePrimarySpec();
+        void ActivateSecondarySpec();
+        void ActivateSpec(uint32 spec);
+        void LearnSecondarySpec();
+        void UnlearnSecondarySpec();
 
         void InitGlyphsForLevel();
         void SetGlyphSlot(uint8 slot, uint32 slottype) { SetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_1 + slot, slottype); }
         uint32 GetGlyphSlot(uint8 slot) { return GetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_1 + slot); }
-        void SetGlyph(uint8 slot, uint32 glyph) { SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, glyph); }
-        uint32 GetGlyph(uint8 slot) { return GetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot); }
+        void SetGlyph(uint8 slot, uint32 glyph) { 
+        	SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, glyph); 
+        	m_Glyphs[m_activeSpec][slot] = glyph;
+        }
+        uint32 GetGlyph(uint8 slot) { return m_Glyphs[m_activeSpec][slot]; }
 
         uint32 GetFreePrimaryProfessionPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS2); }
         void SetFreePrimaryProfessions(uint16 profs) { SetUInt32Value(PLAYER_CHARACTER_POINTS2, profs); }
@@ -1585,6 +1594,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         ActionButton* addActionButton(uint8 button, uint32 action, uint8 type);
         void removeActionButton(uint8 button);
         void SendInitialActionButtons() const;
+        void SendActionButtons(uint32 spec) const;
 
         PvPInfo pvpInfo;
         void UpdatePvP(bool state, bool ovrride=false);
@@ -2283,6 +2293,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadBattleGround(QueryResult *result);
         void _LoadArenaTeamInfo(QueryResult *result);
         void _LoadEquipmentSets(QueryResult *result);
+        void _LoadGlyphs(QueryResult *result);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -2297,6 +2308,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveSpells();
         void _SaveBattleGround();
         void _SaveEquipmentSets();
+        void _SaveGlyphs();
 
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
@@ -2349,7 +2361,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_lastPotionId;                              // last used health/mana potion in combat, that block next potion use
 
         uint32 m_activeSpec;
-        uint32 m_specsCount;
+        uint32 m_specCount;
+
+        uint32 m_Glyphs[2][MAX_GLYPH_SLOT_INDEX];
 
         ActionButtonList m_actionButtons;
 
