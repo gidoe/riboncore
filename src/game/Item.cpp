@@ -766,7 +766,7 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
     if(spellInfo->EquippedItemInventoryTypeMask != 0)       // 0 == any inventory type
     {
         if(!((spellInfo->EquippedItemInventoryTypeMask & (1 << proto->InventoryType)) ||
-            (spellInfo->EquippedItemInventoryTypeMask & (1 << 22) && proto->InventoryType == 13)))
+            (spellInfo->EquippedItemInventoryTypeMask & 0x400000 && proto->InventoryType == 13)))
             return false;                                   // inventory type not present in mask
     }
 
