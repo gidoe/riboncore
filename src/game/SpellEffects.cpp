@@ -3148,6 +3148,12 @@ void Spell::EffectEnergize(uint32 i)
     if(unitTarget->GetMaxPower(power) == 0)
         return;
 
+   //Improved Stormstrike
+   if (m_spellInfo->Id == 63375)
+   {
+       damage = unitTarget->GetMaxPower(power)*damage/100;
+   }
+
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, damage, power);
 
     // Mad Alchemist's Potion

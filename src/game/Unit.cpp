@@ -7525,6 +7525,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 return false;
             break;
         }
+        // Improved Stormstrike
+        case 63375:
+        {
+            basepoints0 = int32(GetCreateMana() * 20 / 100);
+            break;
+        }
     }
 
     if( cooldown && GetTypeId()==TYPEID_PLAYER && ((Player*)this)->HasSpellCooldown(trigger_spell_id))
