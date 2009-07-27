@@ -7528,7 +7528,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 return false;
             break;
         }
-<<<<<<< HEAD:src/game/Unit.cpp
         // Glyph of death's Embrace
         case 58679:
         {
@@ -7540,15 +7539,9 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         // Improved Stormstrike
         case 63375:
         {
-            basepoints0 = int32(GetCreateMana() * 20 / 100);
-            break;
-        }
-=======
-        // Improved Stormstrike
-        case 63375:
             basepoints0 = int32(GetCreateMana() * triggerAmount / 100);
             break;
->>>>>>> c60ab8eb5815f91bddaba691b5085c2d76e06c58:src/game/Unit.cpp
+        }
     }
 
     if( cooldown && GetTypeId()==TYPEID_PLAYER && ((Player*)this)->HasSpellCooldown(trigger_spell_id))
