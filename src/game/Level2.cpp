@@ -34,6 +34,8 @@
 #include "AccountMgr.h"
 #include "GMTicketMgr.h"
 #include "WaypointManager.h"
+#include "WaypointMovementGenerator.h"
+#include "math.h"
 #include "Util.h"
 #include <cctype>
 #include <iostream>
@@ -2228,6 +2230,42 @@ bool ChatHandler::HandlePInfoAccountCommand(const char* args)
 
     PSendSysMessage(LANG_PINFO_ACCOUNT_ACCOUNT, username.c_str(), accId, security, last_ip.c_str(), last_login.c_str(), email.c_str(), joindate.c_str(), isbanned.c_str());
     PSendSysMessage(LANG_PINFO_CHARS, count, playerChars.c_str());
+
+    /*if (subcommandStr && strncmp(subcommandStr, "jail", 4) == 0)
+    {
+        if (target->m_jail_times > 0)
+        {
+            if(target->m_jail_release > 0)
+            {
+                time_t localtime;
+                localtime = time(NULL);
+                uint32 min_left = (uint32)floor(float(target->m_jail_release - localtime) / 60);
+
+                if (min_left <= 0)
+                {
+                    target->m_jail_release = 0;
+                    target->_SaveJail();
+                    PSendSysMessage(LANG_JAIL_GM_INFO, target->m_jail_char.c_str(), target->m_jail_times, 0, target->m_jail_gmchar.c_str(), target->m_jail_reason.c_str());
+                    return true;
+                }
+                else
+                {
+                    PSendSysMessage(LANG_JAIL_GM_INFO, target->m_jail_char.c_str(), target->m_jail_times, min_left, target->m_jail_gmchar.c_str(), target->m_jail_reason.c_str());
+                    return true;
+                }
+            }
+            else
+            {
+                PSendSysMessage(LANG_JAIL_GM_INFO, target->m_jail_char.c_str(), target->m_jail_times, 0, target->m_jail_gmchar.c_str(), target->m_jail_reason.c_str());
+                return true;
+            }
+        }
+        else
+        {
+            PSendSysMessage(LANG_JAIL_GM_NOINFO, target->GetName());
+            return true;
+        }
+    }*/
 
     return true;
 }
