@@ -33,12 +33,8 @@ mangos_worldd_SOURCES = \
 	WorldRunnable.h
 
 ## Link world daemon against the shared library
-<<<<<<< HEAD:src/mangosd/Makefile.am
-mangos_worldd_LDADD = ../bindings/ScriptDev2/libmangosscript.la ../game/libmangosgame.a ../shared/Database/libmangosdatabase.a ../shared/Config/libmangosconfig.a ../shared/Auth/libmangosauth.a ../shared/libmangosshared.a ../shared/vmap/libmangosvmaps.a ../framework/libmangosframework.a ../../dep/src/sockets/libmangossockets.a  ../../dep/src/g3dlite/libg3dlite.a
-mangos_worldd_LDFLAGS = -L../../dep/src/sockets -L../../dep/src/g3dlite -L../bindings/ScriptDev2/ -L$(libdir) $(MANGOS_LIBS) -export-dynamic
-=======
 mangos_worldd_LDADD = \
-	../bindings/universal/libmangosscript.la \
+	../bindings/ScriptDev2/libmangosscript.la \
 	../game/libmangosgame.a \
 	../shared/Database/libmangosdatabase.a \
 	../shared/Config/libmangosconfig.a \
@@ -50,7 +46,6 @@ mangos_worldd_LDADD = \
 	../../dep/src/g3dlite/libg3dlite.a
 
 mangos_worldd_LDFLAGS = -L../../dep/src/sockets -L../../dep/src/g3dlite -L../bindings/universal/ -L$(libdir) $(MANGOS_LIBS) -export-dynamic
->>>>>>> a8e086b5f6b7dc9c312a68a5400e26b36da58e30:src/mangosd/Makefile.am
 
 ## Additional files to include when running 'make dist'
 #  Include world daemon configuration
