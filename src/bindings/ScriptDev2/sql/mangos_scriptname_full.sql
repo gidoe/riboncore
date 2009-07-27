@@ -219,14 +219,19 @@ UPDATE instance_template SET script='instance_blackrock_depths' WHERE map =230;
 UPDATE creature_template SET ScriptName='boss_emperor_dagran_thaurissan' WHERE entry=9019;
 UPDATE creature_template SET ScriptName='boss_moira_bronzebeard' WHERE entry=8929;
 UPDATE creature_template SET ScriptName='boss_ambassador_flamelash' WHERE entry=9156;
+UPDATE creature_template SET ScriptName='boss_angerrel' WHERE entry=9035;
 UPDATE creature_template SET ScriptName='boss_anubshiah' WHERE entry=9031;
 UPDATE creature_template SET ScriptName='boss_doomrel' WHERE entry=9039;
-UPDATE creature_template SET ScriptName='boss_gloomrel' WHERE entry=9037;
+UPDATE creature_template SET ScriptName='boss_doperel' WHERE entry=9040;
 UPDATE creature_template SET ScriptName='boss_general_angerforge' WHERE entry=9033;
+UPDATE creature_template SET ScriptName='boss_gloomrel' WHERE entry=9037;
 UPDATE creature_template SET ScriptName='boss_gorosh_the_dervish' WHERE entry=9027;
 UPDATE creature_template SET ScriptName='boss_grizzle' WHERE entry=9028;
+UPDATE creature_template SET ScriptName='boss_haterel' WHERE entry=9034;
 UPDATE creature_template SET ScriptName='boss_high_interrogator_gerstahn' WHERE entry=9018;
 UPDATE creature_template SET ScriptName='boss_magmus' WHERE entry=9938;
+UPDATE creature_template SET ScriptName='boss_seethrel' WHERE entry=9038;
+UPDATE creature_template SET ScriptName='boss_vilerel' WHERE entry=9036;
 UPDATE creature_template SET ScriptName='mob_phalanx' WHERE entry=9502;
 UPDATE creature_template SET ScriptName='npc_grimstone' WHERE entry=10096;
 UPDATE creature_template SET ScriptName='npc_lokhtos_darkbargainer' WHERE entry=12944;
@@ -525,7 +530,7 @@ UPDATE creature_template SET ScriptName='npc_wounded_blood_elf' WHERE entry=1699
 
 
 /* HINTERLANDS */
-
+UPDATE creature_template SET ScriptName='npc_rinji' WHERE entry=7780;
 
 /* HOWLING FJORD */
 
@@ -944,6 +949,7 @@ UPDATE creature_template SET ScriptName='npc_skyguard_handler_irena' WHERE entry
 UPDATE creature_template SET ScriptName='npc_slim' WHERE entry=19679;
 
 /* THOUSAND NEEDLES */
+UPDATE creature_template SET ScriptName='npc_kanati' WHERE entry=10638;
 UPDATE creature_template SET ScriptName='npc_plucky_johnson' WHERE entry=6626;
 UPDATE creature_template SET ScriptName='npc_paoka_swiftmountain' WHERE entry=10427;
 UPDATE creature_template SET ScriptName='npc_lakota_windsong' WHERE entry=10646;
