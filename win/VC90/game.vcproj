@@ -564,47 +564,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\ChannelMgr.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\CharacterHandler.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\Chat.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\Chat.h"
-				>
-			</File>
-			<File
-<<<<<<< HEAD:win/VC90/game.vcproj
-				RelativePath="..\..\src\game\ChatHandler.cpp"
-=======
 				RelativePath="..\..\src\game\ChannelMgr.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\game\ChannelMgr.h"
->>>>>>> c60ab8eb5815f91bddaba691b5085c2d76e06c58:win/VC90/game.vcproj
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\ChatLexicsCutter.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ChatLexicsCutter.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ChatLog.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ChatLog.h"
+				RelativePath="..\..\src\game\CharacterHandler.cpp"
 				>
 			</File>
 			<File
@@ -1713,6 +1681,38 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\BattleGroundWS.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Chatlog"
+			>
+			<File
+				RelativePath="..\..\src\game\Chat.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Chat.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ChatHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ChatLexicsCutter.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ChatLexicsCutter.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ChatLog.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ChatLog.h"
 				>
 			</File>
 		</Filter>
