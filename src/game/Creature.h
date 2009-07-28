@@ -486,6 +486,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void GetRespawnCoord(float &x, float &y, float &z, float* ori = NULL, float* dist =NULL) const;
         uint32 GetEquipmentId() const { return m_equipmentId; }
 
+		bool isSummon() const   { return m_summonMask & SUMMON_MASK_SUMMON; }
+        bool isGuardian() const { return m_summonMask & SUMMON_MASK_GUARDIAN; }
         bool isPet() const { return m_isPet; }
         bool isVehicle() const { return m_isVehicle; }
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
@@ -719,6 +721,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool m_gossipOptionLoaded;
         GossipOptionList m_goptions;
 
+		uint32 m_summonMask;
         bool m_isPet;                                       // set only in Pet::Pet
         bool m_isVehicle;                                   // set only in Vehicle::Vehicle
         bool m_isTotem;                                     // set only in Totem::Totem
