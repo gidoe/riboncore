@@ -32,10 +32,14 @@
 #define CONTACT_DISTANCE            0.5f
 #define INTERACTION_DISTANCE        5.0f
 #define ATTACK_DISTANCE             5.0f
-#define MAX_VISIBILITY_DISTANCE  (5*SIZE_OF_GRID_CELL/2.0f) // max distance for visible object show, limited by active zone for player based at cell size (active zone = 5x5 cells)
-#define DEFAULT_VISIBILITY_DISTANCE (SIZE_OF_GRID_CELL)     // default visible distance
+#define MAX_VISIBILITY_DISTANCE     333.0f      // max distance for visible object show, limited in 333 yards
+#define DEFAULT_VISIBILITY_DISTANCE 90.0f       // default visible distance, 90 yards on continents
+#define DEFAULT_VISIBILITY_INSTANCE 120.0f      // default visible distance in instances, 120 yards
+#define DEFAULT_VISIBILITY_BGARENAS 180.0f      // default visible distance in BG/Arenas, 180 yards
 
 #define DEFAULT_WORLD_OBJECT_SIZE   0.388999998569489f      // player size, also currently used (correctly?) for any non Unit world objects
+#define MAX_STEALTH_DETECT_RANGE    45.0f
+#define CREATURE_MAX_AGGRO_RANGE    45.0f * sWorld.getRate(RATE_CREATURE_AGGRO)
 
 enum TypeMask
 {
@@ -81,6 +85,16 @@ enum PhaseMasks
 {
     PHASEMASK_NORMAL   = 0x00000001,
     PHASEMASK_ANYWHERE = 0xFFFFFFFF
+};
+
+enum NotifyFlags
+{
+    NOTIFY_NONE                     = 0x00,
+    NOTIFY_AI_RELOCATION            = 0x01,
+    NOTIFY_VISIBILITY_CHANGED       = 0x02,
+    NOTIFY_VISIBILITY_ACTIVE        = 0x04,
+    NOTIFY_PLAYER_VISIBILITY        = 0x08,
+    NOTIFY_ALL                      = 0xFF
 };
 
 class WorldPacket;
@@ -493,6 +507,17 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void ResetMap() { m_currMap = NULL; }
 
         //this function should be removed in nearest time...
+        //new relocation and visibility system functions
+        void AddToNotify(uint16 f) { m_notifyflags |= f;}
+        void RemoveFromNotify(uint16 f) { m_notifyflags &= ~f;}
+        bool isNeedNotify(uint16 f) const { return m_notifyflags & f;}
+
+        bool isNotified(uint16 f) const { return m_executed_notifies & f;}
+        void SetNotified(uint16 f) { m_executed_notifies |= f;}
+        void ResetNotifies(uint16 f) { m_executed_notifies |= ~f;}
+        void ResetAllNotifies() { m_notifyflags = 0; m_executed_notifies = 0; }
+        void ResetAllNotifiesbyMask(uint16 f) { m_notifyflags &= ~f; m_executed_notifies &= ~f; }
+
         Map const* GetBaseMap() const;
 
         Creature* SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime);
@@ -519,5 +544,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         float m_positionY;
         float m_positionZ;
         float m_orientation;
+
+        uint16 m_notifyflags;
+        uint16 m_executed_notifies;
 };
 #endif

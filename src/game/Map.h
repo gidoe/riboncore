@@ -272,6 +272,10 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         void MessageDistBroadcast(Player *, WorldPacket *, float dist, bool to_self, bool own_team_only = false);
         void MessageDistBroadcast(WorldObject *, WorldPacket *, float dist);
 
+        float GetVisibilityDistance() const { return m_VisibleDistance; }
+        //function for setting up visibility distance for maps on per-type/per-Id basis
+        virtual void InitVisibilityDistance();
+
         void PlayerRelocation(Player *, float x, float y, float z, float angl);
         void CreatureRelocation(Creature *creature, float x, float y, float, float);
 
@@ -302,6 +306,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         static void InitStateMachine();
         static void DeleteStateMachine();
+        void InitializeNotifyTimers();
 
         Map const * GetParent() const { return m_parentMap; }
 
@@ -417,8 +422,14 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         void LoadMap(int gx,int gy, bool reload = false);
         GridMap *GetGrid(float x, float y);
 
+        //these functions used to process player/mob aggro reactions and
+        //visibility calculations. Highly optimized for massive calculations
+        void ProcessObjectsVisibility();
+        void ProcesssPlayersVisibility();
+        void ProcessRelocationNotifies();
+        void ResetNotifies(uint16 notify_mask);
+
         void SetTimer(uint32 t) { i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t; }
-        //uint64 CalculateGridMask(const uint32 &y) const;
 
         void SendInitSelf( Player * player );
 
@@ -445,6 +456,8 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         NGridType* getNGrid(uint32 x, uint32 y) const
         {
+            ASSERT(x < MAX_NUMBER_OF_GRIDS);
+            ASSERT(y < MAX_NUMBER_OF_GRIDS);
             return i_grids[x][y];
         }
 
@@ -464,6 +477,11 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         uint32 i_id;
         uint32 i_InstanceId;
         uint32 m_unloadTimer;
+        float m_VisibleDistance;
+
+        PeriodicTimer m_ObjectVisibilityNotifyTimer;
+        PeriodicTimer m_PlayerVisibilityNotifyTimer;
+        PeriodicTimer m_RelocationNotifyTimer;
 
         MapRefManager m_mapRefManager;
         MapRefManager::iterator m_mapRefIter;
@@ -551,6 +569,9 @@ class MANGOS_DLL_SPEC InstanceMap : public Map
         void SendResetWarnings(uint32 timeLeft) const;
         void SetResetSchedule(bool on);
         uint32 GetMaxPlayers() const;
+
+        void InitVisibilityDistance();
+        void InitializeNotifyTimers();
     private:
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;
@@ -569,6 +590,10 @@ class MANGOS_DLL_SPEC BattleGroundMap : public Map
         bool CanEnter(Player* player);
         void SetUnload();
         void UnloadAll(bool pForce);
+
+        void InitVisibilityDistance();
+        void InitializeNotifyTimers();
+
         BattleGround* GetBG() { return m_bg; }
         void SetBG(BattleGround* bg) { m_bg = bg; }
     private:

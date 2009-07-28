@@ -956,6 +956,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool hasNegativeAuraWithInterruptFlag(uint32 flag);
         void SendMeleeAttackStop(Unit* victim);
         void SendMeleeAttackStart(Unit* pVictim);
+        void SendInitialVisiblePackets(Player *player = 0);
+        void SendAuras(Player *player = 0);
 
         void addUnitState(uint32 f) { m_state |= f; }
         bool hasUnitState(const uint32 f) const { return (m_state & f); }
