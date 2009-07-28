@@ -275,6 +275,7 @@ scripts/zone/naxxramas/boss_thaddius.cpp \
 scripts/zone/naxxramas/instance_naxxramas.cpp \
 scripts/zone/naxxramas/def_naxxramas.h \
 scripts/zone/netherstorm/netherstorm.cpp \
+scripts/zone/nexus/nexus/def_nexus.h \
 scripts/zone/nexus/nexus/boss_anomalus.cpp \
 scripts/zone/nexus/nexus/boss_keristrasza.cpp \
 scripts/zone/nexus/nexus/boss_ormorok.cpp \
