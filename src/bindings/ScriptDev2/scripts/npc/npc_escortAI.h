@@ -5,6 +5,8 @@
 #ifndef SC_ESCORTAI_H
 #define SC_ESCORTAI_H
 
+#define DEFAULT_MAX_PLAYER_DISTANCE 50
+
 extern UNORDERED_MAP<uint32, std::vector<PointMovement> > PointMovementMap;
 
 struct Escort_Waypoint
@@ -31,7 +33,7 @@ struct MANGOS_DLL_DECL npc_escortAI : public ScriptedAI
         explicit npc_escortAI(Creature* pCreature) : ScriptedAI(pCreature),
             IsBeingEscorted(false), IsOnHold(false), PlayerGUID(0), m_uiPlayerCheckTimer(1000), m_uiWPWaitTimer(2500),
             m_bIsReturning(false), m_bIsActiveAttacker(true), m_bIsRunning(false),
-            m_pQuestForEscort(NULL), m_bCanInstantRespawn(false), m_bCanReturnToStart(false) {}
+            m_pQuestForEscort(NULL), m_bCanInstantRespawn(false), m_bCanReturnToStart(false), MaxPlayerDistance(DEFAULT_MAX_PLAYER_DISTANCE), CanMelee(true), DespawnAtEnd(true), DespawnAtFar(true) {}
         ~npc_escortAI() {}
 
         // Pure Virtual Functions
@@ -45,6 +47,13 @@ struct MANGOS_DLL_DECL npc_escortAI : public ScriptedAI
         bool IsVisible(Unit*) const;
 
         void AttackStart(Unit*);
+
+        void SetMaxPlayerDistance(float newMax) { MaxPlayerDistance = newMax; }
+        float GetMaxPlayerDistance() { return MaxPlayerDistance; }
+
+        void SetCanMelee(bool usemelee) { CanMelee = usemelee; }
+        void SetDespawnAtEnd(bool despawn) { DespawnAtEnd = despawn; }
+        void SetDespawnAtFar(bool despawn) { DespawnAtFar = despawn; }
 
         void EnterCombat(Unit*);
 
@@ -78,6 +87,7 @@ struct MANGOS_DLL_DECL npc_escortAI : public ScriptedAI
     private:
         uint32 m_uiWPWaitTimer;
         uint32 m_uiPlayerCheckTimer;
+        float MaxPlayerDistance;
 
         const Quest* m_pQuestForEscort;                     //generally passed in Start() when regular escort script.
  
@@ -89,5 +99,8 @@ struct MANGOS_DLL_DECL npc_escortAI : public ScriptedAI
         bool m_bIsRunning;                                  //all creatures are walking by default (has flag MONSTER_MOVE_WALK)
         bool m_bCanInstantRespawn;                          //if creature should respawn instantly after escort over (if not, database respawntime are used)
         bool m_bCanReturnToStart;                           //if creature can walk same path (loop) without despawn. Not for regular escort quests.
+        bool CanMelee;
+        bool DespawnAtEnd;
+        bool DespawnAtFar;
 };
 #endif

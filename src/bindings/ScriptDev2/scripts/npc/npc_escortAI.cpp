@@ -12,8 +12,6 @@ EndScriptData */
 #include "precompiled.h"
 #include "npc_escortAI.h"
 
-const float MAX_PLAYER_DISTANCE = 66.0f;
-
 enum
 {
     POINT_LAST_POINT    = 0xFFFFFF,
@@ -221,7 +219,7 @@ void npc_escortAI::UpdateAI(const uint32 uiDiff)
                     {
                         Player* pMember = pRef->getSource();
 
-                        if (pMember && m_creature->IsWithinDistInMap(pMember, MAX_PLAYER_DISTANCE))
+                        if (DespawnAtFar && pMember && m_creature->IsWithinDistInMap(pMember, DEFAULT_MAX_PLAYER_DISTANCE))
                         {
                             bIsMaxRangeExceeded = false;
                             break;
@@ -230,7 +228,7 @@ void npc_escortAI::UpdateAI(const uint32 uiDiff)
                 }
                 else
                 {
-                    if (m_creature->IsWithinDistInMap(pPlayer, MAX_PLAYER_DISTANCE))
+                    if (m_creature->IsWithinDistInMap(pPlayer, DEFAULT_MAX_PLAYER_DISTANCE))
                         bIsMaxRangeExceeded = false;
                 }
             }
@@ -256,9 +254,23 @@ void npc_escortAI::UpdateAI(const uint32 uiDiff)
             m_uiPlayerCheckTimer -= uiDiff;
     }
 
-    //Check if we have a current target
-    if (!m_creature->SelectHostilTarget() || !m_creature->getVictim())
-        return;
+    if(CanMelee)
+    {
+        //Check if we have a current target 
+        if( m_creature->isAlive()) 
+        {
+            //If we are within range melee the target
+            if (!m_creature->SelectHostilTarget() || !m_creature->getVictim())
+                return;
+            {
+                if( m_creature->isAttackReady() ) 
+                { 
+                    m_creature->AttackerStateUpdate(m_creature->getVictim()); 
+                    m_creature->resetAttackTimer(); 
+                } 
+            } 
+        } 
+    } 
 
     DoMeleeAttackIfReady();
 }
