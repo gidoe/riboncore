@@ -327,6 +327,9 @@ extern void AddSC_hinterlands();
 //Ironforge
 extern void AddSC_ironforge();
 
+//Icecrown
+extern void AddSC_icecrown();
+
 //Isle of Quel'Danas
 extern void AddSC_isle_of_queldanas();
 
@@ -1228,6 +1231,9 @@ void ScriptsInit()
 
     //Ironforge
     AddSC_ironforge();
+
+    //Icecrown
+    AddSC_icecrown();
 
     //Isle of Quel'Danas
     AddSC_isle_of_queldanas();
