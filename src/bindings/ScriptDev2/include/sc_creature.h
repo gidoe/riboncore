@@ -205,4 +205,18 @@ struct MANGOS_DLL_DECL Scripted_NoMovementAI : public ScriptedAI
     void AttackStart(Unit*);
 };
 
+class SummonList : private std::list<uint64>
+{
+    public:
+        explicit SummonList(Creature* creature) : m_creature(creature) {}
+        void Summon(Creature *summon) { push_back(summon->GetGUID()); }
+        void Despawn(Creature *summon) { remove(summon->GetGUID()); }
+        void DespawnEntry(uint32 entry);
+        void DespawnAll();
+        void DoAction(uint32 entry, uint32 info);
+        void DoZoneInCombat(uint32 entry = 0);
+    private:
+        Creature *m_creature;
+};
+
 #endif

@@ -200,6 +200,8 @@ extern void AddSC_burning_steppes();
 //Caverns of Time
 //--Battle for Mt. Hyjal
 extern void AddSC_hyjal();
+extern void AddSC_hyjal_trash();
+extern void AddSC_boss_anetheron();
 extern void AddSC_boss_archimonde();
 extern void AddSC_instance_mount_hyjal();
 
@@ -1099,6 +1101,8 @@ void ScriptsInit()
     //Caverns of Time
     //--Battle for Mt. Hyjal
     AddSC_hyjal();
+	AddSC_hyjal_trash();
+	AddSC_boss_anetheron();
     AddSC_boss_archimonde();
     AddSC_instance_mount_hyjal();
 

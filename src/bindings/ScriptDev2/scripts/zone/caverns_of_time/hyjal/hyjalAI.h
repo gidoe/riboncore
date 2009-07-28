@@ -7,6 +7,20 @@
 
 #include "def_hyjal.h"
 
+// Trash Mobs summoned in waves
+enum 
+{
+	NECROMANCER		= 17899,
+	ABOMINATION		= 17898,
+	GHOUL			= 17895,
+	BANSHEE			= 17905,
+	CRYPT_FIEND		= 17897,
+	GARGOYLE		= 17906,
+	FROST_WYRM		= 17907,
+	GIANT_INFERNAL	= 17908,
+	FEL_STALKER		= 17916,
+};
+
 enum eBaseArea
 {
     BASE_ALLY       = 0,
