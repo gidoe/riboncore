@@ -10859,6 +10859,11 @@ Unit* Unit::GetUnit(WorldObject& object, uint64 guid)
     return ObjectAccessor::GetUnit(object,guid);
 }
 
+Player* Unit::GetPlayer(uint64 guid)
+{
+    return ObjectAccessor::FindPlayer(guid);
+}
+
 bool Unit::isVisibleForInState( Player const* u, bool inVisibleList ) const
 {
     return isVisibleForOrDetect(u, false, inVisibleList, false);

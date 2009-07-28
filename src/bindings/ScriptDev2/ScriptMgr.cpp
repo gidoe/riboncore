@@ -582,6 +582,8 @@ extern void AddSC_instance_halls_of_lightning();
 extern void AddSC_undercity();
 
 //Un'Goro Crater
+extern void AddSC_ungoro_crater();
+
 //Upper blackrock spire
 
 //Utgarde Keep
@@ -1482,6 +1484,8 @@ void ScriptsInit()
     AddSC_undercity();
 
     //Un'Goro Crater
+	AddSC_ungoro_crater();
+
     //Upper blackrock spire
 
     //Utgarde Keep
