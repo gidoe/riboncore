@@ -1682,6 +1682,14 @@ case SPELLFAMILY_GENERIC:                   // same family case
                     return false;
             }
             break;
+            if (spellInfo_2->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT)
+            {
+                // Desecration (speed reduction aura) and Desecration (owner's damage bonus aura)
+                if (spellInfo_1->SpellIconID==2296 && spellInfo_2->SpellIconID==2296 &&
+                    spellInfo_1->SpellFamilyFlags == spellInfo_2->SpellFamilyFlags)
+                    return false;
+            }
+            break;
         default:
             break;
     }
