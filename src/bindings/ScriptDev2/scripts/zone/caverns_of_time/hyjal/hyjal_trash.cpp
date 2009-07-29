@@ -737,13 +737,13 @@ struct mob_necromancerAI : public hyjal_trashAI
         summons.DespawnAll();
     }
 
-    void JustSummoned(Creature* summon)
+    /*void JustSummoned(Creature* summon)
     {
         Unit* target = SelectTarget(SELECT_TARGET_RANDOM);
         if(target && summon)
             summon->Attack(target,false);
         summons.Summon(summon);
-    }
+    }*/
     void SummonedCreatureDespawn(Creature *summon) {summons.Despawn(summon);}
     void WaypointReached(uint32 i)
     {
