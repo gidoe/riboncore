@@ -1882,9 +1882,11 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffe
                 // Unbreakable armor
                 if (spellProto->Id == 51271)
                 {
-                   RemainingDamage -= pVictim->GetArmor() * currentAbsorb / 100;
-                    if (RemainingDamage < 0)
-                        RemainingDamage = 0;
+                    uint32 absorbed = pVictim->GetArmor() * currentAbsorb / 100;
+                    // If we have a glyph
+                    if (Aura* aur = pVictim->GetDummyAura(58635))
+                        absorbed += absorbed * aur->GetModifier()->m_amount / 100;
+                    RemainingDamage = (RemainingDamage < absorbed) ? 0 : RemainingDamage - absorbed;
                     continue;
                 }
                 // Anti-Magic Zone
