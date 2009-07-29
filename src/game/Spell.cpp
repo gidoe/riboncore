@@ -2546,7 +2546,15 @@ void Spell::cast(bool skipCheck)
         {
             // Ice Block
             if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000008000000000))
+            {
                 AddPrecastSpell(41425);                     // Hypothermia
+
+                if(m_caster->GetTypeId() != TYPEID_PLAYER)
+                    break;
+
+                if(m_caster->HasAura(56372))        // Glyph of Ice Block
+                    ((Player*)m_caster)->RemoveSpellCategoryCooldown(35, true);
+            }
             break;
         }
         case SPELLFAMILY_PRIEST:
