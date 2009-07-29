@@ -7,6 +7,18 @@
 
 #include "CreatureAI.h"
 #include "Creature.h"
+#include "TemporarySummon.h"
+
+#define SCRIPT_CAST_TYPE dynamic_cast
+
+#define CAST_PLR(a)     (SCRIPT_CAST_TYPE<Player*>(a))
+#define CAST_CRE(a)     (SCRIPT_CAST_TYPE<Creature*>(a))
+#define CAST_VEH(a)     (SCRIPT_CAST_TYPE<Vehicle*>(a))
+#define CAST_SUM(a)     (SCRIPT_CAST_TYPE<TemporarySummon*>(a))
+#define CAST_PET(a)     (SCRIPT_CAST_TYPE<Pet*>(a))
+#define CAST_AI(a,b)    (SCRIPT_CAST_TYPE<a*>(b))
+
+#define GET_SPELL(a)    (const_cast<SpellEntry*>(GetSpellStore()->LookupEntry(a)))
 
 //Spell targets used by SelectSpell
 enum SelectTarget

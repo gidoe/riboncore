@@ -32,11 +32,10 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public hyjal_trashAI
 {
     boss_anetheronAI(Creature *c) : hyjal_trashAI(c)
     {
-        pInstance = ((ScriptedInstance*)c->GetInstanceData());
-        go = false;    
+        pInstance = (ScriptedInstance*)c->GetInstanceData();
+        go = false;
         pos = 0;
-        Reset();
-        SpellEntry *TempSpell = (SpellEntry*)GetSpellStore()->LookupEntry(SPELL_SLEEP);
+        SpellEntry *TempSpell = GET_SPELL(SPELL_SLEEP);
         if(TempSpell && TempSpell->EffectImplicitTargetA[0] != 1)
         {
             TempSpell->EffectImplicitTargetA[0] = 1;
@@ -53,6 +52,7 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public hyjal_trashAI
 
     void Reset()
     {
+        damageTaken = 0;
         SwarmTimer = 45000;
         SleepTimer = 60000;
         AuraTimer = 5000;
@@ -62,8 +62,8 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public hyjal_trashAI
             pInstance->SetData(DATA_ANETHERONEVENT, NOT_STARTED);
     }
 
-    void Aggro(Unit *who)
-    {    
+    void EnterCombat(Unit *who)
+    {
         if(pInstance && IsEvent)
             pInstance->SetData(DATA_ANETHERONEVENT, IN_PROGRESS);
         DoScriptText(SAY_ONAGGRO, m_creature);
@@ -93,11 +93,12 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public hyjal_trashAI
             Unit* target = Unit::GetUnit((*m_creature), pInstance->GetData64(DATA_JAINAPROUDMOORE));
             if (target && target->isAlive())
                 m_creature->AddThreat(target,0.0);
-        }        
+        }
     }
 
     void JustDied(Unit *victim)
     {
+        hyjal_trashAI::JustDied(victim);
         if(pInstance && IsEvent)
             pInstance->SetData(DATA_ANETHERONEVENT, DONE);
         DoScriptText(SAY_ONDEATH, m_creature);
@@ -123,7 +124,7 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public hyjal_trashAI
                     ((npc_escortAI*)(m_creature->AI()))->AddWaypoint(6, 5037.77,    -1770.56,    1324.36);
                     ((npc_escortAI*)(m_creature->AI()))->AddWaypoint(7, 5067.23,    -1789.95,    1321.17);
                     ((npc_escortAI*)(m_creature->AI()))->Start(false, true, true);
-                    //((npc_escortAI*)(m_creature->AI()))->SetDespawnAtEnd(false);
+                    ((npc_escortAI*)(m_creature->AI()))->SetDespawnAtEnd(false);
                 }            
             }
         }
@@ -134,7 +135,7 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public hyjal_trashAI
 
         if(SwarmTimer < diff)
         {
-            Unit* target = SelectUnit(SELECT_TARGET_RANDOM,0);
+            Unit* target = SelectTarget(SELECT_TARGET_RANDOM);
             if(target)
                 DoCast(target,SPELL_CARRION_SWARM);
 
@@ -146,15 +147,15 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public hyjal_trashAI
                     break;
                 case 1:
                     DoScriptText(SAY_SWARM2, m_creature);
-                    break;        
-            }    
+                    break;
+            }
         }else SwarmTimer -= diff;
 
         if(SleepTimer < diff)
         {
             for(uint8 i=0;i<3;++i)
             {
-                Unit* target = SelectUnit(SELECT_TARGET_RANDOM,0);
+                Unit* target = SelectTarget(SELECT_TARGET_RANDOM);
                 if(target)
                     target->CastSpell(target,SPELL_SLEEP,true);
             }
@@ -166,17 +167,19 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public hyjal_trashAI
                     break;
                 case 1:
                     DoScriptText(SAY_SLEEP2, m_creature);
-                    break;        
-            }    
-        }else SleepTimer -= diff;        
+                    break;
+            }
+        }else SleepTimer -= diff;
+
         if(AuraTimer < diff)
         {
             DoCast(m_creature, SPELL_VAMPIRIC_AURA,true);
-            AuraTimer = 10000+rand()%10000;            
+            AuraTimer = 10000+rand()%10000;
         }else AuraTimer -= diff;
+
         if(InfernoTimer < diff)
         {
-            DoCast(SelectUnit(SELECT_TARGET_RANDOM,0), SPELL_INFERNO);
+            DoCast(SelectTarget(SELECT_TARGET_RANDOM), SPELL_INFERNO);
             InfernoTimer = 45000;
             switch(rand()%2)
             {
@@ -185,8 +188,8 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public hyjal_trashAI
                     break;
                 case 1:
                     DoScriptText(SAY_INFERNO2, m_creature);
-                    break;        
-            }    
+                    break;
+            }
         }else InfernoTimer -= diff;
 
         DoMeleeAttackIfReady();
@@ -198,57 +201,70 @@ CreatureAI* GetAI_boss_anetheron(Creature *_Creature)
     return new boss_anetheronAI (_Creature);
 }
 
-#define SPELL_IMMOLATION 31303
-#define SPELL_INFERNO_EFFECT 31302
+//Spells
+enum
+{
+	SPELL_IMMOLATION		= 31303,
+	SPELL_INFERNO_EFFECT	= 31302
+};
 
 struct MANGOS_DLL_DECL mob_towering_infernalAI : public ScriptedAI
 {
     mob_towering_infernalAI(Creature *c) : ScriptedAI(c)
     {
-        Reset();
+        pInstance = (ScriptedInstance*)c->GetInstanceData();
+        if(pInstance)
+            AnetheronGUID = pInstance->GetData64(DATA_ANETHERON);
     }
 
     uint32 ImmolationTimer;
+    uint32 CheckTimer;
+    uint64 AnetheronGUID;
+    ScriptedInstance* pInstance;
 
     void Reset()
     {
         DoCast(m_creature, SPELL_INFERNO_EFFECT);
         ImmolationTimer = 5000;
+        CheckTimer = 5000;
     }
 
-    void Aggro(Unit *who)
-    {    
-        
-    }
+    void EnterCombat(Unit *who) { }
 
-    void KilledUnit(Unit *victim)
-    {
-                
-    }
+    void KilledUnit(Unit *victim) { }
 
-    void JustDied(Unit *victim)
-    {
-        
-    }
+    void JustDied(Unit *victim) { }
 
     void MoveInLineOfSight(Unit *who)
     {
-        if (m_creature->GetDistance(who) <= 50 && !m_creature->isInCombat() && m_creature->IsHostileTo(who))
-        {
-            m_creature->AddThreat(who,0.0);
-            m_creature->Attack(who,false);
-        }
+        if (m_creature->IsWithinDist(who, 50) && !m_creature->isInCombat() && m_creature->IsHostileTo(who))
+            AttackStart(who);
     }
 
     void UpdateAI(const uint32 diff)
     {
-        //Return since we have no target
-        if (!m_creature->SelectHostilTarget() || !m_creature->getVictim())
+        if(CheckTimer < diff)
+        {
+            if(AnetheronGUID)
+            {
+                Creature* boss = Unit::GetCreature((*m_creature),AnetheronGUID);
+                if(!boss || (boss && boss->isDead()))
+                {
+                    m_creature->setDeathState(JUST_DIED);
+                    m_creature->RemoveCorpse();
+                    return;
+                }
+            }
+            CheckTimer = 5000;
+        }else CheckTimer -= diff;
+
+		//Return since we have no target
+		if (!m_creature->SelectHostilTarget() || !m_creature->getVictim())
             return;
 
-        if(ImmolationTimer < diff)
+		if(ImmolationTimer < diff)
         {
-            DoCast(m_creature, SPELL_IMMOLATION);        
+            DoCast(m_creature, SPELL_IMMOLATION);
             ImmolationTimer = 5000;
         }else ImmolationTimer -= diff;
 

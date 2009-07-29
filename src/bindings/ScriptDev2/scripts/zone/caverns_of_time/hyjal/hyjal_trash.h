@@ -11,11 +11,7 @@ struct MANGOS_DLL_DECL hyjal_trashAI : public npc_escortAI
 {
     hyjal_trashAI(Creature *c);
 
-    void Reset();
-
-    //void EnterEvadeMode();
-
-    void Aggro(Unit *who);
+	void Reset();
 
     void UpdateAI(const uint32 diff);
 
@@ -23,7 +19,7 @@ struct MANGOS_DLL_DECL hyjal_trashAI : public npc_escortAI
 
     void DamageTaken(Unit *done_by, uint32 &damage);
 
-    public:   
+    public:
         ScriptedInstance* pInstance;
         bool IsEvent;
         uint32 Delay;
@@ -33,8 +29,10 @@ struct MANGOS_DLL_DECL hyjal_trashAI : public npc_escortAI
         uint32 OverrunType;
         uint8 faction;
         bool useFlyPath;
-		uint32 damageTaken;
+        uint32 damageTaken;
+        float DummyTarget[3];
 
     //private:
 };
+
 #endif
