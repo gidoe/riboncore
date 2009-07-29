@@ -3,32 +3,32 @@
 #include "def_hyjal.h"
 #include "hyjal_trash.h"
 
-#define SPELL_CLEAVE 31436
-#define SPELL_WARSTOMP 31480
-#define SPELL_MARK 31447
+// Spells
+enum Spells
+{
+    SPELL_CLEAVE    = 31436,
+    SPELL_WARSTOMP  = 31480,
+    SPELL_MARK      = 31447
+};
 
-#define SOUND_ONDEATH 11018
+// Say
+enum Say
+{
+    SAY_ONSLAY1     = -1999926,
+    SAY_ONSLAY2     = -1999927,
+    SAY_ONSLAY3     = -1999928,
 
-#define SAY_ONSLAY1 "Shaza-Kiel!"
-#define SAY_ONSLAY2 "You... are nothing!"
-#define SAY_ONSLAY3 "Miserable nuisance!"
-#define SOUND_ONSLAY1 11017
-#define SOUND_ONSLAY2 11053
-#define SOUND_ONSLAY3 11054
+    SAY_MARK1       = -1999929,
+    SAY_MARK2       = -1999930,
 
-#define SAY_MARK1 "Your death will be a painful one."
-#define SAY_MARK2 "You... are marked."
-#define SOUND_MARK1 11016
-#define SOUND_MARK2 11052
-
-#define SAY_ONAGGRO "Cry for mercy! Your meaningless lives will soon be forfeit."
-#define SOUND_ONAGGRO 11015
+    SAY_ONAGGRO     = -1999931
+};
 
 struct MANGOS_DLL_DECL boss_kazrogalAI : public hyjal_trashAI
 {
-    boss_kazrogalAI(Creature *c) : hyjal_trashAI(c)
+    boss_kazrogalAI(Creature* pCreature) : hyjal_trashAI(pCreature)
     {
-        pInstance = ((ScriptedInstance*)c->GetInstanceData());
+        pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         go = false;    
         pos = 0;
         Reset();
@@ -55,15 +55,14 @@ struct MANGOS_DLL_DECL boss_kazrogalAI : public hyjal_trashAI
         MarkTimerBase = 45000;
 
         if(pInstance && IsEvent)
-            pInstance->SetData(DATA_KAZROGALEVENT, NOT_STARTED);
+            pInstance->SetData(TYPE_KAZROGAL, NOT_STARTED);
     }
 
     void Aggro(Unit *who)
     {    
         if(pInstance && IsEvent)
-            pInstance->SetData(DATA_KAZROGALEVENT, IN_PROGRESS);
-        DoPlaySoundToSet(m_creature, SOUND_ONAGGRO);
-        DoYell(SAY_ONAGGRO, LANG_UNIVERSAL, NULL);
+            pInstance->SetData(TYPE_KAZROGAL, IN_PROGRESS);
+        DoScriptText(SAY_ONAGGRO, m_creature);
     }
 
     void KilledUnit(Unit *victim)
@@ -71,16 +70,13 @@ struct MANGOS_DLL_DECL boss_kazrogalAI : public hyjal_trashAI
         switch(rand()%3)
         {
             case 0:
-                DoPlaySoundToSet(m_creature, SOUND_ONSLAY1);
-                DoYell(SAY_ONSLAY1, LANG_UNIVERSAL, NULL);
+                DoScriptText(SAY_ONSLAY1, m_creature);
                 break;
             case 1:
-                DoPlaySoundToSet(m_creature, SOUND_ONSLAY2);
-                DoYell(SAY_ONSLAY2, LANG_UNIVERSAL, NULL);
+                DoScriptText(SAY_ONSLAY2, m_creature);
                 break;        
             case 2:
-                DoPlaySoundToSet(m_creature, SOUND_ONSLAY3);
-                DoYell(SAY_ONSLAY3, LANG_UNIVERSAL, NULL);
+                DoScriptText(SAY_ONSLAY3, m_creature);
                 break;    
         }        
     }
@@ -99,8 +95,7 @@ struct MANGOS_DLL_DECL boss_kazrogalAI : public hyjal_trashAI
     void JustDied(Unit *victim)
     {
         if(pInstance && IsEvent)
-            pInstance->SetData(DATA_KAZROGALEVENT, DONE);
-        DoPlaySoundToSet(m_creature, SOUND_ONDEATH);
+            pInstance->SetData(TYPE_KAZROGAL, DONE);
     }
 
     void UpdateAI(const uint32 diff)
@@ -129,7 +124,7 @@ struct MANGOS_DLL_DECL boss_kazrogalAI : public hyjal_trashAI
         }
 
         //Return since we have no target
-        if (!UpdateVictim() )
+        if (!m_creature->SelectHostilTarget() || !m_creature->getVictim())
             return;
 
         if(CleaveTimer < diff)
@@ -167,12 +162,10 @@ struct MANGOS_DLL_DECL boss_kazrogalAI : public hyjal_trashAI
             switch(rand()%3)
             {
                 case 0:
-                    DoPlaySoundToSet(m_creature, SOUND_MARK1);
-                    DoYell(SAY_MARK1, LANG_UNIVERSAL, NULL);
+                    DoScriptText(SAY_MARK1, m_creature);
                     break;
                 case 1:
-                    DoPlaySoundToSet(m_creature, SOUND_MARK2);
-                    DoYell(SAY_MARK2, LANG_UNIVERSAL, NULL);
+                    DoScriptText(SAY_MARK2, m_creature);
                     break;    
             }
         }else MarkTimer -= diff;
@@ -181,16 +174,16 @@ struct MANGOS_DLL_DECL boss_kazrogalAI : public hyjal_trashAI
     }
 };
 
-CreatureAI* GetAI_boss_kazrogal(Creature *_Creature)
+CreatureAI* GetAI_boss_kazrogal(Creature* pCreature)
 {
-    return new boss_kazrogalAI (_Creature);
+    return new boss_kazrogalAI(pCreature);
 }
 
 void AddSC_boss_kazrogal()
 {
     Script *newscript;
     newscript = new Script;
-    newscript->Name="boss_kazrogal";
+    newscript->Name = "boss_kazrogal";
     newscript->GetAI = &GetAI_boss_kazrogal;
     newscript->RegisterSelf();
 }

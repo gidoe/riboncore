@@ -147,6 +147,7 @@ scripts/zone/caverns_of_time/dark_portal/def_dark_portal.h \
 scripts/zone/caverns_of_time/dark_portal/instance_dark_portal.cpp \
 scripts/zone/caverns_of_time/hyjal/boss_anetheron.cpp \
 scripts/zone/caverns_of_time/hyjal/boss_archimonde.cpp \
+scripts/zone/caverns_of_time/hyjal/boss_kazrogal.cpp \
 scripts/zone/caverns_of_time/hyjal/def_hyjal.h \
 scripts/zone/caverns_of_time/hyjal/hyjal.cpp \
 scripts/zone/caverns_of_time/hyjal/hyjalAI.cpp \

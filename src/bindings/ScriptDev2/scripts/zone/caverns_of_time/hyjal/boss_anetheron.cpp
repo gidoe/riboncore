@@ -133,7 +133,7 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public hyjal_trashAI
         if (!m_creature->SelectHostilTarget() || !m_creature->getVictim())
             return;
 
-        if(SwarmTimer < diff)
+        /*if(SwarmTimer < diff)
         {
             Unit* target = SelectTarget(SELECT_TARGET_RANDOM);
             if(target)
@@ -149,9 +149,9 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public hyjal_trashAI
                     DoScriptText(SAY_SWARM2, m_creature);
                     break;
             }
-        }else SwarmTimer -= diff;
+        }else SwarmTimer -= diff;*/
 
-        if(SleepTimer < diff)
+        /*if(SleepTimer < diff)
         {
             for(uint8 i=0;i<3;++i)
             {
@@ -169,7 +169,7 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public hyjal_trashAI
                     DoScriptText(SAY_SLEEP2, m_creature);
                     break;
             }
-        }else SleepTimer -= diff;
+        }else SleepTimer -= diff;*/
 
         if(AuraTimer < diff)
         {
@@ -177,7 +177,7 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public hyjal_trashAI
             AuraTimer = 10000+rand()%10000;
         }else AuraTimer -= diff;
 
-        if(InfernoTimer < diff)
+        /*if(InfernoTimer < diff)
         {
             DoCast(SelectTarget(SELECT_TARGET_RANDOM), SPELL_INFERNO);
             InfernoTimer = 45000;
@@ -190,7 +190,7 @@ struct MANGOS_DLL_DECL boss_anetheronAI : public hyjal_trashAI
                     DoScriptText(SAY_INFERNO2, m_creature);
                     break;
             }
-        }else InfernoTimer -= diff;
+        }else InfernoTimer -= diff;*/
 
         DoMeleeAttackIfReady();
     }

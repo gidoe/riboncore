@@ -2071,6 +2071,10 @@
 							>
 						</File>
 						<File
+							RelativePath="..\scripts\zone\caverns_of_time\hyjal\boss_kazrogal.cpp"
+							>
+						</File>
+						<File
 							RelativePath="..\scripts\zone\caverns_of_time\hyjal\def_hyjal.h"
 							>
 						</File>
