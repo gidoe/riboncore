@@ -312,6 +312,9 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
         case 31719:                                         // Suspension
         case 61987:                                         // Avenging Wrath Marker
         case 11196:                                         // Recently Bandadged
+        case 36810:                                         // rotting puterescence
+        case 36809:                                         // overpowering sickness
+        case 48323:                                         // indisposed
             return false;
         case 36032:                                         // Arcane Blast
         case 12042:                                         // Arcane Power
