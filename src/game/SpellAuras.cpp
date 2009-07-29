@@ -7788,12 +7788,37 @@ void Aura::PeriodicDummyTick()
                 m_target->CastCustomSpell(m_target, 61217, &apBonus, &apBonus, NULL, true, NULL, this);
                 return;
             }
-            // Reaping
-//            if (spell->SpellIconID == 22)
-//                return;
             // Blood of the North
-//            if (spell->SpellIconID == 30412)
-//                return;
+            // Reaping
+            if (spell->SpellIconID == 3041 || spell->SpellIconID == 22)
+            {
+                if (m_target->isInCombat() || m_target->HasAuraType(SPELL_AURA_CONVERT_RUNE))
+                    return;
+
+                for (uint8 i=RUNE_BLOOD*2;i<=RUNE_BLOOD*2+1;++i)
+                {
+                    if (((Player*)m_target)->GetCurrentRune(i) != RUNE_DEATH || ((Player*)m_target)->GetRuneCooldown(i) != 0)
+                        continue;
+
+                    ((Player*)m_target)->ConvertRune(i,i/2);
+                }
+                return;
+            }
+            // Death Rune Mastery
+            if (spell->SpellIconID == 2622)
+            {
+                if (m_target->isInCombat() || m_target->HasAuraType(SPELL_AURA_CONVERT_RUNE))
+                    return;
+
+                for (uint8 i=RUNE_UNHOLY*2;i<=RUNE_FROST*2+1;++i)
+                {
+                    if (((Player*)m_target)->GetCurrentRune(i) != RUNE_DEATH || ((Player*)m_target)->GetRuneCooldown(i) != 0)
+                        continue;
+
+                    ((Player*)m_target)->ConvertRune(i,i/2);
+                }
+                return;
+            }
             break;
         }
         default:
