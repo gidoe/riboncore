@@ -1703,7 +1703,7 @@ bool GOSelect( Player *player, GameObject *_GO, uint32 sender, uint32 action )
 {
     if(!_GO)
     return false;
-    debug_log("TSCR: Gossip selection, sender: %d, action: %d",sender, action);
+    debug_log("SD2: Gossip selection, sender: %d, action: %d",sender, action);
 
     Script *tmpscript = m_scripts[_GO->GetGOInfo()->ScriptId];
     if(!tmpscript || !tmpscript->pGOSelect) return false;
@@ -1717,7 +1717,7 @@ bool GOSelectWithCode( Player *player, GameObject *_GO, uint32 sender, uint32 ac
 {
     if(!_GO)
     return false;
-    debug_log("TSCR: Gossip selection, sender: %d, action: %d",sender, action);
+    debug_log("SD2: Gossip selection, sender: %d, action: %d",sender, action);
 
     Script *tmpscript = m_scripts[_GO->GetGOInfo()->ScriptId];
     if(!tmpscript || !tmpscript->pGOSelectWithCode) return false;
