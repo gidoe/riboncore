@@ -21,33 +21,8 @@
 #include "ArenaTeam.h"
 #include "World.h"
 
-void ArenaTeamMember::ModifyPersonalRating(Player* plr, int32 mod, uint32 slot)
-{
-    int32 memberRating = int32(personal_rating) + mod;
-    personal_rating = memberRating > 0 ? memberRating : 0;
-    if(plr)
-        plr->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot*6) + 5, personal_rating);
-}
-
 ArenaTeam::ArenaTeam()
 {
-<<<<<<< HEAD:src/game/ArenaTeam.cpp
-    Id                  = 0;
-    Type                = 0;
-    Name                = "";
-    CaptainGuid         = 0;
-    BackgroundColor     = 0;                                // background
-    EmblemStyle         = 0;                                // icon
-    EmblemColor         = 0;                                // icon color
-    BorderStyle         = 0;                                // border
-    BorderColor         = 0;                                // border color
-    stats.games_week    = 0;
-    stats.games_season  = 0;
-    stats.rank          = 0;
-    stats.rating        = ARENA_NEW_TEAM_RATING;
-    stats.wins_week     = 0;
-    stats.wins_season   = 0;
-=======
     m_TeamId              = 0;
     m_Type                = 0;
     m_Name                = "";
@@ -66,7 +41,6 @@ ArenaTeam::ArenaTeam()
         m_stats.rating    = 1500;
     m_stats.wins_week     = 0;
     m_stats.wins_season   = 0;
->>>>>>> c6d97c6ec37fe4978cbd521620cc6e8cd926682a:src/game/ArenaTeam.cpp
 }
 
 ArenaTeam::~ArenaTeam()
@@ -159,10 +133,6 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
     newmember.games_week        = 0;
     newmember.wins_season       = 0;
     newmember.wins_week         = 0;
-<<<<<<< HEAD:src/game/ArenaTeam.cpp
-    newmember.personal_rating   = ARENA_NEW_PERSONAL_RATING;
-    members.push_back(newmember);
-=======
     if (sWorld.getConfig(CONFIG_ARENA_SEASON_ID) >= 6)
     {
         if (m_stats.rating < 1000)
@@ -175,7 +145,6 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
         newmember.personal_rating = 1500;
     }
     m_members.push_back(newmember);
->>>>>>> c6d97c6ec37fe4978cbd521620cc6e8cd926682a:src/game/ArenaTeam.cpp
 
     CharacterDatabase.PExecute("INSERT INTO arena_team_member (arenateamid, guid, personal_rating) VALUES ('%u', '%u', '%u')", m_TeamId, GUID_LOPART(newmember.guid), newmember.personal_rating );
 
@@ -580,26 +549,9 @@ int32 ArenaTeam::WonAgainst(uint32 againstRating)
     // calculate the rating modification (ELO system with k=32)
     int32 mod = (int32)floor(32.0f * (1.0f - chance));
     // modify the team stats accordingly
-<<<<<<< HEAD:src/game/ArenaTeam.cpp
-    int32 newTeamRating = (int32)stats.rating + mod;
-    stats.rating = newTeamRating > 0 ? newTeamRating : 0;
-    stats.games_week += 1;
-    stats.wins_week += 1;
-    stats.games_season += 1;
-    stats.wins_season += 1;
-    //update team's rank
-    stats.rank = 1;
-    ObjectMgr::ArenaTeamMap::const_iterator i = objmgr.GetArenaTeamMapBegin();
-    for ( ; i != objmgr.GetArenaTeamMapEnd(); ++i)
-    {
-        if (i->second->GetType() == this->Type && i->second->GetStats().rating > stats.rating)
-            ++stats.rank;
-    }
-=======
     FinishGame(mod);
     m_stats.wins_week += 1;
     m_stats.wins_season += 1;
->>>>>>> c6d97c6ec37fe4978cbd521620cc6e8cd926682a:src/game/ArenaTeam.cpp
 
     // return the rating change, used to display it on the results screen
     return mod;
@@ -613,23 +565,7 @@ int32 ArenaTeam::LostAgainst(uint32 againstRating)
     // calculate the rating modification (ELO system with k=32)
     int32 mod = (int32)ceil(32.0f * (0.0f - chance));
     // modify the team stats accordingly
-<<<<<<< HEAD:src/game/ArenaTeam.cpp
-    int32 newTeamRating = (int32)stats.rating + mod;
-    stats.rating = newTeamRating > 0 ? newTeamRating : 0;
-    stats.games_week += 1;
-    stats.games_season += 1;
-    //update team's rank
-
-    stats.rank = 1;
-    ObjectMgr::ArenaTeamMap::const_iterator i = objmgr.GetArenaTeamMapBegin();
-    for ( ; i != objmgr.GetArenaTeamMapEnd(); ++i)
-    {
-        if (i->second->GetType() == this->Type && i->second->GetStats().rating > stats.rating)
-            ++stats.rank;
-    }
-=======
     FinishGame(mod);
->>>>>>> c6d97c6ec37fe4978cbd521620cc6e8cd926682a:src/game/ArenaTeam.cpp
 
     // return the rating change, used to display it on the results screen
     return mod;

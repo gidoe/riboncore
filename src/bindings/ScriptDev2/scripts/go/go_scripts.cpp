@@ -370,6 +370,36 @@ bool GOHello_go_tele_to_violet_stand(Player* pPlayer, GameObject* pGo)
     return true;
 }
 
+/*######
+## go_hello_test
+######
+
+bool GOHello_go_gossip(Player* pPlayer, GameObject* pGo)
+{
+    pPlayer->PlayerTalkClass->GetGossipMenu()->AddMenuItem((uint8)0, "killme", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1, "", 0, false);
+    pPlayer->PlayerTalkClass->GetGossipMenu()->AddMenuItem((uint8)0, "code", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2, "", 0, true);
+    pPlayer->PlayerTalkClass->SendGossipMenu(907, pGo->GetGUID());
+    return true;
+}
+
+bool GOSelect_go_gossip(Player *pPlayer, GameObject* pGo, uint32 sender, uint32 action)
+{
+	sLog.outBasic("Selected GO: action=%u, sender=%u",action, sender);
+	switch(action)
+	{
+	case GOSSIP_ACTION_INFO_DEF+1:
+		pPlayer->CastSpell(player, 5, false);
+		break;
+	}
+	return true;
+}
+
+bool GOSelectWithCode_go_gossip(Player *pPlayer, GameObject* pGo, uint32 sender, uint32 action, const char* code)
+{
+	pPlayer->Say(code, LANG_UNIVERSAL);
+	return true;
+}
+*/
 void AddSC_go_scripts()
 {
     Script *newscript;
@@ -458,4 +488,11 @@ void AddSC_go_scripts()
     newscript->Name = "go_tele_to_violet_stand";
     newscript->pGOHello =           &GOHello_go_tele_to_violet_stand;
     newscript->RegisterSelf();
+
+ /*newscript = new Script;
+ newscript->Name="go_gossip";
+ newscript->pGOHello = GOHello_go_gossip;
+ newscript->pGOSelect= GOSelect_go_gossip;
+ newscript->pGOSelectWithCode= GOSelectWithCode_go_gossip;
+ newscript->RegisterSelf();*/
 }

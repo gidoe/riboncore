@@ -1695,7 +1695,35 @@ bool GossipSelectWithCode(Player* pPlayer, Creature* pCreature, uint32 sender, u
     pPlayer->PlayerTalkClass->ClearMenus();
     return tmpscript->pGossipSelectWithCode(pPlayer, pCreature,sender,action,sCode);
 }
+/*
+MANGOS_DLL_EXPORT
+bool GOSelect( Player *pPlayer, GameObject *pGO, uint32 sender, uint32 action )
+{
+ Script *tmpscript = NULL;
 
+ debug_log("DEBUG: Gossip selection, sender: %d, action: %d",sender, action);
+
+ tmpscript = GetScriptByName(pGO->GetGOInfo()->ScriptName);
+ if(!tmpscript || !tmpscript->pGOSelect) return false;
+
+ player->PlayerTalkClass->ClearMenus();
+ return tmpscript->pGOSelect(player,pGO,sender,action);
+}
+
+MANGOS_DLL_EXPORT
+bool GOSelectWithCode( Player *player, GameObject *_GO, uint32 sender, uint32 action, const char* sCode )
+{
+ Script *tmpscript = NULL;
+
+ debug_log("DEBUG: Gossip selection, sender: %d, action: %d",sender, action);
+
+ tmpscript = GetScriptByName(_GO->GetGOInfo()->ScriptName);
+ if(!tmpscript || !tmpscript->pGOSelectWithCode) return false;
+
+ player->PlayerTalkClass->ClearMenus();
+ return tmpscript->pGOSelectWithCode(player,_GO,sender,action,sCode) ;
+}
+*/
 MANGOS_DLL_EXPORT
 bool QuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 {
