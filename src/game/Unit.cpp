@@ -6021,7 +6021,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 case 31877:
                 case 31878:
                     target = this;
-                    basepoints0 = GetCreatePowers(POWER_MANA) * 25 / 100;
                     triggered_spell_id = 31930;
 
                     // Replenishment
@@ -7591,6 +7590,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 return false;
             break;
         }
+<<<<<<< HEAD:src/game/Unit.cpp
         // Glyph of death's Embrace
         case 58679:
         {
@@ -7605,6 +7605,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             basepoints0 = int32(GetCreateMana() * triggerAmount / 100);
             break;
         }
+=======
+>>>>>>> c6d97c6ec37fe4978cbd521620cc6e8cd926682a:src/game/Unit.cpp
     }
 
     if( cooldown && GetTypeId()==TYPEID_PLAYER && ((Player*)this)->HasSpellCooldown(trigger_spell_id))
