@@ -383,14 +383,7 @@ Map::EnsureGridCreated(const GridPair &p)
     InitVisibilityDistance();
 }
 
-void Map::InitVisibilityDistance()
-{
-    //init visibility for continents
-    m_VisibleDistance = sWorld.GetMaxVisibleDistanceOnContinents();
-}
-
-void
-Map::EnsureGridLoadedAtEnter(const Cell &cell, Player *player)
+void Map::EnsureGridLoadedAtEnter(const Cell &cell, Player *player)
 {
     NGridType *grid;
 
@@ -2513,12 +2506,6 @@ InstanceMap::~InstanceMap()
     }
 }
 
-void InstanceMap::InitVisibilityDistance()
-{
-    //init visibility distance for instances
-    m_VisibleDistance = sWorld.GetMaxVisibleDistanceInInstances();
-}
-
 void InstanceMap::InitializeNotifyTimers()
 {
 	m_PlayerVisibilityNotifyTimer.SetPeriodic(0.5*sWorld.GetVisibilityNotifyPeriodInInstances(), 0.25*sWorld.GetVisibilityNotifyPeriodInInstances());
@@ -2859,13 +2846,6 @@ BattleGroundMap::BattleGroundMap(uint32 id, time_t expiry, uint32 InstanceId, Ma
 BattleGroundMap::~BattleGroundMap()
 {
 }
-
-void BattleGroundMap::InitVisibilityDistance()
-{
-    //init visibility distance for BG/Arenas
-    m_VisibleDistance = sWorld.GetMaxVisibleDistanceInBGArenas();
-}
-
 void BattleGroundMap::InitializeNotifyTimers()
 {
 	m_PlayerVisibilityNotifyTimer.SetPeriodic(0.5*sWorld.GetVisibilityNotifyPeriodInBGArenas(), 0.25*sWorld.GetVisibilityNotifyPeriodInBGArenas());
