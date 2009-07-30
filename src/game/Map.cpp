@@ -378,6 +378,15 @@ Map::EnsureGridCreated(const GridPair &p)
                 LoadMapAndVMap(gx,gy);
         }
     }
+
+    //lets initialize visibility distance for map
+    InitVisibilityDistance();
+}
+
+void Map::InitVisibilityDistance()
+{
+    //init visibility for continents
+    m_VisibleDistance = sWorld.GetMaxVisibleDistanceOnContinents();
 }
 
 void
@@ -512,6 +521,7 @@ void Map::MessageBroadcast(Player *player, WorldPacket *msg, bool to_self)
 
     Cell cell(p);
     cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();
 
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
         return;
@@ -559,6 +569,7 @@ void Map::MessageDistBroadcast(Player *player, WorldPacket *msg, float dist, boo
 
     Cell cell(p);
     cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();
 
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
         return;
@@ -2515,6 +2526,12 @@ void InstanceMap::InitializeNotifyTimers()
 	m_RelocationNotifyTimer.SetPeriodic(sWorld.GetVisibilityNotifyPeriodInInstances(),0.5*sWorld.GetVisibilityNotifyPeriodInInstances());
 }
 
+void InstanceMap::InitVisibilityDistance()
+{
+    //init visibility distance for instances
+    m_VisibleDistance = sWorld.GetMaxVisibleDistanceInInstances();
+}
+
 /*
     Do map specific checks to see if the player can enter
 */
@@ -2854,6 +2871,12 @@ void BattleGroundMap::InitializeNotifyTimers()
 	m_PlayerVisibilityNotifyTimer.SetPeriodic(0.5*sWorld.GetVisibilityNotifyPeriodInBGArenas(), 0.25*sWorld.GetVisibilityNotifyPeriodInBGArenas());
 	m_ObjectVisibilityNotifyTimer.SetPeriodic(sWorld.GetVisibilityNotifyPeriodInBGArenas(), 0 * sWorld.GetVisibilityNotifyPeriodInBGArenas());
 	m_RelocationNotifyTimer.SetPeriodic(sWorld.GetVisibilityNotifyPeriodInBGArenas(),0.5*sWorld.GetVisibilityNotifyPeriodInBGArenas());
+}
+
+void BattleGroundMap::InitVisibilityDistance()
+{
+    //init visibility distance for BG/Arenas
+    m_VisibleDistance = sWorld.GetMaxVisibleDistanceInBGArenas();
 }
 
 bool BattleGroundMap::CanEnter(Player * player)
