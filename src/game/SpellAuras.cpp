@@ -8061,18 +8061,6 @@ void Aura::HandleAllowOnlyAbility(bool apply, bool Real)
     m_target->UpdateDamagePhysical(OFF_ATTACK);
 }
 
-void Aura::HandleAbilityIgnoreAurastate( bool Apply, bool Real )
-{
-	if(Apply && Real)
-		switch (GetId())
-	{
-		case 44544:	SetAuraCharges(2);	break;
-		case 52437:	SetAuraCharges(1);	break;
-		default:
-			break;
-	}
-}
-
 void Aura::UnregisterSingleCastAura()
 {
     if (IsSingleTarget())
