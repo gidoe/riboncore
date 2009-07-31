@@ -8068,9 +8068,14 @@ void Aura::UnregisterSingleCastAura()
         }
         else
         {
+<<<<<<< HEAD:src/game/SpellAuras.cpp
             //Temp Crashfix.
             //sLog.outError("Couldn't find the caster of the single target aura, may crash later!");
             //assert(false);
+=======
+            sLog.outError("Couldn't find the caster of the single target aura (SpellId %u), may crash later!", GetId());
+            assert(false);
+>>>>>>> cb196ee0b21a74d1555e99a27c8eb263c63232e5:src/game/SpellAuras.cpp
         }
         m_isSingleTargetAura = false;
     }
