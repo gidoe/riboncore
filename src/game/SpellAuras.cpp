@@ -1402,6 +1402,9 @@ bool Aura::isAffectedOnSpell(SpellEntry const *spell) const
     // Check family name
     if (spell->SpellFamilyName != m_spellProto->SpellFamilyName)
         return false;
+	// Special case for 44544 Fingers of Frost
+	if ( (m_spellProto->EffectMiscValue[0] & GetSpellSchoolMask(spell)) && m_spellProto->SpellIconID == 2947 )
+		return true;
     // Check EffectClassMask
     uint32 const *ptr = getAuraSpellClassMask();
     if (((uint64*)ptr)[0] & spell->SpellFamilyFlags)
@@ -8058,6 +8061,18 @@ void Aura::HandleAllowOnlyAbility(bool apply, bool Real)
     m_target->UpdateDamagePhysical(OFF_ATTACK);
 }
 
+void Aura::HandleAbilityIgnoreAurastate( bool Apply, bool Real )
+{
+	if(Apply && Real)
+		switch (GetId())
+	{
+		case 44544:	SetAuraCharges(2);	break;
+		case 52437:	SetAuraCharges(1);	break;
+		default:
+			break;
+	}
+}
+
 void Aura::UnregisterSingleCastAura()
 {
     if (IsSingleTarget())
@@ -8068,14 +8083,8 @@ void Aura::UnregisterSingleCastAura()
         }
         else
         {
-<<<<<<< HEAD:src/game/SpellAuras.cpp
-            //Temp Crashfix.
-            //sLog.outError("Couldn't find the caster of the single target aura, may crash later!");
+            //sLog.outError("Couldn't find the caster of the single target aura (SpellId %u), may crash later!", GetId());
             //assert(false);
-=======
-            sLog.outError("Couldn't find the caster of the single target aura (SpellId %u), may crash later!", GetId());
-            assert(false);
->>>>>>> cb196ee0b21a74d1555e99a27c8eb263c63232e5:src/game/SpellAuras.cpp
         }
         m_isSingleTargetAura = false;
     }

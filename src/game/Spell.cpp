@@ -4080,16 +4080,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                 return SPELL_FAILED_CASTER_AURASTATE;
         }
 
-<<<<<<< HEAD:src/game/Spell.cpp
-        if(target == m_caster && m_spellInfo->AttributesEx & SPELL_ATTR_EX_CANT_TARGET_SELF)
-            return SPELL_FAILED_BAD_TARGETS;
-
-        if(target != m_caster)
-=======
         bool non_caster_target = target != m_caster && !IsSpellWithCasterSourceTargetsOnly(m_spellInfo);
 
         if(non_caster_target)
->>>>>>> cb196ee0b21a74d1555e99a27c8eb263c63232e5:src/game/Spell.cpp
         {
             // target state requirements (apply to non-self only), to allow cast affects to self like Dirty Deeds
             if(m_spellInfo->TargetAuraState && !target->HasAuraStateForCaster(AuraState(m_spellInfo->TargetAuraState),m_caster->GetGUID()))
