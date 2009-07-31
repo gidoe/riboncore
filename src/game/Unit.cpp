@@ -963,6 +963,12 @@ void Unit::CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, I
     if(!originalCaster && triggeredByAura)
         originalCaster = triggeredByAura->GetCasterGUID();
 
+    if(!originalCaster)
+    {
+        sLog.outError("CastSpell: Prevent Crash (original CasterGUID = NULL)");
+        return;
+    }
+
     Spell *spell = new Spell(this, spellInfo, triggered, originalCaster );
 
     SpellCastTargets targets;
