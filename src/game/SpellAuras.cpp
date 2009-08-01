@@ -5065,12 +5065,10 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     float mwb_max = caster->GetWeaponDamageRange(BASE_ATTACK,MAXDAMAGE);
                     m_modifier.m_amount+=int32(((mwb_min+mwb_max)/2+ap*mws/14000)*0.2f);
 
-                    SpellChainNode const* RendSpell = spellmgr.GetSpellChainNode(m_spellProto->Id);
-
-                    if (RendSpell->rank >= 9)
+                    if (m_target && (m_spellProto->Id == 46845 || m_spellProto->Id == 47465))
                     {
-                        if (m_target->GetHealth() > m_target->GetMaxHealth()*0.75f)
-                            m_modifier.m_amount += int32(GetModifier()->m_amount*0.35);
+                        if (m_target->GetHealth() * 100 > m_target->GetMaxHealth() * 75)
+                            m_modifier.m_amount += int32(GetModifier()->m_amount * 0.35);
                     }
 
                     return;
