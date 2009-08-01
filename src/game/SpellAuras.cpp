@@ -314,7 +314,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //259 SPELL_AURA_DECREASE_PERIODIC_HEAL
     &Aura::HandleNoImmediateEffect,                         //260 SPELL_AURA_SCREEN_EFFECT (miscvalue = id in ScreenEffect.dbc) not required any code
     &Aura::HandlePhase,                                     //261 SPELL_AURA_PHASE undetactable invisibility?     implemented in Unit::isVisibleForOrDetect
-    &Aura::HandleNULL,                                      //262
+    &Aura::HandleAbilityIgnoreAurastate,                    //262 SPELL_AURA_ABILITY_IGNORE_AURASTATE
     &Aura::HandleAllowOnlyAbility,                          //263 SPELL_AURA_ALLOW_ONLY_ABILITY player can use only abilities set in SpellClassMask
     &Aura::HandleUnused,                                    //264 unused (3.0.8a)
     &Aura::HandleUnused,                                    //265 unused (3.0.8a)
@@ -1179,38 +1179,6 @@ void Aura::_RemoveAura()
     HandleAuraSpecificMods(false);
 }
 
-void Aura::SendFakeAuraUpdate(uint32 auraId, bool remove)
-{
-    WorldPacket data(SMSG_AURA_UPDATE);
-    data.append(m_target->GetPackGUID());
-    data << uint8(64);
-    data << uint32(remove ? 0 : auraId);
-
-    if(remove)
-    {
-        m_target->SendMessageToSet(&data, true);
-        return;
-    }
-
-    uint8 auraFlags = GetAuraFlags();
-    data << uint8(auraFlags);
-    data << uint8(GetAuraLevel());
-    data << uint8(m_procCharges ? m_procCharges : m_stackAmount);
-
-    if(!(auraFlags & AFLAG_NOT_CASTER))
-    {
-        data << uint8(0);                                   // pguid
-    }
-
-    if(auraFlags & AFLAG_DURATION)
-    {
-        data << uint32(GetAuraMaxDuration());
-        data << uint32(GetAuraDuration());
-    }
-
-    m_target->SendMessageToSet(&data, true);
-}
-
 void Aura::HandleAuraSpecificMods(bool apply)
 {
     if (GetSpellSpecific(m_spellProto->Id) == SPELL_PRESENCE)
@@ -1304,6 +1272,38 @@ void Aura::HandleAuraSpecificMods(bool apply)
             }
         }
     }
+}
+
+void Aura::SendFakeAuraUpdate(uint32 auraId, bool remove)
+{
+    WorldPacket data(SMSG_AURA_UPDATE);
+    data.append(m_target->GetPackGUID());
+    data << uint8(64);
+    data << uint32(remove ? 0 : auraId);
+
+    if(remove)
+    {
+        m_target->SendMessageToSet(&data, true);
+        return;
+    }
+
+    uint8 auraFlags = GetAuraFlags();
+    data << uint8(auraFlags);
+    data << uint8(GetAuraLevel());
+    data << uint8(m_procCharges ? m_procCharges : m_stackAmount);
+
+    if(!(auraFlags & AFLAG_NOT_CASTER))
+    {
+        data << uint8(0);                                   // pguid
+    }
+
+    if(auraFlags & AFLAG_DURATION)
+    {
+        data << uint32(GetAuraMaxDuration());
+        data << uint32(GetAuraDuration());
+    }
+
+    m_target->SendMessageToSet(&data, true);
 }
 
 void Aura::SendAuraUpdate(bool remove)
@@ -1402,9 +1402,9 @@ bool Aura::isAffectedOnSpell(SpellEntry const *spell) const
     // Check family name
     if (spell->SpellFamilyName != m_spellProto->SpellFamilyName)
         return false;
-	// Special case for 44544 Fingers of Frost
-	if ( (m_spellProto->EffectMiscValue[0] & GetSpellSchoolMask(spell)) && m_spellProto->SpellIconID == 2947 )
-		return true;
+    // Special case for 44544 Fingers of Frost
+    if ( (m_spellProto->EffectMiscValue[0] & GetSpellSchoolMask(spell)) && m_spellProto->SpellIconID == 2947 )
+        return true;
     // Check EffectClassMask
     uint32 const *ptr = getAuraSpellClassMask();
     if (((uint64*)ptr)[0] & spell->SpellFamilyFlags)
@@ -4980,12 +4980,20 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
             switch (spell->Id)
             {
                 case 48018:
-                    if (apply)
-                        SendFakeAuraUpdate(62388,false);
+                    if (!m_target->GetGameObject(spell->Id))
+                    {
+                        m_target->RemoveAurasDueToSpell(spell->Id);
+                        SendFakeAuraUpdate(62388,true);
+                    }
                     else
                     {
-                        m_target->RemoveGameObject(spell->Id,true);
-                        SendFakeAuraUpdate(62388,true);
+                        if (apply)
+                            SendFakeAuraUpdate(62388,false);
+                        else
+                        {
+                            m_target->RemoveAurasDueToSpell(spell->Id);
+                            SendFakeAuraUpdate(62388,true);
+                        }
                     }
                 break;
             }
@@ -8059,6 +8067,18 @@ void Aura::HandleAllowOnlyAbility(bool apply, bool Real)
     m_target->UpdateDamagePhysical(BASE_ATTACK);
     m_target->UpdateDamagePhysical(RANGED_ATTACK);
     m_target->UpdateDamagePhysical(OFF_ATTACK);
+}
+
+void Aura::HandleAbilityIgnoreAurastate( bool Apply, bool Real )
+{
+    if(Apply && Real)
+        switch (GetId())
+    {
+        case 44544:    SetAuraCharges(2);    break;
+        case 52437:    SetAuraCharges(1);    break;
+        default:
+            break;
+    }
 }
 
 void Aura::UnregisterSingleCastAura()

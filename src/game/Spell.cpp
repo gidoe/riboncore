@@ -1462,7 +1462,6 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,UnitList& TagUnitMap)
         case TARGET_SELF2:
         case TARGET_DYNAMIC_OBJECT:
         case TARGET_SUMMON:
-        case TARGET_EFFECT_SELECT:
         {
             TagUnitMap.push_back(m_caster);
             break;
@@ -1478,6 +1477,15 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,UnitList& TagUnitMap)
         case TARGET_UNK_2:
         {
             TagUnitMap.push_back(m_caster);
+            break;
+        }
+        case TARGET_EFFECT_SELECT:
+        {
+            if (m_spellInfo->SpellFamilyFlags2 & UI64LIT (0x00000020) && m_spellInfo->SpellIconID == 3217)
+            {
+                TagUnitMap.push_back(m_caster);
+                break;
+            }
             break;
         }
 		case TARGET_AREAEFFECT_CUSTOM:
@@ -4023,28 +4031,47 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
-    // caster state requirements
-    if(m_spellInfo->CasterAuraState && !m_caster->HasAuraState(AuraState(m_spellInfo->CasterAuraState)))
-        return SPELL_FAILED_CASTER_AURASTATE;
-    if(m_spellInfo->CasterAuraStateNot && m_caster->HasAuraState(AuraState(m_spellInfo->CasterAuraStateNot)))
-        return SPELL_FAILED_CASTER_AURASTATE;
+    bool reqCombat=true;
+    bool reqDodge=true;
+    Unit::AuraList const& stateAuras = m_caster->GetAurasByType(SPELL_AURA_ABILITY_IGNORE_AURASTATE);
+    for(Unit::AuraList::const_iterator i = stateAuras.begin();i != stateAuras.end(); ++i)
+    {
+        if((*i)->isAffectedOnSpell(m_spellInfo))
+        {
+            if ((*i)->GetMiscValue()==1)
+                reqCombat=false;
+            else if ((*i)->GetSpellProto()->SpellIconID==2961)
+                reqDodge=false;
+            break;
+        }
+    }
 
-    // Caster aura req check if need
+    if (!m_IsTriggeredSpell || m_spellInfo->Id == 48018)
+    {
+        if(m_spellInfo->CasterAuraState && !m_caster->HasAuraState(AuraState(m_spellInfo->CasterAuraState), m_spellInfo, m_caster))
+            return SPELL_FAILED_CASTER_AURASTATE;
+        if(m_spellInfo->CasterAuraStateNot && m_caster->HasAuraState(AuraState(m_spellInfo->CasterAuraStateNot), m_spellInfo, m_caster))
+            return SPELL_FAILED_CASTER_AURASTATE;
+
     if(m_spellInfo->casterAuraSpell &&
         sSpellStore.LookupEntry(m_spellInfo->casterAuraSpell) &&
         !m_caster->HasAura(m_spellInfo->casterAuraSpell))
         return SPELL_FAILED_CASTER_AURASTATE;
-    if(m_spellInfo->excludeCasterAuraSpell)
-    {
-        // Special cases of non existing auras handling
-        if(m_spellInfo->excludeCasterAuraSpell == 61988)
+
+        if(m_spellInfo->excludeCasterAuraSpell)
         {
-            // Avenging Wrath Marker
-            if(m_caster->HasAura(61987))
+            // Special cases of non existing auras handling
+            if(m_spellInfo->excludeCasterAuraSpell == 61988)
+            {
+                if(m_caster->HasAura(61987))
+                    return SPELL_FAILED_CASTER_AURASTATE;
+            }
+            else if(m_caster->HasAura(m_spellInfo->excludeCasterAuraSpell))
                 return SPELL_FAILED_CASTER_AURASTATE;
         }
-        else if(m_caster->HasAura(m_spellInfo->excludeCasterAuraSpell))
-            return SPELL_FAILED_CASTER_AURASTATE;
+
+        if(reqCombat && m_caster->isInCombat() && IsNonCombatSpell(m_spellInfo))
+            return SPELL_FAILED_AFFECTING_COMBAT;
     }
 
     // cancel autorepeat spells if cast start when moving
@@ -4059,38 +4086,21 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     if(Unit *target = m_targets.getUnitTarget())
     {
-        // target state requirements (not allowed state), apply to self also
-        if(m_spellInfo->TargetAuraStateNot && target->HasAuraState(AuraState(m_spellInfo->TargetAuraStateNot)))
-            return SPELL_FAILED_TARGET_AURASTATE;
-
-        // Target aura req check if need
-        if(m_spellInfo->targetAuraSpell && !target->HasAura(m_spellInfo->targetAuraSpell))
-            return SPELL_FAILED_CASTER_AURASTATE;
-        if(m_spellInfo->excludeTargetAuraSpell)
-        {
-            // Special cases of non existing auras handling
-            if (m_spellInfo->excludeTargetAuraSpell == 61988)
-            {
-                // Avenging Wrath Marker
-                if (target->HasAura(61987))
-                    return SPELL_FAILED_CASTER_AURASTATE;
-
-            }
-            else if (target->HasAura(m_spellInfo->excludeTargetAuraSpell))
-                return SPELL_FAILED_CASTER_AURASTATE;
-        }
-
         bool non_caster_target = target != m_caster && !IsSpellWithCasterSourceTargetsOnly(m_spellInfo);
 
         if(non_caster_target)
         {
             // target state requirements (apply to non-self only), to allow cast affects to self like Dirty Deeds
-            if(m_spellInfo->TargetAuraState && !target->HasAuraStateForCaster(AuraState(m_spellInfo->TargetAuraState),m_caster->GetGUID()))
+            if(!m_IsTriggeredSpell && m_spellInfo->TargetAuraState && !target->HasAuraState(AuraState(m_spellInfo->TargetAuraState), m_spellInfo, m_caster, !strict))
                 return SPELL_FAILED_TARGET_AURASTATE;
 
             // Not allow casting on flying player
             if (target->isInFlight())
                 return SPELL_FAILED_BAD_TARGETS;
+
+            //Check combo points (Overpower and etc)
+            if(reqDodge && !m_IsTriggeredSpell && NeedsComboPoints(m_spellInfo) && !((Player*)m_caster)->GetComboPoints())
+                return SPELL_FAILED_CASTER_AURASTATE;
 
             if(!m_IsTriggeredSpell && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
                 return SPELL_FAILED_LINE_OF_SIGHT;
@@ -4403,12 +4413,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         {
             case SPELL_EFFECT_DUMMY:
             {
-                if(m_spellInfo->SpellIconID == 1648)        // Execute
-                {
-                    if(!m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetHealth() > m_targets.getUnitTarget()->GetMaxHealth()*0.2)
-                        return SPELL_FAILED_BAD_TARGETS;
-                }
-                else if (m_spellInfo->Id == 51582)          // Rocket Boots Engaged
+                if (m_spellInfo->Id == 51582)          // Rocket Boots Engaged
                 {
                     if(m_caster->IsInWater())
                         return SPELL_FAILED_ONLY_ABOVEWATER;

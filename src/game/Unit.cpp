@@ -8386,6 +8386,23 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
         }
     }
 }
+
+bool Unit::HasAuraState(AuraState flag, SpellEntry const *spellProto, Unit *Caster, bool rm_chrg) const
+{
+     if (Caster && spellProto && !HasFlag(UNIT_FIELD_AURASTATE, 1<<(flag-1)))
+     {
+          Unit::AuraList const& stateAuras = Caster->GetAurasByType(SPELL_AURA_ABILITY_IGNORE_AURASTATE);
+          for(Unit::AuraList::const_iterator i = stateAuras.begin();i != stateAuras.end(); ++i)
+            if((*i)->isAffectedOnSpell(spellProto))
+            {
+                if(rm_chrg && (*i)->DropAuraCharge())
+                    Caster->RemoveAurasDueToSpellByCancel((*i)->GetId());
+                return true;
+            }
+    }
+     return HasFlag(UNIT_FIELD_AURASTATE, 1<<(flag-1));
+}
+
 Unit *Unit::GetOwner() const
 {
     if(uint64 ownerid = GetOwnerGUID())
@@ -8808,7 +8825,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     if (spellProto->SpellFamilyName == SPELLFAMILY_MAGE)
     {
         // Ice Lance
-        if (spellProto->SpellIconID == 186 && pVictim->isFrozen())
+        if (spellProto->SpellIconID == 186 && pVictim->HasAuraState(AURA_STATE_FROZEN,spellProto,this))
                 DoneTotalMod *= 3.0f;
 
         // Torment the Weak
@@ -9084,9 +9101,9 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                         continue;
                     switch((*i)->GetModifier()->m_miscvalue)
                     {
-                        case  849: if (pVictim->isFrozen()) crit_chance+= 17.0f; break; //Shatter Rank 1
-                        case  910: if (pVictim->isFrozen()) crit_chance+= 34.0f; break; //Shatter Rank 2
-                        case  911: if (pVictim->isFrozen()) crit_chance+= 50.0f; break; //Shatter Rank 3
+                        case  849: if (pVictim->HasAuraState(AURA_STATE_FROZEN,spellProto,this, spellProto->SpellIconID!=186)) crit_chance+= 17.0f; break; //Shatter Rank 1
+                        case  910: if (pVictim->HasAuraState(AURA_STATE_FROZEN,spellProto,this, spellProto->SpellIconID!=186)) crit_chance+= 34.0f; break; //Shatter Rank 2
+                        case  911: if (pVictim->HasAuraState(AURA_STATE_FROZEN,spellProto,this, spellProto->SpellIconID!=186)) crit_chance+= 50.0f; break; //Shatter Rank 3
                         case 7917: // Glyph of Shadowburn
                             if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
                                 crit_chance+=(*i)->GetModifier()->m_amount;
