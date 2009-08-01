@@ -1967,8 +1967,14 @@ void Spell::EffectDummy(uint32 i)
             }
             break;
         case SPELLFAMILY_DEATHKNIGHT:
+            // Death Strike healing effect
+            if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x00000010))
+            {
+                m_caster->CastSpell(m_caster,45469,true);
+                return;
+            }
             // Death Coil
-            if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x002000))
+            else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x002000))
             {
                 if(m_caster->IsFriendlyTo(unitTarget))
                 {
