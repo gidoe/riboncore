@@ -218,7 +218,6 @@ scripts/zone/hellfire_peninsula/hellfire_peninsula.cpp \
 scripts/zone/hinterlands/hinterlands.cpp \
 scripts/zone/icecrown/icecrown.cpp \
 scripts/zone/ironforge/ironforge.cpp \
-scripts/zone/icecrown/icecrown.cpp \
 scripts/zone/isle_of_queldanas/isle_of_queldanas.cpp \
 scripts/zone/karazhan/boss_curator.cpp \
 scripts/zone/karazhan/boss_maiden_of_virtue.cpp \
