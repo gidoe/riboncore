@@ -3677,6 +3677,10 @@ bool Unit::AddAura(Aura *Aur)
 
     Aur->ApplyModifier(true,true);
     sLog.outDebug("Aura %u now is in use", aurName);
+
+    if(IsSpellLastAuraEffect(aurSpellInfo,Aur->GetEffIndex()))
+        Aur->HandleSpellSpecificBoosts(true);
+
     return true;
 }
 

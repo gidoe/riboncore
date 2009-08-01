@@ -1177,6 +1177,7 @@ void Aura::_RemoveAura()
                     ((Player*)caster)->SendCooldownEvent(GetSpellProto());
             }
 
+        if(IsSpellLastAuraEffect(GetSpellProto(),GetEffIndex()))
             HandleSpellSpecificBoosts(false);
         }
     }
@@ -6318,70 +6319,102 @@ void Aura::HandleShapeshiftBoosts(bool apply)
 
 void Aura::HandleSpellSpecificBoosts(bool apply)
 {
-    SpellSpecific spellSpec = GetSpellSpecific(GetId());
-
-    // spellSpec == SPELL_NORMAL
-    if(!spellSpec)
-        return;
-
-    uint32 spellId = 0;
+    uint32 spellId1 = 0;
     uint32 spellId2 = 0;
+    uint32 spellId3 = 0;
 
-    switch(spellSpec)
+    switch(GetSpellProto()->SpellFamilyName)
     {
-        case SPELL_AURA:
-            // Only process on player casting paladin aura
-            if(GetCasterGUID() != m_target->GetGUID() || !IS_PLAYER_GUID(GetCasterGUID()))
-                return;
-            // Sanctified Retribution and Swift Retribution (they share one aura), but not Retribution Aura (already gets modded)
-            if (GetSpellProto()->SpellFamilyFlags != UI64LIT(0x0000000000000008))
-                spellId = 63531;
-            // Improved Concentration Aura
-            spellId2 = 63510;
+        case SPELLFAMILY_WARRIOR:
+        {
+            if(!apply)
+            {
+                // Remove Blood Frenzy only if target no longer has any Deep Wound or Rend (applying is handled by procs)
+                if (GetSpellProto()->Mechanic != MECHANIC_BLEED)
+                    return;
+
+                // If target still has one of Warrior's bleeds, do nothing
+                Unit::AuraList const& PeriodicDamage = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                for(Unit::AuraList::const_iterator i = PeriodicDamage.begin(); i != PeriodicDamage.end(); ++i)
+                    if( (*i)->GetCasterGUID() == GetCasterGUID() &&
+                        (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR &&
+                        (*i)->GetSpellProto()->Mechanic == MECHANIC_BLEED)
+                        return;
+
+                spellId1 = 30069;
+                spellId2 = 30070;
+            }
             break;
-        case SPELL_ASPECT:
+        }
+        case SPELLFAMILY_HUNTER:
+        {
+            if(GetSpellSpecific(m_spellProto->Id) != SPELL_ASPECT)
+                return;
+
             // Aspect of the Dragonhawk dodge
             if (GetSpellProto()->SpellFamilyFlags2 & 0x00001000)
-                spellId = 61848;
+                spellId2 = 61848;
+            else
+                return;
+
             break;
-        case SPELL_PRESENCE:
+        }
+        case SPELLFAMILY_PALADIN:
+        {
+            // Only process on player casting paladin aura
+            // all aura bonuses applied also in aura area effect way to caster
+            if (GetCasterGUID() != m_target->GetGUID() || !IS_PLAYER_GUID(GetCasterGUID()))
+                return;
+
+            if (GetSpellSpecific(m_spellProto->Id) != SPELL_AURA)
+                return;
+
+            // Sanctified Retribution and Swift Retribution (they share one aura), but not Retribution Aura (already gets modded)
+            if ((GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000008))==0)
+                spellId1 = 63531;
+            // Improved Concentration Aura (auras bonus)
+            spellId2 = 63510;
+            // Improved Devotion Aura (auras bonus)
+            spellId3 = 63514;
+            break;
+        }
+        case SPELLFAMILY_DEATHKNIGHT:
+        {
+            if (GetSpellSpecific(m_spellProto->Id) != SPELL_PRESENCE)
+                return;
+
             // Frost Presence health
             if (GetId() == 48263)
-                spellId = 61261;
+                spellId1 = 61261;
             // Unholy Presence move speed
             else if (GetId() == 48265)
-                spellId = 49772;
+                spellId1 = 49772;
+            else
+                return;
+
             break;
-        case SPELL_WARRIOR_BLEED:
-            spellId = 30069;
-            spellId2 = 30070;
-            break;
+        }
         default:
             return;
     }
 
-    if(spellSpec == SPELL_WARRIOR_BLEED)
-    {
-        // Remove Blood Frenzy only if target no longer has any Deep Wound or Rend (applying is handled by procs)
-        if (apply)
-            return;
-
-        // If target still has one of Warrior's bleeds, do nothing
-        Unit::AuraList const& PeriodicDamage = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-        for(Unit::AuraList::const_iterator i = PeriodicDamage.begin(); i != PeriodicDamage.end(); ++i)
-            if((*i)->GetCasterGUID() == GetCasterGUID() && (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR)
-                return;
-    }
-
     if (apply)
     {
-        if (spellId) m_target->CastSpell(m_target, spellId, true);
-        if (spellId2) m_target->CastSpell(m_target, spellId2, true);
+        if (spellId1)
+            m_target->CastSpell(m_target, spellId1, true, NULL, NULL, GetCasterGUID());
+        if (spellId2)
+            m_target->CastSpell(m_target, spellId2, true, NULL, NULL, GetCasterGUID());
+        if (spellId3)
+            m_target->CastSpell(m_target, spellId3, true, NULL, NULL, GetCasterGUID());
     }
     else
     {
-        m_target->RemoveAurasByCasterSpell(spellId, GetCasterGUID());
-        m_target->RemoveAurasByCasterSpell(spellId2, GetCasterGUID());
+        if (spellId1)
+            m_target->RemoveAurasByCasterSpell(spellId1, GetCasterGUID());
+        if (spellId2)
+            m_target->RemoveAurasByCasterSpell(spellId2, GetCasterGUID());
+        if (spellId3)
+            m_target->RemoveAurasByCasterSpell(spellId3, GetCasterGUID());
     }
 }
 
