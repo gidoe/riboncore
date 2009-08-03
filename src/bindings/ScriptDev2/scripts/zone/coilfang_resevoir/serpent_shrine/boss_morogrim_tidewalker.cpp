@@ -125,20 +125,21 @@ struct MANGOS_DLL_DECL boss_morogrim_tidewalkerAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_MOROGRIM_EVENT, DONE);
+            m_pInstance->SetData(TYPE_MOROGRIM_EVENT, SPECIAL);
     }
 
     void JustSummoned(Creature* pSummoned)
     {
         if (pSummoned->GetEntry() == NPC_TIDEWALKER_LURKER)
         {
-            if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+            pSummoned->SetCorpseDelay(10000);               // despawn murloc 10 seconds after dying
+            if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 1))
                 pSummoned->AI()->AttackStart(pTarget);
         }
 
         if (pSummoned->GetEntry() == NPC_WATER_GLOBULE)
         {
-            if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+            if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 1))
                 pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0.0f, 0.0f);
         }
     }

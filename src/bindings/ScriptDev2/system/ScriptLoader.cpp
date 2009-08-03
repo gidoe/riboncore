@@ -199,6 +199,7 @@ extern void AddSC_boss_lady_vashj();
 extern void AddSC_boss_leotheras_the_blind();
 extern void AddSC_boss_morogrim_tidewalker();
 extern void AddSC_instance_serpentshrine_cavern();
+extern void AddSC_serpentshrine_cavern();
 
 //Slave Pens
 
@@ -668,6 +669,7 @@ void AddScripts()
     AddSC_boss_leotheras_the_blind();
     AddSC_boss_morogrim_tidewalker();
     AddSC_instance_serpentshrine_cavern();
+    AddSC_serpentshrine_cavern();
 
     //Slave Pens
 

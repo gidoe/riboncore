@@ -144,7 +144,7 @@ struct MANGOS_DLL_DECL boss_leotheras_the_blindAI : public ScriptedAI
         }
 
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_LEOTHERAS_EVENT, DONE);
+            m_pInstance->SetData(TYPE_LEOTHERAS_EVENT, SPECIAL);
     }
 
     void UpdateAI(const uint32 uiDiff)

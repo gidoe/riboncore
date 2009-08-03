@@ -35,10 +35,13 @@ EndScriptData */
 
 const int MAX_ENCOUNTER = 6;
 const int MAX_GENERATOR = 4;
+const int MAX_BRIDGE    = 3;
 
 struct MANGOS_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
 {
     instance_serpentshrine_cavern(Map* pMap) : ScriptedInstance(pMap) { Initialize(); };
+
+    std::string strSaveData;
 
     uint64 m_uiSharkkis;
     uint64 m_uiTidalvess;
@@ -46,12 +49,16 @@ struct MANGOS_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
     uint64 m_uiLadyVashj;
     uint64 m_uiKarathress;
     uint64 m_uiKarathressEvent_Starter;
+    uint64 m_auiCoilfangBridge_GUID[MAX_BRIDGE];
 
     uint32 m_auiShieldGenerator[MAX_GENERATOR];
     uint32 m_auiEncounter[MAX_ENCOUNTER];
 
+    bool m_bBridgeActivated;
+
     void Initialize()
     {
+        memset(&m_auiCoilfangBridge_GUID, 0, sizeof(m_auiCoilfangBridge_GUID));
         memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
         memset(&m_auiShieldGenerator, 0, sizeof(m_auiShieldGenerator));
 
@@ -61,6 +68,7 @@ struct MANGOS_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
         m_uiLadyVashj = 0;
         m_uiKarathress = 0;
         m_uiKarathressEvent_Starter = 0;
+        m_bBridgeActivated = false;
     }
 
     bool IsEncounterInProgress()
@@ -84,6 +92,52 @@ struct MANGOS_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
         }
     }
 
+    void OnObjectCreate(GameObject* pGo)
+    {
+        switch (pGo->GetEntry())
+        {
+            case 185114:
+                if (GetData(TYPE_HYDROSS_EVENT) == DONE)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
+                break;
+            case 185115:
+                if (GetData(TYPE_THELURKER_EVENT) == DONE)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
+                break;
+            case 185116:
+                if (GetData(TYPE_LEOTHERAS_EVENT) == DONE)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
+                break;
+            case 185117:
+                if (GetData(TYPE_KARATHRESS_EVENT) == DONE)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
+                break;
+            case 185118:
+                if (GetData(TYPE_MOROGRIM_EVENT) == DONE)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
+                break;
+            case 184203:
+                m_auiCoilfangBridge_GUID[0] = pGo->GetGUID();
+                if (m_bBridgeActivated)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
+                break;
+            case 184204:
+                m_auiCoilfangBridge_GUID[1] = pGo->GetGUID();
+                if (m_bBridgeActivated)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
+                break;
+            case 184205:
+                m_auiCoilfangBridge_GUID[2] = pGo->GetGUID();
+                if (m_bBridgeActivated)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
+                break;
+            case 184568:
+                if (m_bBridgeActivated)
+                    pGo->SetGoState(GO_STATE_ACTIVE);
+                break;
+        }
+    }
+
     void SetData64(uint32 uiType, uint64 uiData)
     {
         if (uiType == DATA_KARATHRESS_STARTER)
@@ -94,18 +148,12 @@ struct MANGOS_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
     {
         switch(uiIdentifier)
         {
-            case DATA_SHARKKIS:
-                return m_uiSharkkis;
-            case DATA_TIDALVESS:
-                return m_uiTidalvess;
-            case DATA_CARIBDIS:
-                return m_uiCaribdis;
-            case DATA_LADYVASHJ:
-                return m_uiLadyVashj;
-            case DATA_KARATHRESS:
-                return m_uiKarathress;
-            case DATA_KARATHRESS_STARTER:
-                return m_uiKarathressEvent_Starter;
+            case DATA_SHARKKIS:             return m_uiSharkkis;
+            case DATA_TIDALVESS:            return m_uiTidalvess;
+            case DATA_CARIBDIS:             return m_uiCaribdis;
+            case DATA_LADYVASHJ:            return m_uiLadyVashj;
+            case DATA_KARATHRESS:           return m_uiKarathress;
+            case DATA_KARATHRESS_STARTER:   return m_uiKarathressEvent_Starter;
         }
         return 0;
     }
@@ -114,75 +162,62 @@ struct MANGOS_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
     {
         switch(uiType)
         {
-            case TYPE_HYDROSS_EVENT:
-                m_auiEncounter[0] = uiData;
-                break;
-            case TYPE_LEOTHERAS_EVENT:
-                m_auiEncounter[1] = uiData;
-                break;
-            case TYPE_THELURKER_EVENT:
-                m_auiEncounter[2] = uiData;
-                break;
-            case TYPE_KARATHRESS_EVENT:
-                m_auiEncounter[3] = uiData;
-                break;
-            case TYPE_MOROGRIM_EVENT:
-                m_auiEncounter[4] = uiData;
-                break;
+            case TYPE_HYDROSS_EVENT:        m_auiEncounter[0] = uiData; break;
+            case TYPE_LEOTHERAS_EVENT:      m_auiEncounter[1] = uiData; break;
+            case TYPE_THELURKER_EVENT:      m_auiEncounter[2] = uiData; break;
+            case TYPE_KARATHRESS_EVENT:     m_auiEncounter[3] = uiData; break;
+            case TYPE_MOROGRIM_EVENT:       m_auiEncounter[4] = uiData; break;
             case TYPE_LADYVASHJ_EVENT:
                 if (uiData == NOT_STARTED)
                     memset(&m_auiShieldGenerator, 0, sizeof(m_auiShieldGenerator));
+                if (uiData == SPECIAL)
+                {
+                    for (uint8 i = 0; i < MAX_BRIDGE; ++i)
+                        DoUseDoorOrButton(m_auiCoilfangBridge_GUID[i]);
+                    m_bBridgeActivated = true;
+                }
                 m_auiEncounter[5] = uiData;
                 break;
-            case TYPE_SHIELDGENERATOR1:
-                m_auiShieldGenerator[0] = uiData;
-                break;
-            case TYPE_SHIELDGENERATOR2:
-                m_auiShieldGenerator[1] = uiData;
-                break;
-            case TYPE_SHIELDGENERATOR3:
-                m_auiShieldGenerator[2] = uiData;
-                break;
-            case TYPE_SHIELDGENERATOR4:
-                m_auiShieldGenerator[3] = uiData;
-                break;
+            case TYPE_SHIELDGENERATOR1:     m_auiShieldGenerator[0] = uiData; break;
+            case TYPE_SHIELDGENERATOR2:     m_auiShieldGenerator[1] = uiData; break;
+            case TYPE_SHIELDGENERATOR3:     m_auiShieldGenerator[2] = uiData; break;
+            case TYPE_SHIELDGENERATOR4:     m_auiShieldGenerator[3] = uiData; break;
         }
+
+        if (uiData == DONE || uiData == SPECIAL)
+        {
+            OUT_SAVE_INST_DATA;
+
+            std::ostringstream saveStream;
+            saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
+                << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5];
+
+            strSaveData = saveStream.str();
+
+            SaveToDB();
+            OUT_SAVE_INST_DATA_COMPLETE;
+        }
+    }
+
+    const char* Save()
+    {
+        return strSaveData.c_str();
     }
 
     uint32 GetData(uint32 uiType)
     {
         switch(uiType)
         {
-            case TYPE_HYDROSS_EVENT:
-                return m_auiEncounter[0];
-
-            case TYPE_LEOTHERAS_EVENT:
-                return m_auiEncounter[1];
-
-            case TYPE_THELURKER_EVENT:
-                return m_auiEncounter[2];
-
-            case TYPE_KARATHRESS_EVENT:
-                return m_auiEncounter[3];
-
-            case TYPE_MOROGRIM_EVENT:
-                return m_auiEncounter[4];
-
-            case TYPE_LADYVASHJ_EVENT:
-                return m_auiEncounter[5];
-
-            case TYPE_SHIELDGENERATOR1:
-                return m_auiShieldGenerator[0];
-
-            case TYPE_SHIELDGENERATOR2:
-                return m_auiShieldGenerator[1];
-
-            case TYPE_SHIELDGENERATOR3:
-                return m_auiShieldGenerator[2];
-
-            case TYPE_SHIELDGENERATOR4:
-                return m_auiShieldGenerator[3];
-
+            case TYPE_HYDROSS_EVENT:    return m_auiEncounter[0];
+            case TYPE_LEOTHERAS_EVENT:  return m_auiEncounter[1];
+            case TYPE_THELURKER_EVENT:  return m_auiEncounter[2];
+            case TYPE_KARATHRESS_EVENT: return m_auiEncounter[3];
+            case TYPE_MOROGRIM_EVENT:   return m_auiEncounter[4];
+            case TYPE_LADYVASHJ_EVENT:  return m_auiEncounter[5];
+            case TYPE_SHIELDGENERATOR1: return m_auiShieldGenerator[0];
+            case TYPE_SHIELDGENERATOR2: return m_auiShieldGenerator[1];
+            case TYPE_SHIELDGENERATOR3: return m_auiShieldGenerator[2];
+            case TYPE_SHIELDGENERATOR4: return m_auiShieldGenerator[3];
             case TYPE_VASHJ_PHASE3_CHECK:
                 for(uint8 i = 0; i < MAX_GENERATOR; ++i)
                 {
@@ -191,8 +226,34 @@ struct MANGOS_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
                 }
                 return DONE;
         }
-
         return 0;
+    }
+
+    void Load(const char* chrIn)
+    {
+        if (!chrIn)
+        {
+            OUT_LOAD_INST_DATA_FAIL;
+            return;
+        }
+
+        OUT_LOAD_INST_DATA(chrIn);
+
+        std::istringstream loadStream(chrIn);
+
+        loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
+            >> m_auiEncounter[4] >> m_auiEncounter[5];
+
+        for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            if (m_auiEncounter[i] == IN_PROGRESS)
+                m_auiEncounter[i] = NOT_STARTED;
+
+        OUT_LOAD_INST_DATA_COMPLETE;
+
+        if (GetData(TYPE_HYDROSS_EVENT) == DONE && GetData(TYPE_THELURKER_EVENT) == DONE
+            && GetData(TYPE_LEOTHERAS_EVENT) == DONE && GetData(TYPE_KARATHRESS_EVENT) == DONE
+            && GetData(TYPE_MOROGRIM_EVENT) == DONE)
+                m_bBridgeActivated = true;
     }
 };
 
