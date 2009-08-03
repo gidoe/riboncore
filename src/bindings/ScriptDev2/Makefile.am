@@ -389,6 +389,8 @@ scripts/zone/utgarde_keep/utgarde_keep/boss_skarvald_and_dalronn.cpp \
 scripts/zone/utgarde_keep/utgarde_keep/def_utgarde_keep.h \
 scripts/zone/utgarde_keep/utgarde_keep/instance_utgarde_keep.cpp \
 scripts/zone/utgarde_keep/utgarde_keep/utgarde_keep.cpp \
+scripts/zone/vault_of_archavon/boss_emalon.cpp \
+scripts/zone/vault_of_archavon/instance_vault_of_archavon.cpp \
 scripts/zone/wailing_caverns/instance_wailing_caverns.cpp \
 scripts/zone/zulaman/boss_akilzon.cpp \
 scripts/zone/zulaman/boss_halazzi.cpp \
