@@ -1605,10 +1605,11 @@ case SPELLFAMILY_GENERIC:                   // same family case
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN )
             {
                 // Paladin Seals
-                if( IsSealSpell(spellInfo_1) && IsSealSpell(spellInfo_2) )
+                if (IsSealSpell(spellInfo_1) && IsSealSpell(spellInfo_2))
                     return true;
 
                 // Swift Retribution / Improved Devotion Aura (talents) and Paladin Auras
+<<<<<<< HEAD:src/game/SpellMgr.cpp
                 if( (spellInfo_1->SpellFamilyFlags2 & 0x00000020 || spellInfo_2->SpellFamilyFlags2 & 0x00000020) &&
                    (spellInfo_1->SpellFamilyFlags2 !=  spellInfo_2->SpellFamilyFlags2) )
                     return false;
@@ -1617,6 +1618,13 @@ case SPELLFAMILY_GENERIC:                   // same family case
             if(spellInfo_2->SpellFamilyName == SPELLFAMILY_PRIEST)
                 if(spellInfo_1->SpellIconID == 51 && spellInfo_2->SpellIconID == 51)
                 return false;
+=======
+                if ((spellInfo_1->SpellFamilyFlags2 & 0x00000020) && (spellInfo_2->SpellIconID == 291 || spellInfo_2->SpellIconID == 3028) ||
+                    (spellInfo_2->SpellFamilyFlags2 & 0x00000020) && (spellInfo_1->SpellIconID == 291 || spellInfo_1->SpellIconID == 3028))
+                    return false;
+            }
+
+>>>>>>> b10bf4b6dfbe07c0737af44ab19ff63310f4bf65:src/game/SpellMgr.cpp
             // Combustion and Fire Protection Aura (multi-family check)
             if( spellInfo_2->Id == 11129 && spellInfo_1->SpellIconID == 33 && spellInfo_1->SpellVisual[0] == 321 )
                 return false;
@@ -1646,6 +1654,7 @@ case SPELLFAMILY_GENERIC:                   // same family case
                 return false;
             break;
         case SPELLFAMILY_DEATHKNIGHT:
+<<<<<<< HEAD:src/game/SpellMgr.cpp
             // Presences and triggered effects
             if( spellInfo_1->Category == 47 || spellInfo_2->Category == 47 )
                 return false;
@@ -1687,6 +1696,16 @@ case SPELLFAMILY_GENERIC:                   // same family case
                 // Desecration (speed reduction aura) and Desecration (owner's damage bonus aura)
                 if (spellInfo_1->SpellIconID==2296 && spellInfo_2->SpellIconID==2296 &&
                     spellInfo_1->SpellFamilyFlags == spellInfo_2->SpellFamilyFlags)
+=======
+            if (spellInfo_2->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT)
+            {
+                // Frost Presence and Frost Presence (triggered)
+                if( spellInfo_1->SpellIconID == 2632 && spellInfo_2->SpellIconID == 2632 )
+                    return false;
+
+                // Unholy Presence and Unholy Presence (triggered)
+                if( spellInfo_1->SpellIconID == 2633 && spellInfo_2->SpellIconID == 2633 )
+>>>>>>> b10bf4b6dfbe07c0737af44ab19ff63310f4bf65:src/game/SpellMgr.cpp
                     return false;
             }
             break;

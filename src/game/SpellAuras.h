@@ -296,8 +296,12 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraSpecificMods(bool apply);
 
         void _AddAura();
+<<<<<<< HEAD:src/game/SpellAuras.h
         void _RemoveAura();
         bool IsEffectStacking();
+=======
+        bool _RemoveAura();
+>>>>>>> b10bf4b6dfbe07c0737af44ab19ff63310f4bf65:src/game/SpellAuras.h
 
         bool IsUpdated() { return m_updated; }
         void SetUpdated(bool val) { m_updated = val; }

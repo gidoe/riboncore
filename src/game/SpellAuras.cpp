@@ -1033,7 +1033,7 @@ void Aura::_AddAura()
     HandleAuraSpecificMods(true);
 }
 
-void Aura::_RemoveAura()
+bool Aura::_RemoveAura()
 {
     // Remove all triggered by aura spells vs unlimited duration
     // except same aura replace case
@@ -1057,10 +1057,10 @@ void Aura::_RemoveAura()
     uint8 slot = GetAuraSlot();
 
     if(slot >= MAX_AURAS)                                   // slot not set
-        return;
+        return false;
 
     if(m_target->GetVisibleAura(slot) == 0)
-        return;
+        return false;
 
     bool lastaura = true;
 
@@ -1081,27 +1081,22 @@ void Aura::_RemoveAura()
     }
 
     // only remove icon when the last aura of the spell is removed (current aura already removed from list)
-    if (lastaura)
-    {
-        // unregister aura diminishing (and store last time)
-        if (getDiminishGroup() != DIMINISHING_NONE )
-            m_target->ApplyDiminishingAura(getDiminishGroup(), false);
+    if (!lastaura)
+        return false;
 
-        SetAura(true);
-        SetAuraFlags(AFLAG_NONE);
-        SetAuraLevel(0);
-        SendAuraUpdate(true);
+    // unregister aura diminishing (and store last time)
+    if (getDiminishGroup() != DIMINISHING_NONE )
+        m_target->ApplyDiminishingAura(getDiminishGroup(), false);
 
-        // update for out of range group members
-        m_target->UpdateAuraForGroup(slot);
+    SetAura(true);
+    SetAuraFlags(AFLAG_NONE);
+    SetAuraLevel(0);
+    SendAuraUpdate(true);
 
-        //*****************************************************
-        // Update target aura state flag (at last aura remove)
-        //*****************************************************
-        // Enrage aura state
-        if(m_spellProto->Dispel == DISPEL_ENRAGE)
-            m_target->ModifyAuraState(AURA_STATE_ENRAGE, false);
+    // update for out of range group members
+    m_target->UpdateAuraForGroup(slot);
 
+<<<<<<< HEAD:src/game/SpellAuras.cpp
         // Mechanic bleed aura state
         if(GetAllSpellMechanicMask(m_spellProto) & (1 << MECHANIC_BLEED))
             m_target->ModifyAuraState(AURA_STATE_MECHANIC_BLEED, false);
@@ -1145,28 +1140,56 @@ void Aura::_RemoveAura()
             case SPELLFAMILY_HUNTER:
                 if(m_spellProto->SpellFamilyFlags & UI64LIT(0x1000000000000000))
                     removeState = AURA_STATE_FAERIE_FIRE;   // Sting (hunter versions)
+=======
+    //*****************************************************
+    // Update target aura state flag (at last aura remove)
+    //*****************************************************
+    // Enrage aura state
+    if(m_spellProto->Dispel == DISPEL_ENRAGE)
+        m_target->ModifyAuraState(AURA_STATE_ENRAGE, false);
+>>>>>>> b10bf4b6dfbe07c0737af44ab19ff63310f4bf65:src/game/SpellAuras.cpp
 
-        }
-        // Remove state (but need check other auras for it)
-        if (removeState)
+    uint32 removeState = 0;
+    uint64 removeFamilyFlag = m_spellProto->SpellFamilyFlags;
+    uint32 removeFamilyFlag2 = m_spellProto->SpellFamilyFlags2;
+    switch(m_spellProto->SpellFamilyName)
+    {
+    case SPELLFAMILY_PALADIN:
+        if (IsSealSpell(m_spellProto))
+            removeState = AURA_STATE_JUDGEMENT;     // Update Seals information
+        break;
+    case SPELLFAMILY_WARLOCK:
+        // Conflagrate aura state on Immolate and Shadowflame,
+        if ((m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000004)) ||
+            (m_spellProto->SpellFamilyFlags2 & 0x00000002))
         {
-            bool found = false;
-            Unit::AuraMap& Auras = m_target->GetAuras();
-            for(Unit::AuraMap::iterator i = Auras.begin(); i != Auras.end(); ++i)
-            {
-                SpellEntry const *auraSpellInfo = (*i).second->GetSpellProto();
-                if(auraSpellInfo->SpellFamilyName  == m_spellProto->SpellFamilyName &&
-                   (auraSpellInfo->SpellFamilyFlags & removeFamilyFlag || auraSpellInfo->SpellFamilyFlags2 & removeFamilyFlag2))
-                {
-                    found = true;
-                    break;
-                }
-            }
-            // this has been last aura
-            if(!found)
-                m_target->ModifyAuraState(AuraState(removeState), false);
+            removeFamilyFlag = UI64LIT(0x0000000000000004);
+            removeFamilyFlag2 = 0x00000002;
+            removeState = AURA_STATE_CONFLAGRATE;
         }
+        break;
+    case SPELLFAMILY_DRUID:
+        if(m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000400))
+            removeState = AURA_STATE_FAERIE_FIRE;   // Faerie Fire (druid versions)
+        else if(m_spellProto->SpellFamilyFlags & UI64LIT(0x50))
+        {
+            removeFamilyFlag = 0x50;
+            removeState = AURA_STATE_SWIFTMEND;     // Swiftmend aura state
+        }
+        break;
+    case SPELLFAMILY_WARRIOR:
+        if(m_spellProto->SpellFamilyFlags & UI64LIT(0x0004000000000000))
+            removeState = AURA_STATE_WARRIOR_VICTORY_RUSH; // Victorious
+        break;
+    case SPELLFAMILY_ROGUE:
+        if(m_spellProto->SpellFamilyFlags & UI64LIT(0x10000))
+            removeState = AURA_STATE_DEADLY_POISON; // Deadly poison aura state
+        break;
+    case SPELLFAMILY_HUNTER:
+        if(m_spellProto->SpellFamilyFlags & UI64LIT(0x1000000000000000))
+            removeState = AURA_STATE_FAERIE_FIRE;   // Sting (hunter versions)
 
+<<<<<<< HEAD:src/game/SpellAuras.cpp
         if(caster)
         {
             if(caster->GetTypeId() == TYPEID_PLAYER)
@@ -1274,9 +1297,38 @@ void Aura::HandleAuraSpecificMods(bool apply)
                     m_target->RemoveAurasDueToSpell(65095);
                 }
                 m_target->RemoveAurasDueToSpell(49772);
+=======
+    }
+    // Remove state (but need check other auras for it)
+    if (removeState)
+    {
+        bool found = false;
+        Unit::AuraMap& Auras = m_target->GetAuras();
+        for(Unit::AuraMap::iterator i = Auras.begin(); i != Auras.end(); ++i)
+        {
+            SpellEntry const *auraSpellInfo = (*i).second->GetSpellProto();
+            if(auraSpellInfo->SpellFamilyName  == m_spellProto->SpellFamilyName &&
+                (auraSpellInfo->SpellFamilyFlags & removeFamilyFlag || auraSpellInfo->SpellFamilyFlags2 & removeFamilyFlag2))
+            {
+                found = true;
+                break;
+>>>>>>> b10bf4b6dfbe07c0737af44ab19ff63310f4bf65:src/game/SpellAuras.cpp
             }
         }
+        // this has been last aura
+        if(!found)
+            m_target->ModifyAuraState(AuraState(removeState), false);
     }
+
+    // reset cooldown state for spells
+    if(caster && caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        if ( GetSpellProto()->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE )
+            // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existed cases)
+            ((Player*)caster)->SendCooldownEvent(GetSpellProto());
+    }
+
+    return true;
 }
 
 void Aura::SendFakeAuraUpdate(uint32 auraId, bool remove)
@@ -3791,9 +3843,17 @@ void Aura::HandleModCharm(bool apply, bool Real)
                 CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
                 if(cinfo && cinfo->type == CREATURE_TYPE_DEMON)
                 {
-                    //does not appear to have relevance. Why code added initially? See note below at !apply
-                    //to prevent client crash
-                    //m_target->SetFlag(UNIT_FIELD_BYTES_0, 2048);
+                    // creature with pet number expected have class set
+                    if(m_target->GetByteValue(UNIT_FIELD_BYTES_0, 1)==0)
+                    {
+                        if(cinfo->unit_class==0)
+                            sLog.outErrorDb("Creature (Entry: %u) have unit_class = 0 but used in charmed spell, that will be result client crash.",cinfo->Entry);
+                        else
+                            sLog.outError("Creature (Entry: %u) have unit_class = %u but at charming have class 0!!! that will be result client crash.",cinfo->Entry,cinfo->unit_class);
+
+                        m_target->SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
+                    }
+
                     //just to enable stat window
                     charmInfo->SetPetNumber(objmgr.GeneratePetNumber(), true);
                     //if charmed two demons the same session, the 2nd gets the 1st one's name
@@ -3829,13 +3889,8 @@ void Aura::HandleModCharm(bool apply, bool Real)
             // restore UNIT_FIELD_BYTES_0
             if(cinfo && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK && cinfo->type == CREATURE_TYPE_DEMON)
             {
-                //does not appear to have relevance. Why code added initially? Class, gender, powertype should be same.
-                //db field removed and replaced with better way to set class, restore using this if problems
-                /*CreatureDataAddon const *cainfo = ((Creature*)m_target)->GetCreatureAddon();
-                if(cainfo && cainfo->bytes0 != 0)
-                m_target->SetUInt32Value(UNIT_FIELD_BYTES_0, cainfo->bytes0);
-                else
-                m_target->RemoveFlag(UNIT_FIELD_BYTES_0, 2048);*/
+                // DB must have proper class set in field at loading, not req. restore, including workaround case at apply
+                // m_target->SetByteValue(UNIT_FIELD_BYTES_0, 1, cinfo->unit_class);
 
                 if(m_target->GetCharmInfo())
                     m_target->GetCharmInfo()->SetPetNumber(0, true);
@@ -6353,7 +6408,11 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
 
             // Aspect of the Dragonhawk dodge
             if (GetSpellProto()->SpellFamilyFlags2 & 0x00001000)
+<<<<<<< HEAD:src/game/SpellAuras.cpp
                 spellId2 = 61848;
+=======
+                spellId1 = 61848;
+>>>>>>> b10bf4b6dfbe07c0737af44ab19ff63310f4bf65:src/game/SpellAuras.cpp
             else
                 return;
 
@@ -6371,11 +6430,19 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
 
             // Sanctified Retribution and Swift Retribution (they share one aura), but not Retribution Aura (already gets modded)
             if ((GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000008))==0)
+<<<<<<< HEAD:src/game/SpellAuras.cpp
                 spellId1 = 63531;
             // Improved Concentration Aura (auras bonus)
             spellId2 = 63510;
             // Improved Devotion Aura (auras bonus)
             spellId3 = 63514;
+=======
+                spellId1 = 63531;                           // placeholder for talent spell mods
+            // Improved Concentration Aura (auras bonus)
+            spellId2 = 63510;                               // placeholder for talent spell mods
+            // Improved Devotion Aura (auras bonus)
+            spellId3 = 63514;                               // placeholder for talent spell mods
+>>>>>>> b10bf4b6dfbe07c0737af44ab19ff63310f4bf65:src/game/SpellAuras.cpp
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:
@@ -6401,11 +6468,19 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
     if (apply)
     {
         if (spellId1)
+<<<<<<< HEAD:src/game/SpellAuras.cpp
             m_target->CastSpell(m_target, spellId1, true, NULL, NULL, GetCasterGUID());
         if (spellId2)
             m_target->CastSpell(m_target, spellId2, true, NULL, NULL, GetCasterGUID());
         if (spellId3)
             m_target->CastSpell(m_target, spellId3, true, NULL, NULL, GetCasterGUID());
+=======
+            m_target->CastSpell(m_target, spellId1, true, NULL, this);
+        if (spellId2)
+            m_target->CastSpell(m_target, spellId2, true, NULL, this);
+        if (spellId3)
+            m_target->CastSpell(m_target, spellId3, true, NULL, this);
+>>>>>>> b10bf4b6dfbe07c0737af44ab19ff63310f4bf65:src/game/SpellAuras.cpp
     }
     else
     {
@@ -6614,6 +6689,7 @@ void Aura::HandleSpiritOfRedemption( bool apply, bool Real )
 
 void Aura::CleanupTriggeredSpells()
 {
+<<<<<<< HEAD:src/game/SpellAuras.cpp
     // King of the Jungle, trigger of increase damage is remove with remove Enrage
     if (m_spellProto->SpellFamilyName == SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000080000))
     {
@@ -6653,6 +6729,8 @@ void Aura::CleanupTriggeredSpells()
         return;
     }
 
+=======
+>>>>>>> b10bf4b6dfbe07c0737af44ab19ff63310f4bf65:src/game/SpellAuras.cpp
     uint32 tSpellId = m_spellProto->EffectTriggerSpell[GetEffIndex()];
     if(!tSpellId)
         return;
