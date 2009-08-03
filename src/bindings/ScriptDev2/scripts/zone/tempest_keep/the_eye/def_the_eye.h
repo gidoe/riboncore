@@ -24,5 +24,4 @@ enum
     DATA_THALADRED              = 13
 };
 
-#define DATA_ALAR 							13
 #endif

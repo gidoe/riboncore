@@ -26,7 +26,7 @@ npc_shadowfang_prisoner
 EndContentData */
 
 #include "precompiled.h"
-#include "../../npc/npc_escortAI.h"
+#include "escort_ai.h"
 #include "def_shadowfang_keep.h"
 
 /*######
@@ -102,11 +102,7 @@ struct MANGOS_DLL_DECL npc_shadowfang_prisonerAI : public npc_escortAI
 
 CreatureAI* GetAI_npc_shadowfang_prisoner(Creature* pCreature)
 {
-    npc_shadowfang_prisonerAI* prisonerAI = new npc_shadowfang_prisonerAI(pCreature);
-
-    prisonerAI->FillPointMovementListForCreature();
-
-    return (CreatureAI*)prisonerAI;
+    return new npc_shadowfang_prisonerAI(pCreature);
 }
 
 bool GossipHello_npc_shadowfang_prisoner(Player* pPlayer, Creature* pCreature)

@@ -319,7 +319,7 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
     data << plName;
     data << guild->GetRankName(newRankId);
     guild->BroadcastPacket(&data);
-   
+    
     guild->ChangeRank(plGuid, newRankId);
     // Put record into guildlog
     guild->LogGuildEvent(GUILD_EVENT_LOG_PROMOTE_PLAYER, GetPlayer()->GetGUIDLow(), GUID_LOPART(plGuid), newRankId);

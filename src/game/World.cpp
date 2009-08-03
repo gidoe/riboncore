@@ -1218,9 +1218,6 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Spell Proc Event conditions..." );
     spellmgr.LoadSpellProcEvents();
 
-    sLog.outString( "Loading Enchant Spells Proc datas...");
-    spellmgr.LoadSpellEnchantProcData();
-
     sLog.outString( "Loading Spell Bonus Data..." );
     spellmgr.LoadSpellBonusess();
 
@@ -1546,7 +1543,7 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    //depend on next event
 
     sLog.outString("Initialize AuctionHouseBot...");
-    auctionbot.Initialize();
+    AuctionHouseBotInit();
 
     sLog.outString("Starting Anticheat System...\n" );
 
@@ -1637,7 +1634,8 @@ void World::Update(uint32 diff)
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
     {
-        auctionbot.Update();
+        AuctionHouseBot();
+
         m_timers[WUPDATE_AUCTIONS].Reset();
 
         ///- Update mails (return old mails with item, or delete them)

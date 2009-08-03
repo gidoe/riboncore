@@ -73,10 +73,9 @@ void GameObject::CleanupsBeforeDelete()
         if(uint64 owner_guid = GetOwnerGUID())
         {
             Unit* owner = NULL;
-            // Object may be deleted while player is not in world, skip this check for now.
-            /*if(IS_PLAYER_GUID(owner_guid))
+            if(IS_PLAYER_GUID(owner_guid))
                 owner = ObjectAccessor::GetObjectInWorld(owner_guid, (Player*)NULL);
-            else*/
+            else
                 owner = ObjectAccessor::GetUnit(*this,owner_guid);
 
             if(owner)
@@ -861,20 +860,6 @@ void GameObject::UseDoorOrButton(uint32 time_to_restore, bool alternative /* = f
     m_cooldownTime = time(NULL) + time_to_restore;
 }
 
-void GameObject::SetOwnerGUID(uint64 owner)
-{
-    // Owner already found and different than expected owner - remove object from old owner
-    if (owner && GetOwnerGUID() && GetOwnerGUID() != owner)
-    {
-        if (Unit* owner = GetOwner())
-            owner->RemoveGameObject(this, false);
-        else
-            assert(false);
-    }
-    m_spawnedByDefault = false;                     // all object with owner is despawned after delay
-    SetUInt64Value(OBJECT_FIELD_CREATED_BY, owner);
-}
-
 void GameObject::SwitchDoorOrButton(bool activate, bool alternative /* = false */)
 {
     if(activate)
@@ -1143,12 +1128,30 @@ void GameObject::Use(Unit* user)
                 return;
 
             spellId = info->summoningRitual.spellId;
-            if(spellId==62330)                              // GO store not existed spell, replace by expected
+            switch (spellId)                              // GO store not existed spell, replace by expected
             {
-                // spell have reagent and mana cost but it not expected use its
-                // it triggered spell in fact casted at currently channeled GO
-                spellId = 61993;
-                triggered = true;
+                case 62330:
+                {
+                    // spell have reagent and mana cost but it not expected use its
+                    // it triggered spell in fact casted at currently channeled GO
+                    spellId = 61993;
+                    triggered = true;
+                    break;
+                }
+                case 34145:
+                {
+                    spellId = 29886;
+                    triggered = true;
+                    break;
+                }
+                case 58888:
+                {
+                    spellId = 58889;
+                    triggered = true;
+                    break;
+                }
+                default:
+                    break;
             }
 
             // finish spell

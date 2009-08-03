@@ -97,7 +97,7 @@ enum SpellSpecific
     SPELL_GUARDIAN_ELIXIR   = 15,
     SPELL_FLASK_ELIXIR      = 16,
     SPELL_PRESENCE          = 17,
-    SPELL_WARRIOR_BLEED     = 18
+    SPELL_MAGE_BOMB         = 18
 };
 
 SpellSpecific GetSpellSpecific(uint32 spellId);
@@ -256,7 +256,6 @@ inline bool IsPointEffectTarget( Targets target )
         case TARGET_CURRENT_ENEMY_COORDINATES:
         case TARGET_DUELVSPLAYER_COORDINATES:
         case TARGET_DYNAMIC_OBJECT_COORDINATES:
-	 case TARGET_RANDOM_DEST_IN_RADIUS:
             return true;
         default:
             break;
@@ -504,9 +503,7 @@ enum ProcFlagsEx
    PROC_EX_RESERVED2           = 0x0004000,
    PROC_EX_RESERVED3           = 0x0008000,
    PROC_EX_EX_TRIGGER_ALWAYS   = 0x0010000,                 // If set trigger always ( no matter another flags) used for drop charges
-   PROC_EX_EX_ONE_TIME_TRIGGER = 0x0020000,                  // If set trigger always but only one time (not used)
-   PROC_EX_INTERNAL_DOT        = 0x1000000,                 // Only for internal use
-   PROC_EX_INTERNAL_HOT        = 0x2000000                  // Only for internal use
+   PROC_EX_EX_ONE_TIME_TRIGGER = 0x0020000                  // If set trigger always but only one time (not used)
 };
 
 struct SpellProcEventEntry
@@ -522,11 +519,6 @@ struct SpellProcEventEntry
     uint32      cooldown;                                   // hidden cooldown used for some spell proc events, applied to _triggered_spell_
 };
 
-struct SpellProcItemEnchantEntry
-{
-	float chance; 
-};
-
 struct SpellBonusEntry
 {
     float  direct_damage;
@@ -534,16 +526,8 @@ struct SpellBonusEntry
     float  ap_bonus;
 };
 
-struct SpellEnchantProcEntry
-{
-    uint32      customChance;
-    float       PPMChance;
-    uint32      procEx;
-};
-
 typedef UNORDERED_MAP<uint32, SpellProcEventEntry> SpellProcEventMap;
 typedef UNORDERED_MAP<uint32, SpellBonusEntry>     SpellBonusMap;
-typedef UNORDERED_MAP<uint32, SpellEnchantProcEntry> SpellEnchantProcEventMap;
 
 #define ELIXIR_BATTLE_MASK    0x1
 #define ELIXIR_GUARDIAN_MASK  0x2
@@ -801,14 +785,6 @@ class SpellMgr
 
         static bool IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spellProcEvent, uint32 EventProcFlag, SpellEntry const * procSpell, uint32 procFlags, uint32 procExtra, bool active);
 
-        SpellEnchantProcEntry const* GetSpellEnchantProcEvent(uint32 enchId) const
-        {
-            SpellEnchantProcEventMap::const_iterator itr = mSpellEnchantProcEventMap.find(enchId);
-            if( itr != mSpellEnchantProcEventMap.end( ) )
-                return &itr->second;
-            return NULL;
-        }
-
         // Spell bonus data
         SpellBonusEntry const* GetSpellBonusData(uint32 spellId) const
         {
@@ -1043,7 +1019,6 @@ class SpellMgr
         void LoadSpellBonusess();
         void LoadSpellTargetPositions();
         void LoadSpellThreats();
-        void LoadSpellEnchantProcData();
         void LoadSkillLineAbilityMap();
         void LoadSpellPetAuras();
         void LoadPetLevelupSpellMap();
@@ -1061,7 +1036,6 @@ class SpellMgr
         SpellThreatMap     mSpellThreatMap;
         SpellProcEventMap  mSpellProcEventMap;
         SpellProcItemEnchantMap mSpellProcItemEnchantMap;
-        SpellEnchantProcEventMap     mSpellEnchantProcEventMap;
         SpellBonusMap      mSpellBonusMap;
         SkillLineAbilityMap mSkillLineAbilityMap;
         SpellPetAuraMap     mSpellPetAuraMap;

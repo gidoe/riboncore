@@ -144,15 +144,15 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if ((spellInfo->SpellFamilyFlags & UI64LIT(0x1000000)) && spellInfo->EffectApplyAuraName[0]==SPELL_AURA_MOD_CONFUSE)
                 return SPELL_MAGE_POLYMORPH;
 
+            if (spellInfo->SpellFamilyFlags & UI64LIT(0x2000000000000))
+                return SPELL_MAGE_BOMB;
+
             break;
         }
         case SPELLFAMILY_WARRIOR:
         {
             if (spellInfo->SpellFamilyFlags & UI64LIT(0x00008000010000))
                 return SPELL_POSITIVE_SHOUT;
-
-            if (spellInfo->SpellFamilyFlags & UI64LIT(0x0000001000000020))
-                return SPELL_WARRIOR_BLEED;
 
             break;
         }
@@ -191,8 +191,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (spellInfo->SpellFamilyFlags & UI64LIT(0x0000000011010002))
                 return SPELL_BLESSING;
 
-            // Judgement of Wisdom, Judgement of Light, Judgement of Justice
-            if (spellInfo->Id == 20184 || spellInfo->Id == 20185 || spellInfo->Id == 20186)
+            if ((spellInfo->SpellFamilyFlags & UI64LIT(0x00000800180400)) && (spellInfo->AttributesEx3 & 0x200))
                 return SPELL_JUDGEMENT;
 
             // only paladin auras have this (for palaldin class family)
@@ -242,6 +241,7 @@ bool IsSingleFromSpellSpecificPerCaster(SpellSpecific spellSpec1,SpellSpecific s
         case SPELL_POSITIVE_SHOUT:
         case SPELL_JUDGEMENT:
         case SPELL_PRESENCE:
+        case SPELL_MAGE_BOMB:
             return spellSpec1==spellSpec2;
         case SPELL_BATTLE_ELIXIR:
             return spellSpec2==SPELL_BATTLE_ELIXIR
@@ -302,22 +302,18 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
 
     switch(spellId)
     {
-        case 46392:                                         // Focused Assault
-        case 46393:                                         // Brutal Assault
         case 28441:                                         // not positive dummy spell
         case 37675:                                         // Chaos Blast
-        case 41519:                                         // Mark of Stormrage
-        case 34877:                                         // Custodian of Time
-        case 34700:                                         // Allergic Reaction
-        case 31719:                                         // Suspension
-        case 61987:                                         // Avenging Wrath Marker
-        case 11196:                                         // Recently Bandadged
-        case 36810:                                         // rotting puterescence
-        case 36809:                                         // overpowering sickness
-        case 48323:                                         // indisposed
             return false;
         case 36032:                                         // Arcane Blast
-        case 12042:                                         // Arcane Power
+        case 47540:                                         // Penance start dummy aura - Rank 1
+        case 53005:                                         // Penance start dummy aura - Rank 2
+        case 53006:                                         // Penance start dummy aura - Rank 3
+        case 53007:                                         // Penance start dummy aura - Rank 4
+        case 47757:                                         // Penance heal effect trigger - Rank 1
+        case 52986:                                         // Penance heal effect trigger - Rank 2
+        case 52987:                                         // Penance heal effect trigger - Rank 3
+        case 52988:                                         // Penance heal effect trigger - Rank 4
             return true;
     }
 
@@ -351,6 +347,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                         case 38637:                         // Nether Exhaustion (red)
                         case 38638:                         // Nether Exhaustion (green)
                         case 38639:                         // Nether Exhaustion (blue)
+                        case 11196:                         // Recently Bandaged
                             return false;
                         // some spells have unclear target modes for selection, so just make effect positive
                         case 27184:
@@ -410,10 +407,14 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                 case SPELL_AURA_MOD_SILENCE:
                 case SPELL_AURA_GHOST:
                 case SPELL_AURA_PERIODIC_LEECH:
-                case SPELL_AURA_MOD_PACIFY_SILENCE:
                 case SPELL_AURA_MOD_STALKED:
                 case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
                     return false;
+                case SPELL_AURA_MOD_PACIFY_SILENCE:
+                    // part of positive spell if casted at self
+                    if(spellproto->EffectImplicitTargetA[effIndex] != TARGET_SELF)
+                        return false;
+                    break;
                 case SPELL_AURA_PERIODIC_DAMAGE:            // used in positive spells also.
                     // part of negative spell if casted at self (prevent cancel)
                     if(spellproto->EffectImplicitTargetA[effIndex] == TARGET_SELF)
@@ -1112,58 +1113,6 @@ void SpellMgr::LoadSpellThreats()
     sLog.outString( ">> Loaded %u aggro generating spells", count );
 }
 
-void SpellMgr::LoadSpellEnchantProcData()
-{
-    mSpellEnchantProcEventMap.clear();                             // need for reload case
-
-    uint32 count = 0;
-
-    //                                                0      1             2          3
-    QueryResult *result = WorldDatabase.Query("SELECT entry, customChance, PPMChance, procEx FROM spell_enchant_proc_data");
-    if( !result )
-    {
-
-        barGoLink bar( 1 );
-
-        bar.step();
-
-        sLog.outString();
-        sLog.outString( ">> Loaded %u spell enchant proc event conditions", count );
-        return;
-    }
-
-    barGoLink bar( result->GetRowCount() );
-    do
-    {
-        Field *fields = result->Fetch();
-
-        bar.step();
-
-        uint32 enchantId = fields[0].GetUInt32();
-
-        SpellItemEnchantmentEntry const *ench = sSpellItemEnchantmentStore.LookupEntry(enchantId);
-        if (!ench)
-        {
-            sLog.outErrorDb("Enchancment %u listed in `spell_enchant_proc_data` does not exist", enchantId);
-            continue;
-        }
-
-        SpellEnchantProcEntry spe;
-
-        spe.customChance = fields[1].GetUInt32();
-        spe.PPMChance = fields[2].GetFloat();
-        spe.procEx = fields[3].GetUInt32();
-
-        mSpellEnchantProcEventMap[enchantId] = spe;
-
-        ++count;
-    } while( result->NextRow() );
-
-    delete result;
-
-    sLog.outString( ">> Loaded %u enchant proc data definitions", count);
-}
-
 bool SpellMgr::IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellId_2) const
 {
     SpellEntry const *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
@@ -1241,7 +1190,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
         case SPELLFAMILY_GENERIC:
             switch(spellInfo_2->SpellFamilyName)
             {
-case SPELLFAMILY_GENERIC:                   // same family case
+                case SPELLFAMILY_GENERIC:                   // same family case
                 {
                     // Thunderfury
                     if ((spellInfo_1->Id == 21992 && spellInfo_2->Id == 27648) ||
@@ -1279,6 +1228,11 @@ case SPELLFAMILY_GENERIC:                   // same family case
                         (spellInfo_2->Id == 52950 && spellInfo_1->Id == 52707) )
                         return false;
 
+                    // Regular and Night Elf Ghost
+                    if( (spellInfo_1->Id == 8326 && spellInfo_2->Id == 20584) ||
+                        (spellInfo_2->Id == 8326 && spellInfo_1->Id == 20584) )
+                         return false;
+
                     // Sextant of Unstable Currents and Band of the Eternal Sage
                     if( spellInfo_1->SpellIconID == 502 && spellInfo_2->SpellIconID == 502 )
                         return false;
@@ -1287,14 +1241,6 @@ case SPELLFAMILY_GENERIC:                   // same family case
                     if( spellInfo_1->SpellIconID == 2010 && spellInfo_2->SpellIconID == 2010 )
                         return false;
 
-                    // Regular and Night Elf Ghost
-                    if( (spellInfo_1->Id == 8326 && spellInfo_2->Id == 20584) ||
-                        (spellInfo_2->Id == 8326 && spellInfo_1->Id == 20584) )
-                        return false;
-			
-                    //Kindred Spirits (allow stack for auras)
-                    if (spellInfo_1->SpellIconID == 3559 && spellInfo_2->SpellIconID == 3559)
-                        return false;
                     break;
                 }
                 case SPELLFAMILY_MAGE:
@@ -1355,6 +1301,10 @@ case SPELLFAMILY_GENERIC:                   // same family case
                     if( spellId_1 == 35081 && spellInfo_2->SpellIconID==561 && spellInfo_2->SpellVisual[0]==7992)
                         return false;
 
+                    //Kindred Spirits (allow stack for auras)
+                    if (spellInfo_1->SpellIconID == 3559 && spellInfo_2->SpellIconID == 3559)
+                        return false;
+
                     break;
                 }
             }
@@ -1365,6 +1315,10 @@ case SPELLFAMILY_GENERIC:                   // same family case
         case SPELLFAMILY_MAGE:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_MAGE )
             {
+                // Living Bomb & Ignite
+                if( (spellInfo_1->SpellIconID == 3000) && (spellInfo_2->SpellIconID == 937) ||
+                    (spellInfo_2->SpellIconID == 3000) && (spellInfo_1->SpellIconID == 937) )
+                    return false;
                 // Blizzard & Chilled (and some other stacked with blizzard spells
                 if( (spellInfo_1->SpellFamilyFlags & UI64LIT(0x80)) && (spellInfo_2->SpellFamilyFlags & UI64LIT(0x100000)) ||
                     (spellInfo_2->SpellFamilyFlags & UI64LIT(0x80)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x100000)) )
@@ -1375,34 +1329,19 @@ case SPELLFAMILY_GENERIC:                   // same family case
                     (spellInfo_2->SpellFamilyFlags & UI64LIT(0x0000000000010000)) && (spellInfo_1->SpellVisual[0] == 72 && spellInfo_1->SpellIconID == 1499) )
                     return false;
 
-                // Living Bomb & Ignite (Dots)
-               if( (spellInfo_1->SpellFamilyFlags & UI64LIT(0x2000000000000)) && (spellInfo_2->SpellFamilyFlags & UI64LIT(0x8000000)) ||
-                   (spellInfo_2->SpellFamilyFlags & UI64LIT(0x2000000000000)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x8000000)) )
-                   return false;
-
-               // Fireball & Pyroblast (Dots)
-               if( (spellInfo_1->SpellFamilyFlags & UI64LIT(0x1)) && (spellInfo_2->SpellFamilyFlags & UI64LIT(0x400000)) ||
-                   (spellInfo_2->SpellFamilyFlags & UI64LIT(0x1)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x400000)) )
-                   return false;
-
                 // Shadow Embrace (two different effects must be stack)
                 if( spellInfo_1->SpellIconID == 2209 && spellInfo_2->SpellIconID == 2209 ||
                     spellInfo_2->SpellIconID == 2209 && spellInfo_1->SpellIconID == 2209 )
-                    return false;
 
                 // Living Bomb & Ignite (Dots)
-               if( (spellInfo_1->SpellFamilyFlags & UI64LIT(0x2000000000000)) && (spellInfo_2->SpellFamilyFlags & UI64LIT(0x8000000)) ||
-                   (spellInfo_2->SpellFamilyFlags & UI64LIT(0x2000000000000)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x8000000)) )
-                   return false;
-                 
-               // Fireball & Pyroblast (Dots)
-               if( (spellInfo_1->SpellFamilyFlags & UI64LIT(0x1)) && (spellInfo_2->SpellFamilyFlags & UI64LIT(0x400000)) ||
-                   (spellInfo_2->SpellFamilyFlags & UI64LIT(0x1)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x400000)) )
-                   return false;
+                if( (spellInfo_1->SpellFamilyFlags & UI64LIT(0x2000000000000)) && (spellInfo_2->SpellFamilyFlags & UI64LIT(0x8000000)) ||
+                    (spellInfo_2->SpellFamilyFlags & UI64LIT(0x2000000000000)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x8000000)) )
+                    return false;
 
-                // All metamorphosis effects are stackable, I hope 
-                if (spellInfo_1->SpellIconID == 3314 && spellInfo_2->SpellIconID == 3314) 
-                    return false; 
+                // Fireball & Pyroblast (Dots)
+                if( (spellInfo_1->SpellFamilyFlags & UI64LIT(0x1)) && (spellInfo_2->SpellFamilyFlags & UI64LIT(0x400000)) ||
+                    (spellInfo_2->SpellFamilyFlags & UI64LIT(0x1)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x400000)) )
+                    return false;
             }
             // Detect Invisibility and Mana Shield (multi-family check)
             if( spellInfo_2->Id == 132 && spellInfo_1->SpellIconID == 209 && spellInfo_1->SpellVisual[0] == 968 )
@@ -1423,16 +1362,16 @@ case SPELLFAMILY_GENERIC:                   // same family case
             if( spellInfo_1->Id == 11129 && spellInfo_2->SpellIconID == 33 && spellInfo_2->SpellVisual[0] == 321 )
                 return false;
 
+            // Arcane Intellect and Insight
+            if( spellInfo_1->SpellIconID == 125 && spellInfo_2->Id == 18820 )
+                return false;
+
             if( spellInfo_1->EffectSpellClassMaskC[0] == 262144 && spellInfo_2->EffectSpellClassMaskC[0] == 262144)
                 return false;
 
-	     // Fire Ward and Fire Shield (multi-family check)
-            if ((spellInfo_1->SpellIconID == 16) && (spellInfo_1->SpellFamilyFlags & 0x0000000000000008LL) &&
+            // Fire Ward and Fire Shield (multi-family check)
+            if ((spellInfo_1->SpellIconID == 16) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x0000000000000008)) &&
                 (spellInfo_2->SpellIconID == 16) && (spellInfo_2->SpellFamilyName == SPELLFAMILY_WARLOCK))
-                return false;
-
-            // Arcane Intellect and Insight
-            if( spellInfo_1->SpellIconID == 125 && spellInfo_2->Id == 18820 )
                 return false;
 
             break;
@@ -1463,6 +1402,10 @@ case SPELLFAMILY_GENERIC:                   // same family case
                 // Metamorphosis, diff effects
                 if (spellInfo_1->SpellIconID == 3314 && spellInfo_2->SpellIconID == 3314)
                     return false;
+
+                // Nether Protection effects
+                if( spellInfo_2->SpellIconID==1985 && spellInfo_1->SpellIconID==1985 && spellInfo_1->SpellVisual[0]==9750 )
+                    return false;
             }
             // Detect Invisibility and Mana Shield (multi-family check)
             if( spellInfo_1->Id == 132 && spellInfo_2->SpellIconID == 209 && spellInfo_2->SpellVisual[0] == 968 )
@@ -1470,11 +1413,10 @@ case SPELLFAMILY_GENERIC:                   // same family case
 
             // Fire Shield and Fire Ward (multi-family check)
             if ((spellInfo_1->SpellIconID == 16) &&
-                (spellInfo_2->SpellIconID == 16) && (spellInfo_2->SpellFamilyFlags & 0x0000000000000008LL))
+                (spellInfo_2->SpellIconID == 16) && (spellInfo_2->SpellFamilyFlags & UI64LIT(0x0000000000000008)))
                 return false;
 
-		break;
-
+            break;
         case SPELLFAMILY_WARRIOR:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_WARRIOR )
             {
@@ -1609,22 +1551,11 @@ case SPELLFAMILY_GENERIC:                   // same family case
                     return true;
 
                 // Swift Retribution / Improved Devotion Aura (talents) and Paladin Auras
-<<<<<<< HEAD:src/game/SpellMgr.cpp
-                if( (spellInfo_1->SpellFamilyFlags2 & 0x00000020 || spellInfo_2->SpellFamilyFlags2 & 0x00000020) &&
-                   (spellInfo_1->SpellFamilyFlags2 !=  spellInfo_2->SpellFamilyFlags2) )
-                    return false;
-            }
-            // Inner Fire and Consecration
-            if(spellInfo_2->SpellFamilyName == SPELLFAMILY_PRIEST)
-                if(spellInfo_1->SpellIconID == 51 && spellInfo_2->SpellIconID == 51)
-                return false;
-=======
                 if ((spellInfo_1->SpellFamilyFlags2 & 0x00000020) && (spellInfo_2->SpellIconID == 291 || spellInfo_2->SpellIconID == 3028) ||
                     (spellInfo_2->SpellFamilyFlags2 & 0x00000020) && (spellInfo_1->SpellIconID == 291 || spellInfo_1->SpellIconID == 3028))
                     return false;
             }
 
->>>>>>> b10bf4b6dfbe07c0737af44ab19ff63310f4bf65:src/game/SpellMgr.cpp
             // Combustion and Fire Protection Aura (multi-family check)
             if( spellInfo_2->Id == 11129 && spellInfo_1->SpellIconID == 33 && spellInfo_1->SpellVisual[0] == 321 )
                 return false;
@@ -1654,49 +1585,6 @@ case SPELLFAMILY_GENERIC:                   // same family case
                 return false;
             break;
         case SPELLFAMILY_DEATHKNIGHT:
-<<<<<<< HEAD:src/game/SpellMgr.cpp
-            // Presences and triggered effects
-            if( spellInfo_1->Category == 47 || spellInfo_2->Category == 47 )
-                return false;
-            break;
-            if (spellInfo_2->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT)
-            {
-                // Desecration (speed reduction aura) and Desecration (owner's damage bonus aura)
-                if (spellInfo_1->SpellIconID==2296 && spellInfo_2->SpellIconID==2296 &&
-                    spellInfo_1->SpellFamilyFlags == spellInfo_2->SpellFamilyFlags)
-                    return false;
-                //Frost Presence -> +10% max. health or +10% max. health -> Frost Presence
-                if ((spellInfo_2->Id == 48263 && spellInfo_1->Id == 61261) ||
-                    (spellInfo_2->Id == 61261 && spellInfo_1->Id == 48263))
-                    return false;
-                // Ebon Plague must replace Crypt Fever.
-                if ( (spellInfo_1->Attributes & 0x40000) && (spellInfo_1->AttributesEx & 0x8) &&
-                     (spellInfo_2->Attributes & 0x10) && (spellInfo_2->AttributesEx3 & 0x40000000) )
-                    return true;
-                // Higher rank Crypt Fever must replace lower.
-                if ( (spellInfo_1->Attributes & 0x10) && (spellInfo_1->AttributesEx3 & 0x40000000) &&
-                     (spellInfo_2->Attributes & 0x10) && (spellInfo_2->AttributesEx3 & 0x40000000) &&
-                     spellInfo_1->Id > spellInfo_2->Id )
-                    return true;
-                // Higher rank Ebon Plague must replace lower.
-                if ( (spellInfo_1->Attributes & 0x40000) && (spellInfo_1->AttributesEx & 0x8) &&
-                     (spellInfo_2->Attributes & 0x40000) && (spellInfo_2->AttributesEx & 0x8) &&
-                     spellInfo_1->Id > spellInfo_2->Id)
-                    return true;
-            }
-            if (spellInfo_2->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT)
-            {
-                // Lichborne shapeshift and immunity
-                if (spellInfo_1->SpellFamilyFlags == UI64LIT(0x1000000000) && spellInfo_2->SpellFamilyFlags == UI64LIT(0x1000000000))
-                    return false;
-            }
-            break;
-            if (spellInfo_2->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT)
-            {
-                // Desecration (speed reduction aura) and Desecration (owner's damage bonus aura)
-                if (spellInfo_1->SpellIconID==2296 && spellInfo_2->SpellIconID==2296 &&
-                    spellInfo_1->SpellFamilyFlags == spellInfo_2->SpellFamilyFlags)
-=======
             if (spellInfo_2->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT)
             {
                 // Frost Presence and Frost Presence (triggered)
@@ -1705,7 +1593,6 @@ case SPELLFAMILY_GENERIC:                   // same family case
 
                 // Unholy Presence and Unholy Presence (triggered)
                 if( spellInfo_1->SpellIconID == 2633 && spellInfo_2->SpellIconID == 2633 )
->>>>>>> b10bf4b6dfbe07c0737af44ab19ff63310f4bf65:src/game/SpellMgr.cpp
                     return false;
             }
             break;
@@ -3241,17 +3128,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_LIMITONLY;
             break;
         }
-        case SPELLFAMILY_PRIEST:
-        {
-            // Vampiric Embrace
-            if (spellproto->SpellFamilyFlags & UI64LIT(0x00000000004))
-                return DIMINISHING_LIMITONLY;
-            break;
-            // Shackle Undead
-            if (spellproto->SpellFamilyFlags & UI64LIT(0x400100040000000))
-                return DIMINISHING_CONTROL_STUN;
-            break;
-        }
         case SPELLFAMILY_WARLOCK:
         {
             // Curses/etc
@@ -3282,11 +3158,12 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_LIMITONLY;
             break;
         }
-        case SPELLFAMILY_PALADIN:
+        case SPELLFAMILY_PRIEST:
         {
-            // Turn Evil
-            if (spellproto->SpellFamilyFlags & UI64LIT(0x0080400000000000))
-                return DIMINISHING_FEAR_BLIND;
+            // Vampiric Embrace
+            if ((spellproto->SpellFamilyFlags & UI64LIT(0x00000000004)) && spellproto->SpellIconID == 150)
+                return DIMINISHING_LIMITONLY;
+            break;
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {

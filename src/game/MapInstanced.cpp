@@ -132,7 +132,7 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
         // instantiate or find existing bg map for player
         // the instance id is set in battlegroundid
         NewInstanceId = player->GetBattleGroundId();
-        //ASSERT(NewInstanceId); <- This execute the crash, need rewrite.
+        ASSERT(NewInstanceId);
         map = _FindMap(NewInstanceId);
         if(!map)
         {

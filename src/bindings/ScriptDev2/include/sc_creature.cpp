@@ -15,44 +15,6 @@ struct TSpellSummary
     uint8 Effects;                                          // set of enum SelectEffect
 } *SpellSummary;
 
-void SummonList::DespawnEntry(uint32 entry)
-{
-    for(iterator i = begin(); i != end();)
-    {
-        Creature *summon = Unit::GetCreature(*m_creature, *i);
-        if(!summon)
-            erase(i++);
-        else if(summon->GetEntry() == entry)
-        {
-            erase(i++);
-            summon->setDeathState(JUST_DIED);
-            summon->RemoveCorpse();
-        }
-        else
-            ++i;
-    }
-}
-
-void SummonList::DespawnAll()
-{
-    while(!empty())
-    {
-        Creature *summon = Unit::GetCreature(*m_creature, *begin());
-        if(!summon)
-            erase(begin());
-        else
-        {
-            erase(begin());
-            summon->SetVisibility(VISIBILITY_OFF);
-            if(summon->isSummon() && !summon->isPet())
-                CAST_SUM(summon)->UnSummon();
-            else
-                summon->setDeathState(JUST_DIED);
-            summon->RemoveCorpse();
-        }
-    }
-}
-
 bool ScriptedAI::IsVisible(Unit* pWho) const
 {
     if (!pWho)

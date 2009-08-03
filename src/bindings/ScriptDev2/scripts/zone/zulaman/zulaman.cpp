@@ -27,7 +27,7 @@ EndContentData */
 
 #include "precompiled.h"
 #include "def_zulaman.h"
-#include "../../npc/npc_escortAI.h"
+#include "escort_ai.h"
 
 /*######
 ## npc_forest_frog
@@ -192,11 +192,7 @@ bool GossipSelect_npc_harrison_jones_za(Player* pPlayer, Creature* pCreature, ui
 
 CreatureAI* GetAI_npc_harrison_jones_za(Creature* pCreature)
 {
-    npc_harrison_jones_zaAI* tempAI = new npc_harrison_jones_zaAI(pCreature);
-
-    tempAI->FillPointMovementListForCreature();
-
-    return (CreatureAI*)tempAI;
+    return new npc_harrison_jones_zaAI(pCreature);
 }
 
 /*######

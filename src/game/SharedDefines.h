@@ -254,7 +254,7 @@ enum ItemQualities
 #define SPELL_ATTR_EX_NEGATIVE                    0x00000080            // 7
 #define SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET        0x00000100            // 8 Spell req target not to be in combat state
 #define SPELL_ATTR_EX_UNK9                        0x00000200            // 9
-#define SPELL_ATTR_EX_NO_INITIAL_AGGRO            0x00000400            // 10 no generates threat on cast 100%
+#define SPELL_ATTR_EX_UNK10                       0x00000400            // 10 no generates threat on cast 100% ( old NO_INITIAL_AGGRO)
 #define SPELL_ATTR_EX_UNK11                       0x00000800            // 11
 #define SPELL_ATTR_EX_UNK12                       0x00001000            // 12
 #define SPELL_ATTR_EX_UNK13                       0x00002000            // 13
@@ -263,7 +263,7 @@ enum ItemQualities
 #define SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE 0x00010000            // 16 unaffected by school immunity
 #define SPELL_ATTR_EX_UNK17                       0x00020000            // 17
 #define SPELL_ATTR_EX_UNK18                       0x00040000            // 18
-#define SPELL_ATTR_EX_CANT_TARGET_SELF            0x00080000            // 19 Applies only to unit target - for example Divine Intervention (19752)
+#define SPELL_ATTR_EX_UNK19                       0x00080000            // 19
 #define SPELL_ATTR_EX_REQ_COMBO_POINTS1           0x00100000            // 20 Req combo points on target
 #define SPELL_ATTR_EX_UNK21                       0x00200000            // 21
 #define SPELL_ATTR_EX_REQ_COMBO_POINTS2           0x00400000            // 22 Req combo points on target
@@ -435,7 +435,7 @@ enum ItemQualities
 #define SPELL_ATTR_EX6_UNK23                      0x00800000            // 23 not set in 3.0.3
 #define SPELL_ATTR_EX6_UNK24                      0x01000000            // 24 not set in 3.0.3
 #define SPELL_ATTR_EX6_UNK25                      0x02000000            // 25 not set in 3.0.3
-#define SPELL_ATTR_EX6_UNK26                      0x04000000            // 26 May also have something to do with spell with special healing coefficient calculation
+#define SPELL_ATTR_EX6_UNK26                      0x04000000            // 26 not set in 3.0.3
 #define SPELL_ATTR_EX6_UNK27                      0x08000000            // 27 not set in 3.0.3
 #define SPELL_ATTR_EX6_UNK28                      0x10000000            // 28 not set in 3.0.3
 #define SPELL_ATTR_EX6_UNK29                      0x20000000            // 29 not set in 3.0.3
@@ -901,7 +901,7 @@ enum AuraState
     AURA_STATE_SWIFTMEND                    = 15,           //   T |
     AURA_STATE_DEADLY_POISON                = 16,           //   T |
     AURA_STATE_ENRAGE                       = 17,           // C   |
-    AURA_STATE_MECHANIC_BLEED               = 18,           //    T|
+    AURA_STATE_MECHANIC_BLEED               = 18,           // C  t|
     //AURA_STATE_UNKNOWN19                  = 19,           //     | not used
     //AURA_STATE_UNKNOWN20                  = 20,           //  c  | only (45317 Suicide)
     //AURA_STATE_UNKNOWN21                  = 21,           //     | not used
@@ -1036,6 +1036,8 @@ enum Targets
     TARGET_SCRIPT_COORDINATES          = 46,
     TARGET_DYNAMIC_OBJECT              = 47,
     TARGET_SUMMON                      = 48,
+     TARGET_DEST_CASTER_RIGHT           = 49,
+     TARGET_DEST_CASTER_LEFT            = 50,
     TARGET_AREAEFFECT_CUSTOM_2         = 52,
     TARGET_CURRENT_ENEMY_COORDINATES   = 53,                // set unit coordinates as dest, only 16 target B imlemented
     TARGET_ALL_RAID_AROUND_CASTER      = 56,
@@ -1044,7 +1046,6 @@ enum Targets
     TARGET_DUELVSPLAYER_COORDINATES    = 63,
     TARGET_BEHIND_VICTIM               = 65,                // uses in teleport behind spells, caster/target dependent from spell effect
     TARGET_UNK_1                       = 72,                // ImplicitTargetA[0] in Army of the Dead spell
-    TARGET_RANDOM_DEST_IN_RADIUS       = 73,                // target or caster
     TARGET_DYNAMIC_OBJECT_COORDINATES  = 76,
     TARGET_SINGLE_ENEMY                = 77,
     TARGET_UNK_2                       = 86,                // ImplicitTargetA[1] in Army of the Dead spell
@@ -2218,9 +2219,6 @@ enum CorpseDynFlags
 #define SPELL_ID_WEAPON_SWITCH_COOLDOWN_1_0s    6123
 #define SPELL_ID_AUTOSHOT                       75          // used for checks in other spells interruption
 #define SPELL_ID_SHADOWMELD                     58984       // used for check ignore stealth stance state
-#define SPELL_ID_BLOOD_PRESENCE                 48266       // Blood Presence
-#define SPELL_ID_FROST_PRESENCE                 48263       // Frost Presence
-#define SPELL_ID_UNHOLY_PRESENCE                48265       // Unholy Presence
 
 enum WeatherType
 {
@@ -2386,7 +2384,6 @@ enum SummonMask
 
 enum SummonType
 {
-<<<<<<< HEAD:src/game/SharedDefines.h
     SUMMON_TYPE_CRITTER         = 41,
     SUMMON_TYPE_GUARDIAN        = 61,
     SUMMON_TYPE_TOTEM_SLOT1     = 63,
@@ -2411,12 +2408,10 @@ enum SummonType
     SUMMON_TYPE_VEHICLE3        = 488,
     SUMMON_TYPE_VEHICLE4        = 493,
     SUMMON_TYPE_VEHICLE5        = 607,
-    SUMMON_TYPE_TOTEM2          = 647,
-    SUMMON_TYPE_GHOUL_OF_THE_DEAD = 687,
     SUMMON_TYPE_VEHICLE6        = 708,
     SUMMON_TYPE_VEHICLE7        = 710,
+    SUMMON_TYPE_INFERNO         = 711,
     SUMMON_TYPE_VEHICLE8        = 716,
-    SUMMON_TYPE_GHOUL           = 829,
     SUMMON_TYPE_SNAKES          = 881,
     SUMMON_TYPE_VEHICLE9        = 901,
     SUMMON_TYPE_VEHICLE10       = 941,
@@ -2424,7 +2419,6 @@ enum SummonType
     SUMMON_TYPE_GUARDIAN2       = 1161,
     SUMMON_TYPE_VEHICLE12       = 1162,
     SUMMON_TYPE_ELEMENTAL       = 1561,
-    SUMMON_TYPE_RANDOM_AT_RADIUS = 1362,
     SUMMON_TYPE_FORCE_OF_NATURE = 1562,
     SUMMON_TYPE_VEHICLE13       = 25995
 };
@@ -2450,31 +2444,6 @@ enum CustomVehicleSeatFLags
     SF_UNATTACKABLE                 = 0x0002,                   // hided inside, and unatackable until vehicle is destroyed
     SF_CAN_CAST                     = 0x0004,                   // player/npc can rotate, and cast OWN spells
     SF_UNACCESSIBLE                 = 0x0008                    // player cant enter this seat by normal way (only by script)
-=======
-    SUMMON_TYPE_CRITTER     = 41,
-    SUMMON_TYPE_GUARDIAN    = 61,
-    SUMMON_TYPE_TOTEM_SLOT1 = 63,
-    SUMMON_TYPE_WILD        = 64,
-    SUMMON_TYPE_POSESSED    = 65,
-    SUMMON_TYPE_DEMON       = 66,
-    SUMMON_TYPE_SUMMON      = 67,
-    SUMMON_TYPE_TOTEM_SLOT2 = 81,
-    SUMMON_TYPE_TOTEM_SLOT3 = 82,
-    SUMMON_TYPE_TOTEM_SLOT4 = 83,
-    SUMMON_TYPE_TOTEM       = 121,
-    SUMMON_TYPE_UNKNOWN3    = 181,
-    SUMMON_TYPE_UNKNOWN4    = 187,
-    SUMMON_TYPE_UNKNOWN1    = 247,
-    SUMMON_TYPE_CRITTER2    = 407,
-    SUMMON_TYPE_CRITTER3    = 307,
-    SUMMON_TYPE_UNKNOWN5    = 409,
-    SUMMON_TYPE_UNKNOWN2    = 427,
-    SUMMON_TYPE_POSESSED2   = 428,
-    SUMMON_TYPE_INFERNO     = 711,
-    SUMMON_TYPE_GUARDIAN2   = 1161,
-    SUMMON_TYPE_ELEMENTAL   = 1561,
-    SUMMON_TYPE_FORCE_OF_NATURE = 1562
->>>>>>> b10bf4b6dfbe07c0737af44ab19ff63310f4bf65:src/game/SharedDefines.h
 };
 
 enum ResponseCodes

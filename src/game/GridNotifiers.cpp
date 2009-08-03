@@ -118,7 +118,6 @@ Player2PlayerNotifier::SendToSelf()
     WorldPacket packet;
     i_data.BuildPacket(&packet);
     i_player.GetSession()->SendPacket(&packet);
-    //i_player.BuildVehicleInfo((Unit*)(*vItr));
 
     for(std::set<Unit*>::const_iterator it = i_visibleNow.begin(); it != i_visibleNow.end(); ++it)
         (*it)->SendInitialVisiblePackets(&i_player);

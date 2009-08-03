@@ -486,8 +486,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void GetRespawnCoord(float &x, float &y, float &z, float* ori = NULL, float* dist =NULL) const;
         uint32 GetEquipmentId() const { return m_equipmentId; }
 
-		bool isSummon() const   { return m_summonMask & SUMMON_MASK_SUMMON; }
-        bool isGuardian() const { return m_summonMask & SUMMON_MASK_GUARDIAN; }
         bool isPet() const { return m_isPet; }
         bool isVehicle() const { return m_isVehicle; }
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
@@ -695,11 +693,36 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool isActiveObject() const { return m_isActiveObject; }
         void SetActiveObjectState(bool on);
+        
+        void IncrementReceivedDamage(Unit* pAttacker, uint32 unDamage) 
+        {
+		    if(!pAttacker || !unDamage)
+                return;
 
+		    if(pAttacker->GetCharmerOrOwnerPlayerOrPlayerItself())
+		    {
+                m_unPlayerDamageDone += unDamage;
+                return;
+		    }
+		    else if(pAttacker->GetTypeId() == TYPEID_UNIT)
+		    {
+                //some conditions can be placed here
+                m_unUnitDamageDone += unDamage;
+                return;
+		    }
+        }
+        bool AreLootAndRewardAllowed() { return (m_unPlayerDamageDone > m_unUnitDamageDone); }
+        void ResetObtainedDamage() 
+        {
+		    m_unPlayerDamageDone = 0;
+		    m_unUnitDamageDone = 0;
+        }
     protected:
         bool CreateFromProto(uint32 guidlow,uint32 Entry,uint32 team, const CreatureData *data = NULL);
         bool InitEntry(uint32 entry, uint32 team=ALLIANCE, const CreatureData* data=NULL);
 
+        uint32 m_unPlayerDamageDone;
+        uint32 m_unUnitDamageDone;
         // vendor items
         VendorItemCounts m_vendorItemCounts;
 
@@ -721,7 +744,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool m_gossipOptionLoaded;
         GossipOptionList m_goptions;
 
-		uint32 m_summonMask;
         bool m_isPet;                                       // set only in Pet::Pet
         bool m_isVehicle;                                   // set only in Vehicle::Vehicle
         bool m_isTotem;                                     // set only in Totem::Totem

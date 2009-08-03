@@ -204,7 +204,8 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
 
             SetUInt32Value(UNIT_FIELD_BYTES_0, 2048);
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-			// If pet is deathknight's ghoul
+
+             // If pet is deathknight's ghoul
             if (GetEntry() == 26125)
                 // then he must have energy bar instead of mana
                 setPowerType(POWER_ENERGY);
@@ -781,7 +782,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     setPowerType(POWER_FOCUS);
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
-    SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, objmgr.GetXPForLevel(creature->getLevel())/4);
+    SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, objmgr.GetXPForLevel(creature->getLevel())/10);
     SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
     if(CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family))
@@ -926,7 +927,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
         }
         case HUNTER_PET:
         {
-            SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, objmgr.GetXPForLevel(petlevel)/4);
+            SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, objmgr.GetXPForLevel(petlevel)/10);
             //these formula may not be correct; however, it is designed to be close to what it should be
             //this makes dps 0.5 of pets level
             SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)) );
@@ -1382,10 +1383,7 @@ bool Pet::addSpell(uint32 spell_id,ActiveStates active /*= ACT_DECIDE*/, PetSpel
         m_charmInfo->AddSpellToActionBar(spell_id);
 
     if(newspell.active == ACT_ENABLED)
-    {
         ToggleAutocast(spell_id, true);
-        m_charmInfo->SetSpellAutocast(spell_id, true);
-    }
 
     uint32 talentCost = GetTalentSpellCost(spell_id);
     if (talentCost)
@@ -1782,6 +1780,20 @@ void Pet::ToggleAutocast(uint32 spellid, bool apply)
     if(IsPassiveSpell(spellid))
         return;
 
+       // Sacrifice is not autocastable
+       switch(spellid) {
+              case 7812:     // Sacrifice Rank 1
+              case 19438:    // Sacrifice Rank 2
+              case 19440:    // Sacrifice Rank 3
+              case 19441:    // Sacrifice Rank 4
+              case 19442:    // Sacrifice Rank 5
+              case 19443:    // Sacrifice Rank 6
+              case 27273:    // Sacrifice Rank 7
+              case 47985:    // Sacrifice Rank 8
+              case 47986:    // Sacrifice Rank 9
+                     return;
+       }
+
     PetSpellMap::iterator itr = m_spells.find(spellid);
 
     int i;
@@ -1917,7 +1929,7 @@ void Pet::CastPetAura(PetAura const* aura)
         return;
 
     switch (auraId)
-	{
+    {
         case 35696: // Demonic Knowledge
         {
             int32 basePoints = int32(aura->GetDamage() * (GetStat(STAT_STAMINA) + GetStat(STAT_INTELLECT)) / 100);
@@ -1946,7 +1958,7 @@ void Pet::CastPetAura(PetAura const* aura)
             CastSpell(this, auraId, true);
             break;
         }
-    }
+     }
 }
 
 struct DoPetLearnSpell
@@ -1981,7 +1993,7 @@ void Pet::SynchronizeLevelWithOwner()
             if(getLevel() > owner->getLevel())
             {
                 GivePetLevel(owner->getLevel());
-                SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, objmgr.GetXPForLevel(owner->getLevel())/4);
+                SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, objmgr.GetXPForLevel(owner->getLevel())/10);
                 SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP)-1);
             }
             break;

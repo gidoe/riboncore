@@ -721,17 +721,10 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
                                 ch = true;
                             }
                             else if(index == UNIT_FIELD_FACTIONTEMPLATE)
-							{
-                                FactionTemplateEntry const *ft1, *ft2;
-                                ft1 = ((Player*)this)->getFactionTemplateEntry();
-                                ft2 = ((Player*)target)->getFactionTemplateEntry();
-                                if(ft1 && ft2 && !ft1->IsFriendlyTo(*ft2))
-                                {
-                                    uint32 faction = ((Player*)target)->getFaction(); // pretend that all other HOSTILE players have own faction, to allow follow, heal, rezz (trade wont work)
-                                    DEBUG_LOG("-- VALUES_UPDATE: Sending '%s' the blue-group-fix from '%s' (faction %u)", target->GetName(), ((Player*)this)->GetName(), faction);
-                                    *data << uint32(faction);
-                                    ch = true;
-                                }
+                            {
+                                DEBUG_LOG("-- VALUES_UPDATE: Sending '%s' the blue-group-fix from '%s' (faction)", target->GetName(), ((Player*)this)->GetName());
+                                *data << uint32(35);
+                                ch = true;
                             }
                         }
                     }
@@ -1698,7 +1691,6 @@ GameObject* WorldObject::SummonGameObject(uint32 entry, float x, float y, float 
     if(!go->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, map, GetPhaseMask(), x, y, z, ang, rotation0, rotation1, rotation2, rotation3, 100, GO_STATE_READY))
         return NULL;
     go->SetRespawnTime(respawnTime);
-    go->SetSpawnedByDefault(false); // do not save respawn time
     go->SetOwnerGUID(GetGUID());
     map->Add(go);
 

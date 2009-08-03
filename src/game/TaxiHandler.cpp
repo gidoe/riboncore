@@ -53,7 +53,7 @@ void WorldSession::SendTaxiStatus( uint64 guid )
         return;
     }
 
-    uint32 curloc = objmgr.GetNearestTaxiNode(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ(), unit->GetMapId(), GetPlayer( )->GetTeam(), 0);
+    uint32 curloc = objmgr.GetNearestTaxiNode(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),unit->GetMapId(),GetPlayer( )->GetTeam(),0);
 
     // not found nearest
     if(curloc == 0)
@@ -193,6 +193,7 @@ void WorldSession::HandleActivateTaxiExpressOpcode ( WorldPacket & recv_data )
     GetPlayer()->ActivateTaxiPathTo(nodes, npc);
 }
 
+
 void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
 {
     sLog.outDebug( "WORLD: Received CMSG_MOVE_SPLINE_DONE" );
@@ -212,7 +213,7 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
     MovementInfo movementInfo;
     ReadMovementInfo(recv_data, &movementInfo);
     //<<< end movement anticheat
-
+    
     uint32 curDest = GetPlayer()->m_taxi.GetTaxiDestination();
 
     if(!curDest)
@@ -220,10 +221,10 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
         //movement anticheat code
         GetPlayer()->SetPosition(movementInfo.x, movementInfo.y, movementInfo.z, movementInfo.o);
         GetPlayer()->m_movementInfo = movementInfo;
-       // GetPlayer()->SetMovementFlags(MovementFlags(movementInfo.flags));
-GetPlayer()->m_movementInfo.SetMovementFlags(MovementFlags(movementInfo.flags));
+        GetPlayer()->m_movementInfo.SetMovementFlags(MovementFlags(movementInfo.flags));
+
         //calc time deltas
-       int32 cClientTimeDelta = 0;
+        int32 cClientTimeDelta = 0;
         if (GetPlayer()->m_anti_LastClientTime !=0){
             cClientTimeDelta = movementInfo.time - GetPlayer()->m_anti_LastClientTime;
             GetPlayer()->m_anti_DeltaClientTime += cClientTimeDelta;
@@ -231,6 +232,7 @@ GetPlayer()->m_movementInfo.SetMovementFlags(MovementFlags(movementInfo.flags));
         } else {
             GetPlayer()->m_anti_LastClientTime = movementInfo.time;
         }
+
         uint32 cServerTime=getMSTime();
         uint32 cServerTimeDelta = 0;
         if (GetPlayer()->m_anti_LastServerTime != 0){
@@ -265,8 +267,7 @@ GetPlayer()->m_movementInfo.SetMovementFlags(MovementFlags(movementInfo.flags));
     //movement anticheat code
     GetPlayer()->SetPosition(movementInfo.x, movementInfo.y, movementInfo.z, movementInfo.o);
     GetPlayer()->m_movementInfo = movementInfo;
-    //GetPlayer()->SetUnitMovementFlags(movementInfo.flags);
-	GetPlayer()->m_movementInfo.SetMovementFlags(MovementFlags(movementInfo.flags));
+    GetPlayer()->m_movementInfo.SetMovementFlags(MovementFlags(movementInfo.flags));
     //calc time deltas
     int32 cClientTimeDelta = 0;
     if (GetPlayer()->m_anti_LastClientTime !=0){
@@ -304,7 +305,7 @@ GetPlayer()->m_movementInfo.SetMovementFlags(MovementFlags(movementInfo.flags));
         }
         return;
     }
-
+    
     //<<< movement anticheat fix - disallow unmount from taxi
     if(curloc != curDest){
          // current source node for next destination
@@ -321,6 +322,7 @@ GetPlayer()->m_movementInfo.SetMovementFlags(MovementFlags(movementInfo.flags));
         return;
     }
     ///<<< movement anticheat
+
 
     uint32 destinationnode = GetPlayer()->m_taxi.NextTaxiDestination();
     if ( destinationnode > 0 )                              // if more destinations to go

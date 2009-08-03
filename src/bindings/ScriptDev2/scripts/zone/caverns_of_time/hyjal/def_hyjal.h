@@ -31,6 +31,9 @@ enum eNPC
     NPC_GIANT               = 17908,
     NPC_STALK               = 17916,
 
+    NPC_WATER_ELEMENTAL     = 18001,
+    NPC_DIRE_WOLF           = 17854,
+
     GO_ANCIENT_GEM          = 185557
 };
 
@@ -51,7 +54,6 @@ enum
     TYPE_ARCHIMONDE             = 4,
 
     DATA_ANETHERON              = 1,
-	DATA_ANETHERONEVENT			= 2,
     DATA_RAGEWINTERCHILL        = 10,
     DATA_AZGALOR                = 5,
     DATA_KAZROGAL               = 8,
@@ -63,10 +65,7 @@ enum
 
     DATA_TRASH                  = 14,
     DATA_RESET_TRASH_COUNT      = 15,
-	DATA_ALLIANCE_RETREAT		= 16,
-    DATA_HORDE_RETREAT			= 17,
-	DATA_RAIDDAMAGE				= 18,
-    TYPE_RETREAT                = 20
+    TYPE_RETREAT                = 16
 };
 
 #endif

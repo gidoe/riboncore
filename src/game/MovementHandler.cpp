@@ -57,7 +57,6 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         LogoutPlayer(false);
         return;
     }
-
     //movement anticheat
     GetPlayer()->m_anti_JustTeleported = 1;
     //end movement anticheat
@@ -73,17 +72,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     GetPlayer()->SetSemaphoreTeleportFar(false);
 
     // relocate the player to the teleport destination
-    Map * newMap = MapManager::Instance().CreateMap(loc.mapid, GetPlayer());
-    if (!newMap)
-    {
-        sLog.outError("Map %d could not be created for player %d, porting player to homebind", loc.mapid, GetPlayer()->GetGUIDLow());
-        GetPlayer()->RelocateToHomebind();
-        newMap = MapManager::Instance().CreateMap(GetPlayer()->GetMapId(), GetPlayer());
-    }
-    else
-        GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
-
-    GetPlayer()->SetMap(newMap);
+    GetPlayer()->SetMap(MapManager::Instance().CreateMap(loc.mapid, GetPlayer()));    GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
+    GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
 
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
     // the CanEnter checks are done in TeleporTo but conditions may change
@@ -233,8 +223,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     Player *plMover = mover->GetTypeId()==TYPEID_PLAYER ? (Player*)mover : NULL;
 
     // ignore, waiting processing in WorldSession::HandleMoveWorldportAckOpcode and WorldSession::HandleMoveTeleportAck
-    if(plMover && plMover->IsBeingTeleported())
-    {
+    if(plMover && plMover->IsBeingTeleported()){
         // movement anticheat
         plMover->m_anti_JustTeleported = 1;
         // end movement anticheat
@@ -351,6 +340,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         plMover->HandleFall(movementInfo);
     }
 
+
     if (plMover && (movementInfo.HasMovementFlag(MOVEMENTFLAG_SWIMMING) != plMover->IsInWater()))
     {
         // now client not include swimming flag in case jumping under water
@@ -438,6 +428,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             check_passed = false;
         }
         // end mistiming checks
+
 
         uint32 curDest = plMover->m_taxi.GetTaxiDestination(); //check taxi flight
         if ((plMover->m_anti_TransportGUID == 0) && !curDest)
@@ -669,8 +660,8 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     if(plMover)                                             // nothing is charmed, or player charmed
     {
-        plMover->SetPosition(movementInfo.x, movementInfo.y, movementInfo.z, movementInfo.o);
         plMover->m_movementInfo = movementInfo;
+        plMover->SetPosition(movementInfo.x, movementInfo.y, movementInfo.z, movementInfo.o);
         plMover->UpdateFallInformationIfNeed(movementInfo, recv_data.GetOpcode());
 
         if(plMover->isMovingOrTurning())
@@ -722,11 +713,11 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 ((Vehicle*)mover)->RellocatePassengers(mover->GetMap());
         }
     }
-}
-    else if (plMover)
-    {
+    
+    } else if (plMover) {
         plMover->m_anti_AlarmCount++;
         WorldPacket data;
+        plMover->m_movementInfo.SetMovementFlags(MovementFlags(MOVEMENTFLAG_NONE));
         plMover->BuildTeleportAckMsg(&data, plMover->GetPositionX(), plMover->GetPositionY(), plMover->GetPositionZ(), plMover->GetOrientation());
         plMover->GetSession()->SendPacket(&data);
         plMover->BuildHeartBeatMsg(&data);

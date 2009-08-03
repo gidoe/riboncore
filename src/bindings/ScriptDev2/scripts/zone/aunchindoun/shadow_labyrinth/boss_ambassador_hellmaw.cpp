@@ -22,8 +22,8 @@ SDCategory: Auchindoun, Shadow Labyrinth
 EndScriptData */
 
 #include "precompiled.h"
-#include "../../../npc/npc_escortAI.h"
 #include "def_shadow_labyrinth.h"
+#include "escort_ai.h"
 
 #define SAY_INTRO       -1555000
 
@@ -199,11 +199,7 @@ struct MANGOS_DLL_DECL boss_ambassador_hellmawAI : public npc_escortAI
 
 CreatureAI* GetAI_boss_ambassador_hellmaw(Creature* pCreature)
 {
-    boss_ambassador_hellmawAI* pHellAI = new boss_ambassador_hellmawAI(pCreature);
-
-    pHellAI->FillPointMovementListForCreature();
-
-    return (CreatureAI*)pHellAI;
+    return new boss_ambassador_hellmawAI(pCreature);
 }
 
 void AddSC_boss_ambassador_hellmaw()

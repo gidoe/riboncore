@@ -331,7 +331,7 @@ class MANGOS_DLL_SPEC Group
         InstanceGroupBind* GetBoundInstance(uint32 mapid, uint8 difficulty);
         BoundInstancesMap& GetBoundInstances(uint8 difficulty) { return m_boundInstances[difficulty]; }
 
-        //Group hack.
+        // FG: evil hacks
         void BroadcastGroupUpdate(void);
 
     protected:

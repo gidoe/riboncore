@@ -15,7 +15,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
 #ifndef MANGOS_SPELLAURAS_H
 #define MANGOS_SPELLAURAS_H
 
@@ -57,9 +56,18 @@ class MANGOS_DLL_SPEC Aura
 
     public:
         //aura handlers
-        void HandleNULL(bool, bool) { /* Not implemented. */ }
-        void HandleUnused(bool, bool) { /* Not used or useless. */ }
-        void HandleNoImmediateEffect(bool, bool) { /* Aura does not have immediate effect at add/remove and handled by ID in other place. */ }
+        void HandleNULL(bool, bool)
+        {
+            // NOT IMPLEMENTED
+        }
+        void HandleUnused(bool, bool)
+        {
+            // NOT USED BY ANY SPELL OR USELESS
+        }
+        void HandleNoImmediateEffect(bool, bool)
+        {
+            // aura not have immediate effect at add/remove and handled by ID in other code place
+        }
         void HandleBindSight(bool Apply, bool Real);
         void HandleModPossess(bool Apply, bool Real);
         void HandlePeriodicDamage(bool Apply, bool Real);
@@ -91,7 +99,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraModIncreaseEnergyPercent(bool Apply, bool Real);
         void HandleAuraModIncreaseHealthPercent(bool Apply, bool Real);
         void HandleAuraModRegenInterrupt(bool Apply, bool Real);
-        void HandleAuraModMeleeHaste(bool Apply, bool Real);
+        void HandleHaste(bool Apply, bool Real);
         void HandlePeriodicTriggerSpell(bool Apply, bool Real);
         void HandlePeriodicTriggerSpellWithValue(bool apply, bool Real);
         void HandlePeriodicEnergize(bool Apply, bool Real);
@@ -204,9 +212,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleNoReagentUseAura(bool Apply, bool Real);
         void HandlePhase(bool Apply, bool Real);
         void HandleAllowOnlyAbility(bool Apply, bool Real);
-        void HandleAuraInitializeImages(bool Apply, bool Real);
-        void HandleAuraCloneCaster(bool Apply, bool Real);
-        void HandleAbilityIgnoreAurastate(bool Apply, bool Real);
+        void HandleAddCreatureImmunity(bool apply, bool Real);
 
         virtual ~Aura();
 
@@ -293,15 +299,12 @@ class MANGOS_DLL_SPEC Aura
 
         virtual void Update(uint32 diff);
         void ApplyModifier(bool apply, bool Real = false);
-        void HandleAuraSpecificMods(bool apply);
+
+        void SetDamageDoneBySpell(int32 damage) { m_damageDoneBySpell = damage; }
+        void SetHealingDoneBySpell(int32 healing) { m_healingDoneBySpell = healing; }
 
         void _AddAura();
-<<<<<<< HEAD:src/game/SpellAuras.h
-        void _RemoveAura();
-        bool IsEffectStacking();
-=======
         bool _RemoveAura();
->>>>>>> b10bf4b6dfbe07c0737af44ab19ff63310f4bf65:src/game/SpellAuras.h
 
         bool IsUpdated() { return m_updated; }
         void SetUpdated(bool val) { m_updated = val; }
@@ -312,8 +315,6 @@ class MANGOS_DLL_SPEC Aura
         void SetRemoveMode(AuraRemoveMode mode) { m_removeMode = mode; }
 
         virtual Unit* GetTriggerTarget() const { return m_target; }
-
-        void HandleModArmorPenetrationPct(bool Apply, bool Real);
 
         // add/remove SPELL_AURA_MOD_SHAPESHIFT (36) linked auras
         void HandleShapeshiftBoosts(bool apply);
@@ -327,8 +328,6 @@ class MANGOS_DLL_SPEC Aura
         void TriggerSpellWithValue();
         void PeriodicTick();
         void PeriodicDummyTick();
-
-        int32 GetAmount() const {return m_amount;}
 
         uint32 const *getAuraSpellClassMask() const { return  m_spellProto->EffectSpellClassMaskA + m_effIndex * 3; }
         bool isAffectedOnSpell(SpellEntry const *spell) const;
@@ -346,8 +345,10 @@ class MANGOS_DLL_SPEC Aura
         uint64 m_castItemGuid;                              // it is NOT safe to keep a pointer to the item because it may get deleted
         time_t m_applyTime;
 
+        int32 m_damageDoneBySpell;
+        int32 m_healingDoneBySpell;
+
         int32 m_currentBasePoints;                          // cache SpellEntry::EffectBasePoints and use for set custom base points
-        int32 m_amount;
         int32 m_maxduration;                                // Max aura duration
         int32 m_duration;                                   // Current time
         int32 m_timeCla;                                    // Timer for power per sec calcultion
