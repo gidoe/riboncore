@@ -773,7 +773,7 @@ void AuctionHouseBot()
 
     WorldSession _session(AHBplayerAccount, NULL, SEC_PLAYER, true, 0, LOCALE_enUS);
     Player _AHBplayer(&_session);
-    _AHBplayer.MinimalLoadFromDB(NULL, AHBplayerGUID);
+    //_AHBplayer.LoadFromDB(AHBplayerGUID);
     ObjectAccessor::Instance().AddObject(&_AHBplayer);
 
     if(!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
