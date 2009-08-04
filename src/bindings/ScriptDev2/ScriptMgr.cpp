@@ -11,15 +11,10 @@
 #include "ProgressBar.h"
 #include "../system/ScriptLoader.h"
 
-// The path to config files
-#ifndef SYSCONFDIR
-  #define SYSCONFDIR ""
-#endif
-
 #define _FULLVERSION "ScriptDev2"
 
 #ifndef _SCRIPTDEV2_CONFIG
-# define _SCRIPTDEV2_CONFIG  SYSCONFDIR"mangosd.conf"
+# define _SCRIPTDEV2_CONFIG  "mangosd.conf"
 #endif _SCRIPTDEV2_CONFIG
 
 int num_sc_scripts;
