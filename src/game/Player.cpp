@@ -16133,28 +16133,15 @@ void Player::SaveToDB()
 
     ss << GetZoneId() << ", ";
 
-<<<<<<< HEAD:src/game/Player.cpp
-    ss << ", '";
-    ss << m_taxi.SaveTaxiDestinationsToString();
-    ss << "', '0'";
+    ss << (uint64)m_deathExpireTime << ", '";
+
+    ss << m_taxi.SaveTaxiDestinationsToString() << "', ";
+    ss << "'0'";                                           // arena_pending_points
 
     ss << ", ";
     ss << uint32(m_specCount);
     ss << ", ";
-    ss << uint32(m_activeSpec); 
-=======
-    ss << (uint64)m_deathExpireTime << ", '";
-
-    ss << m_taxi.SaveTaxiDestinationsToString() << "', ";
-    ss << "'0', ";                                          // arena_pending_points
-    ss << GetBattleGroundId() << ", ";
-    ss << GetBGTeam() << ", ";
-    ss << m_bgEntryPoint.mapid << ", "
-       << finiteAlways(m_bgEntryPoint.coord_x) << ", "
-       << finiteAlways(m_bgEntryPoint.coord_y) << ", "
-       << finiteAlways(m_bgEntryPoint.coord_z) << ", "
-       << finiteAlways(m_bgEntryPoint.orientation);
->>>>>>> fbe162c871af097133b4bf3af3664ac9bfa7cc5e:src/game/Player.cpp
+    ss << uint32(m_activeSpec);
     ss << ")";
 
     CharacterDatabase.Execute( ss.str().c_str() );
