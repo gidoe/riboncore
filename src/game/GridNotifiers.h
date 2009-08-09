@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOS_GRIDNOTIFIERS_H
-#define MANGOS_GRIDNOTIFIERS_H
+#ifndef RIBON_GRIDNOTIFIERS_H
+#define RIBON_GRIDNOTIFIERS_H
 
 #include "ObjectGridLoader.h"
 #include "ByteBuffer.h"
@@ -35,54 +37,55 @@
 class Player;
 //class Map;
 
-namespace MaNGOS
+namespace Ribon
 {
-    // creates UpdateData for i_player
-    struct MANGOS_DLL_DECL VisibleNotifier
+    struct RIBON_DLL_DECL PlayerVisibilityNotifier
     {
-        bool force;
         Player &i_player;
         UpdateData i_data;
-        std::set<Unit*> i_visibleNow;
-        Player::ClientGUIDs vis_guids;
+        Player::ClientGUIDs i_clientGUIDs;
+        std::set<WorldObject*> i_visibleNow;
 
-        explicit VisibleNotifier(Player &player, bool forced) :
-            i_player(player), vis_guids(player.m_clientGUIDs), force(forced) {}
-        explicit VisibleNotifier(Player &player) :
-            i_player(player), vis_guids(player.m_clientGUIDs), force(player.isNeedNotify(NOTIFY_VISIBILITY_ACTIVE)) {}
-        template<class T> void Visit(GridRefManager<T> &m);
-        void Visit(PlayerMapType &m) {}
-        void SendToSelf(void);
+        PlayerVisibilityNotifier(Player &player) : i_player(player),i_clientGUIDs(player.m_clientGUIDs) {}
+
+        template<class T> inline void Visit(GridRefManager<T> &);
+
+        void Notify(void);
     };
 
-    // send object's update to every player in cell
-    struct MANGOS_DLL_DECL VisibleChangesNotifier
+    struct RIBON_DLL_DECL PlayerRelocationNotifier : public PlayerVisibilityNotifier
+    {
+        PlayerRelocationNotifier(Player &player) : PlayerVisibilityNotifier(player) {}
+        template<class T> inline void Visit(GridRefManager<T> &m) { PlayerVisibilityNotifier::Visit(m); }
+        #ifdef WIN32
+        template<> inline void Visit(PlayerMapType &);
+        template<> inline void Visit(CreatureMapType &);
+        #endif
+    };
+
+    struct RIBON_DLL_DECL CreatureRelocationNotifier
+    {
+        Creature &i_creature;
+        CreatureRelocationNotifier(Creature &c) : i_creature(c) {}
+        template<class T> void Visit(GridRefManager<T> &) {}
+        #ifdef WIN32
+        template<> inline void Visit(PlayerMapType &);
+        template<> inline void Visit(CreatureMapType &);
+        #endif
+    };
+
+    struct RIBON_DLL_DECL VisibleChangesNotifier
     {
         WorldObject &i_object;
 
         explicit VisibleChangesNotifier(WorldObject &object) : i_object(object) {}
         template<class T> void Visit(GridRefManager<T> &) {}
         void Visit(PlayerMapType &);
+        void Visit(CreatureMapType &);
+        void Visit(DynamicObjectMapType &);
     };
 
-    struct MANGOS_DLL_DECL Player2PlayerNotifier
-    {
-		bool force;
-        Player &i_player;
-        UpdateData i_data;
-        std::set<Unit*> i_visibleNow;
-        Player::ClientGUIDs vis_guids;
-
-        explicit Player2PlayerNotifier(Player &player) :
-			i_player(player), force(false), vis_guids(player.m_clientGUIDs) {}
-        explicit Player2PlayerNotifier(Player &player, bool forced) :
-			i_player(player), force(forced), vis_guids(player.m_clientGUIDs) {}
-        template<class T> void Visit(GridRefManager<T> &) {}
-        void Visit(PlayerMapType &);
-        void SendToSelf(void);
-    };
-
-    struct MANGOS_DLL_DECL GridUpdater
+    struct RIBON_DLL_DECL GridUpdater
     {
         GridType &i_grid;
         uint32 i_timeDiff;
@@ -101,51 +104,42 @@ namespace MaNGOS
         void Visit(CorpseMapType &m) { updateObjects<Corpse>(m); }
     };
 
-    struct MANGOS_DLL_DECL MessageDeliverer
+    struct RIBON_DLL_DECL MessageDistDeliverer
     {
-        Player &i_player;
+        WorldObject *i_source;
         WorldPacket *i_message;
-        bool i_toSelf;
-        MessageDeliverer(Player &pl, WorldPacket *msg, bool to_self) : i_player(pl), i_message(msg), i_toSelf(to_self) {}
-        void Visit(PlayerMapType &m);
-        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
-    };
-
-    struct MANGOS_DLL_DECL ObjectMessageDeliverer
-    {
         uint32 i_phaseMask;
-        WorldPacket *i_message;
-        explicit ObjectMessageDeliverer(WorldObject& obj, WorldPacket *msg)
-            : i_phaseMask(obj.GetPhaseMask()), i_message(msg) {}
+        float i_distSq;
+        bool self;
+        uint32 team;
+        MessageDistDeliverer(WorldObject *src, WorldPacket *msg, float dist, bool to_self = true, bool own_team_only = false)
+            : i_source(src), i_message(msg), i_distSq(dist * dist), i_phaseMask(src->GetPhaseMask())
+            , self(to_self || src->GetTypeId() != TYPEID_PLAYER), team((own_team_only && src->GetTypeId() == TYPEID_PLAYER) ? ((Player*)src)->GetTeam() : 0)
+        {
+        }
         void Visit(PlayerMapType &m);
+        void Visit(CreatureMapType &m);
+        void Visit(DynamicObjectMapType &m);
         template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
+
+        void SendPacket(Player* plr)
+        {
+            if(!self)
+            {
+                if(plr == i_source)
+                    return;
+            }
+            else if(team)
+            {
+                if(plr->GetTeam() != team)
+                    return;
+            }
+
+            plr->GetSession()->SendPacket(i_message);
+        }
     };
 
-    struct MANGOS_DLL_DECL MessageDistDeliverer
-    {
-        Player &i_player;
-        WorldPacket *i_message;
-        bool i_toSelf;
-        bool i_ownTeamOnly;
-        float i_dist;
-
-        MessageDistDeliverer(Player &pl, WorldPacket *msg, float dist, bool to_self, bool ownTeamOnly)
-            : i_player(pl), i_message(msg), i_toSelf(to_self), i_ownTeamOnly(ownTeamOnly), i_dist(dist) {}
-        void Visit(PlayerMapType &m);
-        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
-    };
-
-    struct MANGOS_DLL_DECL ObjectMessageDistDeliverer
-    {
-        WorldObject &i_object;
-        WorldPacket *i_message;
-        float i_dist;
-        ObjectMessageDistDeliverer(WorldObject &obj, WorldPacket *msg, float dist) : i_object(obj), i_message(msg), i_dist(dist) {}
-        void Visit(PlayerMapType &m);
-        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
-    };
-
-    struct MANGOS_DLL_DECL ObjectUpdater
+    struct RIBON_DLL_DECL ObjectUpdater
     {
         uint32 i_timeDiff;
         explicit ObjectUpdater(const uint32 &diff) : i_timeDiff(diff) {}
@@ -156,7 +150,7 @@ namespace MaNGOS
     };
 
     template<class T>
-        struct MANGOS_DLL_DECL ObjectAccessorNotifier
+        struct RIBON_DLL_DECL ObjectAccessorNotifier
     {
         T *& i_object;
 
@@ -182,50 +176,7 @@ namespace MaNGOS
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
-    struct MANGOS_DLL_DECL PlayerRelocationNotifier
-    {
-        Player &i_player;
-        PlayerRelocationNotifier(Player &pl) : i_player(pl) {}
-        template<class T> void Visit(GridRefManager<T> &) {}
-        void Visit(PlayerMapType &);
-        void Visit(CreatureMapType &);
-    };
-
-    struct MANGOS_DLL_DECL CreatureRelocationNotifier
-    {
-        Creature &i_creature;
-        CreatureRelocationNotifier(Creature &c) : i_creature(c) {}
-        template<class T> void Visit(GridRefManager<T> &) {}
-        #ifdef WIN32
-        template<> void Visit(PlayerMapType &);
-        #endif
-    };
-
-    // mass creature relocation
-    struct MANGOS_DLL_DECL DelayedUnitRelocation
-    {
-        typedef GridReadGuard ReadGuard;
-        Map &i_map;
-        CellLock<ReadGuard> &i_lock;
-        const float i_radius;
-        DelayedUnitRelocation(CellLock<ReadGuard> &lock, Map &map, float radius) :
-            i_lock(lock), i_map(map), i_radius(radius) {}
-        template<class T> void Visit(GridRefManager<T> &) {}
-        void Visit(CreatureMapType &);
-        void Visit(PlayerMapType &);
-    };
-
-    struct MANGOS_DLL_DECL ResetNotifier
-    {
-        uint16 reset_mask;
-        ResetNotifier(uint16 notifies) : reset_mask(notifies) {}
-        template<class T> void Visit(GridRefManager<T> &) {}
-        template<class T> void resetNotify(GridRefManager<T> &);
-        void Visit(CreatureMapType &m) { resetNotify<Creature>(m);}
-        void Visit(PlayerMapType &m) { resetNotify<Player>(m);}
-    };
-
-    struct MANGOS_DLL_DECL DynamicObjectUpdater
+    struct RIBON_DLL_DECL DynamicObjectUpdater
     {
         DynamicObject &i_dynobject;
         Unit* i_check;
@@ -251,7 +202,7 @@ namespace MaNGOS
     // WorldObject searchers & workers
 
     template<class Check>
-        struct MANGOS_DLL_DECL WorldObjectSearcher
+        struct RIBON_DLL_DECL WorldObjectSearcher
     {
         uint32 i_phaseMask;
         WorldObject* &i_object;
@@ -270,7 +221,7 @@ namespace MaNGOS
     };
 
     template<class Check>
-        struct MANGOS_DLL_DECL WorldObjectListSearcher
+        struct RIBON_DLL_DECL WorldObjectListSearcher
     {
         uint32 i_phaseMask;
         std::list<WorldObject*> &i_objects;
@@ -289,7 +240,7 @@ namespace MaNGOS
     };
 
     template<class Do>
-        struct MANGOS_DLL_DECL WorldObjectWorker
+        struct RIBON_DLL_DECL WorldObjectWorker
     {
         uint32 i_phaseMask;
         Do const& i_do;
@@ -337,7 +288,7 @@ namespace MaNGOS
     // Gameobject searchers
 
     template<class Check>
-        struct MANGOS_DLL_DECL GameObjectSearcher
+        struct RIBON_DLL_DECL GameObjectSearcher
     {
         uint32 i_phaseMask;
         GameObject* &i_object;
@@ -353,7 +304,7 @@ namespace MaNGOS
 
     // Last accepted by Check GO if any (Check can change requirements at each call)
     template<class Check>
-        struct MANGOS_DLL_DECL GameObjectLastSearcher
+        struct RIBON_DLL_DECL GameObjectLastSearcher
     {
         uint32 i_phaseMask;
         GameObject* &i_object;
@@ -368,7 +319,7 @@ namespace MaNGOS
     };
 
     template<class Check>
-        struct MANGOS_DLL_DECL GameObjectListSearcher
+        struct RIBON_DLL_DECL GameObjectListSearcher
     {
         uint32 i_phaseMask;
         std::list<GameObject*> &i_objects;
@@ -386,7 +337,7 @@ namespace MaNGOS
 
     // First accepted by Check Unit if any
     template<class Check>
-        struct MANGOS_DLL_DECL UnitSearcher
+        struct RIBON_DLL_DECL UnitSearcher
     {
         uint32 i_phaseMask;
         Unit* &i_object;
@@ -403,7 +354,7 @@ namespace MaNGOS
 
     // Last accepted by Check Unit if any (Check can change requirements at each call)
     template<class Check>
-        struct MANGOS_DLL_DECL UnitLastSearcher
+        struct RIBON_DLL_DECL UnitLastSearcher
     {
         uint32 i_phaseMask;
         Unit* &i_object;
@@ -420,7 +371,7 @@ namespace MaNGOS
 
     // All accepted by Check units if any
     template<class Check>
-        struct MANGOS_DLL_DECL UnitListSearcher
+        struct RIBON_DLL_DECL UnitListSearcher
     {
         uint32 i_phaseMask;
         std::list<Unit*> &i_objects;
@@ -438,7 +389,7 @@ namespace MaNGOS
     // Creature searchers
 
     template<class Check>
-        struct MANGOS_DLL_DECL CreatureSearcher
+        struct RIBON_DLL_DECL CreatureSearcher
     {
         uint32 i_phaseMask;
         Creature* &i_object;
@@ -454,7 +405,7 @@ namespace MaNGOS
 
     // Last accepted by Check Creature if any (Check can change requirements at each call)
     template<class Check>
-        struct MANGOS_DLL_DECL CreatureLastSearcher
+        struct RIBON_DLL_DECL CreatureLastSearcher
     {
         uint32 i_phaseMask;
         Creature* &i_object;
@@ -469,7 +420,7 @@ namespace MaNGOS
     };
 
     template<class Check>
-        struct MANGOS_DLL_DECL CreatureListSearcher
+        struct RIBON_DLL_DECL CreatureListSearcher
     {
         uint32 i_phaseMask;
         std::list<Creature*> &i_objects;
@@ -505,7 +456,7 @@ namespace MaNGOS
     // Player searchers
 
     template<class Check>
-    struct MANGOS_DLL_DECL PlayerSearcher
+    struct RIBON_DLL_DECL PlayerSearcher
     {
         uint32 i_phaseMask;
         Player* &i_object;
@@ -519,8 +470,23 @@ namespace MaNGOS
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
+    template<class Check>
+        struct RIBON_DLL_DECL PlayerListSearcher
+    {
+        uint32 i_phaseMask;
+        std::list<Player*> &i_objects;
+        Check& i_check;
+
+        PlayerListSearcher(WorldObject const* searcher, std::list<Player*> &objects, Check & check)
+            : i_phaseMask(searcher->GetPhaseMask()), i_objects(objects),i_check(check) {}
+
+        void Visit(PlayerMapType &m);
+
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+    };
+
     template<class Do>
-    struct MANGOS_DLL_DECL PlayerWorker
+    struct RIBON_DLL_DECL PlayerWorker
     {
         uint32 i_phaseMask;
         Do& i_do;
@@ -539,7 +505,7 @@ namespace MaNGOS
     };
 
     template<class Do>
-    struct MANGOS_DLL_DECL PlayerDistWorker
+    struct RIBON_DLL_DECL PlayerDistWorker
     {
         WorldObject const* i_searcher;
         float i_dist;
@@ -595,8 +561,8 @@ namespace MaNGOS
             }
             bool operator()(Creature* u)
             {
-                if ((u->getDeathState()!=CORPSE && u->getDeathState()!=GHOULED) || u->isInFlight() ||
-                    u->isDeadByDefault() || (u->GetDisplayId() != u->GetNativeDisplayId()) ||
+                if (u->getDeathState()!=CORPSE || u->isInFlight() || u->isDeadByDefault() ||
+                    (u->GetDisplayId() != u->GetNativeDisplayId()) ||
                     (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_MECHANICAL_OR_ELEMENTAL)!=0)
                     return false;
 
@@ -692,6 +658,28 @@ namespace MaNGOS
             NearestGameObjectFishingHole(NearestGameObjectFishingHole const&);
     };
 
+    class NearestGameObjectCheck
+    {
+        public:
+            NearestGameObjectCheck(WorldObject const& obj) : i_obj(obj), i_range(999) {}
+            bool operator()(GameObject* go)
+            {
+                if(i_obj.IsWithinDistInMap(go, i_range))
+                {
+                    i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
+                    return true;
+                }
+                return false;
+            }
+            float GetLastRange() const { return i_range; }
+        private:
+            WorldObject const& i_obj;
+            float i_range;
+
+            // prevent clone this object
+            NearestGameObjectCheck(NearestGameObjectCheck const&);
+    };
+
     // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO)
     class NearestGameObjectEntryInObjectRangeCheck
     {
@@ -775,7 +763,7 @@ namespace MaNGOS
             bool operator()(Unit* u)
             {
                 if(u->isAlive() && u->isInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) &&
-                    !(u->HasAura(i_spell, 0) || u->HasAura(i_spell, 1) || u->HasAura(i_spell, 2)))
+                    !(u->HasAura(i_spell)))
                 {
                     return true;
                 }
@@ -804,6 +792,26 @@ namespace MaNGOS
             float i_range;
     };
 
+    class AnyUnfriendlyNoTotemUnitInObjectRangeCheck
+    {
+        public:
+            AnyUnfriendlyNoTotemUnitInObjectRangeCheck(WorldObject const* obj, Unit const* funit, float range) : i_obj(obj), i_funit(funit), i_range(range) {}
+            bool operator()(Unit* u)
+            {
+                if(!u->isAlive())
+                    return false;
+
+                if(u->GetTypeId()==TYPEID_UNIT && ((Creature*)u)->isTotem())
+                    return false;
+
+                return i_obj->IsWithinDistInMap(u, i_range) && !i_funit->IsFriendlyTo(u);
+            }
+        private:
+            WorldObject const* i_obj;
+            Unit const* i_funit;
+            float i_range;
+    };
+
     class AnyUnfriendlyVisibleUnitInObjectRangeCheck
     {
         public:
@@ -821,6 +829,19 @@ namespace MaNGOS
             WorldObject const* i_obj;
             Unit const* i_funit;
             float i_range;
+    };
+
+    class CreatureWithDbGUIDCheck
+    {
+        public:
+            CreatureWithDbGUIDCheck(WorldObject const* obj, uint32 lowguid) : i_obj(obj), i_lowguid(lowguid) {}
+            bool operator()(Creature* u)
+            {
+                return u->GetDBTableGUIDLow() == i_lowguid;
+            }
+        private:
+            WorldObject const* i_obj;
+            uint32 i_lowguid;
     };
 
     class AnyFriendlyUnitInObjectRangeCheck
@@ -884,8 +905,8 @@ namespace MaNGOS
     class AnyAoETargetUnitInObjectRangeCheck
     {
         public:
-            AnyAoETargetUnitInObjectRangeCheck(WorldObject const* obj, Unit const* funit, float range, bool hitHidden = true)
-                : i_obj(obj), i_funit(funit), i_range(range), i_hitHidden(hitHidden)
+            AnyAoETargetUnitInObjectRangeCheck(WorldObject const* obj, Unit const* funit, float range)
+                : i_obj(obj), i_funit(funit), i_range(range)
             {
                 Unit const* check = i_funit;
                 Unit const* owner = i_funit->GetOwner();
@@ -900,8 +921,6 @@ namespace MaNGOS
                     return false;
                 if(u->GetTypeId()==TYPEID_UNIT && ((Creature*)u)->isTotem())
                     return false;
-                if (!i_hitHidden && !u->isVisibleForOrDetect(i_funit, false))
-                    return false;
 
                 if(( i_targetForPlayer ? !i_funit->IsFriendlyTo(u) : i_funit->IsHostileTo(u) )&& i_obj->IsWithinDistInMap(u, i_range))
                     return true;
@@ -909,7 +928,6 @@ namespace MaNGOS
                 return false;
             }
         private:
-            bool i_hitHidden;
             bool i_targetForPlayer;
             WorldObject const* i_obj;
             Unit const* i_funit;
@@ -960,19 +978,40 @@ namespace MaNGOS
 
     // Creature checks
 
-    class InAttackDistanceFromAnyHostileCreatureCheck
+    class NearestHostileUnitInAttackDistanceCheck
     {
         public:
-            explicit InAttackDistanceFromAnyHostileCreatureCheck(Unit* funit) : i_funit(funit) {}
-            bool operator()(Creature* u)
+            explicit NearestHostileUnitInAttackDistanceCheck(Creature const* creature, float dist = 0) : m_creature(creature)
             {
-                if(u->isAlive() && u->IsHostileTo(i_funit) && i_funit->IsWithinDistInMap(u, u->GetAttackDistance(i_funit)))
-                    return true;
-
-                return false;
+                m_range = (dist == 0 ? 9999 : dist);
+                m_force = (dist == 0 ? false : true);
             }
+            bool operator()(Unit* u)
+            {
+                // TODO: addthreat for every enemy in range?
+                if(!m_creature->IsWithinDistInMap(u, m_range))
+                    return false;
+
+                if(m_force)
+                {
+                    if(!m_creature->canAttack(u))
+                        return false;
+                }
+                else
+                {
+                    if(!m_creature->canStartAttack(u, false))
+                        return false;
+                }
+
+                m_range = m_creature->GetDistance(u);
+                return true;
+            }
+            float GetLastRange() const { return m_range; }
         private:
-            Unit* const i_funit;
+            Creature const *m_creature;
+            float m_range;
+            bool m_force;
+            NearestHostileUnitInAttackDistanceCheck(NearestHostileUnitInAttackDistanceCheck const&);
     };
 
     class AnyAssistCreatureInRangeCheck
@@ -1081,6 +1120,86 @@ namespace MaNGOS
         float i_range;
     };
 
+    class AllFriendlyCreaturesInGrid
+    {
+    public:
+        AllFriendlyCreaturesInGrid(Unit const* obj) : pUnit(obj) {}
+        bool operator() (Unit* u)
+        {
+            if(u->isAlive() && u->GetVisibility() == VISIBILITY_ON && u->IsFriendlyTo(pUnit))
+                return true;
+
+            return false;
+        }
+    private:
+        Unit const* pUnit;
+    };
+
+    class AllGameObjectsWithEntryInRange
+    {
+    public:
+        AllGameObjectsWithEntryInRange(const WorldObject* pObject, uint32 uiEntry, float fMaxRange) : m_pObject(pObject), m_uiEntry(uiEntry), m_fRange(fMaxRange) {}
+        bool operator() (GameObject* pGo)
+        {
+            if (pGo->GetEntry() == m_uiEntry && m_pObject->IsWithinDist(pGo,m_fRange,false))
+                return true;
+
+            return false;
+        }
+    private:
+        const WorldObject* m_pObject;
+        uint32 m_uiEntry;
+        float m_fRange;
+    };
+
+    class AllCreaturesOfEntryInRange
+    {
+        public:
+            AllCreaturesOfEntryInRange(const WorldObject* pObject, uint32 uiEntry, float fMaxRange) : m_pObject(pObject), m_uiEntry(uiEntry), m_fRange(fMaxRange) {}
+            bool operator() (Unit* pUnit)
+            {
+                if (pUnit->GetEntry() == m_uiEntry && m_pObject->IsWithinDist(pUnit,m_fRange,false))
+                    return true;
+
+                return false;
+            }
+
+        private:
+            const WorldObject* m_pObject;
+            uint32 m_uiEntry;
+            float m_fRange;
+    };
+
+    class PlayerAtMinimumRangeAway
+    {
+    public:
+        PlayerAtMinimumRangeAway(Unit const* unit, float fMinRange) : pUnit(unit), fRange(fMinRange) {}
+        bool operator() (Player* pPlayer)
+        {
+            //No threat list check, must be done explicit if expected to be in combat with creature
+            if (!pPlayer->isGameMaster() && pPlayer->isAlive() && !pUnit->IsWithinDist(pPlayer,fRange,false))
+                return true;
+
+            return false;
+        }
+
+    private:
+        Unit const* pUnit;
+        float fRange;
+    };
+
+    class GameObjectInRangeCheck
+    {
+    public:
+        GameObjectInRangeCheck(float _x, float _y, float _z, float _range) : x(_x), y(_y), z(_z), range(_range) {}
+        bool operator() (GameObject* go)
+        {
+            return go->IsInRange(x, y, z, range);
+        }
+    private:
+        float x, y, z, range;
+    };
+
     // Player checks and do
 
     // Prepare using Builder localized packets with caching and send to player
@@ -1125,12 +1244,13 @@ namespace MaNGOS
     };
 
     #ifndef WIN32
-    template<> void PlayerRelocationNotifier::Visit<Creature>(CreatureMapType &);
-    template<> void PlayerRelocationNotifier::Visit<Player>(PlayerMapType &);
-    template<> void CreatureRelocationNotifier::Visit<Player>(PlayerMapType &);
-    template<> void CreatureRelocationNotifier::Visit<Creature>(CreatureMapType &);
+    template<> inline void PlayerRelocationNotifier::Visit<Creature>(CreatureMapType &);
+    template<> inline void PlayerRelocationNotifier::Visit<Player>(PlayerMapType &);
+    template<> inline void CreatureRelocationNotifier::Visit<Player>(PlayerMapType &);
+    template<> inline void CreatureRelocationNotifier::Visit<Creature>(CreatureMapType &);
     template<> inline void DynamicObjectUpdater::Visit<Creature>(CreatureMapType &);
     template<> inline void DynamicObjectUpdater::Visit<Player>(PlayerMapType &);
     #endif
 }
 #endif
+

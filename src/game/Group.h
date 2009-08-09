@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,16 +10,16 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOSSERVER_GROUP_H
-#define MANGOSSERVER_GROUP_H
+#ifndef RIBONCORE_GROUP_H
+#define RIBONCORE_GROUP_H
 
 #include "GroupReference.h"
 #include "GroupRefManager.h"
@@ -85,8 +87,7 @@ enum GroupUpdateFlags
     GROUP_UPDATE_FLAG_PET_AURAS         = 0x00040000,       // uint64 mask, for each bit set uint32 spellid + uint8 unk, pet auras...
     GROUP_UPDATE_FLAG_VEHICLE_SEAT      = 0x00080000,       // uint32 vehicle_seat_id (index from VehicleSeat.dbc)
     GROUP_UPDATE_PET                    = 0x0007FC00,       // all pet flags
-    GROUP_UPDATE_VEHICLE                = 0x000FFC00,       // all vehicle flags
-    GROUP_UPDATE_FULL                   = 0x000FFFFF,       // all known flags
+    GROUP_UPDATE_FULL                   = 0x0007FFFF,       // all known flags
 };
 
 #define GROUP_UPDATE_FLAGS_COUNT          20
@@ -130,7 +131,7 @@ struct InstanceGroupBind
 
 /** request member stats checken **/
 /** todo: uninvite people that not accepted invite **/
-class MANGOS_DLL_SPEC Group
+class RIBON_DLL_SPEC Group
 {
     public:
         struct MemberSlot
@@ -412,3 +413,4 @@ class MANGOS_DLL_SPEC Group
         uint8*              m_subGroupsCounts;
 };
 #endif
+

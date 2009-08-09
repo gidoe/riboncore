@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -296,16 +298,6 @@ bool Group::AddMember(const uint64 &guid, const char* name)
                 player->SetDifficulty(m_difficulty);
                 player->SendDungeonDifficulty(true);
             }
-            // Group Interfactions interactions (test)
-            if(sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP))
-            {
-                Group *group = player->GetGroup();
-                if(Player *leader = objmgr.GetPlayer(group->GetLeaderGUID()))
-                {
-                    player->setFactionForRace(leader->getRace());
-                    sLog.outDebug( "WORLD: Group Interfaction Interactions - Faction changed (AddMember)" );
-                }
-            }         
         }
         player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
         UpdatePlayerOutOfRange(player);
@@ -352,14 +344,6 @@ uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
                 data << uint64(0) << uint64(0) << uint64(0);
                 player->GetSession()->SendPacket(&data);
             }
-
-            // Restore original faction if needed
-            if(sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP))
-            {
-                player->setFactionForRace(player->getRace());
-                sLog.outDebug( "WORLD: Group Interfaction Interactions - Restore original faction (RemoveMember)" );
-            }
-
 
             _homebindIfInstance(player);
         }
@@ -416,13 +400,6 @@ void Group::Disband(bool hideDestroy)
                 player->SetOriginalGroup(NULL);
             else
                 player->SetGroup(NULL);
-            // Restore original faction if needed
-            if(sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP))
-            {
-                player->setFactionForRace(player->getRace());
-                sLog.outDebug( "WORLD: Group Interfaction Interactions - Restore original faction (Disband)" );
-            }
-
         }
 
         // quest related GO state dependent from raid membership
@@ -755,7 +732,7 @@ void Group::CountRollVote(const uint64& playerGUID, const uint64& Guid, uint32 N
     }
 }
 
-// called when roll timer expires
+//called when roll timer expires
 void Group::EndRoll()
 {
     Rolls::iterator itr;
@@ -1220,7 +1197,7 @@ void Group::_setLeader(const uint64 &guid)
 
 void Group::_removeRolls(const uint64 &guid)
 {
-    for (Rolls::iterator it = RollId.begin(); it < RollId.end(); ++it)
+    for (Rolls::iterator it = RollId.begin(); it != RollId.end(); ++it)
     {
         Roll* roll = *it;
         Roll::PlayerVote::iterator itr2 = roll->playerVote.find(guid);
@@ -1492,8 +1469,10 @@ bool Group::InCombatToInstance(uint32 instanceId)
     for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player *pPlayer = itr->getSource();
-        if(pPlayer->getAttackers().size() && pPlayer->GetInstanceId() == instanceId)
-            return true;
+        if(pPlayer && pPlayer->getAttackers().size() && pPlayer->GetInstanceId() == instanceId && (pPlayer->GetMap()->IsRaid() || pPlayer->GetMap()->IsHeroic()))
+            for(std::set<Unit*>::const_iterator i = pPlayer->getAttackers().begin(); i!=pPlayer->getAttackers().end(); ++i)
+                if((*i) && (*i)->GetTypeId() == TYPEID_UNIT && ((Creature*)(*i))->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
+                    return true;
     }
     return false;
 }
@@ -1532,7 +1511,12 @@ void Group::ResetInstances(uint8 method, Player* SendMsgTo)
         // if the map is loaded, reset it
         Map *map = MapManager::Instance().FindMap(p->GetMapId(), p->GetInstanceId());
         if(map && map->IsDungeon() && !(method == INSTANCE_RESET_GROUP_DISBAND && !p->CanReset()))
-            isEmpty = ((InstanceMap*)map)->Reset(method);
+        {
+            if(p->CanReset())
+                isEmpty = ((InstanceMap*)map)->Reset(method);
+            else
+                isEmpty = !map->HavePlayers();
+        }
 
         if(SendMsgTo)
         {
@@ -1629,12 +1613,14 @@ void Group::BroadcastGroupUpdate(void)
     // -- not very efficient but safe
     for(member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
+
         Player *pp = objmgr.GetPlayer(citr->guid);
         if(pp && pp->IsInWorld())
         {
-           pp->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
-           pp->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
-           DEBUG_LOG("-- Forced group value update for '%s'", pp->GetName());
+            pp->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
+            pp->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
+            DEBUG_LOG("-- Forced group value update for '%s'", pp->GetName());
         }
     }
 }
+

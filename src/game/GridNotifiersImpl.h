@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,16 +10,16 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOS_GRIDNOTIFIERSIMPL_H
-#define MANGOS_GRIDNOTIFIERSIMPL_H
+#ifndef RIBON_GRIDNOTIFIERSIMPL_H
+#define RIBON_GRIDNOTIFIERSIMPL_H
 
 #include "GridNotifiers.h"
 #include "WorldPacket.h"
@@ -27,154 +29,130 @@
 #include "CreatureAI.h"
 #include "SpellAuras.h"
 
-template<class T>
 inline void
-MaNGOS::VisibleNotifier::Visit(GridRefManager<T> &m)
-{
-    for(typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
-    {
-        vis_guids.erase(iter->getSource()->GetGUID());
-
-        if(force || iter->getSource()->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
-            i_player.UpdateVisibilityOf(iter->getSource(),i_data,i_visibleNow);
-    }
-}
-
-inline void
-MaNGOS::ObjectUpdater::Visit(CreatureMapType &m)
+Ribon::ObjectUpdater::Visit(CreatureMapType &m)
 {
     for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-        if(!iter->getSource()->isSpiritService())
+        if(iter->getSource()->IsInWorld() && !iter->getSource()->isSpiritService())
             iter->getSource()->Update(i_timeDiff);
-}
-
-inline void
-MaNGOS::PlayerRelocationNotifier::Visit(PlayerMapType &m)
-{
-    // Cancel Trade
-    if(i_player.GetTrader())
-        if(!i_player.IsWithinDistInMap(i_player.GetTrader(), 5))
-            i_player.GetSession()->SendCancelTrade();   // will clode both side trade windows
 }
 
 inline void PlayerCreatureRelocationWorker(Player* pl, Creature* c)
 {
+    if(!pl->isAlive() || !c->isAlive() || pl->isInFlight())
+        return;
+
     // Creature AI reaction
-    if(!c->hasUnitState(UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING))
+    if(c->HasReactState(REACT_AGGRESSIVE) && !c->hasUnitState(UNIT_STAT_SIGHTLESS))
     {
-        if( c->AI() && c->AI()->IsVisible(pl) && !c->IsInEvadeMode() )
+        if( c->IsAIEnabled && c->IsWithinSightDist(pl) && !c->IsInEvadeMode() )
             c->AI()->MoveInLineOfSight(pl);
     }
 }
 
 inline void CreatureCreatureRelocationWorker(Creature* c1, Creature* c2)
 {
-    if(!c1->hasUnitState(UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING))
+    if(c1->HasReactState(REACT_AGGRESSIVE) && !c1->hasUnitState(UNIT_STAT_SIGHTLESS))
     {
-        if( c1->AI() && c1->AI()->IsVisible(c2) && !c1->IsInEvadeMode() )
+        if( c1->IsAIEnabled && c1->IsWithinSightDist(c2) && !c1->IsInEvadeMode() )
             c1->AI()->MoveInLineOfSight(c2);
     }
 
-    if(!c2->hasUnitState(UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING))
+    if(c2->HasReactState(REACT_AGGRESSIVE) && !c2->hasUnitState(UNIT_STAT_SIGHTLESS))
     {
-        if( c2->AI() && c2->AI()->IsVisible(c1) && !c2->IsInEvadeMode() )
+        if( c2->IsAIEnabled && c1->IsWithinSightDist(c2) && !c2->IsInEvadeMode() )
             c2->AI()->MoveInLineOfSight(c1);
-    }
-}
-
-inline void
-MaNGOS::PlayerRelocationNotifier::Visit(CreatureMapType &m)
-{
-    if(!i_player.isAlive() || i_player.isInFlight())
-        return;
-
-    for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        Creature * c = iter->getSource();
-        if(c->isAlive() && !c->isNotified(NOTIFY_AI_RELOCATION))
-            PlayerCreatureRelocationWorker(&i_player, c);
-    }
-}
-
-template<>
-inline void
-MaNGOS::CreatureRelocationNotifier::Visit(PlayerMapType &m)
-{
-    if(!i_creature.isAlive())
-        return;
-
-    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        Player * pl = iter->getSource();
-        if( pl->isAlive() && !pl->isInFlight() && !pl->isNotified(NOTIFY_AI_RELOCATION))
-            PlayerCreatureRelocationWorker(pl, &i_creature);
-    }
-}
-
-template<>
-inline void
-MaNGOS::CreatureRelocationNotifier::Visit(CreatureMapType &m)
-{
-    if(!i_creature.isAlive())
-        return;
-
-    for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        Creature* c = iter->getSource();
-        if( c != &i_creature && c->isAlive() && !c->isNotified(NOTIFY_AI_RELOCATION))
-            CreatureCreatureRelocationWorker(c, &i_creature);
-    }
-}
-
-inline void
-MaNGOS::DelayedUnitRelocation::Visit(CreatureMapType &m)
-{
-    for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        Creature * i_creature = iter->getSource();
-        if(!i_creature->isAlive() || !i_creature->isNeedNotify(NOTIFY_AI_RELOCATION))
-            continue;
-
-        CreatureRelocationNotifier relocate(*i_creature);
-        TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, WorldTypeMapContainer > c2world_relocation(relocate);
-        TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, GridTypeMapContainer >  c2grid_relocation(relocate);
-
-        i_lock->Visit(i_lock, c2world_relocation, i_map, *i_creature, i_radius);
-        i_lock->Visit(i_lock, c2grid_relocation, i_map, *i_creature, i_radius);
-
-        i_creature->SetNotified(NOTIFY_AI_RELOCATION);
-    }
-}
-
-inline void
-MaNGOS::DelayedUnitRelocation::Visit(PlayerMapType &m)
-{
-    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        Player * i_player = iter->getSource();
-        if(!i_player->isAlive() || !i_player->isNeedNotify(NOTIFY_AI_RELOCATION))
-            continue;
-
-        PlayerRelocationNotifier relocate(*i_player);
-        TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, WorldTypeMapContainer > c2world_relocation(relocate);
-        TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, GridTypeMapContainer >  c2grid_relocation(relocate);
-
-        i_lock->Visit(i_lock, c2world_relocation, i_map, *i_player, i_radius);
-        i_lock->Visit(i_lock, c2grid_relocation, i_map, *i_player, i_radius);
-
-        i_player->SetNotified(NOTIFY_AI_RELOCATION);
     }
 }
 
 template<class T>
 inline void
-MaNGOS::ResetNotifier::resetNotify(GridRefManager<T> &m)
+Ribon::PlayerVisibilityNotifier::Visit(GridRefManager<T> &m)
 {
-    for(typename GridRefManager<T>::iterator iter=m.begin(); iter != m.end(); ++iter)
-        iter->getSource()->ResetAllNotifiesbyMask(reset_mask);
+    for(typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
+    {
+        i_player.UpdateVisibilityOf(iter->getSource(),i_data,i_visibleNow);
+        i_clientGUIDs.erase(iter->getSource()->GetGUID());
+    }
 }
 
-inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
+template<>
+inline void
+Ribon::PlayerRelocationNotifier::Visit(PlayerMapType &m)
+{
+    for(PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    {
+        i_clientGUIDs.erase(iter->getSource()->GetGUID());
+
+        if(iter->getSource()->m_Notified) //self is also skipped in this check
+            continue;
+
+        i_player.UpdateVisibilityOf(iter->getSource(),i_data,i_visibleNow);
+        iter->getSource()->UpdateVisibilityOf(&i_player);
+
+        //if (!i_player.GetSharedVisionList().empty())
+        //    for (SharedVisionList::const_iterator it = i_player.GetSharedVisionList().begin(); it != i_player.GetSharedVisionList().end(); ++it)
+        //        (*it)->UpdateVisibilityOf(iter->getSource());
+
+        // Cancel Trade
+        if(i_player.GetTrader()==iter->getSource())
+            if(!i_player.IsWithinDistInMap(iter->getSource(), 5)) // iteraction distance
+                i_player.GetSession()->SendCancelTrade();   // will clode both side trade windows
+    }
+}
+
+template<>
+inline void
+Ribon::PlayerRelocationNotifier::Visit(CreatureMapType &m)
+{
+    for(CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    {
+        i_clientGUIDs.erase(iter->getSource()->GetGUID());
+
+        if(iter->getSource()->m_Notified)
+            continue;
+
+        i_player.UpdateVisibilityOf(iter->getSource(),i_data,i_visibleNow);
+
+        PlayerCreatureRelocationWorker(&i_player, iter->getSource());
+    }
+}
+
+template<>
+inline void
+Ribon::CreatureRelocationNotifier::Visit(PlayerMapType &m)
+{
+    for(PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    {
+        if(iter->getSource()->m_Notified)
+            continue;
+
+        iter->getSource()->UpdateVisibilityOf(&i_creature);
+
+        PlayerCreatureRelocationWorker(iter->getSource(), &i_creature);
+    }
+}
+
+template<>
+inline void
+Ribon::CreatureRelocationNotifier::Visit(CreatureMapType &m)
+{
+    if(!i_creature.isAlive())
+        return;
+
+    for(CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    {
+        if(iter->getSource()->m_Notified)
+            continue;
+
+        if(!iter->getSource()->isAlive())
+            continue;
+
+        CreatureCreatureRelocationWorker(iter->getSource(), &i_creature);
+    }
+}
+
+inline void Ribon::DynamicObjectUpdater::VisitHelper(Unit* target)
 {
     if(!target->isAlive() || target->isInFlight() )
         return;
@@ -197,49 +175,57 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if( target->GetTypeId()==TYPEID_PLAYER && target != i_check && (((Player*)target)->isGameMaster() || ((Player*)target)->GetVisibility()==VISIBILITY_OFF) )
         return;
 
-    if (i_check->GetTypeId()==TYPEID_PLAYER )
+    if (i_dynobject.IsAffecting(target))
+        return;
+
+    uint32 eff_index  = i_dynobject.GetEffIndex();
+    if(target->HasAuraEffect(i_dynobject.GetSpellId(), eff_index, i_check->GetGUID()))
+        return;
+
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(i_dynobject.GetSpellId());
+    if(spellInfo->EffectImplicitTargetB[eff_index] == TARGET_DEST_DYNOBJ_ALLY
+        || spellInfo->EffectImplicitTargetB[eff_index] == TARGET_UNIT_AREA_ALLY_DST)
+    {
+        if(!i_check->IsFriendlyTo(target))
+            return;
+    }
+    else if( i_check->GetTypeId()==TYPEID_PLAYER )
     {
         if (i_check->IsFriendlyTo( target ))
             return;
+
+        i_check->CombatStart(target);
     }
     else
     {
         if (!i_check->IsHostileTo( target ))
             return;
+
+        i_check->CombatStart(target);
     }
 
-    if (i_dynobject.IsAffecting(target))
-        return;
-
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(i_dynobject.GetSpellId());
-    uint32 eff_index  = i_dynobject.GetEffIndex();
     // Check target immune to spell or aura
     if (target->IsImmunedToSpell(spellInfo) || target->IsImmunedToSpellEffect(spellInfo, eff_index))
         return;
     // Apply PersistentAreaAura on target
-    PersistentAreaAura* Aur = new PersistentAreaAura(spellInfo, eff_index, NULL, target, i_dynobject.GetCaster());
-    target->AddAura(Aur);
+    if(Aura *aur = target->AddAuraEffect(spellInfo, eff_index, i_dynobject.GetCaster()))
+        aur->SetAuraDuration(i_dynobject.GetDuration());
+
     i_dynobject.AddAffected(target);
 }
 
 template<>
 inline void
-MaNGOS::DynamicObjectUpdater::Visit(CreatureMapType  &m)
+Ribon::DynamicObjectUpdater::Visit(CreatureMapType  &m)
 {
-    if(i_dynobject.GetRadius() == 0.0f)
-        return;
-
     for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         VisitHelper(itr->getSource());
 }
 
 template<>
 inline void
-MaNGOS::DynamicObjectUpdater::Visit(PlayerMapType  &m)
+Ribon::DynamicObjectUpdater::Visit(PlayerMapType  &m)
 {
-    if(i_dynobject.GetRadius() == 0.0f)
-        return;
-
     for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         VisitHelper(itr->getSource());
 }
@@ -249,7 +235,7 @@ MaNGOS::DynamicObjectUpdater::Visit(PlayerMapType  &m)
 // WorldObject searchers & workers
 
 template<class Check>
-void MaNGOS::WorldObjectSearcher<Check>::Visit(GameObjectMapType &m)
+void Ribon::WorldObjectSearcher<Check>::Visit(GameObjectMapType &m)
 {
     // already found
     if(i_object)
@@ -269,7 +255,7 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(GameObjectMapType &m)
 }
 
 template<class Check>
-void MaNGOS::WorldObjectSearcher<Check>::Visit(PlayerMapType &m)
+void Ribon::WorldObjectSearcher<Check>::Visit(PlayerMapType &m)
 {
     // already found
     if(i_object)
@@ -289,7 +275,7 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(PlayerMapType &m)
 }
 
 template<class Check>
-void MaNGOS::WorldObjectSearcher<Check>::Visit(CreatureMapType &m)
+void Ribon::WorldObjectSearcher<Check>::Visit(CreatureMapType &m)
 {
     // already found
     if(i_object)
@@ -309,7 +295,7 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
-void MaNGOS::WorldObjectSearcher<Check>::Visit(CorpseMapType &m)
+void Ribon::WorldObjectSearcher<Check>::Visit(CorpseMapType &m)
 {
     // already found
     if(i_object)
@@ -329,7 +315,7 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(CorpseMapType &m)
 }
 
 template<class Check>
-void MaNGOS::WorldObjectSearcher<Check>::Visit(DynamicObjectMapType &m)
+void Ribon::WorldObjectSearcher<Check>::Visit(DynamicObjectMapType &m)
 {
     // already found
     if(i_object)
@@ -349,7 +335,7 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(DynamicObjectMapType &m)
 }
 
 template<class Check>
-void MaNGOS::WorldObjectListSearcher<Check>::Visit(PlayerMapType &m)
+void Ribon::WorldObjectListSearcher<Check>::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(itr->getSource()->InSamePhase(i_phaseMask))
@@ -358,7 +344,7 @@ void MaNGOS::WorldObjectListSearcher<Check>::Visit(PlayerMapType &m)
 }
 
 template<class Check>
-void MaNGOS::WorldObjectListSearcher<Check>::Visit(CreatureMapType &m)
+void Ribon::WorldObjectListSearcher<Check>::Visit(CreatureMapType &m)
 {
     for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(itr->getSource()->InSamePhase(i_phaseMask))
@@ -367,7 +353,7 @@ void MaNGOS::WorldObjectListSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
-void MaNGOS::WorldObjectListSearcher<Check>::Visit(CorpseMapType &m)
+void Ribon::WorldObjectListSearcher<Check>::Visit(CorpseMapType &m)
 {
     for(CorpseMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(itr->getSource()->InSamePhase(i_phaseMask))
@@ -376,7 +362,7 @@ void MaNGOS::WorldObjectListSearcher<Check>::Visit(CorpseMapType &m)
 }
 
 template<class Check>
-void MaNGOS::WorldObjectListSearcher<Check>::Visit(GameObjectMapType &m)
+void Ribon::WorldObjectListSearcher<Check>::Visit(GameObjectMapType &m)
 {
     for(GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(itr->getSource()->InSamePhase(i_phaseMask))
@@ -385,7 +371,7 @@ void MaNGOS::WorldObjectListSearcher<Check>::Visit(GameObjectMapType &m)
 }
 
 template<class Check>
-void MaNGOS::WorldObjectListSearcher<Check>::Visit(DynamicObjectMapType &m)
+void Ribon::WorldObjectListSearcher<Check>::Visit(DynamicObjectMapType &m)
 {
     for(DynamicObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(itr->getSource()->InSamePhase(i_phaseMask))
@@ -396,7 +382,7 @@ void MaNGOS::WorldObjectListSearcher<Check>::Visit(DynamicObjectMapType &m)
 // Gameobject searchers
 
 template<class Check>
-void MaNGOS::GameObjectSearcher<Check>::Visit(GameObjectMapType &m)
+void Ribon::GameObjectSearcher<Check>::Visit(GameObjectMapType &m)
 {
     // already found
     if(i_object)
@@ -416,7 +402,7 @@ void MaNGOS::GameObjectSearcher<Check>::Visit(GameObjectMapType &m)
 }
 
 template<class Check>
-void MaNGOS::GameObjectLastSearcher<Check>::Visit(GameObjectMapType &m)
+void Ribon::GameObjectLastSearcher<Check>::Visit(GameObjectMapType &m)
 {
     for(GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -429,7 +415,7 @@ void MaNGOS::GameObjectLastSearcher<Check>::Visit(GameObjectMapType &m)
 }
 
 template<class Check>
-void MaNGOS::GameObjectListSearcher<Check>::Visit(GameObjectMapType &m)
+void Ribon::GameObjectListSearcher<Check>::Visit(GameObjectMapType &m)
 {
     for(GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(itr->getSource()->InSamePhase(i_phaseMask))
@@ -440,7 +426,7 @@ void MaNGOS::GameObjectListSearcher<Check>::Visit(GameObjectMapType &m)
 // Unit searchers
 
 template<class Check>
-void MaNGOS::UnitSearcher<Check>::Visit(CreatureMapType &m)
+void Ribon::UnitSearcher<Check>::Visit(CreatureMapType &m)
 {
     // already found
     if(i_object)
@@ -460,7 +446,7 @@ void MaNGOS::UnitSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
-void MaNGOS::UnitSearcher<Check>::Visit(PlayerMapType &m)
+void Ribon::UnitSearcher<Check>::Visit(PlayerMapType &m)
 {
     // already found
     if(i_object)
@@ -480,7 +466,7 @@ void MaNGOS::UnitSearcher<Check>::Visit(PlayerMapType &m)
 }
 
 template<class Check>
-void MaNGOS::UnitLastSearcher<Check>::Visit(CreatureMapType &m)
+void Ribon::UnitLastSearcher<Check>::Visit(CreatureMapType &m)
 {
     for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -493,7 +479,7 @@ void MaNGOS::UnitLastSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
-void MaNGOS::UnitLastSearcher<Check>::Visit(PlayerMapType &m)
+void Ribon::UnitLastSearcher<Check>::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -506,7 +492,7 @@ void MaNGOS::UnitLastSearcher<Check>::Visit(PlayerMapType &m)
 }
 
 template<class Check>
-void MaNGOS::UnitListSearcher<Check>::Visit(PlayerMapType &m)
+void Ribon::UnitListSearcher<Check>::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(itr->getSource()->InSamePhase(i_phaseMask))
@@ -515,7 +501,7 @@ void MaNGOS::UnitListSearcher<Check>::Visit(PlayerMapType &m)
 }
 
 template<class Check>
-void MaNGOS::UnitListSearcher<Check>::Visit(CreatureMapType &m)
+void Ribon::UnitListSearcher<Check>::Visit(CreatureMapType &m)
 {
     for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(itr->getSource()->InSamePhase(i_phaseMask))
@@ -526,7 +512,7 @@ void MaNGOS::UnitListSearcher<Check>::Visit(CreatureMapType &m)
 // Creature searchers
 
 template<class Check>
-void MaNGOS::CreatureSearcher<Check>::Visit(CreatureMapType &m)
+void Ribon::CreatureSearcher<Check>::Visit(CreatureMapType &m)
 {
     // already found
     if(i_object)
@@ -546,7 +532,7 @@ void MaNGOS::CreatureSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
-void MaNGOS::CreatureLastSearcher<Check>::Visit(CreatureMapType &m)
+void Ribon::CreatureLastSearcher<Check>::Visit(CreatureMapType &m)
 {
     for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -559,7 +545,7 @@ void MaNGOS::CreatureLastSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
-void MaNGOS::CreatureListSearcher<Check>::Visit(CreatureMapType &m)
+void Ribon::CreatureListSearcher<Check>::Visit(CreatureMapType &m)
 {
     for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(itr->getSource()->InSamePhase(i_phaseMask))
@@ -568,7 +554,16 @@ void MaNGOS::CreatureListSearcher<Check>::Visit(CreatureMapType &m)
 }
 
 template<class Check>
-void MaNGOS::PlayerSearcher<Check>::Visit(PlayerMapType &m)
+void Ribon::PlayerListSearcher<Check>::Visit(PlayerMapType &m)
+{
+    for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
+        if(itr->getSource()->InSamePhase(i_phaseMask))
+            if( i_check(itr->getSource()))
+                i_objects.push_back(itr->getSource());
+}
+
+template<class Check>
+void Ribon::PlayerSearcher<Check>::Visit(PlayerMapType &m)
 {
     // already found
     if(i_object)
@@ -635,5 +630,29 @@ void MaNGOS::LocalizedPacketListDo<Builder>::operator()( Player* p )
     for(size_t i = 0; i < data_list->size(); ++i)
         p->SendDirectMessage((*data_list)[i]);
 }
+
+struct ObjectDistanceOrder : public std::binary_function<const WorldObject, const WorldObject, bool>
+{
+    const Unit* m_pSource;
+
+    ObjectDistanceOrder(const Unit* pSource) : m_pSource(pSource) {};
+
+    bool operator()(const WorldObject* pLeft, const WorldObject* pRight) const
+    {
+        return m_pSource->GetDistanceOrder(pLeft, pRight);
+    }
+};
+
+struct ObjectDistanceOrderReversed : public std::binary_function<const WorldObject, const WorldObject, bool>
+{
+    const Unit* m_pSource;
+
+    ObjectDistanceOrderReversed(const Unit* pSource) : m_pSource(pSource) {};
+
+    bool operator()(const WorldObject* pLeft, const WorldObject* pRight) const
+    {
+        return !m_pSource->GetDistanceOrder(pLeft, pRight);
+    }
+};
 
 #endif                                                      // MANGOS_GRIDNOTIFIERSIMPL_H
