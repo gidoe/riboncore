@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "OutdoorPvPHP.h"
@@ -25,10 +25,6 @@
 #include "ObjectMgr.h"
 #include "Language.h"
 
-OutdoorPvPHP::OutdoorPvPHP()
-{
-}
-
 const uint32 HP_LANG_LOOSE_A[HP_TOWER_NUM] = {LANG_OPVP_HP_LOOSE_BROKENHILL_A,LANG_OPVP_HP_LOOSE_OVERLOOK_A,LANG_OPVP_HP_LOOSE_STADIUM_A};
 
 const uint32 HP_LANG_LOOSE_H[HP_TOWER_NUM] = {LANG_OPVP_HP_LOOSE_BROKENHILL_H,LANG_OPVP_HP_LOOSE_OVERLOOK_H,LANG_OPVP_HP_LOOSE_STADIUM_H};
@@ -37,30 +33,35 @@ const uint32 HP_LANG_CAPTURE_A[HP_TOWER_NUM] = {LANG_OPVP_HP_CAPTURE_BROKENHILL_
 
 const uint32 HP_LANG_CAPTURE_H[HP_TOWER_NUM] = {LANG_OPVP_HP_CAPTURE_BROKENHILL_H,LANG_OPVP_HP_CAPTURE_OVERLOOK_H,LANG_OPVP_HP_CAPTURE_STADIUM_H};
 
-OutdoorPvPObjectiveHP::OutdoorPvPObjectiveHP(OutdoorPvP *pvp,OutdoorPvPHPTowerType type)
-: OutdoorPvPObjective(pvp), m_TowerType(type)
+OPvPCapturePointHP::OPvPCapturePointHP(OutdoorPvP *pvp,OutdoorPvPHPTowerType type)
+: OPvPCapturePoint(pvp), m_TowerType(type)
 {
     AddCapturePoint(HPCapturePoints[type].entry,
-            HPCapturePoints[type].map,
-            HPCapturePoints[type].x,
-            HPCapturePoints[type].y,
-            HPCapturePoints[type].z,
-            HPCapturePoints[type].o,
-            HPCapturePoints[type].rot0,
-            HPCapturePoints[type].rot1,
-            HPCapturePoints[type].rot2,
-            HPCapturePoints[type].rot3);
+        HPCapturePoints[type].map,
+        HPCapturePoints[type].x,
+        HPCapturePoints[type].y,
+        HPCapturePoints[type].z,
+        HPCapturePoints[type].o,
+        HPCapturePoints[type].rot0,
+        HPCapturePoints[type].rot1,
+        HPCapturePoints[type].rot2,
+        HPCapturePoints[type].rot3);
     AddObject(type,
-            HPTowerFlags[type].entry,
-            HPTowerFlags[type].map,
-            HPTowerFlags[type].x,
-            HPTowerFlags[type].y,
-            HPTowerFlags[type].z,
-            HPTowerFlags[type].o,
-            HPTowerFlags[type].rot0,
-            HPTowerFlags[type].rot1,
-            HPTowerFlags[type].rot2,
-            HPTowerFlags[type].rot3);
+        HPTowerFlags[type].entry,
+        HPTowerFlags[type].map,
+        HPTowerFlags[type].x,
+        HPTowerFlags[type].y,
+        HPTowerFlags[type].z,
+        HPTowerFlags[type].o,
+        HPTowerFlags[type].rot0,
+        HPTowerFlags[type].rot1,
+        HPTowerFlags[type].rot2,
+        HPTowerFlags[type].rot3);
+}
+
+OutdoorPvPHP::OutdoorPvPHP()
+{
+    m_TypeId = OUTDOOR_PVP_HP;
 }
 
 bool OutdoorPvPHP::SetupOutdoorPvP()
@@ -69,13 +70,13 @@ bool OutdoorPvPHP::SetupOutdoorPvP()
     m_HordeTowersControlled = 0;
     // add the zones affected by the pvp buff
     for(int i = 0; i < OutdoorPvPHPBuffZonesNum; ++i)
-        sOutdoorPvPMgr.AddZone(OutdoorPvPHPBuffZones[i],this);
+        RegisterZone(OutdoorPvPHPBuffZones[i]);
 
-    m_OutdoorPvPObjectives.insert(new OutdoorPvPObjectiveHP(this,HP_TOWER_BROKEN_HILL));
+    m_capturePoints.push_back(new OPvPCapturePointHP(this,HP_TOWER_BROKEN_HILL));
 
-    m_OutdoorPvPObjectives.insert(new OutdoorPvPObjectiveHP(this,HP_TOWER_OVERLOOK));
+    m_capturePoints.push_back(new OPvPCapturePointHP(this,HP_TOWER_OVERLOOK));
 
-    m_OutdoorPvPObjectives.insert(new OutdoorPvPObjectiveHP(this,HP_TOWER_STADIUM));
+    m_capturePoints.push_back(new OPvPCapturePointHP(this,HP_TOWER_STADIUM));
 
     return true;
 }
@@ -116,11 +117,14 @@ bool OutdoorPvPHP::Update(uint32 diff)
     if(changed = OutdoorPvP::Update(diff))
     {
         if(m_AllianceTowersControlled == 3)
-            BuffTeam(ALLIANCE);
+            TeamApplyBuff(TEAM_ALLIANCE, AllianceBuff, HordeBuff);
         else if(m_HordeTowersControlled == 3)
-            BuffTeam(HORDE);
+            TeamApplyBuff(TEAM_HORDE, HordeBuff, AllianceBuff);
         else
-            BuffTeam(NULL);
+        {
+            TeamCastSpell(TEAM_ALLIANCE, -AllianceBuff);
+            TeamCastSpell(TEAM_HORDE, -HordeBuff);
+        }
         SendUpdateWorldState(HP_UI_TOWER_COUNT_A, m_AllianceTowersControlled);
         SendUpdateWorldState(HP_UI_TOWER_COUNT_H, m_HordeTowersControlled);
     }
@@ -153,49 +157,49 @@ void OutdoorPvPHP::FillInitialWorldStates(WorldPacket &data)
     data << uint32(HP_UI_TOWER_SLIDER_DISPLAY) << uint32(0);
     data << uint32(HP_UI_TOWER_SLIDER_POS) << uint32(50);
     data << uint32(HP_UI_TOWER_SLIDER_N) << uint32(100);
-    for(OutdoorPvPObjectiveSet::iterator itr = m_OutdoorPvPObjectives.begin(); itr != m_OutdoorPvPObjectives.end(); ++itr)
+    for(OPvPCapturePointMap::iterator itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)
     {
         (*itr)->FillInitialWorldStates(data);
     }
 }
 
-bool OutdoorPvPObjectiveHP::Update(uint32 diff)
+bool OPvPCapturePointHP::Update(uint32 diff)
 {
     // if status changed:
-    if(OutdoorPvPObjective::Update(diff))
+    if(OPvPCapturePoint::Update(diff))
     {
         if(m_OldState != m_State)
         {
             uint32 field = 0;
             switch(m_OldState)
             {
-                case OBJECTIVESTATE_NEUTRAL:
-                    field = HP_MAP_N[m_TowerType];
-                    break;
-                case OBJECTIVESTATE_ALLIANCE:
-                    field = HP_MAP_A[m_TowerType];
-                    if(((OutdoorPvPHP*)m_PvP)->m_AllianceTowersControlled)
-                        ((OutdoorPvPHP*)m_PvP)->m_AllianceTowersControlled--;
-                    sWorld.SendZoneText(OutdoorPvPHPBuffZones[0],objmgr.GetMangosString(HP_LANG_LOOSE_A[m_TowerType],-1));
-                    break;
-                case OBJECTIVESTATE_HORDE:
-                    field = HP_MAP_H[m_TowerType];
-                    if(((OutdoorPvPHP*)m_PvP)->m_HordeTowersControlled)
-                        ((OutdoorPvPHP*)m_PvP)->m_HordeTowersControlled--;
-                    sWorld.SendZoneText(OutdoorPvPHPBuffZones[0],objmgr.GetMangosString(HP_LANG_LOOSE_H[m_TowerType],-1));
-                    break;
-                case OBJECTIVESTATE_NEUTRAL_ALLIANCE_CHALLENGE:
-                    field = HP_MAP_N[m_TowerType];
-                    break;
-                case OBJECTIVESTATE_NEUTRAL_HORDE_CHALLENGE:
-                    field = HP_MAP_N[m_TowerType];
-                    break;
-                case OBJECTIVESTATE_ALLIANCE_HORDE_CHALLENGE:
-                    field = HP_MAP_A[m_TowerType];
-                    break;
-                case OBJECTIVESTATE_HORDE_ALLIANCE_CHALLENGE:
-                    field = HP_MAP_H[m_TowerType];
-                    break;
+            case OBJECTIVESTATE_NEUTRAL:
+                field = HP_MAP_N[m_TowerType];
+                break;
+            case OBJECTIVESTATE_ALLIANCE:
+                field = HP_MAP_A[m_TowerType];
+                if(((OutdoorPvPHP*)m_PvP)->m_AllianceTowersControlled)
+                    ((OutdoorPvPHP*)m_PvP)->m_AllianceTowersControlled--;
+                sWorld.SendZoneText(OutdoorPvPHPBuffZones[0],objmgr.GetRibonStringForDBCLocale(HP_LANG_LOOSE_A[m_TowerType]));
+                break;
+            case OBJECTIVESTATE_HORDE:
+                field = HP_MAP_H[m_TowerType];
+                if(((OutdoorPvPHP*)m_PvP)->m_HordeTowersControlled)
+                    ((OutdoorPvPHP*)m_PvP)->m_HordeTowersControlled--;
+                sWorld.SendZoneText(OutdoorPvPHPBuffZones[0],objmgr.GetRibonStringForDBCLocale(HP_LANG_LOOSE_H[m_TowerType]));
+                break;
+            case OBJECTIVESTATE_NEUTRAL_ALLIANCE_CHALLENGE:
+                field = HP_MAP_N[m_TowerType];
+                break;
+            case OBJECTIVESTATE_NEUTRAL_HORDE_CHALLENGE:
+                field = HP_MAP_N[m_TowerType];
+                break;
+            case OBJECTIVESTATE_ALLIANCE_HORDE_CHALLENGE:
+                field = HP_MAP_A[m_TowerType];
+                break;
+            case OBJECTIVESTATE_HORDE_ALLIANCE_CHALLENGE:
+                field = HP_MAP_H[m_TowerType];
+                break;
             }
 
             // send world state update
@@ -204,48 +208,48 @@ bool OutdoorPvPObjectiveHP::Update(uint32 diff)
                 m_PvP->SendUpdateWorldState(field, 0);
                 field = 0;
             }
-            uint8 artkit = 21;
-            uint8 artkit2 = HP_TowerArtKit_N[m_TowerType];
+            uint32 artkit = 21;
+            uint32 artkit2 = HP_TowerArtKit_N[m_TowerType];
             switch(m_State)
             {
-                case OBJECTIVESTATE_NEUTRAL:
-                    field = HP_MAP_N[m_TowerType];
-                    break;
-                case OBJECTIVESTATE_ALLIANCE:
-                    field = HP_MAP_A[m_TowerType];
-                    artkit = 2;
-                    artkit2 = HP_TowerArtKit_A[m_TowerType];
-                    if(((OutdoorPvPHP*)m_PvP)->m_AllianceTowersControlled<3)
-                        ((OutdoorPvPHP*)m_PvP)->m_AllianceTowersControlled++;
-                    sWorld.SendZoneText(OutdoorPvPHPBuffZones[0],objmgr.GetMangosString(HP_LANG_CAPTURE_A[m_TowerType],-1));
-                    break;
-                case OBJECTIVESTATE_HORDE:
-                    field = HP_MAP_H[m_TowerType];
-                    artkit = 1;
-                    artkit2 = HP_TowerArtKit_H[m_TowerType];
-                    if(((OutdoorPvPHP*)m_PvP)->m_HordeTowersControlled<3)
-                        ((OutdoorPvPHP*)m_PvP)->m_HordeTowersControlled++;
-                    sWorld.SendZoneText(OutdoorPvPHPBuffZones[0],objmgr.GetMangosString(HP_LANG_CAPTURE_H[m_TowerType],-1));
-                    break;
-                case OBJECTIVESTATE_NEUTRAL_ALLIANCE_CHALLENGE:
-                    field = HP_MAP_N[m_TowerType];
-                    break;
-                case OBJECTIVESTATE_NEUTRAL_HORDE_CHALLENGE:
-                    field = HP_MAP_N[m_TowerType];
-                    break;
-                case OBJECTIVESTATE_ALLIANCE_HORDE_CHALLENGE:
-                    field = HP_MAP_A[m_TowerType];
-                    artkit = 2;
-                    artkit2 = HP_TowerArtKit_A[m_TowerType];
-                    break;
-                case OBJECTIVESTATE_HORDE_ALLIANCE_CHALLENGE:
-                    field = HP_MAP_H[m_TowerType];
-                    artkit = 1;
-                    artkit2 = HP_TowerArtKit_H[m_TowerType];
-                    break;
+            case OBJECTIVESTATE_NEUTRAL:
+                field = HP_MAP_N[m_TowerType];
+                break;
+            case OBJECTIVESTATE_ALLIANCE:
+                field = HP_MAP_A[m_TowerType];
+                artkit = 2;
+                artkit2 = HP_TowerArtKit_A[m_TowerType];
+                if(((OutdoorPvPHP*)m_PvP)->m_AllianceTowersControlled<3)
+                    ((OutdoorPvPHP*)m_PvP)->m_AllianceTowersControlled++;
+                sWorld.SendZoneText(OutdoorPvPHPBuffZones[0],objmgr.GetRibonStringForDBCLocale(HP_LANG_CAPTURE_A[m_TowerType]));
+                break;
+            case OBJECTIVESTATE_HORDE:
+                field = HP_MAP_H[m_TowerType];
+                artkit = 1;
+                artkit2 = HP_TowerArtKit_H[m_TowerType];
+                if(((OutdoorPvPHP*)m_PvP)->m_HordeTowersControlled<3)
+                    ((OutdoorPvPHP*)m_PvP)->m_HordeTowersControlled++;
+                sWorld.SendZoneText(OutdoorPvPHPBuffZones[0],objmgr.GetRibonStringForDBCLocale(HP_LANG_CAPTURE_H[m_TowerType]));
+                break;
+            case OBJECTIVESTATE_NEUTRAL_ALLIANCE_CHALLENGE:
+                field = HP_MAP_N[m_TowerType];
+                break;
+            case OBJECTIVESTATE_NEUTRAL_HORDE_CHALLENGE:
+                field = HP_MAP_N[m_TowerType];
+                break;
+            case OBJECTIVESTATE_ALLIANCE_HORDE_CHALLENGE:
+                field = HP_MAP_A[m_TowerType];
+                artkit = 2;
+                artkit2 = HP_TowerArtKit_A[m_TowerType];
+                break;
+            case OBJECTIVESTATE_HORDE_ALLIANCE_CHALLENGE:
+                field = HP_MAP_H[m_TowerType];
+                artkit = 1;
+                artkit2 = HP_TowerArtKit_H[m_TowerType];
+                break;
             }
 
-            GameObject* flag = HashMapHolder<GameObject>::Find(m_CapturePoint);
+            GameObject* flag = HashMapHolder<GameObject>::Find(m_CapturePointGUID);
             GameObject* flag2 = HashMapHolder<GameObject>::Find(m_Objects[m_TowerType]);
             if(flag)
             {
@@ -276,12 +280,12 @@ bool OutdoorPvPObjectiveHP::Update(uint32 diff)
             // send this too, sometimes the slider disappears, dunno why :(
             SendUpdateWorldState(HP_UI_TOWER_SLIDER_DISPLAY, 1);
         }
-        return true;
+        return m_OldState != m_State;
     }
     return false;
 }
 
-void OutdoorPvPObjectiveHP::FillInitialWorldStates(WorldPacket &data)
+void OPvPCapturePointHP::FillInitialWorldStates(WorldPacket &data)
 {
     switch(m_State)
     {
@@ -308,62 +312,23 @@ void OutdoorPvPObjectiveHP::FillInitialWorldStates(WorldPacket &data)
     }
 }
 
-void OutdoorPvPObjectiveHP::HandlePlayerEnter(Player *plr)
+bool OPvPCapturePointHP::HandlePlayerEnter(Player *plr)
 {
-    OutdoorPvPObjective::HandlePlayerEnter(plr);
-    plr->SendUpdateWorldState(HP_UI_TOWER_SLIDER_DISPLAY, 1);
-    uint32 phase = (uint32)ceil(( m_ShiftPhase + m_ShiftMaxPhase) / ( 2 * m_ShiftMaxPhase ) * 100.0f);
-    plr->SendUpdateWorldState(HP_UI_TOWER_SLIDER_POS, phase);
-    plr->SendUpdateWorldState(HP_UI_TOWER_SLIDER_N, m_NeutralValue);
+    if(OPvPCapturePoint::HandlePlayerEnter(plr))
+    {
+        plr->SendUpdateWorldState(HP_UI_TOWER_SLIDER_DISPLAY, 1);
+        uint32 phase = (uint32)ceil(( m_ShiftPhase + m_ShiftMaxPhase) / ( 2 * m_ShiftMaxPhase ) * 100.0f);
+        plr->SendUpdateWorldState(HP_UI_TOWER_SLIDER_POS, phase);
+        plr->SendUpdateWorldState(HP_UI_TOWER_SLIDER_N, m_NeutralValue);
+        return true;
+    }
+    return false;
 }
 
-void OutdoorPvPObjectiveHP::HandlePlayerLeave(Player *plr)
+void OPvPCapturePointHP::HandlePlayerLeave(Player *plr)
 {
     plr->SendUpdateWorldState(HP_UI_TOWER_SLIDER_DISPLAY, 0);
-    OutdoorPvPObjective::HandlePlayerLeave(plr);
-}
-
-void OutdoorPvPHP::BuffTeam(uint32 team)
-{
-    if(team == ALLIANCE)
-    {
-        for(std::set<uint64>::iterator itr = m_PlayerGuids[0].begin(); itr != m_PlayerGuids[0].end(); ++itr)
-        {
-            if(Player * plr = objmgr.GetPlayer(*itr))
-                if(plr->IsInWorld()) plr->CastSpell(plr,AllianceBuff,true);
-        }
-        for(std::set<uint64>::iterator itr = m_PlayerGuids[1].begin(); itr != m_PlayerGuids[1].end(); ++itr)
-        {
-            if(Player * plr = objmgr.GetPlayer(*itr))
-                if(plr->IsInWorld()) plr->RemoveAurasDueToSpell(HordeBuff);
-        }
-    }
-    else if(team == HORDE)
-    {
-        for(std::set<uint64>::iterator itr = m_PlayerGuids[1].begin(); itr != m_PlayerGuids[1].end(); ++itr)
-        {
-            if(Player * plr = objmgr.GetPlayer(*itr))
-                if(plr->IsInWorld()) plr->CastSpell(plr,HordeBuff,true);
-        }
-        for(std::set<uint64>::iterator itr = m_PlayerGuids[0].begin(); itr != m_PlayerGuids[0].end(); ++itr)
-        {
-            if(Player * plr = objmgr.GetPlayer(*itr))
-                if(plr->IsInWorld()) plr->RemoveAurasDueToSpell(AllianceBuff);
-        }
-    }
-    else
-    {
-        for(std::set<uint64>::iterator itr = m_PlayerGuids[0].begin(); itr != m_PlayerGuids[0].end(); ++itr)
-        {
-            if(Player * plr = objmgr.GetPlayer(*itr))
-                if(plr->IsInWorld()) plr->RemoveAurasDueToSpell(AllianceBuff);
-        }
-        for(std::set<uint64>::iterator itr = m_PlayerGuids[1].begin(); itr != m_PlayerGuids[1].end(); ++itr)
-        {
-            if(Player * plr = objmgr.GetPlayer(*itr))
-                if(plr->IsInWorld()) plr->RemoveAurasDueToSpell(HordeBuff);
-        }
-    }
+    OPvPCapturePoint::HandlePlayerLeave(plr);
 }
 
 void OutdoorPvPHP::HandleKillImpl(Player *plr, Unit * killed)
@@ -375,19 +340,4 @@ void OutdoorPvPHP::HandleKillImpl(Player *plr, Unit * killed)
         plr->CastSpell(plr,AlliancePlayerKillReward,true);
     else if(plr->GetTeam() == HORDE && ((Player*)killed)->GetTeam() != HORDE)
         plr->CastSpell(plr,HordePlayerKillReward,true);
-}
-
-bool OutdoorPvPObjectiveHP::HandleCapturePointEvent(Player *plr, uint32 eventId)
-{
-    if(eventId == HP_CapturePointEvent_Enter[m_TowerType])
-    {
-        this->HandlePlayerEnter(plr);
-        return true;
-    }
-    else if(eventId == HP_CapturePointEvent_Leave[m_TowerType])
-    {
-        this->HandlePlayerLeave(plr);
-        return true;
-    }
-    return false;
 }

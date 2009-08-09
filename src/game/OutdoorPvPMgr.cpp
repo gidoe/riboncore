@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "OutdoorPvPMgr.h"
@@ -23,7 +23,7 @@
 #include "OutdoorPvPZM.h"
 #include "OutdoorPvPSI.h"
 #include "OutdoorPvPEP.h"
-#include "OutdoorPvPLA.h"
+#include "Wintergrasp.h"
 #include "Player.h"
 #include "Policies/SingletonImp.h"
 
@@ -31,58 +31,114 @@ INSTANTIATE_SINGLETON_1( OutdoorPvPMgr );
 
 OutdoorPvPMgr::OutdoorPvPMgr()
 {
-    sLog.outDebug("OutdoorPvPMgr: Instantiating");
+    m_UpdateTimer = 0;
+    //sLog.outDebug("Instantiating OutdoorPvPMgr");
 }
 
 OutdoorPvPMgr::~OutdoorPvPMgr()
 {
-    sLog.outDebug("OutdoorPvPMgr: Deleting");
+    //sLog.outDebug("Deleting OutdoorPvPMgr");
     for(OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
     {
         (*itr)->DeleteSpawns();
     }
 }
 
-void OutdoorPvPMgr::CreateOutdoorPvP(uint32 typeId)
-{
-    OutdoorPvP * pOP = NULL;
-    switch (typeId)
-    {
-        case OUTDOOR_PVP_HP: pOP = new OutdoorPvPHP; break;
-        case OUTDOOR_PVP_NA: pOP = new OutdoorPvPNA; break;
-        case OUTDOOR_PVP_TF: pOP = new OutdoorPvPTF; break;
-        case OUTDOOR_PVP_ZM: pOP = new OutdoorPvPZM; break;
-        case OUTDOOR_PVP_SI: pOP = new OutdoorPvPSI; break;
-        case OUTDOOR_PVP_EP: pOP = new OutdoorPvPEP; break;
-        case OUTDOOR_PVP_LA: pOP = new OutdoorPvPLA; break;
-        default: break;
-    }
-    if(!pOP)
-    {
-        sLog.outDebug("OutdoorPvPMgr: init failed for %i.", typeId);
-        return;
-    }
-    if(!pOP->SetupOutdoorPvP())
-    {
-        sLog.outDebug("OutdoorPvPMgr: SetupOutdoorPvP failed for %i.", typeId);
-        delete pOP;
-        return;
-    }
-    pOP->SetTypeId(typeId);
-    m_OutdoorPvPSet.insert(pOP);
-    sLog.outDebug("OutdoorPvPMgr: init successfull for %i.", typeId);
-
-}
-
 void OutdoorPvPMgr::InitOutdoorPvP()
 {
-    CreateOutdoorPvP(OUTDOOR_PVP_HP);
-    CreateOutdoorPvP(OUTDOOR_PVP_NA);
-    CreateOutdoorPvP(OUTDOOR_PVP_TF);
-    CreateOutdoorPvP(OUTDOOR_PVP_ZM);
-    CreateOutdoorPvP(OUTDOOR_PVP_SI);
-    CreateOutdoorPvP(OUTDOOR_PVP_EP);
-    CreateOutdoorPvP(OUTDOOR_PVP_LA);
+    // create new opvp
+    OutdoorPvP * pOP = new OutdoorPvPHP;
+    // respawn, init variables
+    if(!pOP->SetupOutdoorPvP())
+    {
+        sLog.outDebug("OutdoorPvP : HP init failed.");
+        delete pOP;
+    }
+    else
+    {
+        m_OutdoorPvPSet.push_back(pOP);
+        sLog.outDebug("OutdoorPvP : HP successfully initiated.");
+    }
+
+
+    pOP = new OutdoorPvPNA;
+    // respawn, init variables
+    if(!pOP->SetupOutdoorPvP())
+    {
+        sLog.outDebug("OutdoorPvP : NA init failed.");
+        delete pOP;
+    }
+    else
+    {
+        m_OutdoorPvPSet.push_back(pOP);
+        sLog.outDebug("OutdoorPvP : NA successfully initiated.");
+    }
+
+
+    pOP = new OutdoorPvPTF;
+    // respawn, init variables
+    if(!pOP->SetupOutdoorPvP())
+    {
+        sLog.outDebug("OutdoorPvP : TF init failed.");
+        delete pOP;
+    }
+    else
+    {
+        m_OutdoorPvPSet.push_back(pOP);
+        sLog.outDebug("OutdoorPvP : TF successfully initiated.");
+    }
+
+    pOP = new OutdoorPvPZM;
+    // respawn, init variables
+    if(!pOP->SetupOutdoorPvP())
+    {
+        sLog.outDebug("OutdoorPvP : ZM init failed.");
+        delete pOP;
+    }
+    else
+    {
+        m_OutdoorPvPSet.push_back(pOP);
+        sLog.outDebug("OutdoorPvP : ZM successfully initiated.");
+    }
+
+    pOP = new OutdoorPvPSI;
+    // respawn, init variables
+    if(!pOP->SetupOutdoorPvP())
+    {
+        sLog.outDebug("OutdoorPvP : SI init failed.");
+        delete pOP;
+    }
+    else
+    {
+        m_OutdoorPvPSet.push_back(pOP);
+        sLog.outDebug("OutdoorPvP : SI successfully initiated.");
+    }
+
+    pOP = new OutdoorPvPEP;
+    // respawn, init variables
+    if(!pOP->SetupOutdoorPvP())
+    {
+        sLog.outDebug("OutdoorPvP : EP init failed.");
+        delete pOP;
+    }
+    else
+    {
+        m_OutdoorPvPSet.push_back(pOP);
+        sLog.outDebug("OutdoorPvP : EP successfully initiated.");
+    }
+
+    pOP = new OPvPWintergrasp;
+    // respawn, init variables
+    if(!pOP->SetupOutdoorPvP())
+    {
+        sLog.outDebug("OutdoorPvP : Wintergrasp init failed.");
+        delete pOP;
+    }
+    else
+    {
+        m_OutdoorPvPSet.push_back(pOP);
+        sLog.outDebug("OutdoorPvP : Wintergrasp successfully initiated.");
+    }
 }
 
 void OutdoorPvPMgr::AddZone(uint32 zoneid, OutdoorPvP *handle)
@@ -95,27 +151,27 @@ void OutdoorPvPMgr::HandlePlayerEnterZone(Player *plr, uint32 zoneid)
 {
     OutdoorPvPMap::iterator itr = m_OutdoorPvPMap.find(zoneid);
     if(itr == m_OutdoorPvPMap.end())
-    {
-        // no handle for this zone, return
         return;
-    }
-    // add possibly beneficial buffs to plr for zone
+
+    if(itr->second->HasPlayer(plr))
+        return;
+
     itr->second->HandlePlayerEnterZone(plr, zoneid);
-    //plr->SendInitWorldStates(); TODO: look if this is needed
-    sLog.outDebug("OutdoorPvPMgr: Player %u entered outdoorpvp id %u", plr->GetGUIDLow(), itr->second->GetTypeId());
+    sLog.outDebug("Player %u entered outdoorpvp id %u", plr->GetGUIDLow(), itr->second->GetTypeId());
 }
 
 void OutdoorPvPMgr::HandlePlayerLeaveZone(Player *plr, uint32 zoneid)
 {
     OutdoorPvPMap::iterator itr = m_OutdoorPvPMap.find(zoneid);
     if(itr == m_OutdoorPvPMap.end())
-    {
-        // no handle for this zone, return
         return;
-    }
-    // inform the OutdoorPvP class of the leaving, it should remove the player from all objectives
+
+    // teleport: remove once in removefromworld, once in updatezone
+    if(!itr->second->HasPlayer(plr))
+        return;
+
     itr->second->HandlePlayerLeaveZone(plr, zoneid);
-    sLog.outDebug("OutdoorPvPMgr: Player %u left outdoorpvp id %u", plr->GetGUIDLow(), itr->second->GetTypeId());
+    sLog.outDebug("Player %u left outdoorpvp id %u",plr->GetGUIDLow(), itr->second->GetTypeId());
 }
 
 OutdoorPvP * OutdoorPvPMgr::GetOutdoorPvPToZoneId(uint32 zoneid)
@@ -131,9 +187,12 @@ OutdoorPvP * OutdoorPvPMgr::GetOutdoorPvPToZoneId(uint32 zoneid)
 
 void OutdoorPvPMgr::Update(uint32 diff)
 {
-    for(OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
+    m_UpdateTimer += diff;
+    if(m_UpdateTimer > OUTDOORPVP_OBJECTIVE_UPDATE_INTERVAL)
     {
-        (*itr)->Update(diff);
+        for(OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
+            (*itr)->Update(m_UpdateTimer);
+        m_UpdateTimer = 0;
     }
 }
 
@@ -147,21 +206,20 @@ bool OutdoorPvPMgr::HandleCustomSpell(Player *plr, uint32 spellId, GameObject * 
     return false;
 }
 
+ZoneScript * OutdoorPvPMgr::GetZoneScript(uint32 zoneId)
+{
+    OutdoorPvPMap::iterator itr = m_OutdoorPvPMap.find(zoneId);
+    if(itr != m_OutdoorPvPMap.end())
+        return itr->second;
+    else
+        return NULL;
+}
+
 bool OutdoorPvPMgr::HandleOpenGo(Player *plr, uint64 guid)
 {
     for(OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
     {
         if((*itr)->HandleOpenGo(plr,guid))
-            return true;
-    }
-    return false;
-}
-
-bool OutdoorPvPMgr::HandleCaptureCreaturePlayerMoveInLos(Player * plr, Creature * c)
-{
-    for(OutdoorPvPSet::iterator itr = m_OutdoorPvPSet.begin(); itr != m_OutdoorPvPSet.end(); ++itr)
-    {
-        if((*itr)->HandleCaptureCreaturePlayerMoveInLos(plr,c))
             return true;
     }
     return false;

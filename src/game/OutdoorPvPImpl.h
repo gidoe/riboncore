@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,24 +15,25 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#ifndef OUTDOORPVP_IMPL_H
+#define OUTDOORPVP_IMPL_H
 
-#include "OutdoorPvPLA.h"
+#include "SharedDefines.h"
+#include "OutdoorPvP.h"
 #include "Player.h"
-#include "ObjectMgr.h"
-#include "OutdoorPvPMgr.h"
 #include "WorldPacket.h"
-#include "Language.h"
-#include "World.h"
 
-OutdoorPvPLA::OutdoorPvPLA()
-{
-}
+#define OTHER_TEAM(a) (a == TEAM_ALLIANCE ? TEAM_HORDE : TEAM_ALLIANCE)
 
-OutdoorPvPLA::~OutdoorPvPLA()
+enum ObjectiveStates
 {
-}
+    OBJECTIVESTATE_NEUTRAL = 0,
+    OBJECTIVESTATE_ALLIANCE,
+    OBJECTIVESTATE_HORDE,
+    OBJECTIVESTATE_NEUTRAL_ALLIANCE_CHALLENGE,
+    OBJECTIVESTATE_NEUTRAL_HORDE_CHALLENGE,
+    OBJECTIVESTATE_ALLIANCE_HORDE_CHALLENGE,
+    OBJECTIVESTATE_HORDE_ALLIANCE_CHALLENGE,
+};
 
-bool OutdoorPvPLA::SetupOutdoorPvP()
-{
-    return true;
-}
+#endif

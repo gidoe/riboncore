@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,26 +8,26 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef OUTDOOR_PVP_HP_
 #define OUTDOOR_PVP_HP_
 
-#include "OutdoorPvP.h"
+#include "OutdoorPvPImpl.h"
 
 #define OutdoorPvPHPBuffZonesNum 6
-//  HP, citadel, ramparts, blood furnace, shattered halls, mag's lair
+                                                         //  HP, citadel, ramparts, blood furnace, shattered halls, mag's lair
 const uint32 OutdoorPvPHPBuffZones[OutdoorPvPHPBuffZonesNum] = { 3483, 3563, 3562, 3713, 3714, 3836 };
 
-const uint32 AllianceBuff = 32071;
+#define AllianceBuff 32071
 
-const uint32 HordeBuff = 32049;
+#define HordeBuff 32049
 
 const uint32 AlliancePlayerKillReward = 32155;
 
@@ -64,11 +64,11 @@ const uint32 HP_MAP_A[HP_TOWER_NUM] = {0x9b3,0x9b0,0x9a7};
 
 const uint32 HP_MAP_H[HP_TOWER_NUM] = {0x9b4,0x9b1,0x9a6};
 
-const uint8 HP_TowerArtKit_A[HP_TOWER_NUM] = {65,62,67};
+const uint32 HP_TowerArtKit_A[HP_TOWER_NUM] = {65,62,67};
 
-const uint8 HP_TowerArtKit_H[HP_TOWER_NUM] = {64,61,68};
+const uint32 HP_TowerArtKit_H[HP_TOWER_NUM] = {64,61,68};
 
-const uint8 HP_TowerArtKit_N[HP_TOWER_NUM] = {66,63,69};
+const uint32 HP_TowerArtKit_N[HP_TOWER_NUM] = {66,63,69};
 
 const go_type HPCapturePoints[HP_TOWER_NUM] = {
     {182175,530,-471.462,3451.09,34.6432,0.174533,0,0,0.087156,0.996195},      // 0 - Broken Hill
@@ -82,24 +82,23 @@ const go_type HPTowerFlags[HP_TOWER_NUM] = {
     {183515,530,-289.610,3696.83,75.9447,3.12414,0,0,0.999962,0.008727} // 2 stadium
 };
 
-class OutdoorPvPObjectiveHP : public OutdoorPvPObjective
+class OPvPCapturePointHP : public OPvPCapturePoint
 {
-    public:
-        OutdoorPvPObjectiveHP(OutdoorPvP * pvp, OutdoorPvPHPTowerType type);
-        bool Update(uint32 diff);
-        void FillInitialWorldStates(WorldPacket & data);
-        // used when player is activated/inactivated in the area
-        void HandlePlayerEnter(Player * plr);
-        void HandlePlayerLeave(Player * plr);
-        bool HandleCapturePointEvent(Player * plr, uint32 eventId);
-    private:
-        OutdoorPvPHPTowerType m_TowerType;
+public:
+    OPvPCapturePointHP(OutdoorPvP * pvp, OutdoorPvPHPTowerType type);
+    bool Update(uint32 diff);
+    void FillInitialWorldStates(WorldPacket & data);
+    // used when player is activated/inactivated in the area
+    bool HandlePlayerEnter(Player * plr);
+    void HandlePlayerLeave(Player * plr);
+private:
+    OutdoorPvPHPTowerType m_TowerType;
 };
 
 class OutdoorPvPHP : public OutdoorPvP
 {
-    friend class OutdoorPvPObjectiveHP;
-    public:
+friend class OPvPCapturePointHP;
+public:
     OutdoorPvPHP();
     bool SetupOutdoorPvP();
     void HandlePlayerEnterZone(Player *plr, uint32 zone);
@@ -108,11 +107,11 @@ class OutdoorPvPHP : public OutdoorPvP
     void FillInitialWorldStates(WorldPacket &data);
     void SendRemoveWorldStates(Player * plr);
     void HandleKillImpl(Player * plr, Unit * killed);
-    void BuffTeam(uint32 team);
-    private:
+private:
     // how many towers are controlled
     uint32 m_AllianceTowersControlled;
     uint32 m_HordeTowersControlled;
 };
 
 #endif
+
