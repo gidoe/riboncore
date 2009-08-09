@@ -1,6 +1,8 @@
 /*
 * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
 *
+* Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+*
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation; either version 2 of the License, or
@@ -8,23 +10,23 @@
 *
 * This program is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 * GNU General Public License for more details.
 *
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifndef MANGOS_FLEEINGMOVEMENTGENERATOR_H
-#define MANGOS_FLEEINGMOVEMENTGENERATOR_H
+#ifndef RIBON_FLEEINGMOVEMENTGENERATOR_H
+#define RIBON_FLEEINGMOVEMENTGENERATOR_H
 
 #include "MovementGenerator.h"
 #include "DestinationHolder.h"
 #include "Traveller.h"
 
 template<class T>
-class MANGOS_DLL_SPEC FleeingMovementGenerator
+class RIBON_DLL_SPEC FleeingMovementGenerator
 : public MovementGeneratorMedium< T, FleeingMovementGenerator<T> >
 {
     public:
@@ -34,6 +36,7 @@ class MANGOS_DLL_SPEC FleeingMovementGenerator
         void Finalize(T &);
         void Reset(T &);
         bool Update(T &, const uint32 &);
+        bool GetDestination(float &x, float &y, float &z) const;
 
         MovementGeneratorType GetMovementGeneratorType() { return FLEEING_MOTION_TYPE; }
 
@@ -76,3 +79,4 @@ class MANGOS_DLL_SPEC TimedFleeingMovementGenerator
 };
 
 #endif
+

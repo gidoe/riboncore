@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -40,24 +42,38 @@ void DynamicObject::AddToWorld()
 {
     ///- Register the dynamicObject for guid lookup
     if(!IsInWorld())
+    {
         ObjectAccessor::Instance().AddObject(this);
-
-    Object::AddToWorld();
+        WorldObject::AddToWorld();
+    }
 }
 
 void DynamicObject::RemoveFromWorld()
 {
     ///- Remove the dynamicObject from the accessor
     if(IsInWorld())
+    {
+        if(m_effIndex == 4)
+        {
+            if(Unit *caster = GetCaster())
+            {
+                if(caster->GetTypeId() == TYPEID_PLAYER)
+                    ((Player*)caster)->SetViewpoint(this, false);
+            }
+            else
+            {
+                sLog.outCrash("DynamicObject::RemoveFromWorld cannot find viewpoint owner");
+            }
+        }
+        WorldObject::RemoveFromWorld();
         ObjectAccessor::Instance().RemoveObject(this);
-
-    Object::RemoveFromWorld();
+    }
 }
 
 bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, uint32 effIndex, float x, float y, float z, int32 duration, float radius )
 {
-    WorldObject::_Create(guidlow, HIGHGUID_DYNAMICOBJECT, caster->GetPhaseMask());
     SetMap(caster->GetMap());
+
     Relocate(x, y, z, 0);
 
     if(!IsPositionValid())
@@ -65,6 +81,8 @@ bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, uint32
         sLog.outError("DynamicObject (spell %u eff %u) not created. Suggested coordinates isn't valid (X: %f Y: %f)",spellId,effIndex,GetPositionX(),GetPositionY());
         return false;
     }
+
+    WorldObject::_Create(guidlow, HIGHGUID_DYNAMICOBJECT, caster->GetPhaseMask());
 
     SetEntry(spellId);
     SetFloatValue( OBJECT_FIELD_SCALE_X, 1 );
@@ -81,6 +99,7 @@ bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, uint32
     m_radius = radius;
     m_effIndex = effIndex;
     m_spellId = spellId;
+    m_updateTimer = 0;
     return true;
 }
 
@@ -107,20 +126,15 @@ void DynamicObject::Update(uint32 p_time)
     else
         deleteThis = true;
 
-    // TODO: make a timer and update this in larger intervals
-    CellPair p(MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY()));
-    Cell cell(p);
-    cell.data.Part.reserved = ALL_DISTRICT;
-    cell.SetNoCreate();
-
-    MaNGOS::DynamicObjectUpdater notifier(*this, caster);
-
-    TypeContainerVisitor<MaNGOS::DynamicObjectUpdater, WorldTypeMapContainer > world_object_notifier(notifier);
-    TypeContainerVisitor<MaNGOS::DynamicObjectUpdater, GridTypeMapContainer > grid_object_notifier(notifier);
-
-    CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, world_object_notifier, *GetMap(), *this, GetRadius());
-    cell_lock->Visit(cell_lock, grid_object_notifier,  *GetMap(), *this, GetRadius());
+    if(m_effIndex < 4)
+    {
+        if(m_updateTimer < p_time)
+        {
+            Ribon::DynamicObjectUpdater notifier(*this,caster);
+            VisitNearbyObject(GetRadius(), notifier);
+            m_updateTimer = 500; // is this official-like?
+        }else m_updateTimer -= p_time;
+    }
 
     if(deleteThis)
     {
@@ -132,6 +146,7 @@ void DynamicObject::Update(uint32 p_time)
 void DynamicObject::Delete()
 {
     SendObjectDeSpawnAnim(GetGUID());
+    RemoveFromWorld();
     AddObjectToRemoveList();
 }
 
@@ -140,10 +155,12 @@ void DynamicObject::Delay(int32 delaytime)
     m_aliveDuration -= delaytime;
     for(AffectedSet::iterator iunit= m_affected.begin(); iunit != m_affected.end(); ++iunit)
         if (*iunit)
-            (*iunit)->DelayAura(m_spellId, m_effIndex, delaytime);
+            (*iunit)->DelayAura(m_spellId, GetCaster()->GetGUID() , delaytime);
 }
 
 bool DynamicObject::isVisibleForInState(Player const* u, bool inVisibleList) const
 {
-    return IsInWorld() && u->IsInWorld() && IsWithinDistInMap(u, World::GetMaxVisibleDistanceForObject() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
+    return IsInWorld() && u->IsInWorld()
+        && (IsWithinDistInMap(u->m_seer,World::GetMaxVisibleDistanceForObject()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false));
 }
+

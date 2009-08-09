@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "Creature.h"
@@ -33,7 +35,7 @@ FleeingMovementGenerator<T>::_setTargetLocation(T &owner)
     if( !&owner )
         return;
 
-    if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_ON_VEHICLE) )
+    if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED) )
         return;
 
     if(!_setMoveData(owner))
@@ -43,9 +45,25 @@ FleeingMovementGenerator<T>::_setTargetLocation(T &owner)
     if(!_getPoint(owner, x, y, z))
         return;
 
-    owner.addUnitState(UNIT_STAT_FLEEING);
+    owner.addUnitState(UNIT_STAT_FLEEING | UNIT_STAT_ROAMING);
     Traveller<T> traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z);
+}
+
+template<>
+bool FleeingMovementGenerator<Creature>::GetDestination(float &x, float &y, float &z) const
+{
+    if(i_destinationHolder.HasArrived())
+        return false;
+
+    i_destinationHolder.GetDestination(x, y, z);
+    return true;
+}
+
+template<>
+bool FleeingMovementGenerator<Player>::GetDestination(float &x, float &y, float &z) const
+{
+    return false;
 }
 
 template<class T>
@@ -141,8 +159,8 @@ FleeingMovementGenerator<T>::_getPoint(T &owner, float &x, float &y, float &z)
         }
         temp_x = x + distance * cos(angle);
         temp_y = y + distance * sin(angle);
-        MaNGOS::NormalizeMapCoord(temp_x);
-        MaNGOS::NormalizeMapCoord(temp_y);
+        Ribon::NormalizeMapCoord(temp_x);
+        Ribon::NormalizeMapCoord(temp_y);
         if( owner.IsWithinLOS(temp_x,temp_y,z))
         {
             bool is_water_now = _map->IsInWater(x,y,z);
@@ -285,6 +303,11 @@ FleeingMovementGenerator<T>::Initialize(T &owner)
         return;
 
     _Init(owner);
+    owner.CastStop();
+    owner.addUnitState(UNIT_STAT_FLEEING | UNIT_STAT_ROAMING);
+    owner.SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+    owner.SetUInt64Value(UNIT_FIELD_TARGET, 0);
+    owner.RemoveUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
 
     if(Unit * fright = ObjectAccessor::GetUnit(owner, i_frightGUID))
     {
@@ -313,8 +336,6 @@ FleeingMovementGenerator<Creature>::_Init(Creature &owner)
     if(!&owner)
         return;
 
-    owner.RemoveMonsterMoveFlag(MONSTER_MOVE_WALK);
-    owner.SetUInt64Value(UNIT_FIELD_TARGET, 0);
     is_water_ok = owner.canSwim();
     is_land_ok  = owner.canWalk();
 }
@@ -327,17 +348,14 @@ FleeingMovementGenerator<Player>::_Init(Player &)
     is_land_ok  = true;
 }
 
-template<>
-void FleeingMovementGenerator<Player>::Finalize(Player &owner)
+template<class T>
+void
+FleeingMovementGenerator<T>::Finalize(T &owner)
 {
-    owner.clearUnitState(UNIT_STAT_FLEEING);
-}
-
-template<>
-void FleeingMovementGenerator<Creature>::Finalize(Creature &owner)
-{
-    owner.AddMonsterMoveFlag(MONSTER_MOVE_WALK);
-    owner.clearUnitState(UNIT_STAT_FLEEING);
+    owner.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+    owner.clearUnitState(UNIT_STAT_FLEEING | UNIT_STAT_ROAMING);
+    if(owner.GetTypeId() == TYPEID_UNIT && owner.getVictim())
+        owner.SetUInt64Value(UNIT_FIELD_TARGET, owner.getVictim()->GetGUID());
 }
 
 template<class T>
@@ -353,7 +371,7 @@ FleeingMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
 {
     if( !&owner || !owner.isAlive() )
         return false;
-    if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_ON_VEHICLE) )
+    if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED) )
         return true;
 
     Traveller<T> traveller(owner);
@@ -366,7 +384,7 @@ FleeingMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
         return true;
     }
 
-    if (i_destinationHolder.UpdateTraveller(traveller, time_diff, false))
+    if (i_destinationHolder.UpdateTraveller(traveller, time_diff))
     {
         i_destinationHolder.ResetUpdate(50);
         if(i_nextCheckTime.Passed() && i_destinationHolder.HasArrived())
@@ -386,6 +404,8 @@ template bool FleeingMovementGenerator<Player>::_getPoint(Player &, float &, flo
 template bool FleeingMovementGenerator<Creature>::_getPoint(Creature &, float &, float &, float &);
 template void FleeingMovementGenerator<Player>::_setTargetLocation(Player &);
 template void FleeingMovementGenerator<Creature>::_setTargetLocation(Creature &);
+template void FleeingMovementGenerator<Player>::Finalize(Player &);
+template void FleeingMovementGenerator<Creature>::Finalize(Creature &);
 template void FleeingMovementGenerator<Player>::Reset(Player &);
 template void FleeingMovementGenerator<Creature>::Reset(Creature &);
 template bool FleeingMovementGenerator<Player>::Update(Player &, const uint32 &);
@@ -393,12 +413,13 @@ template bool FleeingMovementGenerator<Creature>::Update(Creature &, const uint3
 
 void TimedFleeingMovementGenerator::Finalize(Unit &owner)
 {
-    owner.clearUnitState(UNIT_STAT_FLEEING);
+    owner.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+    owner.clearUnitState(UNIT_STAT_FLEEING | UNIT_STAT_ROAMING);
     if (Unit* victim = owner.getVictim())
     {
         if (owner.isAlive())
         {
-            owner.AttackStop(true);
+            owner.AttackStop();
             ((Creature*)&owner)->AI()->AttackStart(victim);
         }
     }
@@ -409,7 +430,7 @@ bool TimedFleeingMovementGenerator::Update(Unit & owner, const uint32 & time_dif
     if( !owner.isAlive() )
         return false;
 
-    if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_ON_VEHICLE) )
+    if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED) )
         return true;
 
     i_totalFleeTime.Update(time_diff);

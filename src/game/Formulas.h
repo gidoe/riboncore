@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,12 +18,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOS_FORMULAS_H
-#define MANGOS_FORMULAS_H
+#ifndef RIBON_FORMULAS_H
+#define RIBON_FORMULAS_H
 
 #include "World.h"
 
-namespace MaNGOS
+namespace Ribon
 {
     namespace Honor
     {
@@ -115,7 +117,7 @@ namespace MaNGOS
                 (((Creature*)u)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL) ))
                 return 0;
 
-            uint32 xp_gain= BaseGain(pl->getLevel(), u->getLevel(), GetContentLevelsForMapAndZone(pl->GetMapId(),pl->GetZoneId()));
+            uint32 xp_gain= BaseGain(pl->getLevel(), u->getLevel(), GetContentLevelsForMapAndZone(u->GetMapId(),u->GetZoneId()));
             if( xp_gain == 0 )
                 return 0;
 
@@ -153,3 +155,4 @@ namespace MaNGOS
     }
 }
 #endif
+
