@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOS_MAPMANAGER_H
-#define MANGOS_MAPMANAGER_H
+#ifndef RIBON_MAPMANAGER_H
+#define RIBON_MAPMANAGER_H
 
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
@@ -31,18 +33,15 @@ class Transport;
 class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockable<MapManager, ACE_Thread_Mutex> >
 {
 
-    friend class MaNGOS::OperatorNew<MapManager>;
+    friend class Ribon::OperatorNew<MapManager>;
     typedef UNORDERED_MAP<uint32, Map*> MapMapType;
     typedef std::pair<UNORDERED_MAP<uint32, Map*>::iterator, bool>  MapMapPair;
 
     public:
 
-        Map* CreateMap(uint32, const WorldObject* obj);
+        Map* CreateMap(uint32, const WorldObject* obj, uint32 instanceId);
         Map const* CreateBaseMap(uint32 id) const { return const_cast<MapManager*>(this)->_createBaseMap(id); }
         Map* FindMap(uint32 mapid, uint32 instanceId = 0) const;
-
-        // only const version for outer users
-        void DeleteInstance(uint32 mapid, uint32 instanceId);
 
         uint16 GetAreaFlag(uint32 mapid, float x, float y, float z) const
         {
@@ -90,17 +89,17 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
 
         static bool IsValidMapCoord(uint32 mapid, float x,float y)
         {
-            return IsValidMAP(mapid) && MaNGOS::IsValidMapCoord(x,y);
+            return IsValidMAP(mapid) && Ribon::IsValidMapCoord(x,y);
         }
 
         static bool IsValidMapCoord(uint32 mapid, float x,float y,float z)
         {
-            return IsValidMAP(mapid) && MaNGOS::IsValidMapCoord(x,y,z);
+            return IsValidMAP(mapid) && Ribon::IsValidMapCoord(x,y,z);
         }
 
         static bool IsValidMapCoord(uint32 mapid, float x,float y,float z,float o)
         {
-            return IsValidMAP(mapid) && MaNGOS::IsValidMapCoord(x,y,z,o);
+            return IsValidMAP(mapid) && Ribon::IsValidMapCoord(x,y,z,o);
         }
 
         static bool IsValidMapCoord(WorldLocation const& loc)
@@ -122,9 +121,6 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         void RemoveBonesFromMap(uint32 mapid, uint64 guid, float x, float y);
         uint32 GenerateInstanceId() { return ++i_MaxInstanceId; }
         void InitMaxInstanceId();
-        void InitializeVisibilityDistanceInfo();
-
-        void InitializeVisibilityNotifyTimers();
 
         /* statistics */
         uint32 GetNumInstances();
@@ -157,3 +153,4 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         uint32 i_MaxInstanceId;
 };
 #endif
+

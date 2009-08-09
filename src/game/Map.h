@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOS_MAP_H
-#define MANGOS_MAP_H
+#ifndef RIBON_MAP_H
+#define RIBON_MAP_H
 
 #include "Platform/Define.h"
 #include "Policies/ThreadingModel.h"
@@ -27,11 +29,11 @@
 #include "DBCStructure.h"
 #include "GridDefines.h"
 #include "Cell.h"
-#include "Object.h"
 #include "Timer.h"
 #include "SharedDefines.h"
 #include "GameSystem/GridRefManager.h"
 #include "MapRefManager.h"
+#include "mersennetwister/MersenneTwister.h"
 
 #include <bitset>
 #include <list>
@@ -41,10 +43,14 @@ class WorldPacket;
 class InstanceData;
 class Group;
 class InstanceSave;
-class BattleGround;
-
+class Object;
+class WorldObject;
+class TempSummon;
+class Player;
+class CreatureGroup;
 struct ScriptInfo;
 struct ScriptAction;
+
 
 typedef ACE_RW_Thread_Mutex GridRWLock;
 
@@ -52,14 +58,14 @@ template<class MUTEX, class LOCK_TYPE>
 struct RGuard
 {
     RGuard(MUTEX &l) : i_lock(l.getReadLock()) {}
-    MaNGOS::GeneralLock<LOCK_TYPE> i_lock;
+    Ribon::GeneralLock<LOCK_TYPE> i_lock;
 };
 
 template<class MUTEX, class LOCK_TYPE>
 struct WGuard
 {
     WGuard(MUTEX &l) : i_lock(l.getWriteLock()) {}
-    MaNGOS::GeneralLock<LOCK_TYPE> i_lock;
+    Ribon::GeneralLock<LOCK_TYPE> i_lock;
 };
 
 typedef RGuard<GridRWLock, ACE_Thread_Mutex> GridReadGuard;
@@ -70,7 +76,7 @@ typedef MaNGOS::SingleThreaded<GridRWLock>::Lock NullGuard;
 // Map file format defines
 //******************************************
 #define MAP_MAGIC             'SPAM'
-#define MAP_VERSION_MAGIC     '0.2w'
+#define MAP_VERSION_MAGIC     '0.1w'
 #define MAP_AREA_MAGIC        'AERA'
 #define MAP_HEIGHT_MAGIC      'TGHM'
 #define MAP_LIQUID_MAGIC      'QILM'
@@ -223,11 +229,10 @@ struct InstanceTemplate
 {
     uint32 map;
     uint32 parent;
-    uint32 levelMin;
-    uint32 levelMax;
     uint32 maxPlayers;
     uint32 maxPlayersHeroic;
     uint32 reset_delay;                                 // FIX ME: now exist normal/heroic raids with possible different time of reset.
+    uint32 access_id;
     float startLocX;
     float startLocY;
     float startLocZ;
@@ -251,6 +256,8 @@ typedef UNORDERED_MAP<Creature*, CreatureMover> CreatureMoveList;
 #define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
 #define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
 #define MIN_UNLOAD_DELAY      1                             // immediate unload
+
+typedef std::map<uint32/*leaderDBGUID*/, CreatureGroup*>        CreatureGroupHolderType;
 
 class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::ObjectLevelLockable<Map, ACE_Thread_Mutex>
 {
@@ -280,10 +287,6 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         void MessageDistBroadcast(Player *, WorldPacket *, float dist, bool to_self, bool own_team_only = false);
         void MessageDistBroadcast(WorldObject *, WorldPacket *, float dist);
 
-        float GetVisibilityDistance() const { return m_VisibleDistance; }
-        //function for setting up visibility distance for maps on per-type/per-Id basis
-        virtual void InitVisibilityDistance();
-
         void PlayerRelocation(Player *, float x, float y, float z, float angl);
         void CreatureRelocation(Creature *creature, float x, float y, float, float);
 
@@ -291,15 +294,15 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         bool IsRemovalGrid(float x, float y) const
         {
-            GridPair p = MaNGOS::ComputeGridPair(x, y);
+            GridPair p = Ribon::ComputeGridPair(x, y);
             return( !getNGrid(p.x_coord, p.y_coord) || getNGrid(p.x_coord, p.y_coord)->GetGridState() == GRID_STATE_REMOVAL );
         }
 
         bool GetUnloadLock(const GridPair &p) const { return getNGrid(p.x_coord, p.y_coord)->getUnloadLock(); }
         void SetUnloadLock(const GridPair &p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadExplicitLock(on); }
-        void LoadGrid(const Cell& cell, bool no_unload = false);
+        void LoadGrid(float x, float y);
         bool UnloadGrid(const uint32 &x, const uint32 &y, bool pForce);
-        virtual void UnloadAll(bool pForce);
+        virtual void UnloadAll();
 
         void ResetGridExpiry(NGridType &grid, float factor = 1) const
         {
@@ -307,21 +310,20 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         }
 
         time_t GetGridExpiry(void) const { return i_gridExpiry; }
-        uint32 GetId(void) const { return i_id; }
+        uint32 GetId(void) const { return i_mapEntry->MapID; }
 
         static bool ExistMap(uint32 mapid, int gx, int gy);
         static bool ExistVMap(uint32 mapid, int gx, int gy);
 
         static void InitStateMachine();
         static void DeleteStateMachine();
-        void InitializeNotifyTimers();
 
         Map const * GetParent() const { return m_parentMap; }
 
         // some calls like isInWater should not use vmaps due to processor power
         // can return INVALID_HEIGHT if under z+2 z coord not found height
         float GetHeight(float x, float y, float z, bool pCheckVMap=true) const;
-		float GetVmapHeight(float x, float y, float z, bool useMaps) const;
+        float GetVmapHeight(float x, float y, float z, bool useMaps) const;
         bool IsInWater(float x, float y, float z, float min_depth = 2.0f) const;
 
         ZLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, LiquidData *data = 0) const;
@@ -337,21 +339,23 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         uint32 GetAreaId(float x, float y, float z) const
         {
-            return GetAreaIdByAreaFlag(GetAreaFlag(x,y,z),i_id);
+            return GetAreaIdByAreaFlag(GetAreaFlag(x,y,z),GetId());
         }
 
         uint32 GetZoneId(float x, float y, float z) const
         {
-            return GetZoneIdByAreaFlag(GetAreaFlag(x,y,z),i_id);
+            return GetZoneIdByAreaFlag(GetAreaFlag(x,y,z),GetId());
         }
 
         void GetZoneAndAreaId(uint32& zoneid, uint32& areaid, float x, float y, float z) const
         {
-            GetZoneAndAreaIdByAreaFlag(zoneid,areaid,GetAreaFlag(x,y,z),i_id);
+            GetZoneAndAreaIdByAreaFlag(zoneid,areaid,GetAreaFlag(x,y,z),GetId());
         }
 
         virtual void MoveAllCreaturesInMoveList();
         virtual void RemoveAllObjectsInRemoveList();
+        virtual void RelocationNotify();
+        virtual void RemoveAllPlayers();
 
         bool CreatureRespawnRelocation(Creature *c);        // used only in MoveAllCreaturesInMoveList and ObjectGridUnloader
 
@@ -384,13 +388,12 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         }
 
         void AddObjectToRemoveList(WorldObject *obj);
-        void DoDelayedMovesAndRemoves();
+        void AddObjectToSwitchList(WorldObject *obj, bool on);
+        //void DoDelayedMovesAndRemoves();
 
         virtual bool RemoveBones(uint64 guid, float x, float y);
 
         void UpdateObjectVisibility(WorldObject* obj, Cell cell, CellPair cellpair);
-        void UpdatePlayerVisibility(Player* player, Cell cell, CellPair cellpair);
-        void UpdateObjectsVisibilityFor(Player* player, Cell cell, CellPair cellpair);
 
         void resetMarkedCells() { marked_cells.reset(); }
         bool isCellMarked(uint32 pCellId) { return marked_cells.test(pCellId); }
@@ -398,7 +401,10 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         bool HavePlayers() const { return !m_mapRefManager.isEmpty(); }
         uint32 GetPlayersCountExceptGMs() const;
-        bool ActiveObjectsNearGrid(uint32 x,uint32 y) const;
+        bool ActiveObjectsNearGrid(uint32 x, uint32 y) const;
+
+        void AddUnitToNotify(Unit* unit);
+        void RemoveUnitFromNotify(Unit *unit, int32 slot);
 
         void SendToPlayers(WorldPacket const* data) const;
 
@@ -421,6 +427,24 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         void RemoveFromActive(Creature* obj);
 
+        template<class T> void SwitchGridContainers(T* obj, bool active);
+        template<class NOTIFIER> void VisitAll(const float &x, const float &y, float radius, NOTIFIER &notifier);
+        template<class NOTIFIER> void VisitWorld(const float &x, const float &y, float radius, NOTIFIER &notifier);
+        template<class NOTIFIER> void VisitGrid(const float &x, const float &y, float radius, NOTIFIER &notifier);
+        CreatureGroupHolderType CreatureGroupHolder;
+
+        void UpdateIteratorBack(Player *player);
+
+#ifdef MAP_BASED_RAND_GEN
+        MTRand mtRand;
+        int32 irand(int32 min, int32 max)       { return int32 (mtRand.randInt(max - min)) + min; }
+        uint32 urand(uint32 min, uint32 max)    { return mtRand.randInt(max - min) + min; }
+        int32 rand32()                          { return mtRand.randInt(); }
+        double rand_norm()                      { return mtRand.randExc(); }
+        double rand_chance()                    { return mtRand.randExc(100.0); }
+#endif
+
+        TempSummon *SummonCreature(uint32 entry, float x, float y, float z, float angle, SummonPropertiesEntry const *properties = NULL, uint32 duration = 0, Unit *summoner = NULL);
         Creature* GetCreature(uint64 guid);
         GameObject* GetGameObject(uint64 guid);
         DynamicObject* GetDynamicObject(uint64 guid);
@@ -430,22 +454,13 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         void LoadMap(int gx,int gy, bool reload = false);
         GridMap *GetGrid(float x, float y);
 
-        //these functions used to process player/mob aggro reactions and
-        //visibility calculations. Highly optimized for massive calculations
-        void ProcessObjectsVisibility();
-        void ProcesssPlayersVisibility();
-        void ProcessRelocationNotifies();
-        void ResetNotifies(uint16 notify_mask);
-
         void SetTimer(uint32 t) { i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t; }
+        //uint64 CalculateGridMask(const uint32 &y) const;
 
         void SendInitSelf( Player * player );
 
         void SendInitTransports( Player * player );
         void SendRemoveTransports( Player * player );
-
-        void PlayerRelocationNotify(Player* player, Cell cell, CellPair cellpair);
-        void CreatureRelocationNotify(Creature *creature, Cell newcell, CellPair newval);
 
         bool CreatureCellRelocation(Creature *creature, Cell new_cell);
 
@@ -464,8 +479,6 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         NGridType* getNGrid(uint32 x, uint32 y) const
         {
-            ASSERT(x < MAX_NUMBER_OF_GRIDS);
-            ASSERT(y < MAX_NUMBER_OF_GRIDS);
             return i_grids[x][y];
         }
 
@@ -475,6 +488,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         void setNGrid(NGridType* grid, uint32 x, uint32 y);
         void ScriptsProcess();
 
+        void UpdateActiveCells(const float &x, const float &y, const uint32 &t_diff);
     protected:
         void SetUnloadReferenceLock(const GridPair &p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadReferenceLock(on); }
 
@@ -482,14 +496,8 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         MapEntry const* i_mapEntry;
         uint8 i_spawnMode;
-        uint32 i_id;
         uint32 i_InstanceId;
         uint32 m_unloadTimer;
-        float m_VisibleDistance;
-
-        PeriodicTimer m_ObjectVisibilityNotifyTimer;
-        PeriodicTimer m_PlayerVisibilityNotifyTimer;
-        PeriodicTimer m_RelocationNotifyTimer;
 
         MapRefManager m_mapRefManager;
         MapRefManager::iterator m_mapRefIter;
@@ -497,6 +505,8 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         typedef std::set<WorldObject*> ActiveNonPlayers;
         ActiveNonPlayers m_activeNonPlayers;
         ActiveNonPlayers::iterator m_activeNonPlayersIter;
+
+
     private:
         //used for fast base_map (e.g. MapInstanced class object) search for
         //InstanceMaps and BattleGroundMaps...
@@ -510,8 +520,13 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cells;
 
         time_t i_gridExpiry;
+        IntervalTimer m_notifyTimer;
 
+        bool i_lock;
+        std::vector<Unit*> i_unitsToNotifyBacklog;
+        std::vector<Unit*> i_unitsToNotify;
         std::set<WorldObject *> i_objectsToRemove;
+        std::map<WorldObject*, bool> i_objectsToSwitch;
         std::multimap<time_t, ScriptAction> m_scriptSchedule;
 
         // Type specific code for add/remove to/from grid
@@ -519,7 +534,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
             void AddToGrid(T*, NGridType *, Cell const&);
 
         template<class T>
-            void AddNotifier(T*, Cell const&, CellPair const&);
+            void AddNotifier(T*);
 
         template<class T>
             void RemoveFromGrid(T*, NGridType *, Cell const&);
@@ -540,6 +555,8 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
             if(m_activeNonPlayersIter != m_activeNonPlayers.end())
             {
                 ActiveNonPlayers::iterator itr = m_activeNonPlayers.find(obj);
+                if(itr == m_activeNonPlayers.end())
+                    return;
                 if(itr==m_activeNonPlayersIter)
                     ++m_activeNonPlayersIter;
                 m_activeNonPlayers.erase(itr);
@@ -559,7 +576,7 @@ enum InstanceResetMethod
     INSTANCE_RESET_RESPAWN_DELAY
 };
 
-class MANGOS_DLL_SPEC InstanceMap : public Map
+class RIBON_DLL_SPEC InstanceMap : public Map
 {
     public:
         InstanceMap(uint32 id, time_t, uint32 InstanceId, uint8 SpawnMode, Map* _parent);
@@ -572,14 +589,11 @@ class MANGOS_DLL_SPEC InstanceMap : public Map
         uint32 GetScriptId() { return i_script_id; }
         InstanceData* GetInstanceData() { return i_data; }
         void PermBindAllPlayers(Player *player);
-        void UnloadAll(bool pForce);
+        void UnloadAll();
         bool CanEnter(Player* player);
         void SendResetWarnings(uint32 timeLeft) const;
         void SetResetSchedule(bool on);
         uint32 GetMaxPlayers() const;
-
-        void InitVisibilityDistance();
-        void InitializeNotifyTimers();
     private:
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;
@@ -587,7 +601,7 @@ class MANGOS_DLL_SPEC InstanceMap : public Map
         uint32 i_script_id;
 };
 
-class MANGOS_DLL_SPEC BattleGroundMap : public Map
+class RIBON_DLL_SPEC BattleGroundMap : public Map
 {
     public:
         BattleGroundMap(uint32 id, time_t, uint32 InstanceId, Map* _parent);
@@ -597,15 +611,7 @@ class MANGOS_DLL_SPEC BattleGroundMap : public Map
         void Remove(Player *, bool);
         bool CanEnter(Player* player);
         void SetUnload();
-        void UnloadAll(bool pForce);
-
-        void InitVisibilityDistance();
-        void InitializeNotifyTimers();
-
-        BattleGround* GetBG() { return m_bg; }
-        void SetBG(BattleGround* bg) { m_bg = bg; }
-    private:
-        BattleGround* m_bg;
+        void RemoveAllPlayers();
 };
 
 /*inline
@@ -634,4 +640,52 @@ Map::Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &
         getNGrid(x, y)->Visit(cell_x, cell_y, visitor);
     }
 }
+
+template<class NOTIFIER>
+inline void
+Map::VisitAll(const float &x, const float &y, float radius, NOTIFIER &notifier)
+{
+    float x_off, y_off;
+    CellPair p(Ribon::ComputeCellPair(x, y, x_off, y_off));
+    Cell cell(p);
+    cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();
+    CellLock<GridReadGuard> cell_lock(cell, p);
+
+    TypeContainerVisitor<NOTIFIER, WorldTypeMapContainer> world_object_notifier(notifier);
+    cell_lock->Visit(cell_lock, world_object_notifier, *this, radius, x_off, y_off);
+    TypeContainerVisitor<NOTIFIER, GridTypeMapContainer >  grid_object_notifier(notifier);
+    cell_lock->Visit(cell_lock, grid_object_notifier, *this, radius, x_off, y_off);
+}
+
+template<class NOTIFIER>
+inline void
+Map::VisitWorld(const float &x, const float &y, float radius, NOTIFIER &notifier)
+{
+    float x_off, y_off;
+    CellPair p(Ribon::ComputeCellPair(x, y, x_off, y_off));
+    Cell cell(p);
+    cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();
+    CellLock<GridReadGuard> cell_lock(cell, p);
+
+    TypeContainerVisitor<NOTIFIER, WorldTypeMapContainer> world_object_notifier(notifier);
+    cell_lock->Visit(cell_lock, world_object_notifier, *this, radius, x_off, y_off);
+}
+
+template<class NOTIFIER>
+inline void
+Map::VisitGrid(const float &x, const float &y, float radius, NOTIFIER &notifier)
+{
+    float x_off, y_off;
+    CellPair p(Ribon::ComputeCellPair(x, y, x_off, y_off));
+    Cell cell(p);
+    cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();
+    CellLock<GridReadGuard> cell_lock(cell, p);
+
+    TypeContainerVisitor<NOTIFIER, GridTypeMapContainer >  grid_object_notifier(notifier);
+    cell_lock->Visit(cell_lock, grid_object_notifier, *this, radius, x_off, y_off);
+}
 #endif
+

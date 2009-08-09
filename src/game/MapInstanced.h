@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOS_MAP_INSTANCED_H
-#define MANGOS_MAP_INSTANCED_H
+#ifndef RIBON_MAP_INSTANCED_H
+#define RIBON_MAP_INSTANCED_H
 
 #include "Map.h"
 #include "InstanceSaveMgr.h"
 
-class MANGOS_DLL_DECL MapInstanced : public Map
+class RIBON_DLL_DECL MapInstanced : public Map
 {
     friend class MapManager;
     public:
@@ -35,13 +37,14 @@ class MANGOS_DLL_DECL MapInstanced : public Map
         void Update(const uint32&);
         void MoveAllCreaturesInMoveList();
         void RemoveAllObjectsInRemoveList();
+        void RelocationNotify();
         bool RemoveBones(uint64 guid, float x, float y);
-        void UnloadAll(bool pForce);
+        void UnloadAll();
+        bool CanEnter(Player* player);
 
-        Map* CreateInstance(const uint32 mapId, Player * player);
+        Map* CreateInstance(const uint32 mapId, Player * player, uint32 instanceId);
         Map* FindMap(uint32 InstanceId) const { return _FindMap(InstanceId); }
-        void DestroyInstance(uint32 InstanceId);
-        void DestroyInstance(InstancedMaps::iterator &itr);
+        bool DestroyInstance(InstancedMaps::iterator &itr);
 
         void AddGridMapReference(const GridPair &p)
         {
@@ -57,7 +60,6 @@ class MANGOS_DLL_DECL MapInstanced : public Map
         }
 
         InstancedMaps &GetInstancedMaps() { return m_InstancedMaps; }
-        void InitVisibilityDistance();
 
     private:
 
@@ -75,3 +77,4 @@ class MANGOS_DLL_DECL MapInstanced : public Map
         uint16 GridMapReference[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 };
 #endif
+

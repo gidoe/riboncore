@@ -22,7 +22,7 @@
 #include "Utilities/LinkedReference/Reference.h"
 #include "Map.h"
 
-class MANGOS_DLL_SPEC MapReference : public Reference<Map, Player>
+class RIBON_DLL_SPEC MapReference : public Reference<Map, Player>
 {
     protected:
         void targetObjectBuildLink()
@@ -50,3 +50,4 @@ class MANGOS_DLL_SPEC MapReference : public Reference<Map, Player>
         MapReference const *nocheck_prev() const { return (MapReference const*)Reference<Map, Player>::nocheck_prev(); }
 };
 #endif
+

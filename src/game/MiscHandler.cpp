@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -38,10 +40,13 @@
 #include "ObjectAccessor.h"
 #include "Object.h"
 #include "BattleGround.h"
-#include "SpellAuras.h"
+#include "OutdoorPvP.h"
 #include "Pet.h"
 #include "SocialMgr.h"
-#include "OutdoorPvP.h"
+#include "CellImpl.h"
+#include "AccountMgr.h"
+#include "Vehicle.h"
+#include "CreatureAI.h"
 
 void WorldSession::HandleRepopRequestOpcode( WorldPacket & /*recv_data*/ )
 {
@@ -65,6 +70,80 @@ void WorldSession::HandleRepopRequestOpcode( WorldPacket & /*recv_data*/ )
     GetPlayer()->RemovePet(NULL,PET_SAVE_NOT_IN_SLOT, true);
     GetPlayer()->BuildPlayerRepop();
     GetPlayer()->RepopAtGraveyard();
+}
+
+void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
+{
+    CHECK_PACKET_SIZE(recv_data,8+4+4);
+
+    sLog.outDebug("WORLD: CMSG_GOSSIP_SELECT_OPTION");
+
+    uint32 option;
+    uint32 unk;
+    uint64 guid;
+    std::string code = "";
+
+    recv_data >> guid >> unk >> option;
+
+    if(_player->PlayerTalkClass->GossipOptionCoded( option ))
+    {
+        // recheck
+        CHECK_PACKET_SIZE(recv_data,8+4+1);
+        sLog.outBasic("reading string");
+        recv_data >> code;
+        sLog.outBasic("string read: %s", code.c_str());
+    }
+
+    Creature *unit = NULL;
+    GameObject *go = NULL;
+    if(IS_CREATURE_GUID(guid))
+    {
+        unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
+        if (!unit)
+        {
+            sLog.outDebug( "WORLD: HandleGossipSelectOptionOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
+            return;
+        }
+    }
+    else if(IS_GAMEOBJECT_GUID(guid))
+    {
+        go = _player->GetMap()->GetGameObject(guid);
+        if (!go)
+        {
+            sLog.outDebug( "WORLD: HandleGossipSelectOptionOpcode - GameObject (GUID: %u) not found.", uint32(GUID_LOPART(guid)) );
+            return;
+        }
+    }
+    else
+    {
+        sLog.outDebug( "WORLD: HandleGossipSelectOptionOpcode - unsupported GUID type for highguid %u. lowpart %u.", uint32(GUID_HIPART(guid)), uint32(GUID_LOPART(guid)) );
+        return;
+    }
+
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+
+    if(!code.empty())
+    {
+        if(unit)
+        {
+            if(!Script->GossipSelectWithCode( _player, unit, _player->PlayerTalkClass->GossipOptionSender( option ), _player->PlayerTalkClass->GossipOptionAction( option ), code.c_str()) )
+                unit->OnGossipSelect( _player, option );
+        }
+        else
+            Script->GOSelectWithCode( _player, go, _player->PlayerTalkClass->GossipOptionSender( option ), _player->PlayerTalkClass->GossipOptionAction( option ), code.c_str());
+    }
+    else
+    {
+        if(unit)
+        {
+            if(!Script->GossipSelect( _player, unit, _player->PlayerTalkClass->GossipOptionSender( option ), _player->PlayerTalkClass->GossipOptionAction( option )) )
+                unit->OnGossipSelect( _player, option );
+        }
+        else
+            Script->GOSelect( _player, go, _player->PlayerTalkClass->GossipOptionSender( option ), _player->PlayerTalkClass->GossipOptionAction( option ));
+    }
 }
 
 void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
@@ -260,8 +339,9 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         data << uint8(0);                                   // new 2.4.0
         data << uint32( pzoneid );                          // player zone id
 
-        // 49 is maximum player count sent to client
-        if ((++clientcount) == 49)
+        // 49 is maximum player count sent to client - can be overridden
+        // through config, but is unstable
+        if ((++clientcount) == sWorld.getConfig(CONFIG_MAX_WHO))
             break;
     }
 
@@ -282,9 +362,9 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & /*recv_data*/ )
     //Can not logout if...
     if( GetPlayer()->isInCombat() ||                        //...is in combat
         GetPlayer()->duel         ||                        //...is in Duel
-        GetPlayer()->GetVehicleGUID() ||                    //...is in vehicle
+        GetPlayer()->HasAura(9454)         ||             //...is frozen by GM via freeze command
                                                             //...is jumping ...is falling
-        GetPlayer()->m_movementInfo.HasMovementFlag(MovementFlags(MOVEMENTFLAG_JUMPING | MOVEMENTFLAG_FALLING)))
+        GetPlayer()->m_movementInfo.HasMovementFlag(MOVEMENTFLAG_JUMPING | MOVEMENTFLAG_FALLING))
     {
         WorldPacket data( SMSG_LOGOUT_RESPONSE, (2+4) ) ;
         data << (uint8)0xC;
@@ -382,10 +462,8 @@ void WorldSession::HandleTogglePvP( WorldPacket & recv_data )
             GetPlayer()->pvpInfo.endTimer = time(NULL);     // start toggle-off
     }
 
-    if(OutdoorPvP * pvp = _player->GetOutdoorPvP())
-    {
-        pvp->HandlePlayerActivityChanged(_player);
-    }
+    //if(OutdoorPvP * pvp = _player->GetOutdoorPvP())
+    //    pvp->HandlePlayerActivityChanged(_player);
 }
 
 void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
@@ -401,6 +479,7 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
     uint32 newzone, newarea;
     GetPlayer()->GetZoneAndAreaId(newzone,newarea);
     GetPlayer()->UpdateZone(newzone,newarea);
+    //GetPlayer()->SendInitWorldStates(true,newZone);
 }
 
 void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )
@@ -467,7 +546,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_ADD_FRIEND" );
 
-    std::string friendName = GetMangosString(LANG_FRIEND_IGNORE_UNKNOWN);
+    std::string friendName = GetRibonString(LANG_FRIEND_IGNORE_UNKNOWN);
     std::string friendNote;
 
     recv_data >> friendName;
@@ -485,47 +564,57 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: %s asked to add friend : '%s'",
         GetPlayer()->GetName(), friendName.c_str() );
 
-    CharacterDatabase.AsyncPQuery(&WorldSession::HandleAddFriendOpcodeCallBack, GetAccountId(), friendNote, "SELECT guid, race FROM characters WHERE name = '%s'", friendName.c_str());
+    CharacterDatabase.AsyncPQuery(&WorldSession::HandleAddFriendOpcodeCallBack, GetAccountId(), friendNote, "SELECT guid, race, account FROM characters WHERE name = '%s'", friendName.c_str());
 }
 
 void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult *result, uint32 accountId, std::string friendNote)
 {
-    if(!result)
-        return;
-
-    uint64 friendGuid = MAKE_NEW_GUID((*result)[0].GetUInt32(), 0, HIGHGUID_PLAYER);
-    uint32 team = Player::TeamForRace((*result)[1].GetUInt8());
-
-    delete result;
+    uint64 friendGuid;
+    uint64 friendAcctid;
+    uint32 team;
+    FriendsResult friendResult;
 
     WorldSession * session = sWorld.FindSession(accountId);
+
     if(!session || !session->GetPlayer())
         return;
 
-    FriendsResult friendResult = FRIEND_NOT_FOUND;
-    if(friendGuid)
+    friendResult = FRIEND_NOT_FOUND;
+    friendGuid = 0;
+
+    if(result)
     {
-        if(friendGuid==session->GetPlayer()->GetGUID())
-            friendResult = FRIEND_SELF;
-        else if(session->GetPlayer()->GetTeam() != team && !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_ADD_FRIEND) && session->GetSecurity() < SEC_MODERATOR)
-            friendResult = FRIEND_ENEMY;
-        else if(session->GetPlayer()->GetSocial()->HasFriend(GUID_LOPART(friendGuid)))
-            friendResult = FRIEND_ALREADY;
-        else
+        friendGuid = MAKE_NEW_GUID((*result)[0].GetUInt32(), 0, HIGHGUID_PLAYER);
+        team = Player::TeamForRace((*result)[1].GetUInt8());
+        friendAcctid = (*result)[2].GetUInt32();
+
+        delete result;
+
+        if ( session->GetSecurity() >= SEC_MODERATOR || sWorld.getConfig(CONFIG_ALLOW_GM_FRIEND) || accmgr.GetSecurity(friendAcctid) < SEC_MODERATOR)
         {
-            Player* pFriend = ObjectAccessor::FindPlayer(friendGuid);
-            if( pFriend && pFriend->IsInWorld() && pFriend->IsVisibleGloballyFor(session->GetPlayer()))
-                friendResult = FRIEND_ADDED_ONLINE;
-            else
-                friendResult = FRIEND_ADDED_OFFLINE;
-
-            if(!session->GetPlayer()->GetSocial()->AddToSocialList(GUID_LOPART(friendGuid), false))
+            if(friendGuid)
             {
-                friendResult = FRIEND_LIST_FULL;
-                sLog.outDebug( "WORLD: %s's friend list is full.", session->GetPlayer()->GetName());
+                if(friendGuid==session->GetPlayer()->GetGUID())
+                    friendResult = FRIEND_SELF;
+                else if(session->GetPlayer()->GetTeam() != team && !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_ADD_FRIEND) && session->GetSecurity() < SEC_MODERATOR)
+                    friendResult = FRIEND_ENEMY;
+                else if(session->GetPlayer()->GetSocial()->HasFriend(GUID_LOPART(friendGuid)))
+                    friendResult = FRIEND_ALREADY;
+                else
+                {
+                    Player* pFriend = ObjectAccessor::FindPlayer(friendGuid);
+                    if( pFriend && pFriend->IsInWorld() && pFriend->IsVisibleGloballyFor(session->GetPlayer()))
+                        friendResult = FRIEND_ADDED_ONLINE;
+                    else
+                        friendResult = FRIEND_ADDED_OFFLINE;
+                    if(!session->GetPlayer()->GetSocial()->AddToSocialList(GUID_LOPART(friendGuid), false))
+                    {
+                        friendResult = FRIEND_LIST_FULL;
+                        sLog.outDebug( "WORLD: %s's friend list is full.", session->GetPlayer()->GetName());
+                    }
+                }
+                session->GetPlayer()->GetSocial()->SetFriendNote(GUID_LOPART(friendGuid), friendNote);
             }
-
-            session->GetPlayer()->GetSocial()->SetFriendNote(GUID_LOPART(friendGuid), friendNote);
         }
     }
 
@@ -557,7 +646,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_ADD_IGNORE" );
 
-    std::string IgnoreName = GetMangosString(LANG_FRIEND_IGNORE_UNKNOWN);
+    std::string IgnoreName = GetRibonString(LANG_FRIEND_IGNORE_UNKNOWN);
 
     recv_data >> IgnoreName;
 
@@ -574,31 +663,37 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleAddIgnoreOpcodeCallBack(QueryResult *result, uint32 accountId)
 {
-    if(!result)
-        return;
-
-    uint64 IgnoreGuid = MAKE_NEW_GUID((*result)[0].GetUInt32(), 0, HIGHGUID_PLAYER);
-
-    delete result;
+    uint64 IgnoreGuid;
+    FriendsResult ignoreResult;
 
     WorldSession * session = sWorld.FindSession(accountId);
+
     if(!session || !session->GetPlayer())
         return;
 
-    FriendsResult ignoreResult = FRIEND_IGNORE_NOT_FOUND;
-    if(IgnoreGuid)
-    {
-        if(IgnoreGuid==session->GetPlayer()->GetGUID())              //not add yourself
-            ignoreResult = FRIEND_IGNORE_SELF;
-        else if( session->GetPlayer()->GetSocial()->HasIgnore(GUID_LOPART(IgnoreGuid)) )
-            ignoreResult = FRIEND_IGNORE_ALREADY;
-        else
-        {
-            ignoreResult = FRIEND_IGNORE_ADDED;
+    ignoreResult = FRIEND_IGNORE_NOT_FOUND;
+    IgnoreGuid = 0;
 
-            // ignore list full
-            if(!session->GetPlayer()->GetSocial()->AddToSocialList(GUID_LOPART(IgnoreGuid), true))
-                ignoreResult = FRIEND_IGNORE_FULL;
+    if(result)
+    {
+        IgnoreGuid = MAKE_NEW_GUID((*result)[0].GetUInt32(), 0, HIGHGUID_PLAYER);
+
+        delete result;
+
+        if(IgnoreGuid)
+        {
+            if(IgnoreGuid==session->GetPlayer()->GetGUID())              //not add yourself
+                ignoreResult = FRIEND_IGNORE_SELF;
+            else if( session->GetPlayer()->GetSocial()->HasIgnore(GUID_LOPART(IgnoreGuid)) )
+                ignoreResult = FRIEND_IGNORE_ALREADY;
+            else
+            {
+                ignoreResult = FRIEND_IGNORE_ADDED;
+
+                // ignore list full
+                if(!session->GetPlayer()->GetSocial()->AddToSocialList(GUID_LOPART(IgnoreGuid), true))
+                    ignoreResult = FRIEND_IGNORE_FULL;
+            }
         }
     }
 
@@ -846,62 +941,8 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     if(!at)
         return;
 
-    if(!GetPlayer()->isGameMaster())
-    {
-        uint32 missingLevel = 0;
-        if(GetPlayer()->getLevel() < at->requiredLevel && !sWorld.getConfig(CONFIG_INSTANCE_IGNORE_LEVEL))
-            missingLevel = at->requiredLevel;
-
-        // must have one or the other, report the first one that's missing
-        uint32 missingItem = 0;
-        if(at->requiredItem)
-        {
-            if(!GetPlayer()->HasItemCount(at->requiredItem, 1) &&
-                (!at->requiredItem2 || !GetPlayer()->HasItemCount(at->requiredItem2, 1)))
-                missingItem = at->requiredItem;
-        }
-        else if(at->requiredItem2 && !GetPlayer()->HasItemCount(at->requiredItem2, 1))
-            missingItem = at->requiredItem2;
-
-        uint32 missingKey = 0;
-        if(GetPlayer()->GetDifficulty() == DIFFICULTY_HEROIC)
-        {
-            if(at->heroicKey)
-            {
-                if(!GetPlayer()->HasItemCount(at->heroicKey, 1) &&
-                    (!at->heroicKey2 || !GetPlayer()->HasItemCount(at->heroicKey2, 1)))
-                    missingKey = at->heroicKey;
-            }
-            else if(at->heroicKey2 && !GetPlayer()->HasItemCount(at->heroicKey2, 1))
-                missingKey = at->heroicKey2;
-        }
-
-        uint32 missingQuest = 0;
-        if(GetPlayer()->GetDifficulty() == DIFFICULTY_HEROIC)
-        {
-            if (at->requiredQuestHeroic && !GetPlayer()->GetQuestRewardStatus(at->requiredQuestHeroic))
-                missingQuest = at->requiredQuestHeroic;
-        }
-        else
-        {
-            if(at->requiredQuest && !GetPlayer()->GetQuestRewardStatus(at->requiredQuest))
-                missingQuest = at->requiredQuest;
-        }
-
-        if(missingLevel || missingItem || missingKey || missingQuest)
-        {
-            // TODO: all this is probably wrong
-            if(missingItem)
-                SendAreaTriggerMessage(GetMangosString(LANG_LEVEL_MINREQUIRED_AND_ITEM), at->requiredLevel, objmgr.GetItemPrototype(missingItem)->Name1);
-            else if(missingKey)
-                GetPlayer()->SendTransferAborted(at->target_mapId, TRANSFER_ABORT_DIFFICULTY, DIFFICULTY_HEROIC);
-            else if(missingQuest)
-                SendAreaTriggerMessage(at->requiredFailedText.c_str());
-            else if(missingLevel)
-                SendAreaTriggerMessage(GetMangosString(LANG_LEVEL_MINREQUIRED), missingLevel);
-            return;
-        }
-    }
+    if(!GetPlayer()->Satisfy(objmgr.GetAccessRequirement(at->access_id), at->target_mapId, true))
+        return;
 
     GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,TELE_TO_NOT_LEAVE_TRANSPORT);
 }
@@ -1066,7 +1107,7 @@ void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & /*recv_data*/ )
         sLog.outDebug( "WORLD: CMSG_MOVE_TIME_SKIPPED" );
 
         /// TODO
-        must be need use in mangos
+        must be need use in Ribon
         We substract server Lags to move time ( AntiLags )
         for exmaple
         GetPlayer()->ModifyLastMoveTime( -int32(time_skipped) );
@@ -1195,7 +1236,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
     uint64 guid;
     recv_data >> guid;
-    DEBUG_LOG("Inspected guid is (GUID: %u TypeId: %u)", GUID_LOPART(guid), GuidHigh2TypeId(GUID_HIPART(guid)));
+    DEBUG_LOG("Inspected guid is " UI64FMTD, guid);
 
     _player->SetSelection(guid);
 
@@ -1203,7 +1244,9 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     if(!plr)                                                // wrong player
         return;
 
-    WorldPacket data(SMSG_INSPECT_TALENT, 50);
+    uint32 talent_points = 0x3D;
+    uint32 guid_size = plr->GetPackGUID().wpos(); 
+    WorldPacket data(SMSG_INSPECT_TALENT, guid_size+4+talent_points);
     data.append(plr->GetPackGUID());
 
     if(sWorld.getConfig(CONFIG_TALENTS_INSPECTING) || _player->isGameMaster())
@@ -1283,51 +1326,6 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
     else
         SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
     sLog.outDebug("Received worldport command from player %s", GetPlayer()->GetName());
-}
-
-void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
-{
-    CHECK_PACKET_SIZE(recv_data,8+4+4);
-
-    sLog.outDebug("WORLD: CMSG_GOSSIP_SELECT_OPTION");
-
-    uint32 option;
-    uint32 unk;
-    uint64 guid;
-    std::string code = "";
-
-    recv_data >> guid >> unk >> option;
-
-    if(_player->PlayerTalkClass->GossipOptionCoded( option ))
-    {
-        // recheck
-        CHECK_PACKET_SIZE(recv_data,8+4+1);
-        sLog.outBasic("reading string");
-        recv_data >> code;
-        sLog.outBasic("string read: %s", code.c_str());
-    }
-
-    Creature *unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
-    if (!unit)
-    {
-        sLog.outDebug( "WORLD: HandleGossipSelectOptionOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
-        return;
-    }
-
-    // remove fake death
-    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
-
-    if(!code.empty())
-    {
-        if (!Script->GossipSelectWithCode(_player, unit, _player->PlayerTalkClass->GossipOptionSender (option), _player->PlayerTalkClass->GossipOptionAction( option ), code.c_str()))
-            unit->OnGossipSelect (_player, option);
-    }
-    else
-    {
-        if (!Script->GossipSelect (_player, unit, _player->PlayerTalkClass->GossipOptionSender (option), _player->PlayerTalkClass->GossipOptionAction (option)))
-           unit->OnGossipSelect (_player, option);
-    }
 }
 
 void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
@@ -1462,21 +1460,30 @@ void WorldSession::HandleFarSightOpcode( WorldPacket & recv_data )
     sLog.outDebug("WORLD: CMSG_FAR_SIGHT");
     //recv_data.hexlike();
 
-    uint8 unk;
-    recv_data >> unk;
+    uint8 apply;
+    recv_data >> apply;
 
-    switch(unk)
+    switch(apply)
     {
         case 0:
-            //WorldPacket data(SMSG_CLEAR_FAR_SIGHT_IMMEDIATE, 0)
-            //SendPacket(&data);
-            //_player->SetUInt64Value(PLAYER_FARSIGHT, 0);
-            sLog.outDebug("Removed FarSight from player %u", _player->GetGUIDLow());
+            sLog.outDebug("Player %u set vision to self", _player->GetGUIDLow());
+            _player->SetSeer(_player);
             break;
         case 1:
-            sLog.outDebug("Added FarSight (GUID:%u TypeId:%u) to player %u", GUID_LOPART(_player->GetFarSight()), GuidHigh2TypeId(GUID_HIPART(_player->GetFarSight())), _player->GetGUIDLow());
+            sLog.outDebug("Added FarSight " I64FMT " to player %u", _player->GetUInt64Value(PLAYER_FARSIGHT), _player->GetGUIDLow());
+            if(WorldObject *target = _player->GetViewpoint())
+                _player->SetSeer(target);
+            else
+                sLog.outError("Player %s requests non-existing seer", _player->GetName());
             break;
+        default:
+            sLog.outDebug("Unhandled mode in CMSG_FAR_SIGHT: %u", apply);
+            return;
     }
+    // Update visibility after vision change
+    //Cell cell(pair);
+    //GetPlayer()->GetMap()->UpdateObjectsVisibilityFor(_player, cell, pair);
+    GetPlayer()->SetToNotify();
 }
 
 void WorldSession::HandleSetTitleOpcode( WorldPacket & recv_data )
@@ -1593,7 +1600,7 @@ void WorldSession::HandleCancelMountAuraOpcode( WorldPacket & /*recv_data*/ )
     }
 
     _player->Unmount();
-    _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+    _player->RemoveAurasByType(SPELL_AURA_MOUNTED);
 }
 
 void WorldSession::HandleMoveSetCanFlyAckOpcode( WorldPacket & recv_data )
@@ -1610,7 +1617,7 @@ void WorldSession::HandleMoveSetCanFlyAckOpcode( WorldPacket & recv_data )
 
     recv_data >> guid >> unk >> flags;
 
-    _player->m_movementInfo.SetMovementFlags(MovementFlags(flags));
+    _player->m_mover->m_movementInfo.flags = flags;
 }
 
 void WorldSession::HandleRequestPetInfoOpcode( WorldPacket & /*recv_data */)

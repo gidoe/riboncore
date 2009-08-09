@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,19 +10,18 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOS_MOTIONMASTER_H
-#define MANGOS_MOTIONMASTER_H
+#ifndef RIBON_MOTIONMASTER_H
+#define RIBON_MOTIONMASTER_H
 
 #include "Common.h"
-#include <stack>
 #include <vector>
 
 class MovementGenerator;
@@ -47,6 +48,15 @@ enum MovementGeneratorType
     ASSISTANCE_MOTION_TYPE= 11,                             // PointMovementGenerator.h (first part of flee for assistance)
     ASSISTANCE_DISTRACT_MOTION_TYPE = 12,                   // IdleMovementGenerator.h (second part of flee for assistance)
     TIMED_FLEEING_MOTION_TYPE = 13,                         // FleeingMovementGenerator.h (alt.second part of flee for assistance)
+    NULL_MOTION_TYPE      = 14,
+};
+
+enum MovementSlot
+{
+    MOTION_SLOT_IDLE,
+    MOTION_SLOT_ACTIVE,
+    MOTION_SLOT_CONTROLLED,
+    MAX_MOTION_SLOT,
 };
 
 enum MMCleanFlag
@@ -56,26 +66,46 @@ enum MMCleanFlag
     MMCF_RESET  = 2  // Flag if need top()->Reset()
 };
 
-class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
+// assume it is 25 yard per 0.6 second
+#define SPEED_CHARGE    42.0f
+
+class RIBON_DLL_SPEC MotionMaster //: private std::stack<MovementGenerator *>
 {
     private:
-        typedef std::stack<MovementGenerator *> Impl;
-        typedef std::vector<MovementGenerator *> ExpireList;
+        //typedef std::stack<MovementGenerator *> Impl;
+        typedef MovementGenerator* _Ty;
+        _Ty Impl[MAX_MOTION_SLOT];
+        bool needInit[MAX_MOTION_SLOT];
+        typedef std::vector<_Ty> ExpireList;
+        int i_top;
+
+        bool empty() const { return (i_top < 0); }
+        void pop() { Impl[i_top] = NULL; --i_top; }
+        void push(_Ty _Val) { ++i_top; Impl[i_top] = _Val; }
+
+        bool needInitTop() const { return needInit[i_top]; }
+        void InitTop();
     public:
 
-        explicit MotionMaster(Unit *unit) : i_owner(unit), m_expList(NULL), m_cleanFlag(MMCF_NONE) {}
+        explicit MotionMaster(Unit *unit) : i_owner(unit), m_expList(NULL), m_cleanFlag(MMCF_NONE), i_top(-1)
+        {
+            for(uint8 i = 0; i < MAX_MOTION_SLOT; ++i)
+            {
+                Impl[i] = NULL;
+                needInit[i] = true;
+            }
+        }
         ~MotionMaster();
 
         void Initialize();
+        void InitDefault();
 
-        MovementGenerator* operator->(void) { return top(); }
+        int size() const { return i_top + 1; }
+        _Ty top() const { return Impl[i_top]; }
+        _Ty GetMotionSlot(int slot) const { return Impl[slot]; }
 
-        using Impl::top;
-        using Impl::empty;
-
-        typedef Impl::container_type::const_iterator const_iterator;
-        const_iterator begin() const { return Impl::c.begin(); }
-        const_iterator end() const { return Impl::c.end(); }
+        void DirectDelete(_Ty curr);
+        void DelayedDelete(_Ty curr);
 
         void UpdateMotion(uint32 diff);
         void Clear(bool reset = true)
@@ -105,25 +135,32 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
                 DirectExpire(reset);
         }
 
-        void MoveIdle();
+        void MoveIdle(MovementSlot slot = MOTION_SLOT_ACTIVE);
         void MoveTargetedHome();
-        void MoveFollow(Unit* target, float dist, float angle);
+        void MoveRandom(float spawndist = 0.0f);
+        void MoveFollow(Unit* target, float dist, float angle, MovementSlot slot = MOTION_SLOT_ACTIVE);
         void MoveChase(Unit* target, float dist = 0.0f, float angle = 0.0f);
         void MoveConfused();
         void MoveFleeing(Unit* enemy, uint32 time = 0);
         void MovePoint(uint32 id, float x,float y,float z);
+        void MoveCharge(float x, float y, float z, float speed = SPEED_CHARGE);
+        void MoveKnockbackFrom(float srcX, float srcY, float speedXY, float speedZ);
+        void MoveJumpTo(float angle, float speedXY, float speedZ);
+        void MoveJump(float x, float y, float z, float speedXY, float speedZ);
         void MoveSeekAssistance(float x,float y,float z);
         void MoveSeekAssistanceDistract(uint32 timer);
         void MoveTaxiFlight(uint32 path, uint32 pathnode);
         void MoveDistract(uint32 time);
+        void MovePath(uint32 path_id, bool repeatable);
 
         MovementGeneratorType GetCurrentMovementGeneratorType() const;
+        MovementGeneratorType GetMotionSlotType(int slot) const;
 
         void propagateSpeedChange();
 
         bool GetDestination(float &x, float &y, float &z);
     private:
-        void Mutate(MovementGenerator *m);                  // use Move* functions instead
+        void Mutate(MovementGenerator *m, MovementSlot slot);                  // use Move* functions instead
 
         void DirectClean(bool reset);
         void DelayedClean();
@@ -136,3 +173,4 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
         uint8       m_cleanFlag;
 };
 #endif
+

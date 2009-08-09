@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,7 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifdef MULTI_THREAD_MAP
 #include <omp.h>
+#endif
 #include "MapManager.h"
 #include "InstanceSaveMgr.h"
 #include "Policies/SingletonImp.h"
@@ -31,6 +35,7 @@
 #include "CellImpl.h"
 #include "Corpse.h"
 #include "ObjectMgr.h"
+#include "Language.h"
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, ACE_Thread_Mutex>
 INSTANTIATE_SINGLETON_2(MapManager, CLASS_LOCK);
@@ -71,12 +76,6 @@ MapManager::Initialize()
     InitMaxInstanceId();
 }
 
-void MapManager::InitializeVisibilityDistanceInfo()
-{
-    for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
-        (*iter).second->InitVisibilityDistance();
-}
-
 // debugging code, should be deleted some day
 void MapManager::checkAndCorrectGridStatesArray()
 {
@@ -89,7 +88,7 @@ void MapManager::checkAndCorrectGridStatesArray()
             ok = false;
             si_GridStates[i] = i_GridStates[i];
         }
-        #ifdef MANGOS_DEBUG
+        #ifdef RIBON_DEBUG
         // inner class checking only when compiled with debug
         if(!si_GridStates[i]->checkMagic())
         {
@@ -118,9 +117,13 @@ MapManager::_createBaseMap(uint32 id)
         {
             m = new MapInstanced(id, i_gridCleanUpDelay);
         }
-        else
+        else if (entry)
         {
             m = new Map(id, i_gridCleanUpDelay, 0, 0);
+        }
+        else
+        {
+            assert(false);
         }
         i_maps[id] = m;
     }
@@ -129,13 +132,13 @@ MapManager::_createBaseMap(uint32 id)
     return m;
 }
 
-Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
+Map* MapManager::CreateMap(uint32 id, const WorldObject* obj, uint32 instanceId)
 {
     ASSERT(obj);
     //if(!obj->IsInWorld()) sLog.outError("GetMap: called for map %d with object (typeid %d, guid %d, mapid %d, instanceid %d) who is not in world!", id, obj->GetTypeId(), obj->GetGUIDLow(), obj->GetMapId(), obj->GetInstanceId());
     Map *m = _createBaseMap(id);
 
-    if (m && (obj->GetTypeId() == TYPEID_PLAYER) && m->Instanceable()) m = ((MapInstanced*)m)->CreateInstance(id, (Player*)obj);
+    if (m && (obj->GetTypeId() == TYPEID_PLAYER) && m->Instanceable()) m = ((MapInstanced*)m)->CreateInstance(id, (Player*)obj, instanceId);
 
     return m;
 }
@@ -175,7 +178,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player)
                 {
                     // probably there must be special opcode, because client has this string constant in GlobalStrings.lua
                     // TODO: this is not a good place to send the message
-                    player->GetSession()->SendAreaTriggerMessage("You must be in a raid group to enter %s instance", mapName);
+                    player->GetSession()->SendAreaTriggerMessage(player->GetSession()->GetRibonString(LANG_INSTANCE_RAID_GROUP_ONLY), mapName);
                     sLog.outDebug("MAP: Player '%s' must be in a raid group to enter instance of '%s'", player->GetName(), mapName);
                     return false;
                 }
@@ -208,7 +211,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player)
 
                 if (!instance_map)
                 {
-                    player->GetSession()->SendAreaTriggerMessage("You cannot enter %s while in a ghost mode", mapName);
+                    player->GetSession()->SendAreaTriggerMessage(player->GetSession()->GetRibonString(811), mapName);
                     sLog.outDebug("MAP: Player '%s' doesn't has a corpse in instance '%s' and can't enter", player->GetName(), mapName);
                     return false;
                 }
@@ -220,24 +223,15 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player)
             }
         }
 
-        // TODO: move this to a map dependent location
-        /*if(i_data && i_data->IsEncounterInProgress())
-        {
-            sLog.outDebug("MAP: Player '%s' can't enter instance '%s' while an encounter is in progress.", player->GetName(), GetMapName());
-            player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
-            return(false);
-        }*/
-        return true;
+        // Requirements
+        InstanceTemplate const* instance = objmgr.GetInstanceTemplate(mapid);
+        if(!instance)
+            return false;
+
+        return player->Satisfy(objmgr.GetAccessRequirement(instance->access_id), mapid, true);
     }
     else
         return true;
-}
-
-void MapManager::DeleteInstance(uint32 mapid, uint32 instanceId)
-{
-    Map *m = _createBaseMap(mapid);
-    if (m && m->Instanceable())
-        ((MapInstanced*)m)->DestroyInstance(instanceId);
 }
 
 void MapManager::RemoveBonesFromMap(uint32 mapid, uint64 guid, float x, float y)
@@ -257,55 +251,62 @@ MapManager::Update(uint32 diff)
     if( !i_timer.Passed() )
         return;
 
-    int i = 0;
+#ifdef MULTI_THREAD_MAP
+    uint32 i=0;
     MapMapType::iterator iter;
     std::vector<Map*> update_queue(i_maps.size());
-
-    int omp_set_num_threads(sWorld.getConfig(CONFIG_NUMTHREADS));
-
-    for(iter = i_maps.begin(), i = 0; iter != i_maps.end(); ++iter, ++i)
-        update_queue[i] = iter->second;
+	int omp_set_num_threads(sWorld.getConfig(CONFIG_NUMTHREADS));
+    for(iter = i_maps.begin(), i=0;iter != i_maps.end(); ++iter, i++)
+        update_queue[i]=iter->second;
 /*
     gomp in gcc <4.4 version cannot parallelise loops using random access iterators
     so until gcc 4.4 isnt standard, we need the update_queue workaround
 */
-    // Parallelize map updates.
-    #pragma omp parallel for schedule(dynamic) private(i) shared(update_queue)
-    for(int i = 0; i < i_maps.size(); ++i)
+#pragma omp parallel for schedule(dynamic) private(i) shared(update_queue)
+    for(int32 i = 0; i < i_maps.size(); ++i)
     {
         checkAndCorrectGridStatesArray();                   // debugging code, should be deleted some day
         update_queue[i]->Update(i_timer.GetCurrent());
+        sWorld.RecordTimeDiff("UpdateMap %u", update_queue[i]->GetId());
+    //  sLog.outError("This is thread %d out of %d threads,updating map %u",omp_get_thread_num(),omp_get_num_threads(),iter->second->GetId());
     }
+#else
+    for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
+    {
+        iter->second->Update(i_timer.GetCurrent());
+        sWorld.RecordTimeDiff("UpdateMap %u", iter->second->GetId());
+    }
+#endif
 
     ObjectAccessor::Instance().Update(i_timer.GetCurrent());
+    sWorld.RecordTimeDiff("UpdateObjectAccessor");
     for (TransportSet::iterator iter = m_Transports.begin(); iter != m_Transports.end(); ++iter)
         (*iter)->Update(i_timer.GetCurrent());
+    sWorld.RecordTimeDiff("UpdateTransports");
 
     i_timer.SetCurrent(0);
 }
 
 void MapManager::DoDelayedMovesAndRemoves()
 {
-    int i = 0;
+    /*
+    int i =0;
     std::vector<Map*> update_queue(i_maps.size());
     MapMapType::iterator iter;
+    for(iter = i_maps.begin();iter != i_maps.end(); ++iter, i++)
+	update_queue[i] = iter->second;
 
-    for(iter = i_maps.begin(); iter != i_maps.end(); ++iter, ++i)
-        update_queue[i] = iter->second;
-
-    int omp_set_num_threads(sWorld.getConfig(CONFIG_NUMTHREADS));
-
-   // Parallelize map updates.
-    #pragma omp parallel for schedule(dynamic) private(i) shared(update_queue)
-    for(i = 0 ; i < i_maps.size() ; ++i)
-    {
-         update_queue[i]->DoDelayedMovesAndRemoves();
-    }
+    omp_set_num_threads(sWorld.getConfig(CONFIG_NUMTHREADS));
+    
+#pragma omp parallel for schedule(dynamic) private(i) shared(update_queue)
+    for(i=0;i<i_maps.size();i++)
+	update_queue[i]->DoDelayedMovesAndRemoves();
+    */
 }
 
 bool MapManager::ExistMapAndVMap(uint32 mapid, float x,float y)
 {
-    GridPair p = MaNGOS::ComputeGridPair(x,y);
+    GridPair p = Ribon::ComputeGridPair(x,y);
 
     int gx=63-p.x_coord;
     int gy=63-p.y_coord;
@@ -323,7 +324,7 @@ bool MapManager::IsValidMAP(uint32 mapid)
 void MapManager::UnloadAll()
 {
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
-        iter->second->UnloadAll(true);
+        iter->second->UnloadAll();
 
     while(!i_maps.empty())
     {
@@ -342,12 +343,6 @@ void MapManager::InitMaxInstanceId()
         i_MaxInstanceId = result->Fetch()[0].GetUInt32();
         delete result;
     }
-}
-
-void MapManager::InitializeVisibilityNotifyTimers()
-{
-    for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
-        (*iter).second->InitializeNotifyTimers();
 }
 
 uint32 MapManager::GetNumInstances()
@@ -378,3 +373,4 @@ uint32 MapManager::GetNumPlayersInInstances()
     }
     return ret;
 }
+

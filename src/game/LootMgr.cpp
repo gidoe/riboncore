@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "LootMgr.h"
@@ -48,6 +50,7 @@ LootStore LootTemplates_Reference(    "reference_loot_template",    "reference i
 LootStore LootTemplates_Skinning(     "skinning_loot_template",     "creature skinning id",         true);
 LootStore LootTemplates_Spell(        "spell_loot_template",        "spell id (random item creating)",false);
 
+
 class LootTemplate::LootGroup                               // A set of loot definitions for items (refs are not allowed)
 {
     public:
@@ -61,7 +64,7 @@ class LootTemplate::LootGroup                               // A set of loot def
 
         void Verify(LootStore const& lootstore, uint32 id, uint32 group_id) const;
         void CollectLootIds(LootIdSet& set) const;
-        void CheckLootRefs(LootIdSet* ref_set) const;
+        void CheckLootRefs(LootTemplateMap const& store, LootIdSet* ref_set) const;
     private:
         LootStoreItemList ExplicitlyChanced;                // Entries with chances defined in DB
         LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
@@ -216,7 +219,7 @@ void LootStore::LoadAndCollectLootIds(LootIdSet& ids_set)
 void LootStore::CheckLootRefs(LootIdSet* ref_set) const
 {
     for(LootTemplateMap::const_iterator ltItr = m_LootTemplates.begin(); ltItr != m_LootTemplates.end(); ++ltItr)
-        ltItr->second->CheckLootRefs(ref_set);
+        ltItr->second->CheckLootRefs(m_LootTemplates,ref_set);
 }
 
 void LootStore::ReportUnusedIds(LootIdSet const& ids_set) const
@@ -558,7 +561,7 @@ void Loot::NotifyQuestItemRemoved(uint8 questIndex)
     // when a free for all questitem is looted
     // all players will get notified of it being removed
     // (other questitems can be looted by each group member)
-    // bit inefficient but isnt called often
+    // bit inefficient but isn't called often
 
     std::set<uint64>::iterator i_next;
     for(std::set<uint64>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); i = i_next)
@@ -900,7 +903,7 @@ void LootTemplate::LootGroup::Verify(LootStore const& lootstore, uint32 id, uint
     }
 }
 
-void LootTemplate::LootGroup::CheckLootRefs(LootIdSet* ref_set) const
+void LootTemplate::LootGroup::CheckLootRefs(LootTemplateMap const& store, LootIdSet* ref_set) const
 {
     for (LootStoreItemList::const_iterator ieItr=ExplicitlyChanced.begin(); ieItr != ExplicitlyChanced.end(); ++ieItr)
     {
@@ -1054,7 +1057,7 @@ void LootTemplate::Verify(LootStore const& lootstore, uint32 id) const
     // TODO: References validity checks
 }
 
-void LootTemplate::CheckLootRefs(LootIdSet* ref_set) const
+void LootTemplate::CheckLootRefs(LootTemplateMap const& store, LootIdSet* ref_set) const
 {
     for(LootStoreItemList::const_iterator ieItr = Entries.begin(); ieItr != Entries.end(); ++ieItr)
     {
@@ -1068,7 +1071,7 @@ void LootTemplate::CheckLootRefs(LootIdSet* ref_set) const
     }
 
     for(LootGroups::const_iterator grItr = Groups.begin(); grItr != Groups.end(); ++grItr)
-        grItr->CheckLootRefs(ref_set);
+        grItr->CheckLootRefs(store,ref_set);
 }
 
 void LoadLootTemplates_Creature()
@@ -1356,3 +1359,4 @@ void LoadLootTemplates_Reference()
     // output error for any still listed ids (not referenced from any loot table)
     LootTemplates_Reference.ReportUnusedIds(ids_set);
 }
+

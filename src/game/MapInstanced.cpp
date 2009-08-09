@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -32,17 +34,6 @@ MapInstanced::MapInstanced(uint32 id, time_t expiry) : Map(id, expiry, 0, 0)
     memset(&GridMapReference, 0, MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_GRIDS*sizeof(uint16));
 }
 
-void MapInstanced::InitVisibilityDistance()
-{
-    if(m_InstancedMaps.empty())
-        return;
-    //initialize visibility distances for all instance copies
-    for (InstancedMaps::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); ++i)
-    {
-        (*i).second->InitVisibilityDistance();
-    }
-}
-
 void MapInstanced::Update(const uint32& t)
 {
     // take care of loaded GridMaps (when unused, unload it!)
@@ -55,7 +46,10 @@ void MapInstanced::Update(const uint32& t)
     {
         if(i->second->CanUnload(t))
         {
-            DestroyInstance(i);                             // iterator incremented
+            if(!DestroyInstance(i))                             // iterator incremented
+            {
+                //m_unloadTimer
+            }
         }
         else
         {
@@ -86,6 +80,12 @@ void MapInstanced::RemoveAllObjectsInRemoveList()
     Map::RemoveAllObjectsInRemoveList();
 }
 
+void MapInstanced::RelocationNotify()
+{
+    for (InstancedMaps::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); ++i)
+        i->second->RelocationNotify();
+}
+
 bool MapInstanced::RemoveBones(uint64 guid, float x, float y)
 {
     bool remove_result = false;
@@ -98,11 +98,11 @@ bool MapInstanced::RemoveBones(uint64 guid, float x, float y)
     return remove_result || Map::RemoveBones(guid,x,y);
 }
 
-void MapInstanced::UnloadAll(bool pForce)
+void MapInstanced::UnloadAll()
 {
     // Unload instanced maps
     for (InstancedMaps::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); ++i)
-        i->second->UnloadAll(pForce);
+        i->second->UnloadAll();
 
     // Delete the maps only after everything is unloaded to prevent crashes
     for (InstancedMaps::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); ++i)
@@ -111,7 +111,7 @@ void MapInstanced::UnloadAll(bool pForce)
     m_InstancedMaps.clear();
 
     // Unload own grids (just dummy(placeholder) grids, neccesary to unload GridMaps!)
-    Map::UnloadAll(pForce);
+    Map::UnloadAll();
 }
 
 /*
@@ -119,73 +119,43 @@ void MapInstanced::UnloadAll(bool pForce)
 - create the instance if it's not created already
 - the player is not actually added to the instance (only in InstanceMap::Add)
 */
-Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
+Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player, uint32 instanceId)
 {
-    if(GetId() != mapId || !player)
-        return NULL;
-
-    Map* map = NULL;
-    uint32 NewInstanceId = 0;                       // instanceId of the resulting map
+    if(instanceId)
+        if(Map *map = _FindMap(instanceId))
+            return map;
 
     if(IsBattleGroundOrArena())
     {
-        // instantiate or find existing bg map for player
-        // the instance id is set in battlegroundid
-        NewInstanceId = player->GetBattleGroundId();
-        ASSERT(NewInstanceId);
-        map = _FindMap(NewInstanceId);
-        if(!map)
-        {
-            map = CreateBattleGround(NewInstanceId);
-            ((BattleGroundMap*)map)->SetBG(player->GetBattleGround());
-        }
-        if(!((BattleGroundMap*)map)->GetBG())
-        {
-            sLog.outError("The bg-class couldn't be assigned (very early) to the battlegroundmap, it's possible, that some db-spawned creatures are now not handled right this is related to battleground alterac valley (av) - please post bugreport, and add information how this bg was created (if you don't have information, report it also) Player: %s (%u) in map:%u requested map:%u", player->GetName(), player->GetGUIDLow(), player->GetMapId(), GetId());
-            if(player->GetBattleGround())
-            {
-                sLog.outError("somehow the battleground was found, but please report also - i end this bg now..");
-                ((BattleGroundMap*)map)->SetBG(player->GetBattleGround());
-                player->GetBattleGround()->EndBattleGround(0); //to avoid the assert
-            }
-            //assert(false);
-        }
+        instanceId = player->GetBattleGroundId();
+        if(instanceId)
+            if(Map *map = _FindMap(instanceId))
+                return map;
+        return CreateBattleGround(instanceId);
     }
-    else
+    else if(InstanceSave *pSave = player->GetInstanceSave(GetId()))
     {
-        InstancePlayerBind *pBind = player->GetBoundInstance(GetId(), player->GetDifficulty());
-        InstanceSave *pSave = pBind ? pBind->save : NULL;
+        if(!instanceId)
+        {
+            instanceId = pSave->GetInstanceId(); // go from outside to instance
+            if(Map *map = _FindMap(instanceId))
+                return map;
+        }
+        else if(instanceId != pSave->GetInstanceId()) // cannot go from one instance to another
+            return NULL;
+        // else log in at a saved instance
 
-        // the player's permanent player bind is taken into consideration first
-        // then the player's group bind and finally the solo bind.
-        if(!pBind || !pBind->perm)
-        {
-            InstanceGroupBind *groupBind = NULL;
-            Group *group = player->GetGroup();
-            // use the player's difficulty setting (it may not be the same as the group's)
-            if(group && (groupBind = group->GetBoundInstance(GetId(), player->GetDifficulty())))
-                pSave = groupBind->save;
-        }
+        return CreateInstance(instanceId, pSave, pSave->GetDifficulty());
+    }
+    else if(!player->GetSession()->PlayerLoading())
+    {
+        if(!instanceId)
+            instanceId = MapManager::Instance().GenerateInstanceId();
 
-        if(pSave)
-        {
-            // solo/perm/group
-            NewInstanceId = pSave->GetInstanceId();
-            map = _FindMap(NewInstanceId);
-            // it is possible that the save exists but the map doesn't
-            if(!map)
-                map = CreateInstance(NewInstanceId, pSave, pSave->GetDifficulty());
-        }
-        else
-        {
-            // if no instanceId via group members or instance saves is found
-            // the instance will be created for the first time
-            NewInstanceId = MapManager::Instance().GenerateInstanceId();
-            map = CreateInstance(NewInstanceId, NULL, player->GetDifficulty());
-        }
+        return CreateInstance(instanceId, NULL, player->GetDifficulty());
     }
 
-    return map;
+    return NULL;
 }
 
 InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save, uint8 difficulty)
@@ -236,26 +206,34 @@ BattleGroundMap* MapInstanced::CreateBattleGround(uint32 InstanceId)
     return map;
 }
 
-void MapInstanced::DestroyInstance(uint32 InstanceId)
-{
-    InstancedMaps::iterator itr = m_InstancedMaps.find(InstanceId);
-    if(itr != m_InstancedMaps.end())
-        DestroyInstance(itr);
-}
-
 // increments the iterator after erase
-void MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
+bool MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
 {
-    itr->second->UnloadAll(true);
+    itr->second->RemoveAllPlayers();
+    if(itr->second->HavePlayers())
+    {
+        ++itr;
+        return false;
+    }
+
+    itr->second->UnloadAll();
     // should only unload VMaps if this is the last instance and grid unloading is enabled
     if(m_InstancedMaps.size() <= 1 && sWorld.getConfig(CONFIG_GRID_UNLOAD))
     {
         VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(itr->second->GetId());
         // in that case, unload grids of the base map, too
         // so in the next map creation, (EnsureGridCreated actually) VMaps will be reloaded
-        Map::UnloadAll(true);
+        Map::UnloadAll();
     }
     // erase map
     delete itr->second;
     m_InstancedMaps.erase(itr++);
+    return true;
 }
+
+bool MapInstanced::CanEnter(Player *player)
+{
+    //assert(false);
+    return true;
+}
+

@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -388,7 +390,7 @@ void WorldSession::HandleMailReturnToSender(WorldPacket & recv_data )
         }
     }
 
-    if (m->sender == AHBplayerGUID)
+    if (m->sender == auctionbot.GetAHBplayerGUID())
     {
         SendReturnToSender(MAIL_CREATURE, GetAccountId(), m->receiver, m->sender, m->subject, m->itemTextId, &mi, m->money, m->mailTemplateId);
     }
@@ -509,7 +511,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data )
                     sender_accId = objmgr.GetPlayerAccountIdByGUID(sender_guid);
 
                     if(!objmgr.GetPlayerNameByGUID(sender_guid,sender_name))
-                        sender_name = objmgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
+                        sender_name = objmgr.GetRibonStringForDBCLocale(LANG_UNKNOWN);
                 }
                 sLog.outCommand(GetAccountId(),"GM %s (Account: %u) receive mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",
                     GetPlayerName(),GetAccountId(),it->GetProto()->Name1,it->GetEntry(),it->GetCount(),m->COD,sender_name.c_str(),sender_accId);
@@ -834,7 +836,7 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket & /*recv_data*/ )
 
 void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 stationery, uint32 sender_guidlow_or_entry, uint32 receiver_guidlow, std::string subject, uint32 itemTextId, MailItemsInfo* mi, uint32 money, uint32 COD, uint32 checked, uint32 deliver_delay, uint16 mailTemplateId)
 {
-    if (receiver_guidlow == AHBplayerGUID)
+    if (receiver_guidlow == auctionbot.GetAHBplayerGUID())
     {
         if(messageType == MAIL_AUCTION && mi)        // auction mail with items
         {
@@ -921,3 +923,4 @@ void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 station
     }
     CharacterDatabase.CommitTransaction();
 }
+
