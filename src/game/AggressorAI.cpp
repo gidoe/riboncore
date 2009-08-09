@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,25 +10,18 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "AggressorAI.h"
-#include "Errors.h"
-#include "Creature.h"
-#include "ObjectAccessor.h"
-#include "VMapFactory.h"
-#include "World.h"
+#include "SpellMgr.h"
 
-#include <list>
-
-int
-AggressorAI::Permissible(const Creature *creature)
+int AggressorAI::Permissible(const Creature *creature)
 {
     // have some hostile factions, it will be selected by IsHostileTo check at MoveInLineOfSight
     if( !creature->isCivilian() && !creature->IsNeutralToAll() )
@@ -35,131 +30,119 @@ AggressorAI::Permissible(const Creature *creature)
     return PERMIT_BASE_NO;
 }
 
-AggressorAI::AggressorAI(Creature *c) : CreatureAI(c), i_victimGuid(0), i_state(STATE_NORMAL), i_tracker(TIME_INTERVAL_LOOK)
+void AggressorAI::UpdateAI(const uint32 /*diff*/)
 {
-}
-
-void
-AggressorAI::MoveInLineOfSight(Unit *u)
-{
-    // Ignore Z for flying creatures
-    if( !m_creature->canFly() && m_creature->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE )
+    if(!UpdateVictim())
         return;
 
-    if( !m_creature->hasUnitState(UNIT_STAT_STUNNED) && u->isTargetableForAttack() &&
-        ( m_creature->IsHostileTo( u ) /*|| u->getVictim() && m_creature->IsFriendlyTo( u->getVictim() )*/ ) &&
-        u->isInAccessablePlaceFor(m_creature) )
+    DoMeleeAttackIfReady();
+}
+
+int SpellAI::Permissible(const Creature *creature)
+{
+    return PERMIT_BASE_NO;
+}
+
+void SpellAI::InitializeAI()
+{
+    for(uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
+        if(me->m_spells[i] && GetSpellStore()->LookupEntry(me->m_spells[i]))
+            spells.push_back(me->m_spells[i]);
+}
+
+void SpellAI::Reset()
+{
+    events.Reset();
+}
+
+void SpellAI::JustDied(Unit *killer)
+{
+    for(SpellVct::iterator i = spells.begin(); i != spells.end(); ++i)
+        if(AISpellInfo[*i].condition == AICOND_DIE)
+            me->CastSpell(killer, *i, true);
+}
+
+void SpellAI::EnterCombat(Unit *who)
+{
+    for(SpellVct::iterator i = spells.begin(); i != spells.end(); ++i)
     {
-        float attackRadius = m_creature->GetAttackDistance(u);
-        if(m_creature->IsWithinDistInMap(u, attackRadius) && m_creature->IsWithinLOSInMap(u) )
-        {
-            if(!m_creature->getVictim())
-            {
-                AttackStart(u);
-                //u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-            }
-            else if(sMapStore.LookupEntry(m_creature->GetMapId())->IsDungeon())
-            {
-                m_creature->AddThreat(u, 0.0f);
-                u->SetInCombatWith(m_creature);
-            }
-        }
+        if(AISpellInfo[*i].condition == AICOND_AGGRO)
+            me->CastSpell(who, *i, false);
+        else if(AISpellInfo[*i].condition == AICOND_COMBAT)
+            events.ScheduleEvent(*i, AISpellInfo[*i].cooldown + rand()%AISpellInfo[*i].cooldown);
     }
 }
 
-void AggressorAI::EnterEvadeMode()
+void SpellAI::UpdateAI(const uint32 diff)
 {
-    if( !m_creature->isAlive() )
-    {
-        DEBUG_LOG("Creature stopped attacking cuz his dead [guid=%u]", m_creature->GetGUIDLow());
-        i_victimGuid = 0;
-        m_creature->CombatStop(true);
-        m_creature->DeleteThreatList();
+    if(!UpdateVictim())
         return;
-    }
 
-    Unit* victim = ObjectAccessor::GetUnit(*m_creature, i_victimGuid );
+    events.Update(diff);
 
-    if( !victim  )
+    if(me->hasUnitState(UNIT_STAT_CASTING))
+        return;
+
+    if(uint32 spellId = events.ExecuteEvent())
     {
-        DEBUG_LOG("Creature stopped attacking because victim is non exist [guid=%u]", m_creature->GetGUIDLow());
-    }
-    else if( !victim->isAlive() )
-    {
-        DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%u]", m_creature->GetGUIDLow());
-    }
-    else if( victim->HasStealthAura() )
-    {
-        DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", m_creature->GetGUIDLow());
-    }
-    else if( victim->isInFlight() )
-    {
-        DEBUG_LOG("Creature stopped attacking cuz his victim is fly away [guid=%u]", m_creature->GetGUIDLow());
+        DoCast(spellId);
+        events.ScheduleEvent(spellId, AISpellInfo[spellId].cooldown + rand()%AISpellInfo[spellId].cooldown);
     }
     else
-    {
-        DEBUG_LOG("Creature stopped attacking due to target out run him [guid=%u]", m_creature->GetGUIDLow());
-        //i_state = STATE_LOOK_AT_VICTIM;
-        //i_tracker.Reset(TIME_INTERVAL_LOOK);
-    }
-
-    if(!m_creature->isCharmed() && !m_creature->GetVehicleGUID())
-    {
-        m_creature->RemoveAllAuras();
-
-        // Remove TargetedMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
-        if( m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE )
-            m_creature->GetMotionMaster()->MoveTargetedHome();
-    }
-
-    m_creature->DeleteThreatList();
-    i_victimGuid = 0;
-    m_creature->CombatStop(true);
-    m_creature->SetLootRecipient(NULL);
-    m_creature->ResetObtainedDamage();
+        DoMeleeAttackIfReady();
 }
 
-void
-AggressorAI::UpdateAI(const uint32 /*diff*/)
+void SpellCasterAI::InitializeAI()
 {
-    // update i_victimGuid if m_creature->getVictim() !=0 and changed
-    if(!m_creature->SelectHostilTarget() || !m_creature->getVictim())
+    SpellAI::InitializeAI();
+    float m_attackDist = 30.0f;
+    for(SpellVct::iterator itr = spells.begin(); itr != spells.end(); ++itr)
+    {
+        if (AISpellInfo[*itr].condition == AICOND_COMBAT && m_attackDist > GetAISpellInfo(*itr)->maxRange)
+            m_attackDist = GetAISpellInfo(*itr)->maxRange;
+    }
+    if (m_attackDist == 30.0f)
+        m_attackDist = MELEE_RANGE;
+}
+
+void SpellCasterAI::EnterCombat(Unit *who)
+{
+    if (spells.empty())
         return;
 
-    i_victimGuid = m_creature->getVictim()->GetGUID();
-
-    if( m_creature->isAttackReady() )
+    uint32 spell = rand() % spells.size();
+    uint32 count = 0;
+    for(SpellVct::iterator itr = spells.begin(); itr != spells.end(); ++itr, ++count)
     {
-        if( m_creature->IsWithinDistInMap(m_creature->getVictim(), ATTACK_DISTANCE))
+        if(AISpellInfo[*itr].condition == AICOND_AGGRO)
+            me->CastSpell(who, *itr, false);
+        else if (AISpellInfo[*itr].condition == AICOND_COMBAT)
         {
-            m_creature->AttackerStateUpdate(m_creature->getVictim());
-            m_creature->resetAttackTimer();
+            uint32 cooldown = GetAISpellInfo(*itr)->realCooldown;
+            if (count == spell)
+            {
+                DoCast(spells[spell]);
+                cooldown += me->GetCurrentSpellCastTime(*itr);
+            }
+            events.ScheduleEvent(*itr, cooldown);
         }
     }
 }
 
-bool
-AggressorAI::IsVisible(Unit *pl) const
+void SpellCasterAI::UpdateAI(const uint32 diff)
 {
-    return m_creature->IsWithinDist(pl,sWorld.getConfig(CONFIG_SIGHT_MONSTER))
-        && pl->isVisibleForOrDetect(m_creature,true);
-}
-
-void
-AggressorAI::AttackStart(Unit *u)
-{
-    if( !u )
+    if(!UpdateVictim())
         return;
 
-    if(m_creature->Attack(u,true))
+    events.Update(diff);
+
+    if(me->hasUnitState(UNIT_STAT_CASTING))
+        return;
+
+    if(uint32 spellId = events.ExecuteEvent())
     {
-        //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", m_creature->GetName(), u->GetGUIDLow());
-        i_victimGuid = u->GetGUID();
-
-        m_creature->AddThreat(u, 0.0f);
-        m_creature->SetInCombatWith(u);
-        u->SetInCombatWith(m_creature);
-
-        m_creature->GetMotionMaster()->MoveChase(u);
+        DoCast(spellId);
+        uint32 casttime = me->GetCurrentSpellCastTime(spellId);
+        events.ScheduleEvent(spellId, (casttime ? casttime : 500) + GetAISpellInfo(spellId)->realCooldown);
     }
 }

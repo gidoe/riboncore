@@ -16,27 +16,29 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "AchievementMgr.h"
 #include "Common.h"
-#include "Player.h"
-#include "WorldPacket.h"
 #include "DBCEnums.h"
-#include "GameEventMgr.h"
 #include "ObjectMgr.h"
-#include "Guild.h"
-#include "Database/DatabaseEnv.h"
 #include "World.h"
-#include "SpellMgr.h"
+#include "WorldPacket.h"
+#include "Database/DatabaseEnv.h"
+#include "Policies/SingletonImp.h"
+
+#include "AchievementMgr.h"
 #include "ArenaTeam.h"
-#include "ProgressBar.h"
-#include "GridNotifiersImpl.h"
 #include "CellImpl.h"
+#include "GameEventMgr.h"
+#include "GridNotifiersImpl.h"
+#include "Guild.h"
 #include "Language.h"
+#include "Player.h"
+#include "ProgressBar.h"
+#include "SpellMgr.h"
+
 #include "MapManager.h"
 #include "BattleGround.h"
 #include "BattleGroundAB.h"
 
-#include "Policies/SingletonImp.h"
 
 INSTANTIATE_SINGLETON_1(AchievementGlobalMgr);
 
@@ -272,7 +274,7 @@ bool AchievementCriteriaData::Meets(Player const* source, Unit const* target, ui
             // flag set == must be same team, not set == different team
             return (((Player*)target)->GetTeam() == source->GetTeam()) == (player_dead.own_team_flag != 0);
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_S_AURA:
-            return source->HasAura(aura.spell_id,aura.effect_idx);
+            return source->HasAuraEffect(aura.spell_id,aura.effect_idx);
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_S_AREA:
         {
             uint32 zone_id,area_id;
@@ -280,7 +282,7 @@ bool AchievementCriteriaData::Meets(Player const* source, Unit const* target, ui
             return area.id==zone_id || area.id==area_id;
         }
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_T_AURA:
-            return target && target->HasAura(aura.spell_id,aura.effect_idx);
+            return target && target->HasAuraEffect(aura.spell_id,aura.effect_idx);
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_VALUE:
             return miscvalue1 >= value.minvalue;
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_T_LEVEL:
@@ -570,7 +572,7 @@ void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement)
     if(GetPlayer()->GetSession()->PlayerLoading())
         return;
 
-    #ifdef MANGOS_DEBUG
+    #ifdef RIBON_DEBUG
     if((sLog.getLogFilter() & LOG_FILTER_ACHIEVEMENT_UPDATES)==0)
         sLog.outDebug("AchievementMgr::SendAchievementEarned(%u)", achievement->ID);
     #endif
@@ -605,7 +607,7 @@ void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement)
         MaNGOS::PlayerDistWorker<MaNGOS::LocalizedPacketDo<MaNGOS::AchievementChatBuilder> > say_worker(GetPlayer(),sWorld.getConfig(CONFIG_LISTEN_RANGE_SAY),say_do);
         TypeContainerVisitor<MaNGOS::PlayerDistWorker<MaNGOS::LocalizedPacketDo<MaNGOS::AchievementChatBuilder> >, WorldTypeMapContainer > message(say_worker);
         CellLock<GridReadGuard> cell_lock(cell, p);
-        cell_lock->Visit(cell_lock, message, *GetPlayer()->GetMap(), *GetPlayer(), sWorld.getConfig(CONFIG_LISTEN_RANGE_SAY));
+        cell_lock->Visit(cell_lock, message, *GetPlayer()->GetMap());
     }
 
     WorldPacket data(SMSG_ACHIEVEMENT_EARNED, 8+4+8);
@@ -1508,7 +1510,6 @@ bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achieve
             return progress->counter >= achievementCriteria->learn_skill_line.spellCount;
         case ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL:
             return progress->counter >= achievementCriteria->honorable_kill.killCount;
-
         // handle all statistic-only criteria here
         case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_BATTLEGROUND:
         case ACHIEVEMENT_CRITERIA_TYPE_DEATH_AT_MAP:
@@ -2196,6 +2197,7 @@ void AchievementGlobalMgr::LoadRewardLocales()
     } while (result->NextRow());
 
     delete result;
+
 
     sLog.outString();
     sLog.outString( ">> Loaded %lu achievement reward locale strings", (unsigned long)m_achievementRewardLocales.size() );

@@ -16,10 +16,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "WorldPacket.h"
 #include "ObjectMgr.h"
+#include "WorldPacket.h"
+
 #include "ArenaTeam.h"
 #include "World.h"
+
+void ArenaTeamMember::ModifyPersonalRating(Player* plr, int32 mod, uint32 slot)
+{
+    int32 memberRating = int32(personal_rating) + mod;
+    personal_rating = memberRating > 0 ? memberRating : 0;
+    if(plr)
+        plr->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot*6) + 5, personal_rating);
+    //sLog.outArena("Modify personal rating for player %s: personal rating %u, mod %d, rating %d", plr->GetName(), personal_rating, mod, rating);
+}
 
 ArenaTeam::ArenaTeam()
 {
@@ -45,7 +55,6 @@ ArenaTeam::ArenaTeam()
 
 ArenaTeam::~ArenaTeam()
 {
-
 }
 
 bool ArenaTeam::Create(uint64 captainGuid, uint32 type, std::string ArenaTeamName)
@@ -78,6 +87,7 @@ bool ArenaTeam::Create(uint64 captainGuid, uint32 type, std::string ArenaTeamNam
     CharacterDatabase.CommitTransaction();
 
     AddMember(m_CaptainGuid);
+    sLog.outArena("New ArenaTeam created [Id: %u] [Type: %u] [Captain GUID: %u]", GetId(), GetType(), GetCaptain());
     return true;
 }
 
@@ -157,6 +167,7 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
         // hide promote/remove buttons
         if(m_CaptainGuid != PlayerGuid)
             pl->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (GetSlot() * 6) + 1, 1);
+        sLog.outArena("Player: %s [GUID: %u] joined arena team type: %u [Id: %u].", pl->GetName(), pl->GetGUIDLow(), GetType(), GetId());
     }
     return true;
 }
@@ -263,7 +274,10 @@ void ArenaTeam::SetCaptain(const uint64& guid)
     // enable remove/promote buttons
     Player *newcaptain = objmgr.GetPlayer(guid);
     if(newcaptain)
+    {
         newcaptain->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + 1 + (GetSlot() * 6), 0);
+        sLog.outArena("Player: %s [GUID: %u] promoted player: %s [GUID: %u] to leader of arena team [Id: %u] [Type: %u].", oldcaptain->GetName(), oldcaptain->GetGUIDLow(), newcaptain->GetName(), newcaptain->GetGUID(), GetId(), GetType());
+    }
 }
 
 void ArenaTeam::DelMember(uint64 guid)
@@ -284,12 +298,12 @@ void ArenaTeam::DelMember(uint64 guid)
         player->SetInArenaTeam(0, GetSlot());
         player->GetSession()->SendArenaTeamCommandResult(ERR_ARENA_TEAM_QUIT_S, GetName(), "", 0);
         // delete all info regarding this team
-        for(int i = 0; i < 6; ++i)
+        for(uint8 i = 0; i < 6; ++i)
         {
             player->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (GetSlot() * 6) + i, 0);
         }
+        sLog.outArena("Player: %s [GUID: %u] left arena team type: %u [Id: %u].", player->GetName(), player->GetGUIDLow(), GetType(), GetId());
     }
-
     CharacterDatabase.PExecute("DELETE FROM arena_team_member WHERE arenateamid = '%u' AND guid = '%u'", GetId(), GUID_LOPART(guid));
 }
 
@@ -305,6 +319,9 @@ void ArenaTeam::Disband(WorldSession *session)
         // Removing from members is done in DelMember.
         DelMember(m_members.front().guid);
     }
+
+    if(Player *player = session->GetPlayer())
+        sLog.outArena("Player: %s [GUID: %u] disbanded arena team type: %u [Id: %u].", player->GetName(), player->GetGUIDLow(), GetType(), GetId());
 
     CharacterDatabase.BeginTransaction();
     CharacterDatabase.PExecute("DELETE FROM arena_team WHERE arenateamid = '%u'", m_TeamId);
@@ -496,7 +513,8 @@ uint32 ArenaTeam::GetPoints(uint32 MemberRating)
     uint32 rating = MemberRating + 150 < m_stats.rating ? MemberRating : m_stats.rating;
 
     if(rating<=1500)
-        points = (float)rating * 0.22f + 14.0f;
+        // points = (float)1500 * 0.22f + 14.0f;
+        points = 344.0f; // 3.1 change - teams with rating below 1500 get arena points for 1500 rating
     else
         points = 1511.26f / (1.0f + 1639.28f * exp(-0.00412f * (float)rating));
 
@@ -534,11 +552,9 @@ void ArenaTeam::FinishGame(int32 mod)
     ObjectMgr::ArenaTeamMap::const_iterator i = objmgr.GetArenaTeamMapBegin();
     for ( ; i != objmgr.GetArenaTeamMapEnd(); ++i)
     {
-        if (i->second->GetType() == this->m_Type && i->second->GetStats().rating > m_stats.rating)
+        if (i->second->GetType() == m_Type && i->second->GetStats().rating > m_stats.rating)
             ++m_stats.rank;
     }
-
-
 }
 
 int32 ArenaTeam::WonAgainst(uint32 againstRating)
@@ -726,3 +742,4 @@ arenateam fields (id from 2.3.3 client):
 1430 - unk - rank?
 1431 - personal arena rating
 */
+

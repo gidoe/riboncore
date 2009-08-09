@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOSSERVER_ARENATEAM_H
-#define MANGOSSERVER_ARENATEAM_H
+#ifndef RIBONCORE_ARENATEAM_H
+#define RIBONCORE_ARENATEAM_H
 
 enum ArenaTeamCommandTypes
 {
@@ -94,15 +96,7 @@ struct ArenaTeamMember
     uint32 wins_season;
     uint32 personal_rating;
 
-    void ModifyPersonalRating(Player* plr, int32 mod, uint32 slot)
-    {
-        if (int32(personal_rating) + mod < 0)
-            personal_rating = 0;
-        else
-            personal_rating += mod;
-        if(plr)
-            plr->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot*6) + 5, personal_rating);
-    }
+    void ModifyPersonalRating(Player* plr, int32 mod, uint32 slot);
 };
 
 struct ArenaTeamStats
@@ -224,3 +218,4 @@ class ArenaTeam
         ArenaTeamStats m_stats;
 };
 #endif
+

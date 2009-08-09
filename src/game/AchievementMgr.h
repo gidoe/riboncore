@@ -18,14 +18,14 @@
 #ifndef __MANGOS_ACHIEVEMENTMGR_H
 #define __MANGOS_ACHIEVEMENTMGR_H
 
+#include <map>
+#include <string>
+
 #include "Common.h"
 #include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"
 #include "DBCEnums.h"
 #include "DBCStores.h"
-
-#include <map>
-#include <string>
 
 typedef std::list<AchievementCriteriaEntry const*> AchievementCriteriaEntryList;
 typedef std::list<AchievementEntry const*>         AchievementEntryList;
@@ -323,6 +323,6 @@ class AchievementGlobalMgr
         AchievementRewardLocales m_achievementRewardLocales;
 };
 
-#define achievementmgr MaNGOS::Singleton<AchievementGlobalMgr>::Instance()
+#define achievementmgr Ribon::Singleton<AchievementGlobalMgr>::Instance()
 
 #endif

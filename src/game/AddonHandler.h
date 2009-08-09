@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ * Copyright (C) 2008-2009 Trinity <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,14 +18,24 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef RIBON_ANIMAL_RANDOMMOVEMENTGENERATOR_H
-#define RIBON_ANIMAL_RANDOMMOVEMENTGENERATOR_H
+#ifndef __ADDONHANDLER_H
+#define __ADDONHANDLER_H
 
-/** AnimalRandomMovementGenerator follows the research on
- *  quantifying scale-dependant effects of animal movement
- *  with simple per-location models (R.H. Gardner, R.V. O'Neil,
- *  M.G: Turner and V.H. Dale). It is specifically used on
- *  animal creatures.
- */
+#include "Common.h"
+#include "Config/ConfigEnv.h"
+#include "Policies/Singleton.h"
+
+#include "WorldPacket.h"
+
+class AddonHandler
+{
+    public:
+        /* Construction */
+        AddonHandler();
+        ~AddonHandler();
+                                                            //built addon packet
+        bool BuildAddonPacket(WorldPacket* Source, WorldPacket* Target);
+};
+#define sAddOnHandler Trinity::Singleton<AddonHandler>::Instance()
 #endif
 
