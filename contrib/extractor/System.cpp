@@ -17,7 +17,6 @@
 #include "loadlib/adt.h"
 #include "loadlib/wdt.h"
 #include <fcntl.h>
-#include "wmoJuicer.h"
 
 #if defined( __GNUC__ )
     #define _open   open
@@ -48,7 +47,6 @@ uint16 *LiqType;
 char output_path[128] = ".";
 char input_path[128] = ".";
 uint32 maxAreaId = 0;
-wmoJuicer* juicer;
 
 //**************************************************
 // Extractor options
@@ -235,6 +233,74 @@ void ReadLiquidTypeTableDBC()
     printf("Done! (%u LiqTypes loaded)\n", LiqType_count);
 }
 
+//
+// Adt file convertor function and data
+//
+
+// Map file format data
+#define MAP_MAGIC             'SPAM'
+#define MAP_VERSION_MAGIC     '0.1w'
+#define MAP_AREA_MAGIC        'AERA'
+#define MAP_HEIGHT_MAGIC      'TGHM'
+#define MAP_LIQUID_MAGIC      'QILM'
+
+struct map_fileheader
+{
+    uint32 mapMagic;
+    uint32 versionMagic;
+    uint32 areaMapOffset;
+    uint32 areaMapSize;
+    uint32 heightMapOffset;
+    uint32 heightMapSize;
+    uint32 liquidMapOffset;
+    uint32 liquidMapSize;
+};
+
+#define MAP_AREA_NO_AREA      0x0001
+
+struct map_areaHeader
+{
+    uint32 fourcc;
+    uint16 flags;
+    uint16 gridArea;
+};
+
+#define MAP_HEIGHT_NO_HEIGHT  0x0001
+#define MAP_HEIGHT_AS_INT16   0x0002
+#define MAP_HEIGHT_AS_INT8    0x0004
+
+struct map_heightHeader
+{
+    uint32 fourcc;
+    uint32 flags;
+    float  gridHeight;
+    float  gridMaxHeight;
+};
+
+#define MAP_LIQUID_TYPE_NO_WATER    0x00
+#define MAP_LIQUID_TYPE_WATER       0x01
+#define MAP_LIQUID_TYPE_OCEAN       0x02
+#define MAP_LIQUID_TYPE_MAGMA       0x04
+#define MAP_LIQUID_TYPE_SLIME       0x08
+
+#define MAP_LIQUID_TYPE_DARK_WATER  0x10
+#define MAP_LIQUID_TYPE_WMO_WATER   0x20
+
+
+#define MAP_LIQUID_NO_TYPE    0x0001
+#define MAP_LIQUID_NO_HEIGHT  0x0002
+
+struct map_liquidHeader
+{
+    uint32 fourcc;
+    uint16 flags;
+    uint16 liquidType;
+    uint8  offsetX;
+    uint8  offsetY;
+    uint8  width;
+    uint8  height;
+    float  liquidLevel;
+};
 
 float selectUInt8StepStore(float maxDiff)
 {
@@ -273,9 +339,8 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x)
         return false;
     }
 
-    //memset(liquid_show, 0, sizeof(liquid_show));
-    //memset(liquid_type, 0, sizeof(liquid_type));
-	juicer->getLiquid(cell_x,cell_y, &liquid_type[0][0], &liquid_show[0][0], &liquid_height[0][0]);
+    memset(liquid_show, 0, sizeof(liquid_show));
+    memset(liquid_type, 0, sizeof(liquid_type));
 
     // Prepare map header
     map_fileheader map;
@@ -451,20 +516,20 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x)
     map.heightMapSize = sizeof(map_heightHeader);
 
     map_heightHeader heightHeader;
-    heightHeader.fourcc = MAP_HEIGTH_MAGIC;
+    heightHeader.fourcc = MAP_HEIGHT_MAGIC;
     heightHeader.flags = 0;
     heightHeader.gridHeight    = minHeight;
     heightHeader.gridMaxHeight = maxHeight;
 
     if (maxHeight == minHeight)
-        heightHeader.flags |=MAP_HEIGHT_NO_HIGHT;
+        heightHeader.flags |= MAP_HEIGHT_NO_HEIGHT;
 
     // Not need store if flat surface
     if (CONF_allow_float_to_int && (maxHeight - minHeight) < CONF_flat_height_delta_limit)
-        heightHeader.flags |=MAP_HEIGHT_NO_HIGHT;
+        heightHeader.flags |= MAP_HEIGHT_NO_HEIGHT;
 
     // Try store as packed in uint16 or uint8 values
-    if (!(heightHeader.flags&MAP_HEIGHT_NO_HIGHT))
+    if (!(heightHeader.flags & MAP_HEIGHT_NO_HEIGHT))
     {
         float step;
         // Try Store as uint values
@@ -568,17 +633,9 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x)
                     {
                         int cx = j*ADT_CELL_SIZE + x + h->xOffset;
                         if (height)
-						{
-							float high=height[pos];
-							if (high> liquid_height[cy][cx])    //Just incase there happens to be a city floating in air over a river ;)
-								liquid_height[cy][cx] = high;
-						}
+                            liquid_height[cy][cx] = height[pos];
                         else
-						{
-							float high= h->heightLevel1;
-							if (high> liquid_height[cy][cx])
-								liquid_height[cy][cx] = high;
-						}
+                            liquid_height[cy][cx] = h->heightLevel1;
                         pos++;
                     }
                 }
@@ -634,9 +691,7 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x)
                     for (int x=0; x<= ADT_CELL_SIZE; x++)
                     {
                         int cx = j*ADT_CELL_SIZE + x;
-						float high=liquid->liquid[y][x].height;
-						if (high> liquid_height[cy][cx])
-                            liquid_height[cy][cx] = high;
+                        liquid_height[cy][cx] = liquid->liquid[y][x].height;
                     }
                 }
             }
@@ -706,22 +761,22 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x)
         liquidHeader.liquidLevel = minHeight;
 
         if (maxHeight == minHeight)
-            liquidHeader.flags|=MAP_LIQUID_NO_HIGHT;
+            liquidHeader.flags |= MAP_LIQUID_NO_HEIGHT;
 
         // Not need store if flat surface
         if (CONF_allow_float_to_int && (maxHeight - minHeight) < CONF_flat_liquid_delta_limit)
-            liquidHeader.flags|=MAP_LIQUID_NO_HIGHT;
+            liquidHeader.flags |= MAP_LIQUID_NO_HEIGHT;
 
         if (!fullType)
-            liquidHeader.flags|=MAP_LIQUID_NO_TYPE;
+            liquidHeader.flags |= MAP_LIQUID_NO_TYPE;
 
-        if (liquidHeader.flags&MAP_LIQUID_NO_TYPE)
+        if (liquidHeader.flags & MAP_LIQUID_NO_TYPE)
             liquidHeader.liquidType = type;
         else
             map.liquidMapSize+=sizeof(liquid_type);
      
-        if (!(liquidHeader.flags&MAP_LIQUID_NO_HIGHT))
-            map.liquidMapSize+=sizeof(float)*liquidHeader.width*liquidHeader.height;
+        if (!(liquidHeader.flags & MAP_LIQUID_NO_HEIGHT))
+            map.liquidMapSize += sizeof(float)*liquidHeader.width*liquidHeader.height;
     }
 
     // Ok all data prepared - store it
@@ -739,14 +794,14 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x)
 
     // Store height data
     fwrite(&heightHeader, sizeof(heightHeader), 1, output);
-    if (!(heightHeader.flags&MAP_HEIGHT_NO_HIGHT))
+    if (!(heightHeader.flags & MAP_HEIGHT_NO_HEIGHT))
     {
-        if (heightHeader.flags&MAP_HEIGHT_AS_INT16)
+        if (heightHeader.flags & MAP_HEIGHT_AS_INT16)
         {
             fwrite(uint16_V9, sizeof(uint16_V9), 1, output);
             fwrite(uint16_V8, sizeof(uint16_V8), 1, output);
         }
-        else if (heightHeader.flags&MAP_HEIGHT_AS_INT8)
+        else if (heightHeader.flags & MAP_HEIGHT_AS_INT8)
         {
             fwrite(uint8_V9, sizeof(uint8_V9), 1, output);
             fwrite(uint8_V8, sizeof(uint8_V8), 1, output);
@@ -764,7 +819,7 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x)
         fwrite(&liquidHeader, sizeof(liquidHeader), 1, output);
         if (!(liquidHeader.flags&MAP_LIQUID_NO_TYPE))
             fwrite(liquid_type, sizeof(liquid_type), 1, output);
-        if (!(liquidHeader.flags&MAP_LIQUID_NO_HIGHT))
+        if (!(liquidHeader.flags&MAP_LIQUID_NO_HEIGHT))
         {
             for (int y=0; y<liquidHeader.height;y++)
                 fwrite(&liquid_height[y+liquidHeader.offsetY][liquidHeader.offsetX], sizeof(float), liquidHeader.width, output);
@@ -791,7 +846,7 @@ void ExtractMapsFromMpq()
     std::string path = output_path;
     path += "/maps/";
     CreateDir(path);
-	juicer=new wmoJuicer(path.c_str());
+
     printf("Convert map files\n");
     for(uint32 z = 0; z < map_count; ++z)
     {
@@ -804,7 +859,7 @@ void ExtractMapsFromMpq()
 //            printf("Error loading %s map wdt data\n", map_ids[z].name);
             continue;
         }
-		juicer->Juice(map_ids[z].name, map_ids[z].id, &wdt);
+
         for(uint32 y = 0; y < WDT_MAP_SIZE; ++y)
         {
             for(uint32 x = 0; x < WDT_MAP_SIZE; ++x)
@@ -816,7 +871,7 @@ void ExtractMapsFromMpq()
                 ConvertADT(mpq_filename, output_filename, y, x);
             }
             // draw progress bar
-            printf("Processing........................%d%%\r", 50+(50 * (y+1)) / WDT_MAP_SIZE);
+            printf("Processing........................%d%%\r", (100 * (y+1)) / WDT_MAP_SIZE);
         }
     }
     delete [] areas;

@@ -58,9 +58,5 @@ bool WDT_file::prepareLoadedData()
     wmo = (wdt_MWMO *)((uint8*)main+ main->size+8);
     if (!wmo->prepareLoadedData())
         return false;
-	if (wmo->size >0)
-		modf = (wdt_MODF *)((uint8*)wmo+ wmo->size+8);
-	else
-		modf=0;
     return true;
 }
