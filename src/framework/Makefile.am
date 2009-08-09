@@ -1,5 +1,7 @@
 # Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
 #
+# Copyright (C) 2008-2009 Ribon <http://www.trinitycore.org/>
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -19,12 +21,12 @@
 ## Sub-directories to parse
 
 ## CPP flags for includes, defines, etc.
-AM_CPPFLAGS = $(MANGOS_INCLUDES) -I$(srcdir)
+AM_CPPFLAGS = $(RIBON_INCLUDES) -I$(srcdir)
 
 ## Build MaNGOS framework library as convenience library.
 #  libMaNGOSScript shared library will later be reused by world server daemon.
-noinst_LIBRARIES = libmangosframework.a
-libmangosframework_a_SOURCES = \
+noinst_LIBRARIES = libribonframework.a
+libribonframework_a_SOURCES = \
 	Policies/ObjectLifeTime.cpp \
 	Utilities/EventProcessor.cpp
 

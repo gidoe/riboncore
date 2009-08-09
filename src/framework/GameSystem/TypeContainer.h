@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,16 +10,16 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOS_TYPECONTAINER_H
-#define MANGOS_TYPECONTAINER_H
+#ifndef RIBON_TYPECONTAINER_H
+#define RIBON_TYPECONTAINER_H
 
 /*
  * Here, you'll find a series of containers that allow you to hold multiple
@@ -95,27 +97,27 @@ template<class H, class T> struct ContainerList<TypeList<H, T> >
  */
 
 template<class OBJECT_TYPES>
-class MANGOS_DLL_DECL TypeMapContainer
+class RIBON_DLL_DECL TypeMapContainer
 {
     public:
-        template<class SPECIFIC_TYPE> size_t Count() const { return MaNGOS::Count(i_elements, (SPECIFIC_TYPE*)NULL); }
+        template<class SPECIFIC_TYPE> size_t Count() const { return Ribon::Count(i_elements, (SPECIFIC_TYPE*)NULL); }
 
-        template<class SPECIFIC_TYPE> SPECIFIC_TYPE* find(OBJECT_HANDLE hdl, SPECIFIC_TYPE *fake) { return MaNGOS::Find(i_elements, hdl,fake); }
+        template<class SPECIFIC_TYPE> SPECIFIC_TYPE* find(OBJECT_HANDLE hdl, SPECIFIC_TYPE *fake) { return Ribon::Find(i_elements, hdl,fake); }
 
         /// find a specific type of object in the container
-        template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* find(OBJECT_HANDLE hdl, SPECIFIC_TYPE *fake) const { return MaNGOS::Find(i_elements, hdl,fake); }
+        template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* find(OBJECT_HANDLE hdl, SPECIFIC_TYPE *fake) const { return Ribon::Find(i_elements, hdl,fake); }
 
         /// inserts a specific object into the container
         template<class SPECIFIC_TYPE> bool insert(OBJECT_HANDLE hdl, SPECIFIC_TYPE *obj)
         {
-            SPECIFIC_TYPE* t = MaNGOS::Insert(i_elements, obj, hdl);
+            SPECIFIC_TYPE* t = Ribon::Insert(i_elements, obj, hdl);
             return (t != NULL);
         }
 
         ///  Removes the object from the container, and returns the removed object
         template<class SPECIFIC_TYPE> bool remove(SPECIFIC_TYPE* obj, OBJECT_HANDLE hdl)
         {
-            SPECIFIC_TYPE* t = MaNGOS::Remove(i_elements, obj, hdl);
+            SPECIFIC_TYPE* t = Ribon::Remove(i_elements, obj, hdl);
             return (t != NULL);
         }
 
@@ -126,3 +128,4 @@ class MANGOS_DLL_DECL TypeMapContainer
         ContainerMapList<OBJECT_TYPES> i_elements;
 };
 #endif
+

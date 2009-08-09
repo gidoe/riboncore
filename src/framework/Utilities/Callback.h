@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,20 +10,20 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOS_CALLBACK_H
-#define MANGOS_CALLBACK_H
+#ifndef RIBON_CALLBACK_H
+#define RIBON_CALLBACK_H
 
 /// ------------ BASE CLASSES ------------
 
-namespace MaNGOS
+namespace Ribon
 {
     template < class Class, typename ParamType1 = void, typename ParamType2 = void, typename ParamType3 = void, typename ParamType4 = void >
     class _Callback
@@ -193,7 +195,7 @@ namespace MaNGOS
 
 /// --------- GENERIC CALLBACKS ----------
 
-namespace MaNGOS
+namespace Ribon
 {
     class ICallback
     {
@@ -269,7 +271,7 @@ namespace MaNGOS
 
 class QueryResult;
 
-namespace MaNGOS
+namespace Ribon
 {
     class IQueryCallback
     {
@@ -380,3 +382,4 @@ namespace MaNGOS
 }
 
 #endif
+

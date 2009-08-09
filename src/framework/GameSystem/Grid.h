@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,20 +10,20 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOS_GRID_H
-#define MANGOS_GRID_H
+#ifndef RIBON_GRID_H
+#define RIBON_GRID_H
 
 /*
   @class Grid
-  Grid is a logical segment of the game world represented inside MaNGOS.
+  Grid is a logical segment of the game world represented inside Ribon.
   Grid is bind at compile time to a particular type of object which
   we call it the object of interested.  There are many types of loader,
   specially, dynamic loader, static loader, or on-demand loader.  There's
@@ -43,9 +45,9 @@ template
 class ACTIVE_OBJECT,
 class WORLD_OBJECT_TYPES,
 class GRID_OBJECT_TYPES,
-class ThreadModel = MaNGOS::SingleThreaded<ACTIVE_OBJECT>
+class ThreadModel = Ribon::SingleThreaded<ACTIVE_OBJECT>
 >
-class MANGOS_DLL_DECL Grid
+class RIBON_DLL_DECL Grid
 {
     // allows the GridLoader to access its internals
     template<class A, class T, class O> friend class GridLoader;
@@ -58,16 +60,18 @@ class MANGOS_DLL_DECL Grid
 
         /** an object of interested enters the grid
          */
-        template<class SPECIFIC_OBJECT> bool AddWorldObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
+        template<class SPECIFIC_OBJECT> void AddWorldObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
         {
-            return i_objects.template insert<SPECIFIC_OBJECT>(hdl, obj);
+            if(!i_objects.template insert<SPECIFIC_OBJECT>(hdl, obj))
+                assert(false);
         }
 
         /** an object of interested exits the grid
          */
-        template<class SPECIFIC_OBJECT> bool RemoveWorldObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
+        template<class SPECIFIC_OBJECT> void RemoveWorldObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
         {
-            return i_objects.template remove<SPECIFIC_OBJECT>(obj, hdl);
+            if(!i_objects.template remove<SPECIFIC_OBJECT>(obj, hdl))
+                assert(false);
         }
 
         /** Accessors: Returns a specific type of object in the WORDL_OBJECT_TYPES
@@ -103,7 +107,7 @@ class MANGOS_DLL_DECL Grid
 
         /** Returns the number of object within the grid.
          */
-        unsigned int ActiveObjectsInGrid(void) const { return m_activeGridObjects.size()+i_objects.template Count<ACTIVE_OBJECT>(); }
+        unsigned int ActiveObjectsInGrid(void) const { return /*m_activeGridObjects.size()+*/i_objects.template Count<ACTIVE_OBJECT>(); }
 
         /** Accessors: Returns a specific type of object in the GRID_OBJECT_TYPES
          */
@@ -112,22 +116,29 @@ class MANGOS_DLL_DECL Grid
 
         /** Inserts a container type object into the grid.
          */
-        template<class SPECIFIC_OBJECT> bool AddGridObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
+        template<class SPECIFIC_OBJECT> void AddGridObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
         {
-            if(obj->isActiveObject())
-                m_activeGridObjects.insert(obj);
-            return i_container.template insert<SPECIFIC_OBJECT>(hdl, obj);
+            if(!i_container.template insert<SPECIFIC_OBJECT>(hdl, obj))
+                assert(false);
         }
 
         /** Removes a containter type object from the grid
          */
-        template<class SPECIFIC_OBJECT> bool RemoveGridObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
+        template<class SPECIFIC_OBJECT> void RemoveGridObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
         {
-            if(obj->isActiveObject())
-                m_activeGridObjects.erase(obj);
-            return i_container.template remove<SPECIFIC_OBJECT>(obj, hdl);
+            if(!i_container.template remove<SPECIFIC_OBJECT>(obj, hdl))
+                assert(false);
         }
 
+        /*bool NoWorldObjectInGrid() const
+        {
+            return i_objects.GetElements().isEmpty();
+        }
+
+        bool NoGridObjectInGrid() const
+        {
+            return i_container.GetElements().isEmpty();
+        }*/
     private:
 
         typedef typename ThreadModel::Lock Guard;
@@ -135,7 +146,8 @@ class MANGOS_DLL_DECL Grid
 
         TypeMapContainer<GRID_OBJECT_TYPES> i_container;
         TypeMapContainer<WORLD_OBJECT_TYPES> i_objects;
-        typedef std::set<void*> ActiveGridObjects;
-        ActiveGridObjects m_activeGridObjects;
+        //typedef std::set<void*> ActiveGridObjects;
+        //ActiveGridObjects m_activeGridObjects;
 };
 #endif
+

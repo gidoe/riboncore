@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOS_DEFINE_H
-#define MANGOS_DEFINE_H
+#ifndef RIBON_DEFINE_H
+#define RIBON_DEFINE_H
 
 #include <sys/types.h>
 
@@ -26,76 +28,89 @@
 
 #include "Platform/CompilerDefs.h"
 
-#define MANGOS_LITTLEENDIAN 0
-#define MANGOS_BIGENDIAN    1
+#define RIBON_LITTLEENDIAN 0
+#define RIBON_BIGENDIAN    1
 
-#if !defined(MANGOS_ENDIAN)
+#if !defined(RIBON_ENDIAN)
 #  if defined (ACE_BIG_ENDIAN)
-#    define MANGOS_ENDIAN MANGOS_BIGENDIAN
+#    define RIBON_ENDIAN RIBON_BIGENDIAN
 #  else //ACE_BYTE_ORDER != ACE_BIG_ENDIAN
-#    define MANGOS_ENDIAN MANGOS_LITTLEENDIAN
+#    define RIBON_ENDIAN RIBON_LITTLEENDIAN
 #  endif //ACE_BYTE_ORDER
-#endif //MANGOS_ENDIAN
+#endif //RIBON_ENDIAN
 
 #if PLATFORM == PLATFORM_WINDOWS
-#  define MANGOS_EXPORT __declspec(dllexport)
-#  define MANGOS_LIBRARY_HANDLE HMODULE
-#  define MANGOS_LOAD_LIBRARY(a) LoadLibrary(a)
-#  define MANGOS_CLOSE_LIBRARY FreeLibrary
-#  define MANGOS_GET_PROC_ADDR GetProcAddress
-#  define MANGOS_IMPORT __cdecl
-#  define MANGOS_SCRIPT_EXT ".dll"
-#  define MANGOS_SCRIPT_NAME "MaNGOSScript"
-#  define MANGOS_PATH_MAX MAX_PATH
+#  define RIBON_EXPORT __declspec(dllexport)
+#  define RIBON_LIBRARY_HANDLE HMODULE
+#  define RIBON_LOAD_LIBRARY(a) LoadLibrary(a)
+#  define RIBON_CLOSE_LIBRARY FreeLibrary
+#  define RIBON_GET_PROC_ADDR GetProcAddress
+#  define RIBON_IMPORT __cdecl
+#  define RIBON_SCRIPT_EXT ".dll"
+#  define RIBON_SCRIPT_NAME "RibonScript"
+#  define RIBON_PATH_MAX MAX_PATH
 #else //PLATFORM != PLATFORM_WINDOWS
-#  define MANGOS_LIBRARY_HANDLE void*
-#  define MANGOS_EXPORT export
-#  define MANGOS_LOAD_LIBRARY(a) dlopen(a,RTLD_NOW)
-#  define MANGOS_CLOSE_LIBRARY dlclose
-#  define MANGOS_GET_PROC_ADDR dlsym
+#  define RIBON_LIBRARY_HANDLE void*
+#  define RIBON_EXPORT export
+#  define RIBON_LOAD_LIBRARY(a) dlopen(a,RTLD_NOW)
+#  define RIBON_CLOSE_LIBRARY dlclose
+#  define RIBON_GET_PROC_ADDR dlsym
 #  if defined(__APPLE_CC__) && defined(BIG_ENDIAN)
-#    define MANGOS_IMPORT __attribute__ ((longcall))
+#    define RIBON_IMPORT __attribute__ ((longcall))
 #  elif defined(__x86_64__)
-#    define MANGOS_IMPORT
+#    define RIBON_IMPORT
 #  else
-#    define MANGOS_IMPORT __attribute__ ((cdecl))
+#    define RIBON_IMPORT __attribute__ ((cdecl))
 #  endif //__APPLE_CC__ && BIG_ENDIAN
-#  define MANGOS_SCRIPT_EXT ".so"
-#  define MANGOS_SCRIPT_NAME "libmangosscript"
-#  define MANGOS_PATH_MAX PATH_MAX
+#  if defined(__APPLE_CC__)
+#    define RIBON_SCRIPT_EXT ".dylib"
+#    if defined(DO_SCRIPTS)
+#      define RIBON_SCRIPT_NAME "../lib/libribonscript"
+#    else
+#      define RIBON_SCRIPT_NAME "../lib/libriboninterface"
+#    endif // DO_SCRIPTS
+#  else
+#    define RIBON_SCRIPT_EXT ".so"
+#    if defined(DO_SCRIPTS)
+#      define RIBON_SCRIPT_NAME "libribonscript"
+#    else
+#      define RIBON_SCRIPT_NAME "libriboninterface"
+#    endif // DO_SCRIPTS
+#  endif //__APPLE_CC__
+#  define RIBON_PATH_MAX PATH_MAX
 #endif //PLATFORM
 
 #if PLATFORM == PLATFORM_WINDOWS
-#  ifdef MANGOS_WIN32_DLL_IMPORT
-#    define MANGOS_DLL_DECL __declspec(dllimport)
-#  else //!MANGOS_WIN32_DLL_IMPORT
-#    ifdef MANGOS_WIND_DLL_EXPORT
-#      define MANGOS_DLL_DECL __declspec(dllexport)
-#    else //!MANGOS_WIND_DLL_EXPORT
-#      define MANGOS_DLL_DECL
-#    endif //MANGOS_WIND_DLL_EXPORT
-#  endif //MANGOS_WIN32_DLL_IMPORT
+#  ifdef RIBON_WIN32_DLL_IMPORT
+#    define RIBON_DLL_DECL __declspec(dllimport)
+#  else //!RIBON_WIN32_DLL_IMPORT
+#    ifdef RIBON_WIND_DLL_EXPORT
+#      define RIBON_DLL_DECL __declspec(dllexport)
+#    else //!RIBON_WIND_DLL_EXPORT
+#      define RIBON_DLL_DECL
+#    endif //RIBON_WIND_DLL_EXPORT
+#  endif //RIBON_WIN32_DLL_IMPORT
 #else //PLATFORM != PLATFORM_WINDOWS
-#  define MANGOS_DLL_DECL
+#  define RIBON_DLL_DECL
 #endif //PLATFORM
 
 #if PLATFORM == PLATFORM_WINDOWS
-#  define MANGOS_DLL_SPEC __declspec(dllexport)
+#  define RIBON_DLL_SPEC __declspec(dllexport)
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)
 #  endif //DECLSPEC_NORETURN
 #else //PLATFORM != PLATFORM_WINDOWS
-#  define MANGOS_DLL_SPEC
+#  define RIBON_DLL_SPEC
 #  define DECLSPEC_NORETURN
 #endif //PLATFORM
 
 #if !defined(DEBUG)
-#  define MANGOS_INLINE inline
+#  define RIBON_INLINE inline
 #else //DEBUG
-#  if !defined(MANGOS_DEBUG)
-#    define MANGOS_DEBUG
-#  endif //MANGOS_DEBUG
-#  define MANGOS_INLINE
+#  if !defined(RIBON_DEBUG)
+#    define RIBON_DEBUG
+#  endif //RIBON_DEBUG
+#  define RIBON_INLINE
 #endif //!DEBUG
 
 #if COMPILER == COMPILER_GNU
@@ -122,4 +137,25 @@ typedef uint32      DWORD;
 
 typedef uint64 OBJECT_HANDLE;
 
-#endif //MANGOS_DEFINE_H
+//#define MULTI_THREAD_MAP
+#ifdef MULTI_THREAD_MAP
+#define MAP_BASED_RAND_GEN
+#endif
+
+#define MaNGOS              Ribon
+#define MANGOS_DLL_DECL     RIBON_DLL_DECL
+#define MANGOS_DLL_SPEC     RIBON_DLL_SPEC
+#define GetMangosString     GetRibonString
+
+#if defined(MANGOS_DEBUG) || defined(RIBON_DEBUG)
+#  ifndef RIBON_DEBUG
+#    define RIBON_DEBUG
+#  endif
+#  ifndef MANGOS_DEBUG
+#    define MANGOS_DEBUG
+#  endif
+#endif
+
+
+#endif //RIBON_DEFINE_H
+

@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,16 +10,16 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOS_NGRID_H
-#define MANGOS_NGRID_H
+#ifndef RIBON_NGRID_H
+#define RIBON_NGRID_H
 
 /** NGrid is nothing more than a wrapper of the Grid with an NxN cells
  */
@@ -66,9 +68,9 @@ unsigned int N,
 class ACTIVE_OBJECT,
 class WORLD_OBJECT_TYPES,
 class GRID_OBJECT_TYPES,
-class ThreadModel = MaNGOS::SingleThreaded<ACTIVE_OBJECT>
+class ThreadModel = Ribon::SingleThreaded<ACTIVE_OBJECT>
 >
-class MANGOS_DLL_DECL NGrid
+class RIBON_DLL_DECL NGrid
 {
     public:
 
@@ -79,19 +81,8 @@ class MANGOS_DLL_DECL NGrid
             i_GridInfo = GridInfo(expiry, unload);
         }
 
-        const GridType& operator()(unsigned short x, unsigned short y) const
-        {
-            ASSERT(x < N);
-            ASSERT(y < N);
-            return i_cells[x][y];
-        }
-
-        GridType& operator()(unsigned short x, unsigned short y)
-        {
-            ASSERT(x < N);
-            ASSERT(y < N);
-            return i_cells[x][y];
-        }
+        const GridType& operator()(unsigned short x, unsigned short y) const { return i_cells[x][y]; }
+        GridType& operator()(unsigned short x, unsigned short y) { return i_cells[x][y]; }
 
         const uint32& GetGridId(void) const { return i_gridId; }
         void SetGridId(const uint32 id) const { i_gridId = id; }
@@ -119,12 +110,12 @@ class MANGOS_DLL_DECL NGrid
 
         template<class SPECIFIC_OBJECT> void AddWorldObject(const uint32 x, const uint32 y, SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
         {
-            getGridType(x, y).AddWorldObject(obj, hdl);
+            i_cells[x][y].AddWorldObject(obj, hdl);
         }
 
         template<class SPECIFIC_OBJECT> void RemoveWorldObject(const uint32 x, const uint32 y, SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
         {
-            getGridType(x, y).RemoveWorldObject(obj, hdl);
+            i_cells[x][y].RemoveWorldObject(obj, hdl);
         }
 
         template<class T, class TT> void Visit(TypeContainerVisitor<T, TypeMapContainer<TT> > &visitor)
@@ -136,7 +127,7 @@ class MANGOS_DLL_DECL NGrid
 
         template<class T, class TT> void Visit(const uint32 &x, const uint32 &y, TypeContainerVisitor<T, TypeMapContainer<TT> > &visitor)
         {
-            getGridType(x, y).Visit(visitor);
+            i_cells[x][y].Visit(visitor);
         }
 
         unsigned int ActiveObjectsInGrid(void) const
@@ -150,32 +141,25 @@ class MANGOS_DLL_DECL NGrid
 
         template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetGridObject(const uint32 x, const uint32 y, OBJECT_HANDLE hdl) const
         {
-            return getGridType(x, y).template GetGridObject<SPECIFIC_OBJECT>(hdl);
+            return i_cells[x][y].template GetGridObject<SPECIFIC_OBJECT>(hdl);
         }
 
         template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetGridObject(const uint32 x, const uint32 y, OBJECT_HANDLE hdl)
         {
-            return getGridType(x, y).template GetGridObject<SPECIFIC_OBJECT>(hdl);
+            return i_cells[x][y].template GetGridObject<SPECIFIC_OBJECT>(hdl);
         }
 
         template<class SPECIFIC_OBJECT> bool AddGridObject(const uint32 x, const uint32 y, SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
         {
-            return getGridType(x, y).AddGridObject(hdl, obj);
+            return i_cells[x][y].AddGridObject(hdl, obj);
         }
 
         template<class SPECIFIC_OBJECT> bool RemoveGridObject(const uint32 x, const uint32 y, SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
         {
-            return getGridType(x, y).RemoveGridObject(obj, hdl);
+            return i_cells[x][y].RemoveGridObject(obj, hdl);
         }
 
     private:
-
-        GridType& getGridType(const uint32& x, const uint32& y)
-        {
-            ASSERT(x < N);
-            ASSERT(y < N);
-            return i_cells[x][y];
-        }
 
         uint32 i_gridId;
         GridInfo i_GridInfo;
@@ -187,3 +171,4 @@ class MANGOS_DLL_DECL NGrid
         bool i_GridObjectDataLoaded;
 };
 #endif
+

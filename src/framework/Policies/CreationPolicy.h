@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,27 +10,27 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOS_CREATIONPOLICY_H
-#define MANGOS_CREATIONPOLICY_H
+#ifndef RIBON_CREATIONPOLICY_H
+#define RIBON_CREATIONPOLICY_H
 
 #include <stdlib.h>
 #include "Platform/Define.h"
 
-namespace MaNGOS
+namespace Ribon
 {
     /**
      * OperatorNew policy creates an object on the heap using new.
      */
     template <class T>
-        class MANGOS_DLL_DECL OperatorNew
+        class RIBON_DLL_DECL OperatorNew
     {
         public:
             static T* Create(void) { return (new T); }
@@ -40,7 +42,7 @@ namespace MaNGOS
      * the first time call Create.
      */
     template <class T>
-        class MANGOS_DLL_DECL LocalStaticCreation
+        class RIBON_DLL_DECL LocalStaticCreation
     {
         union MaxAlign
         {
@@ -69,7 +71,7 @@ namespace MaNGOS
      * CreateUsingMalloc by pass the memory manger.
      */
     template<class T>
-        class MANGOS_DLL_DECL CreateUsingMalloc
+        class RIBON_DLL_DECL CreateUsingMalloc
     {
         public:
             static T* Create()
@@ -90,7 +92,7 @@ namespace MaNGOS
      * CreateOnCallBack creates the object base on the call back.
      */
     template<class T, class CALL_BACK>
-        class MANGOS_DLL_DECL CreateOnCallBack
+        class RIBON_DLL_DECL CreateOnCallBack
     {
         public:
             static T* Create()
@@ -105,3 +107,4 @@ namespace MaNGOS
     };
 }
 #endif
+

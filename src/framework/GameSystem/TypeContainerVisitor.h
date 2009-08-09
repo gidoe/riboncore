@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,16 +10,16 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOS_TYPECONTAINERVISITOR_H
-#define MANGOS_TYPECONTAINERVISITOR_H
+#ifndef RIBON_TYPECONTAINERVISITOR_H
+#define RIBON_TYPECONTAINERVISITOR_H
 
 /*
  * @class TypeContainerVisitor is implemented as a visitor pattern.  It is
@@ -95,7 +97,7 @@ template<class VISITOR, class OBJECT_TYPES> void VisitorHelper(VISITOR &v, TypeM
 }
 
 template<class VISITOR, class TYPE_CONTAINER>
-class MANGOS_DLL_DECL TypeContainerVisitor
+class RIBON_DLL_DECL TypeContainerVisitor
 {
     public:
         TypeContainerVisitor(VISITOR &v) : i_visitor(v) {}
@@ -114,3 +116,4 @@ class MANGOS_DLL_DECL TypeContainerVisitor
         VISITOR &i_visitor;
 };
 #endif
+
