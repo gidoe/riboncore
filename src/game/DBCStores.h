@@ -158,4 +158,5 @@ RIBON_DLL_SPEC DBCStorage <ItemEntry>                  const* GetItemDisplayStor
 RIBON_DLL_SPEC DBCStorage <CreatureDisplayInfoEntry>   const* GetCreatureDisplayStore();
 RIBON_DLL_SPEC DBCStorage <EmotesEntry>                const* GetEmotesStore();
 RIBON_DLL_SPEC DBCStorage <EmotesTextEntry>            const* GetEmotesTextStore();
+RIBON_DLL_SPEC DBCStorage <AchievementEntry>           const* GetAchievementStore();
 #endif
