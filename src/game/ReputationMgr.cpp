@@ -20,6 +20,7 @@
 #include "DBCStores.h"
 #include "Player.h"
 #include "WorldPacket.h"
+#include "World.h"
 
 const int32 ReputationMgr::PointsInRank[MAX_REPUTATION_RANK] = {36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000};
 
@@ -252,7 +253,11 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
         int32 BaseRep = GetBaseReputation(factionEntry);
 
         if(incremental)
+        {
+            // int32 *= float cause one point loss?
+            standing = floor( (float)standing * sWorld.getRate(RATE_REPUTATION_GAIN) + 0.5 );
             standing += itr->second.Standing + BaseRep;
+        }
 
         if (standing > Reputation_Cap)
             standing = Reputation_Cap;

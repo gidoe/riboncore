@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,21 +10,23 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef WIN32
 #include <dlfcn.h>
 #endif
 
+#include "Common.h"
 #include "Platform/Define.h"
 #include "ScriptCalls.h"
 #include "World.h"
+#include "Config/ConfigEnv.h"
 
 ScriptsSet Script=NULL;
 
@@ -32,7 +36,7 @@ void UnloadScriptingModule()
     {
         //todo: some check if some func from script library is called right now
         Script->ScriptsFree();
-        MANGOS_CLOSE_LIBRARY(Script->hScriptsLib);
+        RIBON_CLOSE_LIBRARY(Script->hScriptsLib);
         delete Script;
         Script = NULL;
     }
@@ -42,10 +46,10 @@ bool LoadScriptingModule(char const* libName)
 {
     ScriptsSet testScript=new _ScriptSet;
 
-    std::string name = strlen(libName) ? libName : MANGOS_SCRIPT_NAME;
-    name += MANGOS_SCRIPT_EXT;
+    std::string name = strlen(libName) ? libName : RIBON_SCRIPT_NAME;
+    name += RIBON_SCRIPT_EXT;
 
-    testScript->hScriptsLib=MANGOS_LOAD_LIBRARY(name.c_str());
+    testScript->hScriptsLib=RIBON_LOAD_LIBRARY(name.c_str());
 
     if(!testScript->hScriptsLib )
     {
@@ -54,36 +58,37 @@ bool LoadScriptingModule(char const* libName)
         return false;
     }
 
-    if(   !(testScript->ScriptsInit         =(scriptCallScriptsInit         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ScriptsInit"         ))
-        ||!(testScript->ScriptsFree         =(scriptCallScriptsFree         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ScriptsFree"         ))
-        ||!(testScript->ScriptsVersion      =(scriptCallScriptsVersion      )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ScriptsVersion"      ))
-        ||!(testScript->GossipHello         =(scriptCallGossipHello         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipHello"         ))
-        ||!(testScript->GOChooseReward      =(scriptCallGOChooseReward      )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOChooseReward"      ))
-        ||!(testScript->QuestAccept         =(scriptCallQuestAccept         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestAccept"         ))
-        ||!(testScript->GossipSelect        =(scriptCallGossipSelect        )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipSelect"        ))
-        ||!(testScript->GossipSelectWithCode=(scriptCallGossipSelectWithCode)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipSelectWithCode"))
-        ||!(testScript->GOSelect            =(scriptCallGOSelect            )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOSelect"            ))
-        ||!(testScript->GOSelectWithCode    =(scriptCallGOSelectWithCode    )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOSelectWithCode"    ))
-        ||!(testScript->QuestSelect         =(scriptCallQuestSelect         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestSelect"         ))
-        ||!(testScript->QuestComplete       =(scriptCallQuestComplete       )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestComplete"       ))
-        ||!(testScript->NPCDialogStatus     =(scriptCallNPCDialogStatus     )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"NPCDialogStatus"     ))
-        ||!(testScript->GODialogStatus      =(scriptCallGODialogStatus      )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GODialogStatus"      ))
-        ||!(testScript->ChooseReward        =(scriptCallChooseReward        )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ChooseReward"        ))
-        ||!(testScript->ItemHello           =(scriptCallItemHello           )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ItemHello"           ))
-        ||!(testScript->GOHello             =(scriptCallGOHello             )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOHello"             ))
-        ||!(testScript->scriptAreaTrigger   =(scriptCallAreaTrigger         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"AreaTrigger"         ))
-        ||!(testScript->ItemQuestAccept     =(scriptCallItemQuestAccept     )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ItemQuestAccept"     ))
-        ||!(testScript->GOQuestAccept       =(scriptCallGOQuestAccept       )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOQuestAccept"       ))
-        ||!(testScript->ItemUse             =(scriptCallItemUse             )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ItemUse"             ))
-        ||!(testScript->EffectDummyGameObj  =(scriptCallEffectDummyGameObj  )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"EffectDummyGameObj"  ))
-        ||!(testScript->EffectDummyCreature =(scriptCallEffectDummyCreature )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"EffectDummyCreature" ))
-        ||!(testScript->EffectDummyItem     =(scriptCallEffectDummyItem     )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"EffectDummyItem"     ))
-        ||!(testScript->GetAI               =(scriptCallGetAI               )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GetAI"               ))
-        ||!(testScript->CreateInstanceData  =(scriptCallCreateInstanceData  )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"CreateInstanceData"  ))
+    if(   !(testScript->ScriptsInit         =(scriptCallScriptsInit         )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"ScriptsInit"         ))
+        ||!(testScript->ScriptsFree         =(scriptCallScriptsFree         )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"ScriptsFree"         ))
+        ||!(testScript->ScriptsVersion      =(scriptCallScriptsVersion      )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"ScriptsVersion"      ))
+        ||!(testScript->GossipHello         =(scriptCallGossipHello         )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"GossipHello"         ))
+        ||!(testScript->GOChooseReward      =(scriptCallGOChooseReward      )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"GOChooseReward"      ))
+        ||!(testScript->QuestAccept         =(scriptCallQuestAccept         )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"QuestAccept"         ))
+        ||!(testScript->GossipSelect        =(scriptCallGossipSelect        )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"GossipSelect"        ))
+        ||!(testScript->GossipSelectWithCode=(scriptCallGossipSelectWithCode)RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"GossipSelectWithCode"))
+        ||!(testScript->GOSelect            =(scriptCallGOSelect            )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"GOSelect"            ))
+        ||!(testScript->GOSelectWithCode    =(scriptCallGOSelectWithCode    )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"GOSelectWithCode"    ))
+        ||!(testScript->QuestSelect         =(scriptCallQuestSelect         )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"QuestSelect"         ))
+        ||!(testScript->QuestComplete       =(scriptCallQuestComplete       )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"QuestComplete"       ))
+        ||!(testScript->NPCDialogStatus     =(scriptCallNPCDialogStatus     )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"NPCDialogStatus"     ))
+        ||!(testScript->GODialogStatus      =(scriptCallGODialogStatus      )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"GODialogStatus"     ))
+        ||!(testScript->ChooseReward        =(scriptCallChooseReward        )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"ChooseReward"        ))
+        ||!(testScript->ItemHello           =(scriptCallItemHello           )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"ItemHello"           ))
+        ||!(testScript->GOHello             =(scriptCallGOHello             )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"GOHello"             ))
+        ||!(testScript->scriptAreaTrigger   =(scriptCallAreaTrigger         )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"AreaTrigger"         ))
+        ||!(testScript->ItemQuestAccept     =(scriptCallItemQuestAccept     )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"ItemQuestAccept"     ))
+        ||!(testScript->GOQuestAccept       =(scriptCallGOQuestAccept       )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"GOQuestAccept"       ))
+        ||!(testScript->ItemUse             =(scriptCallItemUse             )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"ItemUse"             ))
+        ||!(testScript->ItemExpire          =(scriptCallItemExpire          )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"ItemExpire"          ))
+        ||!(testScript->EffectDummyGameObj  =(scriptCallEffectDummyGameObj  )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"EffectDummyGameObj"  ))
+        ||!(testScript->EffectDummyCreature =(scriptCallEffectDummyCreature )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"EffectDummyCreature" ))
+        ||!(testScript->EffectDummyItem     =(scriptCallEffectDummyItem     )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"EffectDummyItem"     ))
+        ||!(testScript->GetAI               =(scriptCallGetAI               )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"GetAI"               ))
+        ||!(testScript->CreateInstanceData  =(scriptCallCreateInstanceData  )RIBON_GET_PROC_ADDR(testScript->hScriptsLib,"CreateInstanceData"  ))
         )
     {
         printf("Error loading Scripts Library %s !\n Library missing required functions.",name.c_str());
-        MANGOS_CLOSE_LIBRARY(testScript->hScriptsLib);
+        RIBON_CLOSE_LIBRARY(testScript->hScriptsLib);
         delete testScript;
         return false;
     }
@@ -96,9 +101,10 @@ bool LoadScriptingModule(char const* libName)
     UnloadScriptingModule();
 
     Script=testScript;
-    Script->ScriptsInit(objmgr.GetScriptNames());
+    Script->ScriptsInit(sConfig.GetFilename().c_str());
 
     sWorld.SetScriptsVersion(Script->ScriptsVersion());
 
     return true;
 }
+
