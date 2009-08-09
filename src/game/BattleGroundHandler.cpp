@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,20 +19,21 @@
  */
 
 #include "Common.h"
-#include "WorldPacket.h"
-#include "Opcodes.h"
-#include "Log.h"
-#include "Player.h"
-#include "ObjectMgr.h"
-#include "WorldSession.h"
 #include "ObjectAccessor.h"
-#include "Object.h"
-#include "Chat.h"
+#include "ObjectMgr.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
+
+#include "ArenaTeam.h"
 #include "BattleGroundMgr.h"
 #include "BattleGroundWS.h"
 #include "BattleGround.h"
-#include "ArenaTeam.h"
+#include "Chat.h"
 #include "Language.h"
+#include "Log.h"
+#include "Player.h"
+#include "Object.h"
+#include "Opcodes.h"
 
 void WorldSession::HandleBattlemasterHelloOpcode( WorldPacket & recv_data )
 {
@@ -161,6 +164,9 @@ void WorldSession::HandleBattlemasterJoinOpcode( WorldPacket & recv_data )
 
             uint32 queueSlot = member->AddBattleGroundQueueId(bgQueueTypeId);           // add to queue
 
+            // store entry point coords
+            member->SetBattleGroundEntryPoint(member->GetMapId(),member->GetPositionX(),member->GetPositionY(),member->GetPositionZ(),member->GetOrientation());
+
             WorldPacket data;
                                                             // send status packet (in queue)
             sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, queueSlot, STATUS_WAIT_QUEUE, avgTime, 0, ginfo->ArenaType);
@@ -176,6 +182,8 @@ void WorldSession::HandleBattlemasterJoinOpcode( WorldPacket & recv_data )
     {
         // already checked if queueSlot is valid, now just get it
         uint32 queueSlot = _player->AddBattleGroundQueueId(bgQueueTypeId);
+        // store entry point coords
+        _player->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
 
         WorldPacket data;
                                                             // send status packet (in queue)
@@ -430,9 +438,6 @@ void WorldSession::HandleBattleFieldPortOpcode( WorldPacket &recv_data )
             case 1:                                         // port to battleground
                 if (!_player->IsInvitedForBattleGroundQueueType(bgQueueTypeId))
                     return;                                 // cheating?
-
-                _player->SetBattleGroundEntryPoint();
-
                 // resurrect the player
                 if (!_player->isAlive())
                 {
@@ -443,7 +448,8 @@ void WorldSession::HandleBattleFieldPortOpcode( WorldPacket &recv_data )
                 if (_player->isInFlight())
                 {
                     _player->GetMotionMaster()->MovementExpired();
-                    _player->m_taxi.ClearTaxiDestinations();
+                    _player->CleanupAfterTaxiFlight();
+
                 }
 
                 sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, queueSlot, STATUS_IN_PROGRESS, 0, bg->GetStartTime(), bg->GetArenaType());
@@ -752,6 +758,9 @@ void WorldSession::HandleBattlemasterJoinArena( WorldPacket & recv_data )
 
             uint32 queueSlot = member->AddBattleGroundQueueId(bgQueueTypeId);// add to queue
 
+            // store entry point coords (same as leader entry point)
+            member->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+
             WorldPacket data;
             // send status packet (in queue)
             sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, queueSlot, STATUS_WAIT_QUEUE, avgTime, 0, arenatype);
@@ -768,6 +777,9 @@ void WorldSession::HandleBattlemasterJoinArena( WorldPacket & recv_data )
     else
     {
         uint32 queueSlot = _player->AddBattleGroundQueueId(bgQueueTypeId);
+
+        // store entry point coords
+        _player->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
 
         WorldPacket data;
         // send status packet (in queue)
@@ -831,7 +843,8 @@ void WorldSession::SendBattleGroundOrArenaJoinError(uint8 err)
             return;
             break;
     }
-    ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, GetMangosString(msg), NULL);
+    ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, GetRibonString(msg), NULL);
     SendPacket(&data);
     return;
 }
+

@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef __BATTLEGROUNDWS_H
@@ -21,9 +23,14 @@
 
 #include "BattleGround.h"
 
-#define BG_WS_MAX_TEAM_SCORE      3
-#define BG_WS_FLAG_RESPAWN_TIME   (23*IN_MILISECONDS)
-#define BG_WS_FLAG_DROP_TIME      (10*IN_MILISECONDS)
+enum BG_WS_TimerOrScore
+{
+    BG_WS_MAX_TEAM_SCORE    = 3,
+    BG_WS_FLAG_RESPAWN_TIME = 23000,
+    BG_WS_FLAG_DROP_TIME    = 10000,
+    BG_WS_SPELL_FORCE_TIME  = 600000,
+    BG_WS_SPELL_BRUTAL_TIME = 900000
+};
 
 enum BG_WS_Sound
 {
@@ -41,7 +48,9 @@ enum BG_WS_SpellId
     BG_WS_SPELL_WARSONG_FLAG            = 23333,
     BG_WS_SPELL_WARSONG_FLAG_DROPPED    = 23334,
     BG_WS_SPELL_SILVERWING_FLAG         = 23335,
-    BG_WS_SPELL_SILVERWING_FLAG_DROPPED = 23336
+    BG_WS_SPELL_SILVERWING_FLAG_DROPPED = 23336,
+    BG_WS_SPELL_FOCUSED_ASSAULT         = 46392,
+    BG_WS_SPELL_BRUTAL_ASSAULT          = 46393
 };
 
 enum BG_WS_WorldStates
@@ -92,7 +101,9 @@ enum BG_WS_ObjectEntry
     BG_OBJECT_DOOR_H_3_WS_ENTRY          = 180322,
     BG_OBJECT_DOOR_H_4_WS_ENTRY          = 180322,
     BG_OBJECT_A_FLAG_WS_ENTRY            = 179830,
-    BG_OBJECT_H_FLAG_WS_ENTRY            = 179831
+    BG_OBJECT_H_FLAG_WS_ENTRY            = 179831,
+    BG_OBJECT_A_FLAG_GROUND_WS_ENTRY     = 179785,
+    BG_OBJECT_H_FLAG_GROUND_WS_ENTRY     = 179786
 };
 
 enum BG_WS_FlagState
@@ -117,6 +128,12 @@ enum BG_WS_CreatureTypes
     WS_SPIRIT_MAIN_HORDE      = 1,
 
     BG_CREATURES_MAX_WS       = 2
+};
+
+enum BG_WS_CarrierDebuffs
+{
+    WS_SPELL_FOCUSED_ASSAULT   = 46392,
+    WS_SPELL_BRUTAL_ASSAULT    = 46393
 };
 
 class BattleGroundWGScore : public BattleGroundScore
@@ -153,6 +170,10 @@ class BattleGroundWS : public BattleGround
         void RespawnFlag(uint32 Team, bool captured);
         void RespawnFlagAfterDrop(uint32 Team);
         uint8 GetFlagState(uint32 team)             { return m_FlagState[GetTeamIndexByTeamId(team)]; }
+        void AddTimedAura(uint32 aura);
+        void RemoveTimedAura(uint32 aura);
+        bool IsBrutalTimerDone;
+        bool IsForceTimerDone;
 
         /* Battleground Events */
         virtual void EventPlayerDroppedFlag(Player *Source);
@@ -189,5 +210,9 @@ class BattleGroundWS : public BattleGround
         uint32 m_ReputationCapture;
         uint32 m_HonorWinKills;
         uint32 m_HonorEndKills;
+        int32 m_FlagSpellForceTimer;
+        bool m_BothFlagsKept;
+        uint8 m_FlagDebuffState;                            // 0 - no debuffs, 1 - focused assault, 2 - brutal assault
 };
 #endif
+

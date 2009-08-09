@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,21 +10,21 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include "Object.h"
-#include "Player.h"
 #include "BattleGround.h"
 #include "BattleGroundNA.h"
-#include "ObjectMgr.h"
-#include "WorldPacket.h"
 #include "Language.h"
+#include "Object.h"
+#include "ObjectMgr.h"
+#include "Player.h"
+#include "WorldPacket.h"
 
 BattleGroundNA::BattleGroundNA()
 {
@@ -57,16 +59,16 @@ void BattleGroundNA::Update(uint32 diff)
 void BattleGroundNA::StartingEventCloseDoors()
 {
     for(uint32 i = BG_NA_OBJECT_DOOR_1; i <= BG_NA_OBJECT_DOOR_4; ++i)
-        SpawnBGObject(m_BgObjects[i], RESPAWN_IMMEDIATELY);
+        SpawnBGObject(i, RESPAWN_IMMEDIATELY);
 }
 
 void BattleGroundNA::StartingEventOpenDoors()
 {
     for(uint32 i = BG_NA_OBJECT_DOOR_1; i <= BG_NA_OBJECT_DOOR_2; ++i)
-        DoorOpen(m_BgObjects[i]);
+        DoorOpen(i);
 
     for(uint32 i = BG_NA_OBJECT_BUFF_1; i <= BG_NA_OBJECT_BUFF_2; ++i)
-        SpawnBGObject(m_BgObjects[i], 60);
+        SpawnBGObject(i, 60);
 }
 
 void BattleGroundNA::AddPlayer(Player *plr)
@@ -179,3 +181,4 @@ bool BattleGroundNA::SetupBattleGround()
 0040: 00 00 00 00 00 00 d5 08 00 00 00 00 00 00 d3 08  |  ................
 0050: 00 00 00 00 00 00                                |  ......
 */
+

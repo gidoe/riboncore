@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,23 +10,36 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include "Object.h"
-#include "Player.h"
+#include "ObjectMgr.h"
+#include "World.h"
+#include "WorldPacket.h"
+
 #include "BattleGround.h"
 #include "BattleGroundAB.h"
 #include "Creature.h"
-#include "ObjectMgr.h"
 #include "Language.h"
+#include "Object.h"
+#include "Player.h"
 #include "Util.h"
-#include "WorldPacket.h"
+
+// these variables aren't used outside of this file, so declare them only here
+uint32 BG_AB_HonorScoreTicks[BG_HONOR_MODE_NUM] = {
+    330, // normal honor
+    200  // holiday
+};
+
+uint32 BG_AB_ReputationScoreTicks[BG_HONOR_MODE_NUM] = {
+    200, // normal honor
+    150  // holiday
+};
 
 BattleGroundAB::BattleGroundAB()
 {
@@ -170,15 +185,15 @@ void BattleGroundAB::StartingEventCloseDoors()
 {
     // despawn banners, auras and buffs
     for (int obj = BG_AB_OBJECT_BANNER_NEUTRAL; obj < BG_AB_DYNAMIC_NODES_COUNT * 8; ++obj)
-        SpawnBGObject(m_BgObjects[obj], RESPAWN_ONE_DAY);
+        SpawnBGObject(obj, RESPAWN_ONE_DAY);
     for (int i = 0; i < BG_AB_DYNAMIC_NODES_COUNT * 3; ++i)
-        SpawnBGObject(m_BgObjects[BG_AB_OBJECT_SPEEDBUFF_STABLES + i], RESPAWN_ONE_DAY);
+        SpawnBGObject(BG_AB_OBJECT_SPEEDBUFF_STABLES + i, RESPAWN_ONE_DAY);
 
     // Starting doors
-    DoorClose(m_BgObjects[BG_AB_OBJECT_GATE_A]);
-    DoorClose(m_BgObjects[BG_AB_OBJECT_GATE_H]);
-    SpawnBGObject(m_BgObjects[BG_AB_OBJECT_GATE_A], RESPAWN_IMMEDIATELY);
-    SpawnBGObject(m_BgObjects[BG_AB_OBJECT_GATE_H], RESPAWN_IMMEDIATELY);
+    DoorClose(BG_AB_OBJECT_GATE_A);
+    DoorClose(BG_AB_OBJECT_GATE_H);
+    SpawnBGObject(BG_AB_OBJECT_GATE_A, RESPAWN_IMMEDIATELY);
+    SpawnBGObject(BG_AB_OBJECT_GATE_H, RESPAWN_IMMEDIATELY);
 
     // Starting base spirit guides
     _NodeOccupied(BG_AB_SPIRIT_ALIANCE,ALLIANCE);
@@ -189,15 +204,15 @@ void BattleGroundAB::StartingEventOpenDoors()
 {
     // spawn neutral banners
     for (int banner = BG_AB_OBJECT_BANNER_NEUTRAL, i = 0; i < 5; banner += 8, ++i)
-        SpawnBGObject(m_BgObjects[banner], RESPAWN_IMMEDIATELY);
+        SpawnBGObject(banner, RESPAWN_IMMEDIATELY);
     for (int i = 0; i < BG_AB_DYNAMIC_NODES_COUNT; ++i)
     {
         //randomly select buff to spawn
         uint8 buff = urand(0, 2);
-        SpawnBGObject(m_BgObjects[BG_AB_OBJECT_SPEEDBUFF_STABLES + buff + i * 3], RESPAWN_IMMEDIATELY);
+        SpawnBGObject(BG_AB_OBJECT_SPEEDBUFF_STABLES + buff + i * 3, RESPAWN_IMMEDIATELY);
     }
-    DoorOpen(m_BgObjects[BG_AB_OBJECT_GATE_A]);
-    DoorOpen(m_BgObjects[BG_AB_OBJECT_GATE_H]);
+    DoorOpen(BG_AB_OBJECT_GATE_A);
+    DoorOpen(BG_AB_OBJECT_GATE_H);
 }
 
 void BattleGroundAB::AddPlayer(Player *plr)
@@ -263,25 +278,25 @@ void BattleGroundAB::_CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool
 
     uint8 obj = node*8 + type + teamIndex;
 
-    SpawnBGObject(m_BgObjects[obj], RESPAWN_IMMEDIATELY);
+    SpawnBGObject(obj, RESPAWN_IMMEDIATELY);
 
     // handle aura with banner
     if (!type)
         return;
     obj = node * 8 + ((type == BG_AB_NODE_TYPE_OCCUPIED) ? (5 + teamIndex) : 7);
-    SpawnBGObject(m_BgObjects[obj], RESPAWN_IMMEDIATELY);
+    SpawnBGObject(obj, RESPAWN_IMMEDIATELY);
 }
 
 void BattleGroundAB::_DelBanner(uint8 node, uint8 type, uint8 teamIndex)
 {
     uint8 obj = node*8 + type + teamIndex;
-    SpawnBGObject(m_BgObjects[obj], RESPAWN_ONE_DAY);
+    SpawnBGObject(obj, RESPAWN_ONE_DAY);
 
     // handle aura with banner
     if (!type)
         return;
     obj = node * 8 + ((type == BG_AB_NODE_TYPE_OCCUPIED) ? (5 + teamIndex) : 7);
-    SpawnBGObject(m_BgObjects[obj], RESPAWN_ONE_DAY);
+    SpawnBGObject(obj, RESPAWN_ONE_DAY);
 }
 
 int32 BattleGroundAB::_GetNodeNameId(uint8 node)
@@ -659,8 +674,7 @@ WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(Player* player)
 
 void BattleGroundAB::UpdatePlayerScore(Player *Source, uint32 type, uint32 value)
 {
-    std::map<uint64, BattleGroundScore*>::iterator itr = m_PlayerScores.find(Source->GetGUID());
-
+    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(Source->GetGUID());
     if( itr == m_PlayerScores.end() )                         // player not found...
         return;
 

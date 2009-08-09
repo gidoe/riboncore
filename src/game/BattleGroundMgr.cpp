@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,8 +19,12 @@
  */
 
 #include "Common.h"
-#include "SharedDefines.h"
-#include "Player.h"
+#include "ObjectMgr.h"
+#include "World.h"
+#include "WorldPacket.h"
+#include "Policies/SingletonImp.h"
+
+#include "ArenaTeam.h"
 #include "BattleGroundMgr.h"
 #include "BattleGroundAV.h"
 #include "BattleGroundAB.h"
@@ -31,18 +37,13 @@
 #include "BattleGroundSA.h"
 #include "BattleGroundDS.h"
 #include "BattleGroundRV.h"
-#include "MapManager.h"
+#include "Chat.h"
 #include "Map.h"
 #include "MapInstanced.h"
-#include "ObjectMgr.h"
+#include "MapManager.h"
+#include "Player.h"
 #include "ProgressBar.h"
-#include "Chat.h"
-#include "ArenaTeam.h"
-#include "World.h"
-#include "WorldPacket.h"
-#include "ProgressBar.h"
-
-#include "Policies/SingletonImp.h"
+#include "SharedDefines.h"
 
 INSTANTIATE_SINGLETON_1( BattleGroundMgr );
 
@@ -367,7 +368,7 @@ void BattleGroundQueue::AnnounceWorld(GroupQueueInfo *ginfo, const uint64& playe
 {
     if(ginfo->ArenaType) //if Arena
     {
-        if (sWorld.getConfig(CONFIG_ARENA_QUEUE_ENTER_ANNOUNCER_ENABLE) && ginfo->IsRated)
+        if (sWorld.getConfig(CONFIG_ARENA_QUEUE_ANNOUNCER_ENABLE) && ginfo->IsRated)
         {
             BattleGround* bg = sBattleGroundMgr.GetBattleGroundTemplate(ginfo->BgTypeId);
             if (!bg)
@@ -375,9 +376,25 @@ void BattleGroundQueue::AnnounceWorld(GroupQueueInfo *ginfo, const uint64& playe
 
             char const* bgName = bg->GetName();
             if (isAddedToQueue)
-                sWorld.SendWorldText(LANG_ARENA_QUEUE_ANNOUNCE_WORLD_JOIN, bgName, ginfo->ArenaType, ginfo->ArenaType, ginfo->ArenaTeamRating);
-            else if (sWorld.getConfig(CONFIG_ARENA_QUEUE_LEAVE_ANNOUNCER_ENABLE))
-                sWorld.SendWorldText(LANG_ARENA_QUEUE_ANNOUNCE_WORLD_EXIT, bgName, ginfo->ArenaType, ginfo->ArenaType, ginfo->ArenaTeamRating);
+            {
+                if (sWorld.getConfig(CONFIG_ARENA_QUEUE_ANNOUNCER_PLAYERONLY))
+                {
+                    if(Player *plr = objmgr.GetPlayer(playerGUID))
+                        ChatHandler(plr).PSendSysMessage(LANG_ARENA_QUEUE_ANNOUNCE_WORLD_JOIN, bgName, ginfo->ArenaType, ginfo->ArenaType, ginfo->ArenaTeamRating);
+                }
+                else
+                    sWorld.SendWorldText(LANG_ARENA_QUEUE_ANNOUNCE_WORLD_JOIN, bgName, ginfo->ArenaType, ginfo->ArenaType, ginfo->ArenaTeamRating);
+            }
+            else
+            {
+                if (sWorld.getConfig(CONFIG_ARENA_QUEUE_ANNOUNCER_PLAYERONLY))
+                {
+                    if(Player *plr = objmgr.GetPlayer(playerGUID))
+                        ChatHandler(plr).PSendSysMessage(LANG_ARENA_QUEUE_ANNOUNCE_WORLD_EXIT, bgName, ginfo->ArenaType, ginfo->ArenaType, ginfo->ArenaTeamRating);
+                }
+                else
+                    sWorld.SendWorldText(LANG_ARENA_QUEUE_ANNOUNCE_WORLD_EXIT, bgName, ginfo->ArenaType, ginfo->ArenaType, ginfo->ArenaTeamRating);
+            }
         }
     }
     else //if BG
@@ -585,7 +602,7 @@ bool BattleGroundQueue::CheckPremadeMatch(BGQueueIdBasedOnLevel queue_id, uint32
             m_SelectionPools[BG_TEAM_ALLIANCE].AddGroup((*ali_group), MaxPlayersPerTeam);
             m_SelectionPools[BG_TEAM_HORDE].AddGroup((*horde_group), MaxPlayersPerTeam);
             //add groups/players from normal queue to size of bigger group
-            uint32 maxPlayers = std::max(m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount(), m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount());
+            uint32 maxPlayers = std::min(m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount(), m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount());
             GroupsQueueType::const_iterator itr;
             for(uint32 i = 0; i < BG_TEAMS_COUNT; i++)
             {
@@ -1185,11 +1202,11 @@ void BattleGroundMgr::Update(uint32 diff)
     {
         if (m_AutoDistributionTimeChecker < diff)
         {
-            if (sWorld.GetGameTime() > m_NextAutoDistributionTime)
+            if(time(NULL) > m_NextAutoDistributionTime)
             {
                 DistributeArenaPoints();
-                m_NextAutoDistributionTime = time_t(sWorld.GetGameTime() + BATTLEGROUND_ARENA_POINT_DISTRIBUTION_DAY * sWorld.getConfig(CONFIG_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS));
-                CharacterDatabase.PExecute("UPDATE saved_variables SET NextArenaPointDistributionTime = '"UI64FMTD"'", uint64(m_NextAutoDistributionTime));
+                m_NextAutoDistributionTime = time(NULL) + BATTLEGROUND_ARENA_POINT_DISTRIBUTION_DAY * sWorld.getConfig(CONFIG_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS);
+                CharacterDatabase.PExecute("UPDATE saved_variables SET NextArenaPointDistributionTime = '"UI64FMTD"'", m_NextAutoDistributionTime);
             }
             m_AutoDistributionTimeChecker = 600000; // check 10 minutes
         }
@@ -1332,7 +1349,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
 
     *data << (int32)(bg->GetPlayerScoresSize());
 
-    for(std::map<uint64, BattleGroundScore*>::const_iterator itr = bg->GetPlayerScoresBegin(); itr != bg->GetPlayerScoresEnd(); ++itr)
+    for(BattleGround::BattleGroundScoreMap::const_iterator itr = bg->GetPlayerScoresBegin(); itr != bg->GetPlayerScoresEnd(); ++itr)
     {
         *data << (uint64)itr->first;
         *data << (int32)itr->second->KillingBlows;
@@ -1363,7 +1380,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
                 *data << (uint32)((BattleGroundAVScore*)itr->second)->GraveyardsDefended;   // GraveyardsDefended
                 *data << (uint32)((BattleGroundAVScore*)itr->second)->TowersAssaulted;      // TowersAssaulted
                 *data << (uint32)((BattleGroundAVScore*)itr->second)->TowersDefended;       // TowersDefended
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->SecondaryObjectives;  // SecondaryObjectives - free some of the Lieutnants
+                *data << (uint32)((BattleGroundAVScore*)itr->second)->MinesCaptured;        // MinesCaptured
                 break;
             case BATTLEGROUND_WS:
                 *data << (uint32)0x00000002;                // count of next fields
@@ -1379,15 +1396,11 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
                 *data << (uint32)0x00000001;                // count of next fields
                 *data << (uint32)((BattleGroundEYScore*)itr->second)->FlagCaptures;         // flag captures
                 break;
-            case BATTLEGROUND_SA:
-                *data << (uint32)0x00000002;                // count of next fields
-                *data << (uint32)((BattleGroundSAScore*)itr->second)->DemolishersDestroyed; // demolishers destroyed
-                *data << (uint32)((BattleGroundSAScore*)itr->second)->GatesDestroyed;       // gates destroyed
-                break;
             case BATTLEGROUND_NA:
             case BATTLEGROUND_BE:
             case BATTLEGROUND_AA:
             case BATTLEGROUND_RL:
+            case BATTLEGROUND_SA:                           // wotlk
             case BATTLEGROUND_DS:                           // wotlk
             case BATTLEGROUND_RV:                           // wotlk
                 *data << (int32)0;                          // 0
@@ -1461,6 +1474,8 @@ BattleGround * BattleGroundMgr::GetBattleGroundThroughClientInstance(uint32 inst
 
 BattleGround * BattleGroundMgr::GetBattleGround(uint32 InstanceID, BattleGroundTypeId bgTypeId)
 {
+    if (!InstanceID)
+        return NULL;
     //search if needed
     BattleGroundSet::iterator itr;
     if (bgTypeId == BATTLEGROUND_TYPE_NONE)
@@ -1764,8 +1779,8 @@ void BattleGroundMgr::InitAutomaticArenaPointDistribution()
         if (!result)
         {
             sLog.outDebug("Battleground: Next arena point distribution time not found in SavedVariables, reseting it now.");
-            m_NextAutoDistributionTime = time_t(sWorld.GetGameTime() + BATTLEGROUND_ARENA_POINT_DISTRIBUTION_DAY * sWorld.getConfig(CONFIG_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS));
-            CharacterDatabase.PExecute("INSERT INTO saved_variables (NextArenaPointDistributionTime) VALUES ('"UI64FMTD"')", uint64(m_NextAutoDistributionTime));
+            m_NextAutoDistributionTime = time(NULL) + BATTLEGROUND_ARENA_POINT_DISTRIBUTION_DAY * sWorld.getConfig(CONFIG_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS);
+            CharacterDatabase.PExecute("INSERT INTO saved_variables (NextArenaPointDistributionTime) VALUES ('"UI64FMTD"')", m_NextAutoDistributionTime);
         }
         else
         {
@@ -1992,6 +2007,17 @@ void BattleGroundMgr::ToggleArenaTesting()
         sWorld.SendWorldText(LANG_DEBUG_ARENA_OFF);
 }
 
+void BattleGroundMgr::SetHolidayWeekends(uint32 mask)
+{
+    for(uint32 bgtype = 1; bgtype < MAX_BATTLEGROUND_TYPE_ID; ++bgtype)
+    {
+        if(BattleGround * bg = GetBattleGroundTemplate(BattleGroundTypeId(bgtype)))
+        {
+            bg->SetHoliday(mask & (1 << bgtype));
+        }
+    }
+}
+
 uint32 BattleGroundMgr::GetMaxRatingDifference() const
 {
     // this is for stupid people who can't use brain and set max rating difference to 0
@@ -2054,64 +2080,4 @@ void BattleGroundMgr::LoadBattleMastersEntry()
 
     sLog.outString();
     sLog.outString( ">> Loaded %u battlemaster entries", count );
-}
-
-void BattleGroundMgr::LoadCreatureBattleEventIndexes()
-{
-    mCreatureBattleEventIndexMap.clear();                   // need for reload case
-    QueryResult *result = WorldDatabase.Query( "SELECT guid, eventIndex FROM creature_battleground" );
-    uint32 count = 0;
-    if( !result )
-    {
-        barGoLink bar( 1 );
-        bar.step();
-
-        sLog.outString();
-        sLog.outString( ">> Loaded 0 battleground eventindexes for creatures - table is empty!" );
-        return;
-    }
-    barGoLink bar( result->GetRowCount() );
-    do
-    {
-        ++count;
-        bar.step();
-        Field *fields = result->Fetch();
-        uint32 dbTableGuidLow   = fields[0].GetUInt32();
-        uint8  eventIndex       = fields[1].GetUInt8();
-        mCreatureBattleEventIndexMap[dbTableGuidLow] = eventIndex;
-
-    } while( result->NextRow() );
-    delete result;
-    sLog.outString();
-    sLog.outString( ">> Loaded %u battleground eventindexes for creatures", count );
-}
-
-void BattleGroundMgr::LoadGameObjectBattleEventIndexes()
-{
-    mGameObjectBattleEventIndexMap.clear();                   // need for reload case
-    QueryResult *result = WorldDatabase.Query( "SELECT guid, eventIndex FROM gameobject_battleground" );
-    uint32 count = 0;
-    if( !result )
-    {
-        barGoLink bar( 1 );
-        bar.step();
-
-        sLog.outString();
-        sLog.outString( ">> Loaded 0 battleground eventindexes for gameobjects - table is empty!" );
-        return;
-    }
-    barGoLink bar( result->GetRowCount() );
-    do
-    {
-        ++count;
-        bar.step();
-        Field *fields = result->Fetch();
-        uint32 dbTableGuidLow   = fields[0].GetUInt32();
-        uint8  eventIndex       = fields[1].GetUInt8();
-        mGameObjectBattleEventIndexMap[dbTableGuidLow] = eventIndex;
-
-    } while( result->NextRow() );
-    delete result;
-    sLog.outString();
-    sLog.outString( ">> Loaded %u battleground eventindexes for gameobjects", count );
 }

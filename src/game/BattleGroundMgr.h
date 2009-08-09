@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef __BATTLEGROUNDMGR_H
@@ -21,6 +23,7 @@
 
 #include "Common.h"
 #include "Policies/Singleton.h"
+
 #include "BattleGround.h"
 
 typedef std::map<uint32, BattleGround*> BattleGroundSet;
@@ -29,9 +32,6 @@ typedef std::map<uint32, BattleGround*> BattleGroundSet;
 typedef std::list<BattleGround*> BGFreeSlotQueueType;
 
 typedef UNORDERED_MAP<uint32, BattleGroundTypeId> BattleMastersMap;
-typedef UNORDERED_MAP<uint32, uint8> CreatureBattleEventIndexesMap;
-typedef UNORDERED_MAP<uint32, uint8> GameObjectBattleEventIndexesMap;
-#define BG_EVENT_NONE 255
 
 #define BATTLEGROUND_ARENA_POINT_DISTRIBUTION_DAY 86400     // seconds in a day
 #define COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME 10
@@ -229,6 +229,7 @@ class BattleGroundMgr
         void ToggleArenaTesting();
         void ToggleTesting();
 
+        void SetHolidayWeekends(uint32 mask);
         void LoadBattleMastersEntry();
         BattleGroundTypeId GetBattleMasterBG(uint32 entry) const
         {
@@ -236,23 +237,6 @@ class BattleGroundMgr
             if (itr != mBattleMastersMap.end())
                 return itr->second;
             return BATTLEGROUND_WS;
-        }
-
-        void LoadCreatureBattleEventIndexes();
-        uint8 GetCreatureEventIndex(uint32 dbTableGuidLow) const
-        {
-            CreatureBattleEventIndexesMap::const_iterator itr = mCreatureBattleEventIndexMap.find(dbTableGuidLow);
-            if(itr != mCreatureBattleEventIndexMap.end())
-                return itr->second;
-            return BG_EVENT_NONE;                           // needed to check for error
-        }
-        void LoadGameObjectBattleEventIndexes();
-        uint8 GetGameObjectEventIndex(uint32 dbTableGuidLow) const
-        {
-            GameObjectBattleEventIndexesMap::const_iterator itr = mGameObjectBattleEventIndexMap.find(dbTableGuidLow);
-            if(itr != mGameObjectBattleEventIndexMap.end())
-                return itr->second;
-            return BG_EVENT_NONE;                           // needed to check for error
         }
 
         bool isArenaTesting() const { return m_ArenaTesting; }
@@ -265,8 +249,6 @@ class BattleGroundMgr
         static uint8 BGArenaType(BattleGroundQueueTypeId bgQueueTypeId);
     private:
         BattleMastersMap    mBattleMastersMap;
-        CreatureBattleEventIndexesMap mCreatureBattleEventIndexMap;
-        GameObjectBattleEventIndexesMap mGameObjectBattleEventIndexMap;
 
         /* Battlegrounds */
         BattleGroundSet m_BattleGrounds[MAX_BATTLEGROUND_TYPE_ID];
@@ -278,5 +260,6 @@ class BattleGroundMgr
         bool   m_Testing;
 };
 
-#define sBattleGroundMgr MaNGOS::Singleton<BattleGroundMgr>::Instance()
+#define sBattleGroundMgr Ribon::Singleton<BattleGroundMgr>::Instance()
 #endif
+

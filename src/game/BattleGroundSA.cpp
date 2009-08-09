@@ -16,10 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Player.h"
 #include "BattleGround.h"
 #include "BattleGroundSA.h"
 #include "Language.h"
+#include "Player.h"
 
 BattleGroundSA::BattleGroundSA()
 {
@@ -72,8 +72,7 @@ void BattleGroundSA::HandleAreaTrigger(Player * /*Source*/, uint32 /*Trigger*/)
 void BattleGroundSA::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
 {
 
-    std::map<uint64, BattleGroundScore*>::iterator itr = m_PlayerScores.find(Source->GetGUID());
-
+    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(Source->GetGUID());
     if(itr == m_PlayerScores.end())                         // player not found...
         return;
 

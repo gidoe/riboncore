@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2009 MaNGOS <http://www.mangosproject.org/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,12 +17,13 @@
  */
 
 #include "Common.h"
-#include "Log.h"
-#include "Player.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Opcodes.h"
+
 #include "InstanceSaveMgr.h"
+#include "Log.h"
+#include "Opcodes.h"
+#include "Player.h"
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket &recv_data)
 {
