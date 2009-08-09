@@ -15,203 +15,218 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
-/*
-creature_movement Table
-
-alter table creature_movement add `textid1` int(11) NOT NULL default '0';
-alter table creature_movement add `textid2` int(11) NOT NULL default '0';
-alter table creature_movement add `textid3` int(11) NOT NULL default '0';
-alter table creature_movement add `textid4` int(11) NOT NULL default '0';
-alter table creature_movement add `textid5` int(11) NOT NULL default '0';
-alter table creature_movement add `emote` int(10) unsigned default '0';
-alter table creature_movement add `spell` int(5) unsigned default '0';
-alter table creature_movement add `wpguid` int(11) default '0';
-
-*/
-
-#include <ctime>
-
+//Basic headers
 #include "WaypointMovementGenerator.h"
-#include "ObjectMgr.h"
-#include "Creature.h"
 #include "DestinationHolderImp.h"
+//Extended headers
+#include "ObjectMgr.h"
+#include "World.h"
+//Creature-specific headers
+#include "Creature.h"
 #include "CreatureAI.h"
-#include "WaypointManager.h"
-#include "WorldPacket.h"
+#include "CreatureGroups.h"
+//Player-specific
+#include "Player.h"
 
-#include <cassert>
+template<class T>
+void
+WaypointMovementGenerator<T>::Initialize(T &u){}
 
-//-----------------------------------------------//
-void WaypointMovementGenerator<Creature>::LoadPath(Creature &c)
+template<>
+void
+WaypointMovementGenerator<Creature>::Finalize(Creature &u){}
+
+template<>
+void
+WaypointMovementGenerator<Player>::Finalize(Player &u){}
+
+template<class T>
+void
+WaypointMovementGenerator<T>::MovementInform(T &unit){}
+
+template<>
+void WaypointMovementGenerator<Creature>::MovementInform(Creature &unit)
 {
-    sLog.outDetail("LoadPath: loading waypoint path for creature %d,%d", c.GetGUIDLow(), c.GetDBTableGUIDLow());
+    unit.AI()->MovementInform(WAYPOINT_MOTION_TYPE, i_currentNode);
+}
 
-    i_path = WaypointMgr.GetPath(c.GetDBTableGUIDLow());
-    if(!i_path)
+template<>
+bool WaypointMovementGenerator<Creature>::GetDestination(float &x, float &y, float &z) const
+{
+    if(i_destinationHolder.HasArrived())
+        return false;
+    
+    i_destinationHolder.GetDestination(x, y, z);
+    return true;
+}
+
+template<>
+bool WaypointMovementGenerator<Player>::GetDestination(float &x, float &y, float &z) const
+{
+    return false;
+}
+
+template<>
+void WaypointMovementGenerator<Creature>::Reset(Creature &unit)
+{
+    StopedByPlayer = true;
+    i_nextMoveTime.Reset(0);
+}
+
+template<>
+void WaypointMovementGenerator<Player>::Reset(Player &unit){}
+
+template<>
+void WaypointMovementGenerator<Creature>::InitTraveller(Creature &unit, const WaypointData &node)
+{
+    node.run ? unit.RemoveUnitMovementFlag(MOVEMENTFLAG_WALK_MODE):
+        unit.AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
+
+    unit.SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+    unit.SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+
+    if(unit.canFly())
+        unit.AddUnitMovementFlag(MOVEMENTFLAG_FLYING);
+
+    unit.addUnitState(UNIT_STAT_ROAMING);
+}
+
+template<>
+void
+WaypointMovementGenerator<Creature>::Initialize(Creature &u)
+{
+    u.StopMoving();
+    //i_currentNode = -1; // uint32, become 0 in the first update
+    //i_nextMoveTime.Reset(0);
+    StopedByPlayer = false;
+    if(!path_id)
+        path_id = u.GetWaypointPathId();
+    waypoints = WaypointMgr.GetPath(path_id);
+    i_currentNode = 0;
+    if(waypoints && waypoints->size())
     {
-        sLog.outErrorDb("WaypointMovementGenerator::LoadPath: creature %s (Entry: %u GUID: %d) doesn't have waypoint path",
-            c.GetName(), c.GetEntry(), c.GetDBTableGUIDLow());
-        return;
+        node = waypoints->front();
+        Traveller<Creature> traveller(u);
+        InitTraveller(u, *node);
+        i_destinationHolder.SetDestination(traveller, node->x, node->y, node->z);
+        i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
+
+        //Call for creature group update
+        if(u.GetFormation() && u.GetFormation()->getLeader() == &u)
+            u.GetFormation()->LeaderMoveTo(node->x, node->y, node->z);
     }
-
-    uint32 node_count = i_path->size();
-    i_hasDone.resize(node_count);
-    for(uint32 i = 0; i < node_count-1; ++i)
-        i_hasDone[i] = false;
-
-    // to prevent a misbehavior inside "update"
-    // update is always called with the next wp - but the wpSys needs the current
-    // so when the routine is called the first time, wpSys gets the last waypoint
-    // and this prevents the system from performing text/emote, etc
-    i_hasDone[node_count - 1] = true;
+    else
+        node = NULL;
 }
 
-void WaypointMovementGenerator<Creature>::ClearWaypoints()
+template<>
+void WaypointMovementGenerator<Player>::InitTraveller(Player &unit, const WaypointData &node){}
+
+template<class T>
+bool
+WaypointMovementGenerator<T>::Update(T &unit, const uint32 &diff)
 {
-    i_path = NULL;
+    return false;
 }
 
-void WaypointMovementGenerator<Creature>::Initialize()
+template<>
+bool
+WaypointMovementGenerator<Creature>::Update(Creature &unit, const uint32 &diff)
 {
-}
-
-bool WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &diff)
-{
-    if(!&creature)
+    if(!&unit)
         return true;
+
+    if(!path_id)
+        return false;
 
     // Waypoint movement can be switched on/off
     // This is quite handy for escort quests and other stuff
-    if(creature.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_DISTRACTED | UNIT_STAT_ON_VEHICLE))
+    if(unit.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_DISTRACTED))
         return true;
 
-    // prevent a crash at empty waypoint path.
-    if(!i_path || i_path->empty())
-        return true;
+    // Clear the generator if the path doesn't exist
+    if(!waypoints || !waypoints->size())
+        return false;
 
-    // i_path was modified by chat commands for example
-    if(i_path->size() != i_hasDone.size())
-        i_hasDone.resize(i_path->size());
-    if(i_currentNode >= i_path->size())
-        i_currentNode = 0;
-
-    CreatureTraveller traveller(creature);
+    Traveller<Creature> traveller(unit);
 
     i_nextMoveTime.Update(diff);
-    i_destinationHolder.UpdateTraveller(traveller, diff, false, true);
+    i_destinationHolder.UpdateTraveller(traveller, diff, true);
 
-    // creature has been stopped in middle of the waypoint segment
-    if (!i_destinationHolder.HasArrived() && creature.IsStopped())
+    if(i_nextMoveTime.Passed())
     {
-        if( i_nextMoveTime.Passed()) // Timer has elapsed, meaning this part controlled it
+        if(unit.IsStopped())
         {
-            SetStoppedByPlayer(false);
-            // Now we re-set destination to same node and start travel
-            creature.addUnitState(UNIT_STAT_ROAMING);
-            if (creature.canFly())
-                creature.AddMonsterMoveFlag(MONSTER_MOVE_FLY);
-            const WaypointNode &node = i_path->at(i_currentNode);
-            i_destinationHolder.SetDestination(traveller, node.x, node.y, node.z);
+            if(StopedByPlayer)
+            {
+                assert(node);
+                InitTraveller(unit, *node);
+                i_destinationHolder.SetDestination(traveller, node->x, node->y, node->z);
+                i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
+                StopedByPlayer = false;
+                return true;
+            }
+
+            if(i_currentNode == waypoints->size() - 1) //If that's our last waypoint
+            {
+                if(repeating) //If the movement is repeating
+                    i_currentNode = 0; //Start moving all over again
+                else
+                {
+                    unit.SetHomePosition(node->x, node->y, node->z, unit.GetOrientation());
+                    unit.GetMotionMaster()->Initialize();
+                    return false; //Clear the waypoint movement
+                }
+            }
+            else
+                i_currentNode++;
+
+            node = waypoints->at(i_currentNode);
+            InitTraveller(unit, *node);
+            i_destinationHolder.SetDestination(traveller, node->x, node->y, node->z);
             i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
+
+            //Call for creature group update
+            if(unit.GetFormation() && unit.GetFormation()->getLeader() == &unit)
+                unit.GetFormation()->LeaderMoveTo(node->x, node->y, node->z);
         }
-        else // if( !i_nextMoveTime.Passed())
-        { // unexpected end of timer && creature stopped && not at end of segment
-            if (!IsStoppedByPlayer())
-            {                                                   // Put 30 seconds delay
+        else
+        {
+            //Determine waittime
+            if(node->delay)
+                i_nextMoveTime.Reset(node->delay);
+
+            //note: disable "start" for mtmap
+            if(node->event_id && rand()%100 < node->event_chance)
+                unit.GetMap()->ScriptsStart(sWaypointScripts, node->event_id, &unit, NULL/*, false*/);
+
+            MovementInform(unit);
+            unit.UpdateWaypointID(i_currentNode);
+            unit.clearUnitState(UNIT_STAT_ROAMING);
+            unit.Relocate(node->x, node->y, node->z);
+        }
+    }
+    else
+    {
+        if(unit.IsStopped() && !i_destinationHolder.HasArrived())
+        {
+            if(!StopedByPlayer)
+            {
                 i_destinationHolder.IncreaseTravelTime(STOP_TIME_FOR_PLAYER);
                 i_nextMoveTime.Reset(STOP_TIME_FOR_PLAYER);
-                SetStoppedByPlayer(true);                        // Mark we did it
+                StopedByPlayer = true;
             }
-        }
-        return true;    // Abort here this update
-    }
-
-    if( creature.IsStopped())
-    {
-        uint32 idx = i_currentNode > 0 ? i_currentNode-1 : i_path->size()-1;
-
-        if (!i_hasDone[idx])
-        {
-            if (i_path->at(idx).orientation !=100)
-                creature.SetOrientation(i_path->at(idx).orientation);
-
-            if(WaypointBehavior *behavior = i_path->at(idx).behavior)
-            {
-                if(behavior->emote != 0)
-                    creature.SetUInt32Value(UNIT_NPC_EMOTESTATE,behavior->emote);
-                if(behavior->spell != 0)
-                    creature.CastSpell(&creature,behavior->spell, false);
-                if(behavior->model1 != 0)
-                    creature.SetDisplayId(behavior->model1);
-                if(behavior->textid[0])
-                {
-                    // Not only one text is set
-                    if( behavior->textid[1] )
-                    {
-                        // Select one from max 5 texts (0 and 1 laready checked)
-                        int i = 2;
-                        for( ; i < MAX_WAYPOINT_TEXT; ++i )
-                            if( !behavior->textid[i] )
-                                break;
-
-                        creature.Say(behavior->textid[rand() % i], 0, 0);
-                    }
-                    else
-                        creature.Say(behavior->textid[0], 0, 0);
-                }
-
-                i_hasDone[idx] = true;
-                MovementInform(creature);
-            }                                               // wpBehaviour found
-        }                                                   // HasDone == false
-    }                                                       // i_creature.IsStopped()
-
-    if( i_nextMoveTime.Passed() ) // This is at the end of waypoint segment or has been stopped by player
-    {
-        if( creature.IsStopped() ) // If stopped then begin a new move segment
-        {
-            creature.addUnitState(UNIT_STAT_ROAMING);
-            if (creature.canFly())
-                creature.AddMonsterMoveFlag(MONSTER_MOVE_FLY);
-            const WaypointNode &node = i_path->at(i_currentNode);
-            i_destinationHolder.SetDestination(traveller, node.x, node.y, node.z);
-            i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
-            uint32 idx = i_currentNode > 0 ? i_currentNode-1 : i_path->size()-1;
-
-            if (i_path->at(idx).orientation !=100)
-                creature.SetOrientation(i_path->at(idx).orientation);
-
-            if(WaypointBehavior *behavior = i_path->at(idx).behavior )
-            {
-                i_hasDone[idx] = false;
-                if(behavior->model2 != 0)
-                    creature.SetDisplayId(behavior->model2);
-
-                creature.SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-            }
-        }
-        else // If not stopped then stop it and set the reset of TimeTracker to waittime
-        {
-            creature.StopMoving();
-            SetStoppedByPlayer(false);
-            i_nextMoveTime.Reset(i_path->at(i_currentNode).delay);
-            ++i_currentNode;
-            if( i_currentNode >= i_path->size() )
-                i_currentNode = 0;
         }
     }
     return true;
 }
 
-void WaypointMovementGenerator<Creature>::MovementInform(Creature &unit)
-{
-    if(unit.AI())
-        unit.AI()->MovementInform(WAYPOINT_MOTION_TYPE, i_currentNode);
-}
+template void WaypointMovementGenerator<Player>::Initialize(Player &);
+template bool WaypointMovementGenerator<Player>::Update(Player &, const uint32 &);
+template void WaypointMovementGenerator<Player>::MovementInform(Player &);
 
 //----------------------------------------------------//
-void FlightPathMovementGenerator::LoadPath(Player &)
+void FlightPathMovementGenerator::SetWaypointPathId(Player &)
 {
     objmgr.GetTaxiPathNodes(i_pathId, i_path,i_mapIds);
 }
@@ -236,37 +251,21 @@ void FlightPathMovementGenerator::Initialize(Player &player)
     player.getHostilRefManager().setOnlineOfflineState(false);
     player.addUnitState(UNIT_STAT_IN_FLIGHT);
     player.SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
-    LoadPath(player);
+    SetWaypointPathId(player);
     Traveller<Player> traveller(player);
     // do not send movement, it was sent already
     i_destinationHolder.SetDestination(traveller, i_path[i_currentNode].x, i_path[i_currentNode].y, i_path[i_currentNode].z, false);
 
-    player.SendMonsterMoveByPath(GetPath(),GetCurrentNode(),GetPathAtMapEnd(),MONSTER_MOVE_SPLINE_FLY);
+    player.SendMonsterMoveByPath(GetPath(),GetCurrentNode(),GetPathAtMapEnd());
 }
 
 void FlightPathMovementGenerator::Finalize(Player & player)
 {
-    // remove flag to prevent send object build movement packets for flight state and crash (movement generator already not at top of stack)
     player.clearUnitState(UNIT_STAT_IN_FLIGHT);
 
     float x, y, z;
     i_destinationHolder.GetLocationNow(player.GetBaseMap(), x, y, z);
     player.SetPosition(x, y, z, player.GetOrientation());
-
-    player.Unmount();
-    player.RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
-
-    if(player.m_taxi.empty())
-    {
-        player.getHostilRefManager().setOnlineOfflineState(true);
-        if(player.pvpInfo.inHostileArea)
-            player.CastSpell(&player, 2479, true);
-
-        // update z position to ground and orientation for landing point
-        // this prevent cheating with landing  point at lags
-        // when client side flight end early in comparison server side
-        player.StopMoving();
-    }
 }
 
 bool FlightPathMovementGenerator::Update(Player &player, const uint32 &diff)
@@ -274,7 +273,7 @@ bool FlightPathMovementGenerator::Update(Player &player, const uint32 &diff)
     if( MovementInProgress() )
     {
         Traveller<Player> traveller(player);
-        if( i_destinationHolder.UpdateTraveller(traveller, diff, false) )
+        if( i_destinationHolder.UpdateTraveller(traveller, diff) )
         {
             i_destinationHolder.ResetUpdate(FLIGHT_TRAVEL_UPDATE);
             if( i_destinationHolder.HasArrived() )
@@ -645,3 +644,4 @@ int GetFCost(int to, int num, int parentNum, float *gcost)
     return (int)(gc + hc);
 }
 #endif                                                      //__PATHFINDING__
+

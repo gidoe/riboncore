@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,85 +10,56 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOS_WAYPOINTMANAGER_H
-#define MANGOS_WAYPOINTMANAGER_H
+#ifndef RIBON_WAYPOINTMANAGER_H
+#define RIBON_WAYPOINTMANAGER_H
 
 #include <vector>
-#include <string>
-#include "Utilities/UnorderedMap.h"
-#include "Policies/Singleton.h"
 
-#define MAX_WAYPOINT_TEXT 5
-struct WaypointBehavior
+struct WaypointData
 {
-    uint32 emote;
-    uint32 spell;
-    int32  textid[MAX_WAYPOINT_TEXT];
-    uint32 model1;
-    uint32 model2;
-
-    bool isEmpty();
-    WaypointBehavior() {}
-    WaypointBehavior(const WaypointBehavior &b);
-};
-
-struct WaypointNode
-{
-    float x;
-    float y;
-    float z;
-    float orientation;
+    uint32 id;
+    float x,y,z;
+    bool run;
     uint32 delay;
-    WaypointBehavior * behavior;
-    WaypointNode() : x(0.0f), y(0.0f), z(0.0f), orientation(0.0f), delay(0), behavior(NULL) {}
-    WaypointNode(float _x, float _y, float _z, float _o, uint32 _delay, WaypointBehavior * _behavior)
-      : x(_x), y(_y), z(_z), orientation(_o), delay(_delay), behavior(_behavior) {}
+    uint32 event_id;
+    uint8 event_chance;
 };
 
-typedef std::vector<WaypointNode> WaypointPath;
+typedef std::vector<WaypointData*> WaypointPath;
+typedef UNORDERED_MAP<uint32, WaypointPath*> WaypointPathMap;
 
-class WaypointManager
+extern WaypointPathMap WaypointPathHolder;
+
+class WaypointStore
 {
+    private :
+        uint32  records;
+
     public:
-        WaypointManager() {}
-        ~WaypointManager() { Unload(); }
-
+        void UpdatePath(uint32 id);
         void Load();
-        void Unload();
+        void Free();
 
-        void Cleanup();
-
-        WaypointPath *GetPath(uint32 id)
+        WaypointPath* GetPath(uint32 id)
         {
-            WaypointPathMap::iterator itr = m_pathMap.find(id);
-            return itr != m_pathMap.end() ? &itr->second : NULL;
+            WaypointPathMap::iterator itr = WaypointPathHolder.find(id);
+            if(itr != WaypointPathHolder.end())
+                return itr->second;
+            return NULL;
         }
 
-        void AddLastNode(uint32 id, float x, float y, float z, float o, uint32 delay, uint32 wpGuid);
-        void AddAfterNode(uint32 id, uint32 point, float x, float y, float z, float o, uint32 delay, uint32 wpGuid);
-        uint32 GetLastPoint(uint32 id, uint32 default_notfound);
-        void DeleteNode(uint32 id, uint32 point);
-        void DeletePath(uint32 id);
-        void SetNodePosition(uint32 id, uint32 point, float x, float y, float z);
-        void SetNodeText(uint32 id, uint32 point, const char *text_field, const char *text);
-        void CheckTextsExistance(std::set<int32>& ids);
-
-    private:
-        void _addNode(uint32 id, uint32 point, float x, float y, float z, float o, uint32 delay, uint32 wpGuid);
-        void _clearPath(WaypointPath &path);
-
-        typedef UNORDERED_MAP<uint32, WaypointPath> WaypointPathMap;
-        WaypointPathMap m_pathMap;
+        inline uint32 GetRecordsCount() { return records; }
 };
 
-#define WaypointMgr MaNGOS::Singleton<WaypointManager>::Instance()
+extern WaypointStore WaypointMgr;
 
 #endif
+
