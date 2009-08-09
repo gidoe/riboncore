@@ -384,7 +384,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
             if (plMover->m_anti_MistimingCount > World::GetMistimingAlarms())
             {
-				sWorld.SendWorldText(3,"Kicking cheater: %s",plMover->GetName());
+				sWorld.SendWorldText(3,"Kicking cheater: %s",GetPlayer()->GetName());
                 plMover->GetSession()->KickPlayer();
                 return;
             }
@@ -544,7 +544,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                         {
                             sLog.outError("AC2-%s, teleport to plan exception. Exception count: %d ",
                                             plMover->GetName(), plMover->m_anti_TeleToPlane_Count);
-							sWorld.SendWorldText(3,"Kicking cheater: ",plMover->GetName());
+							sWorld.SendWorldText(3,"Kicking cheater: %s",GetPlayer()->GetName());
                             plMover->GetSession()->KickPlayer();
                             return;
                         }
