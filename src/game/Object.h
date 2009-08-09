@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef _OBJECT_H
@@ -25,6 +27,8 @@
 #include "UpdateData.h"
 #include "GameSystem/GridReference.h"
 #include "ObjectDefines.h"
+#include "GridDefines.h"
+#include "Map.h"
 
 #include <set>
 #include <string>
@@ -32,25 +36,26 @@
 #define CONTACT_DISTANCE            0.5f
 #define INTERACTION_DISTANCE        5.0f
 #define ATTACK_DISTANCE             5.0f
-#define MAX_VISIBILITY_DISTANCE     333.0f      // max distance for visible object show, limited in 333 yards
-#define DEFAULT_VISIBILITY_DISTANCE 90.0f       // default visible distance, 90 yards on continents
-#define DEFAULT_VISIBILITY_INSTANCE 120.0f      // default visible distance in instances, 120 yards
-#define DEFAULT_VISIBILITY_BGARENAS 180.0f      // default visible distance in BG/Arenas, 180 yards
+#define MAX_VISIBILITY_DISTANCE  (5*SIZE_OF_GRID_CELL/2.0f) // max distance for visible object show, limited by active zone for player based at cell size (active zone = 5x5 cells)
+#define DEFAULT_VISIBILITY_DISTANCE (SIZE_OF_GRID_CELL)     // default visible distance
 
 #define DEFAULT_WORLD_OBJECT_SIZE   0.388999998569489f      // player size, also currently used (correctly?) for any non Unit world objects
-#define MAX_STEALTH_DETECT_RANGE    45.0f
-#define CREATURE_MAX_AGGRO_RANGE    45.0f * sWorld.getRate(RATE_CREATURE_AGGRO)
+#define DEFAULT_COMBAT_REACH        1.5f
+#define MIN_MELEE_REACH             2.0f
+#define NOMINAL_MELEE_RANGE         5.0f
+#define MELEE_RANGE                 (NOMINAL_MELEE_RANGE - MIN_MELEE_REACH * 2) //center to center for players
 
 enum TypeMask
 {
     TYPEMASK_OBJECT         = 0x0001,
     TYPEMASK_ITEM           = 0x0002,
     TYPEMASK_CONTAINER      = 0x0006,                       // TYPEMASK_ITEM | 0x0004
-    TYPEMASK_UNIT           = 0x0008,
+    TYPEMASK_UNIT           = 0x0008,   //creature or player
     TYPEMASK_PLAYER         = 0x0010,
     TYPEMASK_GAMEOBJECT     = 0x0020,
     TYPEMASK_DYNAMICOBJECT  = 0x0040,
-    TYPEMASK_CORPSE         = 0x0080
+    TYPEMASK_CORPSE         = 0x0080,
+    TYPEMASK_SEER           = TYPEMASK_UNIT | TYPEMASK_DYNAMICOBJECT
 };
 
 enum TypeID
@@ -87,27 +92,19 @@ enum PhaseMasks
     PHASEMASK_ANYWHERE = 0xFFFFFFFF
 };
 
-enum NotifyFlags
-{
-    NOTIFY_NONE                     = 0x00,
-    NOTIFY_AI_RELOCATION            = 0x01,
-    NOTIFY_VISIBILITY_CHANGED       = 0x02,
-    NOTIFY_VISIBILITY_ACTIVE        = 0x04,
-    NOTIFY_PLAYER_VISIBILITY        = 0x08,
-    NOTIFY_ALL                      = 0xFF
-};
-
 class WorldPacket;
 class UpdateData;
 class ByteBuffer;
 class WorldSession;
 class Creature;
 class Player;
-class Map;
 class UpdateMask;
 class InstanceData;
 class GameObject;
+class TempSummon;
 class Vehicle;
+class CreatureAI;
+class ZoneScript;
 
 typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
 
@@ -124,16 +121,20 @@ struct WorldLocation
         : mapid(loc.mapid), coord_x(loc.coord_x), coord_y(loc.coord_y), coord_z(loc.coord_z), orientation(loc.orientation) {}
 };
 
-class MANGOS_DLL_SPEC Object
+typedef float Position[4];
+
+class RIBON_DLL_SPEC Object
 {
     public:
         virtual ~Object ( );
 
-        const bool& IsInWorld() const { return m_inWorld; }
+        const bool IsInWorld() const { return m_inWorld; }
         virtual void AddToWorld()
         {
             if(m_inWorld)
                 return;
+
+            assert(m_uint32Values);
 
             m_inWorld = true;
 
@@ -142,10 +143,13 @@ class MANGOS_DLL_SPEC Object
         }
         virtual void RemoveFromWorld()
         {
-            // if we remove from world then sending changes not required
-            if(m_uint32Values)
-                ClearUpdateMask(true);
+            if(!m_inWorld)
+                return;
+
             m_inWorld = false;
+
+            // if we remove from world then sending changes not required
+            ClearUpdateMask(true);
         }
 
         const uint64& GetGUID() const { return GetUInt64Value(0); }
@@ -156,7 +160,7 @@ class MANGOS_DLL_SPEC Object
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
         void SetEntry(uint32 entry) { SetUInt32Value(OBJECT_FIELD_ENTRY, entry); }
 
-        uint8 GetTypeId() const { return m_objectTypeId; }
+        TypeID GetTypeId() const { return m_objectTypeId; }
         bool isType(uint16 mask) const { return (mask & m_objectType); }
 
         virtual void BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
@@ -216,6 +220,9 @@ class MANGOS_DLL_SPEC Object
         void SetInt16Value(  uint16 index, uint8 offset, int16 value ) { SetUInt16Value(index,offset,(uint16)value); }
         void SetStatFloatValue( uint16 index, float value);
         void SetStatInt32Value( uint16 index, int32 value);
+
+        bool AddUInt64Value( uint16 index, const uint64 &value );
+        bool RemoveUInt64Value( uint16 index, const uint64 &value );
 
         void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
         void ApplyModInt32Value(uint16 index, int32 val, bool apply);
@@ -309,8 +316,6 @@ class MANGOS_DLL_SPEC Object
 
         uint16 GetValuesCount() const { return m_valuesCount; }
 
-        void InitValues() { _InitValues(); }
-
         virtual bool hasQuest(uint32 /* quest_id */) const { return false; }
         virtual bool hasInvolvedQuest(uint32 /* quest_id */) const { return false; }
 
@@ -327,12 +332,12 @@ class MANGOS_DLL_SPEC Object
         virtual void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
 
         virtual void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
-        void _BuildMovementUpdate(ByteBuffer * data, uint16 flags, uint32 flags2 ) const;
+        void _BuildMovementUpdate(ByteBuffer * data, uint16 flags) const;
         void _BuildValuesUpdate(uint8 updatetype, ByteBuffer *data, UpdateMask *updateMask, Player *target ) const;
 
         uint16 m_objectType;
 
-        uint8 m_objectTypeId;
+        TypeID m_objectTypeId;
         uint16 m_updateFlag;
 
         union
@@ -359,7 +364,7 @@ class MANGOS_DLL_SPEC Object
         Object& operator=(Object const&);                   // prevent generation assigment operator
 };
 
-class MANGOS_DLL_SPEC WorldObject : public Object
+class RIBON_DLL_SPEC WorldObject : public Object
 {
     public:
         virtual ~WorldObject ( ) {}
@@ -367,6 +372,14 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         virtual void Update ( uint32 /*time_diff*/ ) { }
 
         void _Create( uint32 guidlow, HighGuid guidhigh, uint32 phaseMask);
+
+        void Relocate(WorldObject *obj)
+        {
+            m_positionX = obj->GetPositionX();
+            m_positionY = obj->GetPositionY();
+            m_positionZ = obj->GetPositionZ();
+            m_orientation = obj->GetOrientation();
+        }
 
         void Relocate(float x, float y, float z, float orientation)
         {
@@ -383,11 +396,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
             m_positionZ = z;
         }
 
-        void Relocate(WorldLocation const & _loc)
-        {
-            SetLocationMapId(_loc.mapid);
-            Relocate(_loc.coord_x, _loc.coord_y, _loc.coord_z, _loc.orientation);
-        }
+        void Relocate(Position pos)
+            { m_positionX = pos[0]; m_positionY = pos[1]; m_positionZ = pos[2]; m_orientation = pos[3]; }
 
         void SetOrientation(float orientation) { m_orientation = orientation; }
 
@@ -397,7 +407,9 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void GetPosition( float &x, float &y, float &z ) const
             { x = m_positionX; y = m_positionY; z = m_positionZ; }
         void GetPosition( WorldLocation &loc ) const
-            { loc.mapid = m_mapId; GetPosition(loc.coord_x, loc.coord_y, loc.coord_z); loc.orientation = GetOrientation(); }
+            { loc.mapid = GetMapId(); GetPosition(loc.coord_x, loc.coord_y, loc.coord_z); loc.orientation = GetOrientation(); }
+        void GetPosition(Position pos) const
+            { pos[0] = m_positionX; pos[1] = m_positionY; pos[2] = m_positionZ; pos[3] = m_orientation; }
         float GetOrientation( ) const { return m_orientation; }
         void GetNearPoint2D( float &x, float &y, float distance, float absAngle) const;
         void GetNearPoint( WorldObject const* searcher, float &x, float &y, float &z, float searcher_size, float distance2d,float absAngle) const;
@@ -405,6 +417,12 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         {
             // angle calculated from current orientation
             GetNearPoint(NULL,x,y,z,size,distance2d,GetOrientation() + angle);
+        }
+        void GetGroundPoint(float &x, float &y, float &z, float dist, float angle);
+        void GetGroundPointAroundUnit(float &x, float &y, float &z, float dist, float angle)
+        {
+            GetPosition(x, y, z);
+            GetGroundPoint(x, y, z, dist, angle);
         }
         void GetContactPoint( const WorldObject* obj, float &x, float &y, float &z, float distance2d = CONTACT_DISTANCE) const
         {
@@ -414,15 +432,15 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         float GetObjectSize() const
         {
-            return ( m_valuesCount > UNIT_FIELD_BOUNDINGRADIUS ) ? m_floatValues[UNIT_FIELD_BOUNDINGRADIUS] : DEFAULT_WORLD_OBJECT_SIZE;
+            return ( m_valuesCount > UNIT_FIELD_COMBATREACH ) ? m_floatValues[UNIT_FIELD_COMBATREACH] : DEFAULT_WORLD_OBJECT_SIZE;
         }
         bool IsPositionValid() const;
         void UpdateGroundPositionZ(float x, float y, float &z) const;
 
         void GetRandomPoint( float x, float y, float z, float distance, float &rand_x, float &rand_y, float &rand_z ) const;
 
-        uint32 GetMapId() const { return m_mapId; }
-        uint32 GetInstanceId() const { return m_InstanceId; }
+        virtual uint32 GetMapId() const { return m_currMap ? m_currMap->GetId() : 0; }
+        virtual uint32 GetInstanceId() const { return m_currMap ? m_currMap->GetInstanceId() : 0; }
 
         virtual void SetPhaseMask(uint32 newPhaseMask, bool update);
         uint32 GetPhaseMask() const { return m_phaseMask; }
@@ -442,15 +460,15 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         float GetDistance( const WorldObject* obj ) const;
         float GetDistance(float x, float y, float z) const;
+        float GetDistanceSq(const float &x, const float &y, const float &z) const;
+        float GetDistanceSq(const WorldObject *obj) const;
         float GetDistance2d(const WorldObject* obj) const;
         float GetDistance2d(float x, float y) const;
+        float GetExactDistance2d(const float x, const float y) const;
         float GetDistanceZ(const WorldObject* obj) const;
         bool IsInMap(const WorldObject* obj) const
         {
-            if(obj)
-                return IsInWorld() && obj->IsInWorld() && (GetMap() == obj->GetMap()) && InSamePhase(obj);
-            else
-                return false;
+            return IsInWorld() && obj->IsInWorld() && (GetMap() == obj->GetMap()) && InSamePhase(obj);
         }
         bool IsWithinDist3d(float x, float y, float z, float dist2compare) const;
         bool IsWithinDist2d(float x, float y, float dist2compare) const;
@@ -473,7 +491,9 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         float GetAngle( const WorldObject* obj ) const;
         float GetAngle( const float x, const float y ) const;
+        void GetSinCos(const float x, const float y, float &vsin, float &vcos);
         bool HasInArc( const float arcangle, const WorldObject* obj ) const;
+        bool IsInBetween(const WorldObject *obj1, const WorldObject *obj2, float size = 0) const;
 
         virtual void CleanupsBeforeDelete();                // used in destructor or explicitly before mass creature delete to remove cross-references to already deleted units
 
@@ -505,52 +525,62 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         // low level function for visibility change code, must be define in all main world object subclasses
         virtual bool isVisibleForInState(Player const* u, bool inVisibleList) const = 0;
 
-        void SetMap(Map * map);
+        // Low Level Packets
+        void SendPlaySound(uint32 Sound, bool OnlySelf);
+
+        virtual void SetMap(Map * map);
         Map * GetMap() const { ASSERT(m_currMap); return m_currMap; }
+        Map * FindMap() const { return m_currMap; }
         //used to check all object's GetMap() calls when object is not in world!
-        void ResetMap() { m_currMap = NULL; }
+        virtual void ResetMap() { assert(m_currMap); m_currMap = NULL; }
 
         //this function should be removed in nearest time...
-        //new relocation and visibility system functions
-        void AddToNotify(uint16 f) { m_notifyflags |= f;}
-        void RemoveFromNotify(uint16 f) { m_notifyflags &= ~f;}
-        bool isNeedNotify(uint16 f) const { return m_notifyflags & f;}
-
-        bool isNotified(uint16 f) const { return m_executed_notifies & f;}
-        void SetNotified(uint16 f) { m_executed_notifies |= f;}
-        void ResetNotifies(uint16 f) { m_executed_notifies |= ~f;}
-        void ResetAllNotifies() { m_notifyflags = 0; m_executed_notifies = 0; }
-        void ResetAllNotifiesbyMask(uint16 f) { m_notifyflags &= ~f; m_executed_notifies &= ~f; }
-
         Map const* GetBaseMap() const;
 
-        Creature* SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime);
+        void SetZoneScript();
+        ZoneScript * GetZoneScript() const { return m_zoneScript; }
+
+        TempSummon* SummonCreature(uint32 id, float x, float y, float z, float ang = 0,TempSummonType spwtype = TEMPSUMMON_MANUAL_DESPAWN,uint32 despwtime = 0);
+        Vehicle*    SummonVehicle(uint32 entry, float x, float y, float z, float ang = 0);
         GameObject* SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime);
-        Vehicle* SummonVehicle(uint32 id, float x, float y, float z, float ang, uint32 vehicleId = NULL);
+        Creature*   SummonTrigger(float x, float y, float z, float ang, uint32 dur, CreatureAI* (*GetAI)(Creature*) = NULL);
+
+        Creature*   FindNearestCreature(uint32 entry, float range, bool alive = true);
+        GameObject* FindNearestGameObject(uint32 entry, float range);
+
+        void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList, uint32 uiEntry, float fMaxSearchRange);
+        void GetCreatureListWithEntryInGrid(std::list<Creature*>& lList, uint32 uiEntry, float fMaxSearchRange);
+
+        bool isActiveObject() const { return m_isActive; }
+        void setActive(bool isActiveObject);
+        void SetWorldObject(bool apply);
+        template<class NOTIFIER> void VisitNearbyObject(const float &radius, NOTIFIER &notifier) const { GetMap()->VisitAll(GetPositionX(), GetPositionY(), radius, notifier); }
+        template<class NOTIFIER> void VisitNearbyGridObject(const float &radius, NOTIFIER &notifier) const { GetMap()->VisitGrid(GetPositionX(), GetPositionY(), radius, notifier); }
+        template<class NOTIFIER> void VisitNearbyWorldObject(const float &radius, NOTIFIER &notifier) const { GetMap()->VisitWorld(GetPositionX(), GetPositionY(), radius, notifier); }
+        bool IsTempWorldObject;
+
+#ifdef MAP_BASED_RAND_GEN
+        int32 irand(int32 min, int32 max) const     { return int32 (GetMap()->mtRand.randInt(max - min)) + min; }
+        uint32 urand(uint32 min, uint32 max) const  { return GetMap()->mtRand.randInt(max - min) + min;}
+        int32 rand32() const                        { return GetMap()->mtRand.randInt();}
+        double rand_norm() const                    { return GetMap()->mtRand.randExc();}
+        double rand_chance() const                  { return GetMap()->mtRand.randExc(100.0);}
+#endif
 
     protected:
         explicit WorldObject();
         std::string m_name;
-
-        //these functions are used mostly for Relocate() and Corpse/Player specific stuff...
-        //use them ONLY in LoadFromDB()/Create() funcs and nowhere else!
-        //mapId/instanceId should be set in SetMap() function!
-        void SetLocationMapId(uint32 _mapId) { m_mapId = _mapId; }
-        void SetLocationInstanceId(uint32 _instanceId) { m_InstanceId = _instanceId; }
+        bool m_isActive;
+        ZoneScript *m_zoneScript;
 
     private:
         Map * m_currMap;                                    //current object's Map location
-
-        uint32 m_mapId;                                     // object at map with map_id
-        uint32 m_InstanceId;                                // in map copy with instance id
         uint32 m_phaseMask;                                 // in area phase state
 
         float m_positionX;
         float m_positionY;
         float m_positionZ;
         float m_orientation;
-
-        uint16 m_notifyflags;
-        uint16 m_executed_notifies;
 };
 #endif
+
