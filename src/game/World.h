@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -77,8 +79,9 @@ enum WorldTimers
     WUPDATE_UPTIME      = 4,
     WUPDATE_CORPSES     = 5,
     WUPDATE_EVENTS      = 6,
-    WUPDATE_AUTOBROADCAST = 7,
-    WUPDATE_COUNT         = 8
+    WUPDATE_CLEANDB     = 7,
+    WUPDATE_AUTOBROADCAST = 8,
+    WUPDATE_COUNT       = 9
 };
 
 /// Configuration elements
@@ -90,6 +93,7 @@ enum WorldConfigs
     CONFIG_INTERVAL_GRIDCLEAN,
     CONFIG_INTERVAL_MAPUPDATE,
     CONFIG_INTERVAL_CHANGEWEATHER,
+    CONFIG_INTERVAL_DISCONNECT_TOLERANCE,
     CONFIG_PORT_WORLD,
     CONFIG_SOCKET_SELECTTIME,
     CONFIG_GROUP_XP_DISTANCE,
@@ -106,6 +110,7 @@ enum WorldConfigs
     CONFIG_ALLOW_TWO_SIDE_INTERACTION_MAIL,
     CONFIG_ALLOW_TWO_SIDE_WHO_LIST,
     CONFIG_ALLOW_TWO_SIDE_ADD_FRIEND,
+    CONFIG_ALLOW_TWO_SIDE_TRADE,
     CONFIG_STRICT_PLAYER_NAMES,
     CONFIG_STRICT_CHARTER_NAMES,
     CONFIG_STRICT_PET_NAMES,
@@ -142,6 +147,8 @@ enum WorldConfigs
     CONFIG_GM_LEVEL_IN_WHO_LIST,
     CONFIG_GM_LOG_TRADE,
     CONFIG_START_GM_LEVEL,
+    CONFIG_ALLOW_GM_GROUP,
+    CONFIG_ALLOW_GM_FRIEND,
     CONFIG_GM_LOWER_SECURITY,
     CONFIG_GM_ALLOW_ACHIEVEMENT_GAINS,
     CONFIG_GROUP_VISIBILITY,
@@ -158,8 +165,9 @@ enum WorldConfigs
     CONFIG_SKILL_GAIN_DEFENSE,
     CONFIG_SKILL_GAIN_GATHERING,
     CONFIG_SKILL_GAIN_WEAPON,
+    CONFIG_DURABILITY_LOSS_IN_PVP,
     CONFIG_MAX_OVERSPEED_PINGS,
-    CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY,
+    CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY,
     CONFIG_ALWAYS_MAX_SKILL_FOR_LEVEL,
     CONFIG_WEATHER,
     CONFIG_EXPANSION,
@@ -209,13 +217,44 @@ enum WorldConfigs
     CONFIG_ARENA_RATING_DISCARD_TIMER,
     CONFIG_ARENA_AUTO_DISTRIBUTE_POINTS,
     CONFIG_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS,
-    CONFIG_ARENA_QUEUE_ENTER_ANNOUNCER_ENABLE,
-    CONFIG_ARENA_QUEUE_LEAVE_ANNOUNCER_ENABLE,
+    CONFIG_ARENA_QUEUE_ANNOUNCER_ENABLE,
+    CONFIG_ARENA_QUEUE_ANNOUNCER_PLAYERONLY,
     CONFIG_ARENA_SEASON_ID,
     CONFIG_ARENA_SEASON_IN_PROGRESS,
-    CONFIG_OFFHAND_CHECK_AT_TALENTS_RESET,
-    CONFIG_NUMTHREADS,
+    CONFIG_MAX_WHO,
+    CONFIG_BG_START_MUSIC,
+    CONFIG_START_ALL_SPELLS,
+    CONFIG_HONOR_AFTER_DUEL,
+    CONFIG_START_ALL_EXPLORED,
+    CONFIG_START_ALL_REP,
+    CONFIG_ALWAYS_MAXSKILL,
+    CONFIG_PVP_TOKEN_ENABLE,
+    CONFIG_PVP_TOKEN_MAP_TYPE,
+    CONFIG_PVP_TOKEN_ID,
+    CONFIG_PVP_TOKEN_COUNT,
+    CONFIG_OUTDOORPVP_WINTERGRASP_START_TIME,
+    CONFIG_OUTDOORPVP_WINTERGRASP_BATTLE_TIME,
+    CONFIG_OUTDOORPVP_WINTERGRASP_INTERVAL,
+    CONFIG_NO_RESET_TALENT_COST,
+    CONFIG_SHOW_KICK_IN_WORLD,
     CONFIG_INTERVAL_LOG_UPDATE,
+    CONFIG_MIN_LOG_UPDATE,
+    CONFIG_CHECK_DB,
+    CONFIG_ENABLE_SINFO_LOGIN,
+    CONFIG_PET_LOS,   
+    CONFIG_NUMTHREADS,
+    CONFIG_OFFHAND_CHECK_AT_TALENTS_RESET,
+    CONFIG_CHATLOG_CHANNEL,
+    CONFIG_CHATLOG_WHISPER,
+    CONFIG_CHATLOG_SYSCHAN,
+    CONFIG_CHATLOG_PARTY,
+    CONFIG_CHATLOG_RAID,
+    CONFIG_CHATLOG_GUILD,
+    CONFIG_CHATLOG_PUBLIC,
+    CONFIG_CHATLOG_ADDON,
+    CONFIG_CHATLOG_BGROUND,
+    CONFIG_LOGDB_CLEARINTERVAL,
+    CONFIG_LOGDB_CLEARTIME,
     CONFIG_VALUE_COUNT
 };
 
@@ -242,6 +281,7 @@ enum Rates
     RATE_XP_KILL,
     RATE_XP_QUEST,
     RATE_XP_EXPLORE,
+    RATE_REPAIRCOST,
     RATE_REPUTATION_GAIN,
     RATE_REPUTATION_LOWLEVEL_KILL,
     RATE_REPUTATION_LOWLEVEL_QUEST,
@@ -275,6 +315,7 @@ enum Rates
     RATE_CORPSE_DECAY_LOOTED,
     RATE_INSTANCE_RESET_TIME,
     RATE_TARGET_POS_RECALCULATION_RANGE,
+    RATE_DURABILITY_LOSS_ON_DEATH,
     RATE_DURABILITY_LOSS_DAMAGE,
     RATE_DURABILITY_LOSS_PARRY,
     RATE_DURABILITY_LOSS_ABSORB,
@@ -345,6 +386,9 @@ enum RealmZone
 #define SCRIPT_COMMAND_REMOVE_AURA          14              // source (datalong2!=0) or target (datalong==0) unit, datalong = spell_id
 #define SCRIPT_COMMAND_CAST_SPELL           15              // source/target cast spell at target/source (script->datalong2: 0: s->t 1: s->s 2: t->t 3: t->s
 #define SCRIPT_COMMAND_PLAY_SOUND           16              // source = any object, target=any/player, datalong (sound_id), datalong2 (bitmask: 0/1=anyone/target, 0/2=with distance dependent, so 1|2 = 3 is target with distance dependent)
+#define SCRIPT_COMMAND_LOAD_PATH            20              // source = unit, path = datalong, repeatable datalong2
+#define SCRIPT_COMMAND_CALLSCRIPT_TO_UNIT   21              // datalong scriptid, lowguid datalong2, dataint table
+#define SCRIPT_COMMAND_KILL                 22              // datalong removecorpse
 
 /// Storage class for commands issued for delayed execution
 struct CliCommandHolder
@@ -376,7 +420,7 @@ class World
 
         WorldSession* FindSession(uint32 id) const;
         void AddSession(WorldSession *s);
-        void SendBroadcast();
+        void SendRNDBroadcast();
         bool RemoveSession(uint32 id);
         /// Get the number of current active sessions
         void UpdateMaxSessionCounters();
@@ -398,10 +442,15 @@ class World
         inline void DecreasePlayerCount() { m_PlayerCount--; }
 
         Player* FindPlayerInZone(uint32 zone);
-
         Weather* FindWeather(uint32 id) const;
         Weather* AddWeather(uint32 zone_id);
         void RemoveWeather(uint32 zone_id);
+
+        /// Deny clients?
+        bool IsClosed() { return m_isClosed; }
+
+        /// Close world
+        void SetClosed(bool val) { m_isClosed = val; }
 
         /// Get the active session server limit (or security level limitations)
         uint32 GetPlayerAmountLimit() const { return m_playerLimit >= 0 ? m_playerLimit : 0; }
@@ -415,6 +464,7 @@ class World
         void AddQueuedPlayer(WorldSession*);
         bool RemoveQueuedPlayer(WorldSession* session);
         int32 GetQueuePos(WorldSession*);
+        bool HasRecentlyDisconnected(WorldSession*);
         uint32 GetQueueSize() const { return m_QueuedPlayer.size(); }
 
         /// \todo Actions on m_allowMovement still to be implemented
@@ -427,6 +477,11 @@ class World
         void SetMotd(const std::string& motd) { m_motd = motd; }
         /// Get the current Message of the Day
         const char* GetMotd() const { return m_motd.c_str(); }
+
+        /// Set the string for new characters (first login)
+        void SetNewCharString(std::string str) { m_newCharString = str; }
+        /// Get the string for new characters (first login)
+        const std::string& GetNewCharString() const { return m_newCharString; }
 
         LocaleConstant GetDefaultDbcLocale() const { return m_defaultDbcLocale; }
 
@@ -441,6 +496,7 @@ class World
         uint32 GetUptime() const { return uint32(m_gameTime - m_startTime); }
         /// Update time
         uint32 GetUpdateTime() const { return m_updateTime; }
+        void SetRecordDiffInterval(int32 t) { if(t >= 0) m_configs[CONFIG_INTERVAL_LOG_UPDATE] = (uint32)t; }
 
         /// Get the maximum skill level a player can reach
         uint16 GetConfigMaxSkillValue() const
@@ -454,7 +510,9 @@ class World
 
         void SendWorldText(int32 string_id, ...);
         void SendGlobalText(const char* text, WorldSession *self);
+        void SendGMText(int32 string_id, ...);
         void SendGlobalMessage(WorldPacket *packet, WorldSession *self = 0, uint32 team = 0);
+        void SendGlobalGMMessage(WorldPacket *packet, WorldSession *self = 0, uint32 team = 0);
         void SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self = 0, uint32 team = 0);
         void SendZoneText(uint32 zone, const char *text, WorldSession *self = 0, uint32 team = 0);
         void SendServerMessage(ServerMessageType type, const char *text = "", Player* player = NULL);
@@ -506,32 +564,29 @@ class World
         uint32 DecreaseScheduledScriptCount(size_t count) { return (uint32)(m_scheduledScripts -= count); }
         bool IsScriptScheduled() const { return m_scheduledScripts > 0; }
 
-        int32 GetVisibilityNotifyPeriodOnContinents()    { return m_visibility_notify_periodOnContinents; }
-        int32 GetVisibilityNotifyPeriodInInstances()     { return m_visibility_notify_periodInInctances;  }
-        int32 GetVisibilityNotifyPeriodInBGArenas()      { return m_visibility_notify_periodInBGArenas;   }
+        bool IsAllowedMap(uint32 mapid) { return m_forbiddenMapIds.count(mapid) == 0 ;}
 
         // for max speed access
-        static float GetMaxVisibleDistanceOnContinents()    { return m_MaxVisibleDistanceOnContinents; }
-        static float GetMaxVisibleDistanceInInstances()     { return m_MaxVisibleDistanceInInctances;  }
-        static float GetMaxVisibleDistanceInBGArenas()      { return m_MaxVisibleDistanceInBGArenas;   }
-        static float GetMaxVisibleDistanceForObject()       { return m_MaxVisibleDistanceForObject;   }
-
-        static float GetMaxVisibleDistanceInFlight()        { return m_MaxVisibleDistanceInFlight;    }
-        static float GetVisibleUnitGreyDistance()           { return m_VisibleUnitGreyDistance;       }
-        static float GetVisibleObjectGreyDistance()         { return m_VisibleObjectGreyDistance;     }
-
+        static float GetMaxVisibleDistance()            { return m_MaxVisibleDistance;            }
+        static float GetMaxVisibleDistanceForCreature() { return m_MaxVisibleDistanceForCreature; }
+        static float GetMaxVisibleDistanceForPlayer()   { return m_MaxVisibleDistanceForPlayer;   }
+        static float GetMaxVisibleDistanceForObject()   { return m_MaxVisibleDistanceForObject;   }
+        static float GetMaxVisibleDistanceInFlight()    { return m_MaxVisibleDistanceInFlight;    }
+        static float GetVisibleUnitGreyDistance()       { return m_VisibleUnitGreyDistance;       }
+        static float GetVisibleObjectGreyDistance()     { return m_VisibleObjectGreyDistance;     }
         //movement anticheat
         static bool GetEnableMvAnticheat()     {return m_EnableMvAnticheat;}
         static uint32 GetTeleportToPlaneAlarms()  {return m_TeleportToPlaneAlarms;}
         static uint32 GetMistimingDelta()  {return m_MistimingDelta;}
         static uint32 GetMistimingAlarms() {return m_MistimingAlarms;}
         //<<< end movement anticheat
-
         void ProcessCliCommands();
         void QueueCliCommand( CliCommandHolder::Print* zprintf, char const* input ) { cliCmdQueue.add(new CliCommandHolder(input, zprintf)); }
 
         void UpdateResultQueue();
         void InitResultQueue();
+
+        void ForceGameEventUpdate();
 
         void UpdateRealmCharCount(uint32 accid);
 
@@ -546,6 +601,7 @@ class World
         void SetScriptsVersion(char const* version) { m_ScriptsVersion = version ? version : "unknown scripting library"; }
         char const* GetScriptsVersion() { return m_ScriptsVersion.c_str(); }
 
+        void RecordTimeDiff(const char * text, ...);
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters
@@ -559,6 +615,8 @@ class World
         uint32 m_ShutdownTimer;
         uint32 m_ShutdownMask;
 
+        bool m_isClosed;
+
         //atomic op counter for active scripts amount
         ACE_Atomic_Op<ACE_Thread_Mutex, long> m_scheduledScripts;
 
@@ -569,15 +627,20 @@ class World
         uint32 mail_timer_expires;
         uint32 m_updateTime, m_updateTimeSum;
         uint32 m_updateTimeCount;
+        uint32 m_currentTime;
 
         typedef UNORDERED_MAP<uint32, Weather*> WeatherMap;
         WeatherMap m_weathers;
         typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
         SessionMap m_sessions;
+        typedef UNORDERED_MAP<uint32, time_t> DisconnectMap;
+        DisconnectMap m_disconnects;
         uint32 m_maxActiveSessionCount;
         uint32 m_maxQueuedSessionCount;
         uint32 m_PlayerCount;
         uint32 m_MaxPlayerCount;
+
+        std::string m_newCharString;
 
         float rate_values[MAX_RATES];
         uint32 m_configs[CONFIG_VALUE_COUNT];
@@ -588,27 +651,21 @@ class World
         bool m_allowMovement;
         std::string m_motd;
         std::string m_dataPath;
-
-        int32 m_visibility_notify_periodOnContinents;
-        int32 m_visibility_notify_periodInInctances;
-        int32 m_visibility_notify_periodInBGArenas;
+        std::set<uint32> m_forbiddenMapIds;
 
         // for max speed access
-        static float m_MaxVisibleDistanceOnContinents;
-        static float m_MaxVisibleDistanceInInctances;
-        static float m_MaxVisibleDistanceInBGArenas;
+        static float m_MaxVisibleDistance;
+        static float m_MaxVisibleDistanceForCreature;
+        static float m_MaxVisibleDistanceForPlayer;
         static float m_MaxVisibleDistanceForObject;
-
         static float m_MaxVisibleDistanceInFlight;
         static float m_VisibleUnitGreyDistance;
         static float m_VisibleObjectGreyDistance;
-
         //movement anticheat enable flag
         static bool m_EnableMvAnticheat;
         static uint32 m_TeleportToPlaneAlarms;
         static uint32 m_MistimingDelta;
         static uint32 m_MistimingAlarms;
-
         // CLI command holder to be thread safe
         ACE_Based::LockedQueue<CliCommandHolder*,ACE_Thread_Mutex> cliCmdQueue;
         SqlResultQueue *m_resultQueue;
@@ -631,6 +688,7 @@ class World
 
 extern uint32 realmID;
 
-#define sWorld MaNGOS::Singleton<World>::Instance()
+#define sWorld Ribon::Singleton<World>::Instance()
 #endif
 /// @}
+

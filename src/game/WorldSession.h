@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /// \addtogroup u2w
@@ -94,7 +96,7 @@ enum PartyResult
 };
 
 /// Player session in the World
-class MANGOS_DLL_SPEC WorldSession
+class RIBON_DLL_SPEC WorldSession
 {
     friend class CharacterHandler;
     public:
@@ -169,7 +171,6 @@ class MANGOS_DLL_SPEC WorldSession
         void SendTabardVendorActivate( uint64 guid );
         void SendSpiritResurrect();
         void SendBindPoint(Creature* npc);
-        void SendGMTicketGetTicket(uint32 status, char const* text);
 
         void SendAttackStop(Unit const* enemy);
 
@@ -254,7 +255,7 @@ class MANGOS_DLL_SPEC WorldSession
         // Locales
         LocaleConstant GetSessionDbcLocale() const { return m_sessionDbcLocale; }
         int GetSessionDbLocaleIndex() const { return m_sessionDbLocaleIndex; }
-        const char *GetMangosString(int32 entry) const;
+        const char *GetRibonString(int32 entry) const;
 
         uint32 GetLatency() const { return m_latency; }
         void SetLatency(uint32 latency) { m_latency = latency; }
@@ -320,14 +321,16 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleLogoutRequestOpcode(WorldPacket& recvPacket);
         void HandlePlayerLogoutOpcode(WorldPacket& recvPacket);
         void HandleLogoutCancelOpcode(WorldPacket& recvPacket);
-        void HandleGMTicketGetTicketOpcode(WorldPacket& recvPacket);
+
+        // GM Ticket opcodes
         void HandleGMTicketCreateOpcode(WorldPacket& recvPacket);
+        void HandleGMTicketUpdateOpcode(WorldPacket& recvPacket);
+        void HandleGMTicketDeleteOpcode(WorldPacket& recvPacket);
+        void HandleGMTicketGetTicketOpcode(WorldPacket& recvPacket);
         void HandleGMTicketSystemStatusOpcode(WorldPacket& recvPacket);
+        void SendGMTicketGetTicket(uint32 status, char const* text);
 
-        void HandleGMTicketDeleteTicketOpcode(WorldPacket& recvPacket);
-        void HandleGMTicketUpdateTextOpcode(WorldPacket& recvPacket);
-
-        void HandleGMSurveySubmit(WorldPacket& recvPacket);
+        //void HandleGMSurveySubmit(WorldPacket& recvPacket);
 
         void HandleTogglePvP(WorldPacket& recvPacket);
 
@@ -379,9 +382,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleMoveNotActiveMover(WorldPacket &recv_data);
         void HandleDismissControlledVehicle(WorldPacket &recv_data);
         void HandleRequestVehicleExit(WorldPacket &recv_data);
-        void HandleRequestVehiclePrevSeat(WorldPacket &recv_data);
-        void HandleRequestVehicleNextSeat(WorldPacket &recv_data);
-        void HandleRequestVehicleSwitchSeat(WorldPacket &recv_data);
         void HandleChangeSeatsOnControlledVehicle(WorldPacket &recv_data);
         void HandleMoveTimeSkippedOpcode(WorldPacket &recv_data);
 
@@ -579,6 +579,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleChannelUnban(WorldPacket& recvPacket);
         void HandleChannelAnnouncements(WorldPacket& recvPacket);
         void HandleChannelModerate(WorldPacket& recvPacket);
+        void HandleChannelDeclineInvite(WorldPacket& recvPacket);
         void HandleChannelDisplayListQuery(WorldPacket& recvPacket);
         void HandleGetChannelMemberCount(WorldPacket& recvPacket);
         void HandleSetChannelWatch(WorldPacket& recvPacket);
@@ -595,6 +596,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         //Pet
         void HandlePetAction( WorldPacket & recv_data );
+        void HandlePetActionHelper(Unit *pet, uint64 guid1, uint16 spellid, uint16 flag, uint64 guid2);
         void HandlePetNameQuery( WorldPacket & recv_data );
         void HandlePetSetAction( WorldPacket & recv_data );
         void HandlePetAbandon( WorldPacket & recv_data );
@@ -709,6 +711,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleCalendarGetNumPending(WorldPacket& recv_data);
 
         void HandleSpellClick(WorldPacket& recv_data);
+        void HandleMirrrorImageDataRequest( WorldPacket & recv_data );
         void HandleAlterAppearance(WorldPacket& recv_data);
         void HandleRemoveGlyph(WorldPacket& recv_data);
         void HandleCharCustomize(WorldPacket& recv_data);
@@ -722,7 +725,6 @@ class MANGOS_DLL_SPEC WorldSession
 
         // logging helper
         void logUnexpectedOpcode(WorldPacket *packet, const char * reason);
-
         Player *_player;
         WorldSocket *m_Socket;
         std::string m_Address;
@@ -747,3 +749,4 @@ class MANGOS_DLL_SPEC WorldSession
 };
 #endif
 /// @}
+

@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -52,7 +54,6 @@ m_latency(0), m_TutorialsChanged(false)
         m_Address = sock->GetRemoteAddress ();
         sock->AddReference ();
         loginDatabase.PExecute("UPDATE account SET online = 1 WHERE id = %u;", GetAccountId());
-        CharacterDatabase.PExecute("UPDATE characters SET online = 0 WHERE account = %u AND online <> 0;", GetAccountId()); // really need this?
     }
 }
 
@@ -99,7 +100,7 @@ void WorldSession::SendPacket(WorldPacket const* packet)
     if (!m_Socket)
         return;
 
-    #ifdef MANGOS_DEBUG
+    #ifdef RIBON_DEBUG
 
     // Code for network use statistic
     static uint64 sendPacketCount = 0;
@@ -133,7 +134,7 @@ void WorldSession::SendPacket(WorldPacket const* packet)
         sendLastPacketBytes = packet->wpos();               // wpos is real written size
     }
 
-    #endif                                                  // !MANGOS_DEBUG
+    #endif                                                  // !RIBON_DEBUG
 
     if (m_Socket->SendPacket (*packet) == -1)
         m_Socket->CloseSocket ();
@@ -300,7 +301,7 @@ void WorldSession::LogoutPlayer(bool Save)
         else if(_player->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
         {
             // this will kill character by SPELL_AURA_SPIRIT_OF_REDEMPTION
-            _player->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
+            _player->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
             //_player->SetDeathPvP(*); set at SPELL_AURA_SPIRIT_OF_REDEMPTION apply time
             _player->KillPlayer();
             _player->BuildPlayerRepop();
@@ -310,21 +311,11 @@ void WorldSession::LogoutPlayer(bool Save)
         if(BattleGround *bg = _player->GetBattleGround())
             bg->EventPlayerLoggedOut(_player);
 
-        ///- Remove from OutdoorPvP
-        sOutdoorPvPMgr.HandlePlayerLeaveZone(_player,_player->GetZoneId());
-
         ///- Teleport to home if the player is in an invalid instance
         if(!_player->m_InstanceValid && !_player->isGameMaster())
-        {
             _player->TeleportTo(_player->m_homebindMapId, _player->m_homebindX, _player->m_homebindY, _player->m_homebindZ, _player->GetOrientation());
-            //this is a bad place to call for far teleport because we need player to be in world for successful logout
-            //maybe we should implement delayed far teleport logout?
-        }
 
-        // FG: finish pending transfers after starting the logout
-        // this should fix players beeing able to logout and login back with full hp at death position
-        while(_player->IsBeingTeleportedFar())
-            HandleMoveWorldportAckOpcode();
+        sOutdoorPvPMgr.HandlePlayerLeaveZone(_player,_player->GetZoneId());
 
         for (int i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
         {
@@ -334,6 +325,11 @@ void WorldSession::LogoutPlayer(bool Save)
                 sBattleGroundMgr.m_BattleGroundQueues[ bgQueueTypeId ].RemovePlayer(_player->GetGUID(), true);
             }
         }
+
+        // Repop at GraveYard or other player far teleport will prevent saving player because of not present map
+        // Teleport player immediately for correct player save
+        while(_player->IsBeingTeleportedFar())
+            HandleMoveWorldportAckOpcode();
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
         Guild *guild = objmgr.GetGuildById(_player->GetGuildId());
@@ -456,7 +452,7 @@ void WorldSession::SendNotification(const char *format,...)
 
 void WorldSession::SendNotification(int32 string_id,...)
 {
-    char const* format = GetMangosString(string_id);
+    char const* format = GetRibonString(string_id);
     if(format)
     {
         va_list ap;
@@ -479,9 +475,9 @@ void WorldSession::SendSetPhaseShift(uint32 PhaseShift)
     SendPacket(&data);
 }
 
-const char * WorldSession::GetMangosString( int32 entry ) const
+const char * WorldSession::GetRibonString( int32 entry ) const
 {
-    return objmgr.GetMangosString(entry,GetSessionDbLocaleIndex());
+    return objmgr.GetRibonString(entry,GetSessionDbLocaleIndex());
 }
 
 void WorldSession::Handle_NULL( WorldPacket& recvPacket )
@@ -641,7 +637,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
     data >> mi->z;
     data >> mi->o;
 
-    if(mi->HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+    if(mi->flags & MOVEMENTFLAG_ONTRANSPORT)
     {
         if(!data.readPackGUID(mi->t_guid))
             return;
@@ -655,7 +651,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
         data >> mi->t_seat;
     }
 
-    if((mi->HasMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING2))) || (mi->unk1 & 0x20))
+    if((mi->flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || (mi->unk1 & 0x20))
     {
         CHECK_PACKET_SIZE(data, data.rpos()+4);
         data >> mi->s_pitch;
@@ -664,16 +660,16 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
     CHECK_PACKET_SIZE(data, data.rpos()+4);
     data >> mi->fallTime;
 
-    if(mi->HasMovementFlag(MOVEMENTFLAG_JUMPING))
+    if(mi->flags & MOVEMENTFLAG_JUMPING)
     {
         CHECK_PACKET_SIZE(data, data.rpos()+4+4+4+4);
-        data >> mi->j_unk;
+        data >> mi->j_zspeed;
         data >> mi->j_sinAngle;
         data >> mi->j_cosAngle;
         data >> mi->j_xyspeed;
     }
 
-    if(mi->HasMovementFlag(MOVEMENTFLAG_SPLINE))
+    if(mi->flags & MOVEMENTFLAG_SPLINE)
     {
         CHECK_PACKET_SIZE(data, data.rpos()+4);
         data >> mi->u_unk1;
