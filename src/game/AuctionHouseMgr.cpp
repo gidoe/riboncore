@@ -17,23 +17,23 @@
  */
 
 #include "Common.h"
+#include "ObjectMgr.h"
+#include "Player.h"
+#include "World.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 #include "Database/DatabaseEnv.h"
 #include "Database/SQLStorage.h"
+#include "Policies/SingletonImp.h"
 #include "DBCStores.h"
-#include "ProgressBar.h"
 
 #include "AccountMgr.h"
 #include "AuctionHouseMgr.h"
 #include "Item.h"
 #include "Language.h"
 #include "Log.h"
-#include "ObjectMgr.h"
-#include "Player.h"
-#include "World.h"
-#include "WorldPacket.h"
-#include "WorldSession.h"
+#include "ProgressBar.h"
 
-#include "Policies/SingletonImp.h"
 
 INSTANTIATE_SINGLETON_1( AuctionHouseMgr );
 
@@ -66,9 +66,43 @@ AuctionHouseObject * AuctionHouseMgr::GetAuctionsMap( uint32 factionTemplateId )
 
 uint32 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item *pItem)
 {
-    uint32 deposit = pItem->GetProto()->SellPrice * pItem->GetCount() * (time / MIN_AUCTION_TIME );
-
-    return uint32(deposit * entry->depositPercent * 3 * sWorld.getRate(RATE_AUCTION_DEPOSIT) / 100.0f );
+    uint32 MSV = pItem->GetProto()->SellPrice;
+    double deposit;
+    double faction_pct;
+    if (MSV > 0)
+    {
+        if(sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
+            faction_pct = (0.75 * (double)sWorld.getRate(RATE_AUCTION_DEPOSIT));
+        else
+        {
+            FactionTemplateEntry const* u_entry = sFactionTemplateStore.LookupEntry(entry->houseId);
+            if(!u_entry)
+                faction_pct = (0.75 * (double)sWorld.getRate(RATE_AUCTION_DEPOSIT));
+            else if(u_entry->ourMask & FACTION_MASK_ALLIANCE)
+                faction_pct = (0.15 * (double)sWorld.getRate(RATE_AUCTION_DEPOSIT));
+            else if(u_entry->ourMask & FACTION_MASK_HORDE)
+                faction_pct = (0.15 * (double)sWorld.getRate(RATE_AUCTION_DEPOSIT));
+            else
+                faction_pct = (0.75 * (double)sWorld.getRate(RATE_AUCTION_DEPOSIT));
+        }
+        deposit = ((double)MSV * faction_pct * (double)pItem->GetCount()) * (double)(time / MIN_AUCTION_TIME );
+    }
+    else
+    {
+        faction_pct = 0.0f;
+        deposit = 0.0f;
+    }
+    sLog.outDebug("SellPrice:\t\t%u", MSV);
+    sLog.outDebug("Deposit Percent:\t%f", faction_pct);
+    sLog.outDebug("Auction Time1:\t\t%u", time);
+    sLog.outDebug("Auction Time2:\t\t%u", MIN_AUCTION_TIME);
+    sLog.outDebug("Auction Time3:\t\t%u", (time / MIN_AUCTION_TIME ));
+    sLog.outDebug("Count:\t\t\t%u", pItem->GetCount());
+    sLog.outDebug("Deposit:\t\t%f", deposit);
+    if (deposit > 0)
+        return (uint32)deposit;
+    else
+        return 0;
 }
 
 //does not clear ram
@@ -99,10 +133,10 @@ void AuctionHouseMgr::SendAuctionWonMail( AuctionEntry *auction )
             bidder_accId = objmgr.GetPlayerAccountIdByGUID(bidder_guid);
             bidder_security = accmgr.GetSecurity(bidder_accId);
 
-            if(bidder_security > SEC_PLAYER )               // not do redundant DB requests
+            if(bidder_security > SEC_PLAYER ) // not do redundant DB requests
             {
                 if(!objmgr.GetPlayerNameByGUID(bidder_guid,bidder_name))
-                    bidder_name = objmgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
+                    bidder_name = objmgr.GetRibonStringForDBCLocale(LANG_UNKNOWN);
             }
         }
 
@@ -110,7 +144,7 @@ void AuctionHouseMgr::SendAuctionWonMail( AuctionEntry *auction )
         {
             std::string owner_name;
             if(!objmgr.GetPlayerNameByGUID(auction->owner,owner_name))
-                owner_name = objmgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
+                owner_name = objmgr.GetRibonStringForDBCLocale(LANG_UNKNOWN);
 
             uint32 owner_accid = objmgr.GetPlayerAccountIdByGUID(auction->owner);
 
@@ -147,7 +181,7 @@ void AuctionHouseMgr::SendAuctionWonMail( AuctionEntry *auction )
         if (bidder)
             bidder->GetSession()->SendAuctionBidderNotification( auction->GetHouseId(), auction->Id, bidder_guid, 0, 0, auction->item_template);
         else
-            RemoveAItem(pItem->GetGUIDLow());               // we have to remove the item, before we delete it !!
+            RemoveAItem(pItem->GetGUIDLow()); // we have to remove the item, before we delete it !!
 
         // will delete item or place to receiver mail list
         WorldSession::SendMailTo(bidder, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->GetHouseId(), auction->bidder, msgAuctionWonSubject.str(), itemTextId, &mi, 0, 0, MAIL_CHECK_MASK_AUCTION);
@@ -156,7 +190,7 @@ void AuctionHouseMgr::SendAuctionWonMail( AuctionEntry *auction )
     else
     {
         CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid='%u'", pItem->GetGUIDLow());
-        RemoveAItem(pItem->GetGUIDLow());                   // we have to remove the item, before we delete it !!
+        RemoveAItem(pItem->GetGUIDLow()); // we have to remove the item, before we delete it !!
         delete pItem;
     }
 }
@@ -235,7 +269,7 @@ void AuctionHouseMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
 
 //does not clear ram
 void AuctionHouseMgr::SendAuctionExpiredMail( AuctionEntry * auction )
-{                                                           //return an item in auction to its owner by mail
+{ //return an item in auction to its owner by mail
     Item *pItem = GetAItem(auction->item_guidlow);
     if(!pItem)
     {
@@ -271,7 +305,7 @@ void AuctionHouseMgr::SendAuctionExpiredMail( AuctionEntry * auction )
     else
     {
         CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid='%u'",pItem->GetGUIDLow());
-        RemoveAItem(pItem->GetGUIDLow());                   // we have to remove the item, before we delete it !!
+        RemoveAItem(pItem->GetGUIDLow()); // we have to remove the item, before we delete it !!
         delete pItem;
     }
 }
@@ -461,7 +495,7 @@ void AuctionHouseMgr::Update()
 
 AuctionHouseEntry const* AuctionHouseMgr::GetAuctionHouseEntry(uint32 factionTemplateId)
 {
-    uint32 houseid = 7;                            // goblin auction house
+    uint32 houseid = 7; // goblin auction house
 
     if(!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
     {
@@ -470,27 +504,27 @@ AuctionHouseEntry const* AuctionHouseMgr::GetAuctionHouseEntry(uint32 factionTem
         // but no easy way convert creature faction to player race faction for specific city
         switch(factionTemplateId)
         {
-            case   12: houseid = 1; break;                  // human
-            case   29: houseid = 6; break;                  // orc, and generic for horde
-            case   55: houseid = 2; break;                  // dwarf, and generic for alliance
-            case   68: houseid = 4; break;                  // undead
-            case   80: houseid = 3; break;                  // n-elf
-            case  104: houseid = 5; break;                  // trolls
-            case  120: houseid = 7; break;                  // booty bay, neutral
-            case  474: houseid = 7; break;                  // gadgetzan, neutral
-            case  855: houseid = 7; break;                  // everlook, neutral
-            case 1604: houseid = 6; break;                  // b-elfs,
-            default:                                        // for unknown case
+            case   12: houseid = 1; break; // human
+            case   29: houseid = 6; break; // orc, and generic for horde
+            case   55: houseid = 2; break; // dwarf, and generic for alliance
+            case   68: houseid = 4; break; // undead
+            case   80: houseid = 3; break; // n-elf
+            case  104: houseid = 5; break; // trolls
+            case  120: houseid = 7; break; // booty bay, neutral
+            case  474: houseid = 7; break; // gadgetzan, neutral
+            case  855: houseid = 7; break; // everlook, neutral
+            case 1604: houseid = 6; break; // b-elfs,
+            default:                       // for unknown case
             {
                 FactionTemplateEntry const* u_entry = sFactionTemplateStore.LookupEntry(factionTemplateId);
                 if(!u_entry)
-                    houseid = 7;                            // goblin auction house
+                    houseid = 7; // goblin auction house
                 else if(u_entry->ourMask & FACTION_MASK_ALLIANCE)
-                    houseid = 1;                            // human auction house
+                    houseid = 1; // human auction house
                 else if(u_entry->ourMask & FACTION_MASK_HORDE)
-                    houseid = 6;                            // orc auction house
+                    houseid = 6; // orc auction house
                 else
-                    houseid = 7;                            // goblin auction house
+                    houseid = 7; // goblin auction house
                 break;
             }
         }

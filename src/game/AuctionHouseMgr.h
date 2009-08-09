@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,19 +10,20 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef _AUCTION_HOUSE_MGR_H
 #define _AUCTION_HOUSE_MGR_H
 
-#include "SharedDefines.h"
 #include "Policies/Singleton.h"
+
+#include "SharedDefines.h"
 
 class Item;
 class Player;
@@ -72,97 +75,97 @@ struct AuctionEntry
 //this class is used as auctionhouse instance
 class AuctionHouseObject
 {
-    public:
-        AuctionHouseObject() {}
-        ~AuctionHouseObject()
-        {
-            for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
-                delete itr->second;
-        }
+  public:
+    AuctionHouseObject() {}
+    ~AuctionHouseObject()
+    {
+        for (AuctionEntryMap::iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
+            delete itr->second;
+    }
 
-        typedef std::map<uint32, AuctionEntry*> AuctionEntryMap;
+    typedef std::map<uint32, AuctionEntry*> AuctionEntryMap;
 
-        uint32 Getcount() { return AuctionsMap.size(); }
+    uint32 Getcount() { return AuctionsMap.size(); }
 
-        AuctionEntryMap::iterator GetAuctionsBegin() {return AuctionsMap.begin();}
-        AuctionEntryMap::iterator GetAuctionsEnd() {return AuctionsMap.end();}
+    AuctionEntryMap::iterator GetAuctionsBegin() {return AuctionsMap.begin();}
+    AuctionEntryMap::iterator GetAuctionsEnd() {return AuctionsMap.end();}
 
-        void AddAuction(AuctionEntry *ah)
-        {
-            ASSERT( ah );
-            AuctionsMap[ah->Id] = ah;
-        }
+    void AddAuction(AuctionEntry *ah)
+    {
+        ASSERT( ah );
+        AuctionsMap[ah->Id] = ah;
+    }
 
-        AuctionEntry* GetAuction(uint32 id) const
-        {
-            AuctionEntryMap::const_iterator itr = AuctionsMap.find( id );
-            return itr != AuctionsMap.end() ? itr->second : NULL;
-        }
+    AuctionEntry* GetAuction(uint32 id) const
+    {
+        AuctionEntryMap::const_iterator itr = AuctionsMap.find( id );
+        return itr != AuctionsMap.end() ? itr->second : NULL;
+    }
 
-        bool RemoveAuction(uint32 id)
-        {
-            return AuctionsMap.erase(id) ? true : false;
-        }
+    bool RemoveAuction(uint32 id)
+    {
+        return AuctionsMap.erase(id) ? true : false;
+    }
 
-        void Update();
+    void Update();
 
-        void BuildListBidderItems(WorldPacket& data, Player* player, uint32& count, uint32& totalcount);
-        void BuildListOwnerItems(WorldPacket& data, Player* player, uint32& count, uint32& totalcount);
-        void BuildListAuctionItems(WorldPacket& data, Player* player,
-            std::wstring const& searchedname, uint32 listfrom, uint32 levelmin, uint32 levelmax, uint32 usable,
-            uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality,
-            uint32& count, uint32& totalcount);
+    void BuildListBidderItems(WorldPacket& data, Player* player, uint32& count, uint32& totalcount);
+    void BuildListOwnerItems(WorldPacket& data, Player* player, uint32& count, uint32& totalcount);
+    void BuildListAuctionItems(WorldPacket& data, Player* player,
+        std::wstring const& searchedname, uint32 listfrom, uint32 levelmin, uint32 levelmax, uint32 usable,
+        uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality,
+        uint32& count, uint32& totalcount);
 
-    private:
-        AuctionEntryMap AuctionsMap;
+  private:
+    AuctionEntryMap AuctionsMap;
 };
 
 class AuctionHouseMgr
 {
-    public:
-        AuctionHouseMgr();
-        ~AuctionHouseMgr();
+  public:
+    AuctionHouseMgr();
+    ~AuctionHouseMgr();
 
-        typedef UNORDERED_MAP<uint32, Item*> ItemMap;
+    typedef UNORDERED_MAP<uint32, Item*> ItemMap;
 
-        AuctionHouseObject* GetAuctionsMap( uint32 factionTemplateId );
+    AuctionHouseObject* GetAuctionsMap( uint32 factionTemplateId );
 
-        Item* GetAItem(uint32 id)
+    Item* GetAItem(uint32 id)
+    {
+        ItemMap::const_iterator itr = mAitems.find(id);
+        if (itr != mAitems.end())
         {
-            ItemMap::const_iterator itr = mAitems.find(id);
-            if (itr != mAitems.end())
-            {
-                return itr->second;
-            }
-            return NULL;
+            return itr->second;
         }
+        return NULL;
+    }
 
-        //auction messages
-        void SendAuctionWonMail( AuctionEntry * auction );
-        void SendAuctionSalePendingMail( AuctionEntry * auction );
-        void SendAuctionSuccessfulMail( AuctionEntry * auction );
-        void SendAuctionExpiredMail( AuctionEntry * auction );
-        static uint32 GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item *pItem);
-        static AuctionHouseEntry const* GetAuctionHouseEntry(uint32 factionTemplateId);
+    //auction messages
+    void SendAuctionWonMail( AuctionEntry * auction );
+    void SendAuctionSalePendingMail( AuctionEntry * auction );
+    void SendAuctionSuccessfulMail( AuctionEntry * auction );
+    void SendAuctionExpiredMail( AuctionEntry * auction );
+    static uint32 GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item *pItem);
+    static AuctionHouseEntry const* GetAuctionHouseEntry(uint32 factionTemplateId);
 
-    public:
-        //load first auction items, because of check if item exists, when loading
-        void LoadAuctionItems();
-        void LoadAuctions();
+  public:
+    //load first auction items, because of check if item exists, when loading
+    void LoadAuctionItems();
+    void LoadAuctions();
 
-        void AddAItem(Item* it);
-        bool RemoveAItem(uint32 id);
+    void AddAItem(Item* it);
+    bool RemoveAItem(uint32 id);
 
-        void Update();
+    void Update();
 
-    private:
-        AuctionHouseObject  mHordeAuctions;
-        AuctionHouseObject  mAllianceAuctions;
-        AuctionHouseObject  mNeutralAuctions;
+  private:
+    AuctionHouseObject mHordeAuctions;
+    AuctionHouseObject mAllianceAuctions;
+    AuctionHouseObject mNeutralAuctions;
 
-        ItemMap             mAitems;
+    ItemMap mAitems;
 };
 
-#define auctionmgr MaNGOS::Singleton<AuctionHouseMgr>::Instance()
+#define auctionmgr Ribon::Singleton<AuctionHouseMgr>::Instance()
 
 #endif
