@@ -1,6 +1,4 @@
 #ifndef __REVISION_H__
 #define __REVISION_H__
- #define _REVISION "304"
- #define _REVISION_DATE "*"
- #define _REVISION_TIME "*"
+ #define _REVISION "305"
 #endif // __REVISION_H__

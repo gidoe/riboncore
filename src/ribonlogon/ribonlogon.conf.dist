@@ -1,5 +1,5 @@
 ##########################################
-# Trinity Core realmd configuration file #
+#     RibonLogon configuration file      #
 ##########################################
 ConfVersion=2007062001
 
@@ -101,8 +101,8 @@ ConfVersion=2007062001
 #
 ###################################################################################################################
 
-LoginDatabaseInfo = "127.0.0.1;3306;trinity;trinity;realmd"
-LogsDir = ""
+LoginDatabaseInfo = "127.0.0.1;3306;root;ribon;logon"
+LogsDir = "Data"
 MaxPingTime = 30
 RealmServerPort = 3724
 BindIP = "0.0.0.0"
