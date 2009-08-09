@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,25 +8,25 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef OUTDOOR_PVP_ZM_
 #define OUTDOOR_PVP_ZM_
 
-#include "OutdoorPvP.h"
+#include "OutdoorPvPImpl.h"
 #include "Language.h"
 
 const uint32 OutdoorPvPZMBuffZonesNum = 5;
 // the buff is cast in these zones
 const uint32 OutdoorPvPZMBuffZones[OutdoorPvPZMBuffZonesNum] = {3521,3607,3717,3715,3716};
 // cast on the players of the controlling faction
-const uint32 ZM_CAPTURE_BUFF = 33779;  // twin spire blessing
+#define ZM_CAPTURE_BUFF 33779  // twin spire blessing
 // spell that the field scout casts on the player to carry the flag
 const uint32 ZM_BATTLE_STANDARD_A = 32430;
 // spell that the field scout casts on the player to carry the flag
@@ -148,20 +148,18 @@ enum ZM_TowerStateMask{
 };
 
 class OutdoorPvPZM;
-class OutdoorPvPObjectiveZM_Beacon : public OutdoorPvPObjective
+class OPvPCapturePointZM_Beacon : public OPvPCapturePoint
 {
-    friend class OutdoorPvPZM;
-    public:
-    OutdoorPvPObjectiveZM_Beacon(OutdoorPvP * pvp, ZM_BeaconType type);
+friend class OutdoorPvPZM;
+public:
+    OPvPCapturePointZM_Beacon(OutdoorPvP * pvp, ZM_BeaconType type);
     bool Update(uint32 diff);
     void FillInitialWorldStates(WorldPacket & data);
     // used when player is activated/inactivated in the area
-    void HandlePlayerEnter(Player * plr);
+    bool HandlePlayerEnter(Player * plr);
     void HandlePlayerLeave(Player * plr);
     void UpdateTowerState();
-    protected:
-    bool HandleCapturePointEvent(Player * plr, uint32 eventId);
-    protected:
+protected:
     ZM_BeaconType m_TowerType;
     uint32 m_TowerState;
 };
@@ -172,11 +170,11 @@ enum ZM_GraveYardState{
     ZM_GRAVEYARD_H = 4
 };
 
-class OutdoorPvPObjectiveZM_GraveYard : public OutdoorPvPObjective
+class OPvPCapturePointZM_GraveYard : public OPvPCapturePoint
 {
-    friend class OutdoorPvPZM;
-    public:
-    OutdoorPvPObjectiveZM_GraveYard(OutdoorPvP * pvp);
+friend class OutdoorPvPZM;
+public:
+    OPvPCapturePointZM_GraveYard(OutdoorPvP * pvp);
     bool Update(uint32 diff);
     void FillInitialWorldStates(WorldPacket & data);
     void UpdateTowerState();
@@ -185,17 +183,17 @@ class OutdoorPvPObjectiveZM_GraveYard : public OutdoorPvPObjective
     bool HandleGossipOption(Player * plr, uint64 guid, uint32 gossipid);
     bool HandleDropFlag(Player * plr, uint32 spellId);
     bool CanTalkTo(Player * plr, Creature * c, GossipOption &gso);
-    private:
+private:
     uint32 m_GraveYardState;
-    protected:
+protected:
     uint32 m_BothControllingFaction;
     uint64 m_FlagCarrierGUID;
 };
 
 class OutdoorPvPZM : public OutdoorPvP
 {
-    friend class OutdoorPvPObjectiveZM_Beacon;
-    public:
+friend class OPvPCapturePointZM_Beacon;
+public:
     OutdoorPvPZM();
     bool SetupOutdoorPvP();
     void HandlePlayerEnterZone(Player *plr, uint32 zone);
@@ -204,12 +202,12 @@ class OutdoorPvPZM : public OutdoorPvP
     void FillInitialWorldStates(WorldPacket &data);
     void SendRemoveWorldStates(Player * plr);
     void HandleKillImpl(Player * plr, Unit * killed);
-    void BuffTeam(uint32 team);
-    private:
-    OutdoorPvPObjectiveZM_GraveYard * m_GraveYard;
+private:
+    OPvPCapturePointZM_GraveYard * m_GraveYard;
     uint32 m_AllianceTowersControlled;
     uint32 m_HordeTowersControlled;
 };
 
 // todo: flag carrier death/leave/mount/activitychange should give back the gossip options
 #endif
+

@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "PetAI.h"
@@ -36,55 +38,14 @@ int PetAI::Permissible(const Creature *creature)
     return PERMIT_BASE_NO;
 }
 
-PetAI::PetAI(Creature *c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK), inCombat(false)
+PetAI::PetAI(Creature *c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK)
 {
     m_AllySet.clear();
     UpdateAllies();
 }
 
-void PetAI::MoveInLineOfSight(Unit *u)
-{
-    if( !m_creature->getVictim() && m_creature->GetCharmInfo() &&
-        m_creature->GetCharmInfo()->HasReactState(REACT_AGGRESSIVE) &&
-        u->isTargetableForAttack() && m_creature->IsHostileTo( u ) &&
-        u->isInAccessablePlaceFor(m_creature))
-    {
-        float attackRadius = m_creature->GetAttackDistance(u);
-        if(m_creature->IsWithinDistInMap(u, attackRadius) && m_creature->GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
-        {
-            if(m_creature->IsWithinLOSInMap(u))
-            {
-                AttackStart(u);
-                //u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-            }
-        }
-    }
-}
-
-void PetAI::AttackStart(Unit *u)
-{
-    if(!u || (m_creature->isPet() && ((Pet*)m_creature)->getPetType() == MINI_PET))
-        return;
-
-    if(m_creature->Attack(u,true))
-    {
-        m_creature->clearUnitState(UNIT_STAT_FOLLOW);
-        // TMGs call CreatureRelocation which via MoveInLineOfSight can call this function
-        // thus with the following clear the original TMG gets invalidated and crash, doh
-        // hope it doesn't start to leak memory without this :-/
-        //i_pet->Clear();
-        m_creature->GetMotionMaster()->MoveChase(u);
-        inCombat = true;
-    }
-}
-
 void PetAI::EnterEvadeMode()
 {
-}
-
-bool PetAI::IsVisible(Unit *pl) const
-{
-    return _isVisible(pl);
 }
 
 bool PetAI::_needToStop() const
@@ -93,16 +54,14 @@ bool PetAI::_needToStop() const
     if(m_creature->isCharmed() && m_creature->getVictim() == m_creature->GetCharmer())
         return true;
 
-    return !m_creature->getVictim()->isTargetableForAttack();
+    return !m_creature->canAttack(m_creature->getVictim());
 }
 
 void PetAI::_stopAttack()
 {
-    inCombat = false;
     if( !m_creature->isAlive() )
     {
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", m_creature->GetGUIDLow());
-        m_creature->StopMoving();
         m_creature->GetMotionMaster()->Clear();
         m_creature->GetMotionMaster()->MoveIdle();
         m_creature->CombatStop();
@@ -115,7 +74,7 @@ void PetAI::_stopAttack()
 
     if(owner && m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
     {
-        m_creature->GetMotionMaster()->MoveFollow(owner,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE);
+        m_creature->GetMotionMaster()->MoveFollow(owner,PET_FOLLOW_DIST, m_creature->GetFollowAngle());
     }
     else
     {
@@ -128,9 +87,6 @@ void PetAI::_stopAttack()
 
 void PetAI::UpdateAI(const uint32 diff)
 {
-    if (!m_creature->isAlive())
-        return;
-
     Unit* owner = m_creature->GetCharmerOrOwner();
 
     if(m_updateAlliesTimer <= diff)
@@ -139,63 +95,35 @@ void PetAI::UpdateAI(const uint32 diff)
     else
         m_updateAlliesTimer -= diff;
 
-    if (inCombat && !m_creature->getVictim())
-        _stopAttack();
-
-    // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
-    if (m_creature->getVictim())
+    // m_creature->getVictim() can't be used for check in case stop fighting, m_creature->getVictim() clear at Unit death etc.
+    if( m_creature->getVictim() )
     {
-        if (_needToStop())
+        if( _needToStop() )
         {
             DEBUG_LOG("Pet AI stoped attacking [guid=%u]", m_creature->GetGUIDLow());
             _stopAttack();
             return;
         }
-        else if (m_creature->IsStopped() || m_creature->IsWithinDistInMap(m_creature->getVictim(), ATTACK_DISTANCE))
-        {
-            // required to be stopped cases
-            if (m_creature->IsStopped() && m_creature->IsNonMeleeSpellCasted(false))
-            {
-                if (m_creature->hasUnitState(UNIT_STAT_FOLLOW))
-                    m_creature->InterruptNonMeleeSpells(false);
-                else
-                    return;
-            }
-            // not required to be stopped case
-            else if (m_creature->isAttackReady() && m_creature->IsWithinDistInMap(m_creature->getVictim(), ATTACK_DISTANCE))
-            {
-                m_creature->AttackerStateUpdate(m_creature->getVictim());
 
-                m_creature->resetAttackTimer();
-
-                if (!m_creature->getVictim())
-                    return;
-
-                //if pet misses its target, it will also be the first in threat list
-                m_creature->getVictim()->AddThreat(m_creature,0.0f);
-
-                if( _needToStop() )
-                    _stopAttack();
-            }
-        }
+        DoMeleeAttackIfReady();
     }
-    else if (owner && m_creature->GetCharmInfo())
+    else if(owner && m_creature->GetCharmInfo()) //no victim
     {
-        if (owner->isInCombat() && !(m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE) || m_creature->GetCharmInfo()->HasCommandState(COMMAND_STAY)))
-        {
+        if(owner->isInCombat() && !(m_creature->HasReactState(REACT_PASSIVE) || m_creature->GetCharmInfo()->HasCommandState(COMMAND_STAY)))
             AttackStart(owner->getAttackerForHelper());
-        }
-        else if(m_creature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
-        {
-            if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW) )
-            {
-                m_creature->GetMotionMaster()->MoveFollow(owner,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE);
-            }
-        }
+        else if(m_creature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW) && !m_creature->hasUnitState(UNIT_STAT_FOLLOW))
+            m_creature->GetMotionMaster()->MoveFollow(owner,PET_FOLLOW_DIST, m_creature->GetFollowAngle());
     }
+    else if (owner && !m_creature->hasUnitState(UNIT_STAT_FOLLOW)) // no charm info and no victim
+        m_creature->GetMotionMaster()->MoveFollow(owner,PET_FOLLOW_DIST, m_creature->GetFollowAngle());
+
+    if(!me->GetCharmInfo())
+        return;
+
+    bool inCombat = me->getVictim();
 
     // Autocast (casted only in combat or persistent spells in any state)
-    if (m_creature->GetGlobalCooldown() == 0 && !m_creature->IsNonMeleeSpellCasted(false))
+    if (m_creature->GetGlobalCooldown() == 0 && !m_creature->hasUnitState(UNIT_STAT_CASTING))
     {
         typedef std::vector<std::pair<Unit*, Spell*> > TargetSpellList;
         TargetSpellList targetSpellStore;
@@ -283,13 +211,13 @@ void PetAI::UpdateAI(const uint32 diff)
             SpellCastTargets targets;
             targets.setUnitTarget( target );
 
-            if (!m_creature->HasInArc(M_PI, target))
+            if( !m_creature->HasInArc(M_PI, target) )
             {
                 m_creature->SetInFront(target);
-                if (target->GetTypeId() == TYPEID_PLAYER)
-                    m_creature->SendUpdateToPlayer((Player*)target);
+                if( target->GetTypeId() == TYPEID_PLAYER )
+                    m_creature->SendUpdateToPlayer( (Player*)target );
 
-                if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                if(owner && owner->GetTypeId() == TYPEID_PLAYER)
                     m_creature->SendUpdateToPlayer( (Player*)owner );
             }
 
@@ -302,12 +230,6 @@ void PetAI::UpdateAI(const uint32 diff)
         for(TargetSpellList::const_iterator itr = targetSpellStore.begin(); itr != targetSpellStore.end(); ++itr)
             delete itr->second;
     }
-}
-
-bool PetAI::_isVisible(Unit *u) const
-{
-    return m_creature->IsWithinDist(u,sWorld.getConfig(CONFIG_SIGHT_GUARDER))
-        && u->isVisibleForOrDetect(m_creature,true);
 }
 
 void PetAI::UpdateAllies()
@@ -347,12 +269,4 @@ void PetAI::UpdateAllies()
     }
     else                                                    //remove group
         m_AllySet.insert(owner->GetGUID());
-}
-
-void PetAI::AttackedBy(Unit *attacker)
-{
-    //when attacked, fight back in case 1)no victim already AND 2)not set to passive AND 3)not set to stay, unless can it can reach attacker with melee attack anyway
-    if(!m_creature->getVictim() && m_creature->GetCharmInfo() && !m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE) &&
-        (!m_creature->GetCharmInfo()->HasCommandState(COMMAND_STAY) || m_creature->IsWithinDistInMap(m_creature->getVictim(), ATTACK_DISTANCE)))
-        AttackStart(attacker);
 }

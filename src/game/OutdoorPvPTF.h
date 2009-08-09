@@ -1,25 +1,7 @@
-/*
- * Copyright (C) 2005-2008 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
-
 #ifndef OUTDOOR_PVP_TF_
 #define OUTDOOR_PVP_TF_
 
-#include "OutdoorPvP.h"
+#include "OutdoorPvPImpl.h"
 
 const uint32 OutdoorPvPTFBuffZonesNum = 5;
 
@@ -31,7 +13,7 @@ const uint32 TF_LOCK_TIME = 3600 * 6 * 1000;
 const uint32 TF_LOCK_TIME_UPDATE = 15000;
 
 // blessing of auchindoun
-const uint32 TF_CAPTURE_BUFF = 33377;
+#define TF_CAPTURE_BUFF 33377
 
 const uint32 TF_ALLY_QUEST = 11505;
 const uint32 TF_HORDE_QUEST = 11506;
@@ -94,27 +76,25 @@ enum TFTowerStates {
     TF_TOWERSTATE_A = 4
 };
 
-class OutdoorPvPObjectiveTF : public OutdoorPvPObjective
+class OPvPCapturePointTF : public OPvPCapturePoint
 {
-    public:
-        OutdoorPvPObjectiveTF(OutdoorPvP * pvp, OutdoorPvPTF_TowerType type);
-        bool Update(uint32 diff);
-        void FillInitialWorldStates(WorldPacket & data);
-        // used when player is activated/inactivated in the area
-        void HandlePlayerEnter(Player * plr);
-        void HandlePlayerLeave(Player * plr);
-        void UpdateTowerState();
-    protected:
-        virtual bool HandleCapturePointEvent(Player * plr, uint32 eventId);
-    protected:
-        OutdoorPvPTF_TowerType m_TowerType;
-        uint32 m_TowerState;
+public:
+    OPvPCapturePointTF(OutdoorPvP * pvp, OutdoorPvPTF_TowerType type);
+    bool Update(uint32 diff);
+    void FillInitialWorldStates(WorldPacket & data);
+    // used when player is activated/inactivated in the area
+    bool HandlePlayerEnter(Player * plr);
+    void HandlePlayerLeave(Player * plr);
+    void UpdateTowerState();
+protected:
+    OutdoorPvPTF_TowerType m_TowerType;
+    uint32 m_TowerState;
 };
 
 class OutdoorPvPTF : public OutdoorPvP
 {
-    friend class OutdoorPvPObjectiveTF;
-    public:
+friend class OPvPCapturePointTF;
+public:
     OutdoorPvPTF();
     bool SetupOutdoorPvP();
     void HandlePlayerEnterZone(Player *plr, uint32 zone);
@@ -122,8 +102,7 @@ class OutdoorPvPTF : public OutdoorPvP
     bool Update(uint32 diff);
     void FillInitialWorldStates(WorldPacket &data);
     void SendRemoveWorldStates(Player * plr);
-    void BuffTeam(uint32 team);
-    private:
+private:
     bool m_IsLocked;
     uint32 m_LockTimer;
     uint32 m_LockTimerUpdate;
@@ -133,3 +112,4 @@ class OutdoorPvPTF : public OutdoorPvP
 };
 
 #endif
+

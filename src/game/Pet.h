@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,28 +10,26 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOSSERVER_PET_H
-#define MANGOSSERVER_PET_H
+#ifndef RIBONCORE_PET_H
+#define RIBONCORE_PET_H
 
 #include "ObjectDefines.h"
-#include "Creature.h"
 #include "Unit.h"
+#include "TemporarySummon.h"
 
 enum PetType
 {
     SUMMON_PET              = 0,
     HUNTER_PET              = 1,
-    GUARDIAN_PET            = 2,
-    MINI_PET                = 3,
-    MAX_PET_TYPE            = 4
+    MAX_PET_TYPE            = 4,
 };
 
 extern char const* petTypeSuffix[MAX_PET_TYPE];
@@ -65,14 +65,14 @@ enum PetSpellType
 {
     PETSPELL_NORMAL = 0,
     PETSPELL_FAMILY = 1,
+    PETSPELL_TALENT = 2,
 };
 
 struct PetSpell
 {
-    uint8 active;                                           // use instead enum (not good use *uint8* limited enum in case when value in enum not possitive in *int8*)
-
-    PetSpellState state : 8;
-    PetSpellType type   : 8;
+    ActiveStates active;
+    PetSpellState state;
+    PetSpellType type;
 };
 
 enum ActionFeedback
@@ -123,10 +123,10 @@ typedef std::vector<uint32> AutoSpellList;
 
 class Player;
 
-class Pet : public Creature
+class Pet : public Guardian
 {
     public:
-        explicit Pet(PetType type = MAX_PET_TYPE);
+        explicit Pet(Player *owner, PetType type = MAX_PET_TYPE);
         virtual ~Pet();
 
         void AddToWorld();
@@ -164,14 +164,11 @@ class Pet : public Creature
         void GivePetXP(uint32 xp);
         void GivePetLevel(uint32 level);
         void SynchronizeLevelWithOwner();
-        bool InitStatsForLevel(uint32 level, Unit* owner = NULL);
         bool HaveInDiet(ItemPrototype const* item) const;
         uint32 GetCurrentFoodBenefitLevel(uint32 itemlevel);
         void SetDuration(int32 dur) { m_duration = dur; }
 
-        int32 GetBonusDamage() { return m_bonusdamage; }
-        void SetBonusDamage(int32 damage) { m_bonusdamage = damage; }
-
+        /*
         bool UpdateStats(Stats stat);
         bool UpdateAllStats();
         void UpdateResistances(uint32 school);
@@ -180,6 +177,7 @@ class Pet : public Creature
         void UpdateMaxPower(Powers power);
         void UpdateAttackPowerAndDamage(bool ranged = false);
         void UpdateDamagePhysical(WeaponAttackType attType);
+        */
 
         bool CanTakeMoreActiveSpells(uint32 SpellIconID);
         void ToggleAutocast(uint32 spellid, bool apply);
@@ -223,20 +221,23 @@ class Pet : public Creature
         time_t  m_resetTalentsTime;
         uint32  m_usedTalentCount;
 
-        RedirectThreatMap* getRedirectThreatMap() { return &m_redirectMap; }
-
-        // overwrite Creature function for name localization back to WorldObject version without localization
-        const char* GetNameForLocaleIdx(int32 locale_idx) const { return WorldObject::GetNameForLocaleIdx(locale_idx); }
+        const uint64& GetAuraUpdateMaskForRaid() const { return m_auraRaidUpdateMask; }
+        void SetAuraUpdateMaskForRaid(uint8 slot) { m_auraRaidUpdateMask |= (uint64(1) << slot); }
+        void ResetAuraUpdateMaskForRaid() { m_auraRaidUpdateMask = 0; }
 
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
 
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
+
+        Player *GetOwner() { return m_owner; }
     protected:
+        Player *m_owner;
         uint32  m_happinessTimer;
         PetType m_petType;
         int32   m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
-        int32   m_bonusdamage;
+        uint64  m_auraRaidUpdateMask;
         bool    m_loading;
+        uint32  m_regenTimer;
 
         DeclinedName *m_declinedname;
 
@@ -249,8 +250,5 @@ class Pet : public Creature
         {
             assert(false);
         }
-
-        // Map used to control threat redirection effects
-        RedirectThreatMap m_redirectMap;
 };
 #endif

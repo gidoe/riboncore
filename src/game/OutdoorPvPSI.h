@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,18 +8,18 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef OUTDOOR_PVP_SI_
 #define OUTDOOR_PVP_SI_
 
-#include "OutdoorPvP.h"
+#include "OutdoorPvPImpl.h"
 
 const uint32 SI_SILITHYST_FLAG_GO_SPELL = 29518;
 
@@ -53,23 +53,23 @@ enum SI_WorldStates{
 
 class OutdoorPvPSI : public OutdoorPvP
 {
-    public:
-        OutdoorPvPSI();
-        bool SetupOutdoorPvP();
-        void HandlePlayerEnterZone(Player *plr, uint32 zone);
-        void HandlePlayerLeaveZone(Player *plr, uint32 zone);
-        bool Update(uint32 diff);
-        void FillInitialWorldStates(WorldPacket &data);
-        void SendRemoveWorldStates(Player * plr);
-        bool HandleAreaTrigger(Player * plr, uint32 trigger);
-        bool HandleDropFlag(Player * plr, uint32 spellId);
-        bool HandleCustomSpell(Player * plr, uint32 spellId, GameObject *go);
-        void BuffTeam(uint32 team);
-        void UpdateWorldState();
-    private:
-        uint32 m_Gathered_A;
-        uint32 m_Gathered_H;
-        uint32 m_LastController;
+public:
+    OutdoorPvPSI();
+    bool SetupOutdoorPvP();
+    void HandlePlayerEnterZone(Player *plr, uint32 zone);
+    void HandlePlayerLeaveZone(Player *plr, uint32 zone);
+    bool Update(uint32 diff);
+    void FillInitialWorldStates(WorldPacket &data);
+    void SendRemoveWorldStates(Player * plr);
+    bool HandleAreaTrigger(Player * plr, uint32 trigger);
+    bool HandleDropFlag(Player * plr, uint32 spellId);
+    bool HandleCustomSpell(Player * plr, uint32 spellId, GameObject *go);
+    void UpdateWorldState();
+private:
+    uint32 m_Gathered_A;
+    uint32 m_Gathered_H;
+    uint32 m_LastController;
 };
 
 #endif
+
