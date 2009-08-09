@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -24,7 +26,7 @@
 #include "ObjectMgr.h"
 
 // Character Dump tables
-#define DUMP_TABLE_COUNT 21
+#define DUMP_TABLE_COUNT 20
 
 struct DumpTable
 {
@@ -44,7 +46,7 @@ static DumpTable dumpTables[DUMP_TABLE_COUNT] =
     { "character_action",                 DTT_CHAR_TABLE },
     { "character_aura",                   DTT_CHAR_TABLE },
     { "character_homebind",               DTT_CHAR_TABLE },
-    { "character_ticket",                 DTT_CHAR_TABLE },
+//    { "character_ticket",                 DTT_CHAR_TABLE },
     { "character_inventory",              DTT_INVENTORY  },
     { "mail",                             DTT_MAIL       },
     { "mail_items",                       DTT_MAIL_ITEM  },
@@ -694,3 +696,4 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
 
     return DUMP_SUCCESS;
 }
+

@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "Common.h"
@@ -89,7 +91,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
 
     // remove fake death
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
     uint32 charterid = 0;
     uint32 cost = 0;
@@ -252,7 +254,7 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket & recv_data)
     QueryResult *result = CharacterDatabase.PQuery("SELECT type FROM petition WHERE petitionguid = '%u'", petitionguid_low);
     if(!result)
     {
-        sLog.outError("any petition on server...");
+        sLog.outError("Petition %u is not found for player %u %s", GUID_LOPART(petitionguid), GetPlayer()->GetGUIDLow(), GetPlayer()->GetName());
         return;
     }
     Field *fields = result->Fetch();
@@ -274,7 +276,7 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket & recv_data)
     WorldPacket data(SMSG_PETITION_SHOW_SIGNATURES, (8+8+4+1+signs*12));
     data << petitionguid;                                   // petition guid
     data << _player->GetGUID();                             // owner guid
-    data << petitionguid_low;                               // guild guid (in mangos always same as GUID_LOPART(petitionguid)
+    data << petitionguid_low;                               // guild guid (in Ribon always same as GUID_LOPART(petitionguid)
     data << signs;                                          // sign's count
 
     for(uint8 i = 1; i <= signs; ++i)
@@ -300,7 +302,7 @@ void WorldSession::HandlePetitionQueryOpcode(WorldPacket & recv_data)
 
     uint32 guildguid;
     uint64 petitionguid;
-    recv_data >> guildguid;                                 // in mangos always same as GUID_LOPART(petitionguid)
+    recv_data >> guildguid;                                 // in Ribon always same as GUID_LOPART(petitionguid)
     recv_data >> petitionguid;                              // petition guid
     sLog.outDebug("CMSG_PETITION_QUERY Petition GUID %u Guild GUID %u", GUID_LOPART(petitionguid), guildguid);
 
@@ -336,7 +338,7 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
     }
 
     WorldPacket data(SMSG_PETITION_QUERY_RESPONSE, (4+8+name.size()+1+1+4*13));
-    data << GUID_LOPART(petitionguid);                      // guild/team guid (in mangos always same as GUID_LOPART(petition guid)
+    data << GUID_LOPART(petitionguid);                      // guild/team guid (in Ribon always same as GUID_LOPART(petition guid)
     data << ownerguid;                                      // charter owner guid
     data << name;                                           // name (guild/arena team)
     data << uint8(0);                                       // 1
@@ -460,7 +462,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
 
     if(!result)
     {
-        sLog.outError("any petition on server...");
+        sLog.outError("Petition %u is not found for player %u %s", GUID_LOPART(petitionguid), GetPlayer()->GetGUIDLow(), GetPlayer()->GetName());
         return;
     }
 
@@ -685,7 +687,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket & recv_data)
     WorldPacket data(SMSG_PETITION_SHOW_SIGNATURES, (8+8+4+signs+signs*12));
     data << petitionguid;                                   // petition guid
     data << _player->GetGUID();                             // owner guid
-    data << GUID_LOPART(petitionguid);                      // guild guid (in mangos always same as GUID_LOPART(petition guid)
+    data << GUID_LOPART(petitionguid);                      // guild guid (in Ribon always same as GUID_LOPART(petition guid)
     data << signs;                                          // sign's count
 
     for(uint8 i = 1; i <= signs; ++i)
@@ -913,7 +915,7 @@ void WorldSession::SendPetitionShowList(uint64 guid)
 
     // remove fake death
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
     uint8 count = 0;
     if(pCreature->isTabardDesigner())
@@ -969,3 +971,4 @@ void WorldSession::SendPetitionShowList(uint64 guid)
     SendPacket(&data);
     sLog.outDebug("Sent SMSG_PETITION_SHOWLIST");
 }
+
