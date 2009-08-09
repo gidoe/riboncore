@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -25,11 +27,17 @@
 #include <map>
 #include <string>
 
+#include "Policies/Singleton.h"
+
+#include "Channel.h"
+#include "World.h"
+
 class ChannelMgr
 {
     public:
+        uint32 team;
         typedef std::map<std::string,Channel *> ChannelMap;
-        ChannelMgr() {}
+        ChannelMgr() {team = 0;}
         ~ChannelMgr();
 
         Channel *GetJoinChannel(std::string name, uint32 channel_id);
@@ -46,3 +54,4 @@ class HordeChannelMgr    : public ChannelMgr {};
 ChannelMgr* channelMgr(uint32 team);
 
 #endif
+

@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,24 +10,25 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOS_CELL_H
-#define MANGOS_CELL_H
+#ifndef RIBON_CELL_H
+#define RIBON_CELL_H
+
+#include <cmath>
 
 #include "GameSystem/TypeContainer.h"
 #include "GameSystem/TypeContainerVisitor.h"
+
 #include "GridDefines.h"
-#include <cmath>
 
 class Map;
-class WorldObject;
 
 enum District
 {
@@ -43,27 +46,7 @@ enum District
 
 template<class T> struct CellLock;
 
-struct MANGOS_DLL_DECL CellArea
-{
-    CellArea() : right_offset(0), left_offset(0), upper_offset(0), lower_offset(0) {}
-    CellArea(int right, int left, int upper, int lower) : right_offset(right), left_offset(left), upper_offset(upper), lower_offset(lower) {}
-    bool operator!() const { return !right_offset && !left_offset && !upper_offset && !lower_offset; }
-
-    void ResizeBorders(CellPair& begin_cell, CellPair& end_cell) const
-    {
-        begin_cell << left_offset;
-        begin_cell -= lower_offset;
-        end_cell >> right_offset;
-        end_cell += upper_offset;
-    }
-
-    int right_offset;
-    int left_offset;
-    int upper_offset;
-    int lower_offset;
-};
-
-struct MANGOS_DLL_DECL Cell
+struct RIBON_DLL_DECL Cell
 {
     Cell() { data.All = 0; }
     Cell(const Cell &cell) { data.All = cell.data.All; }
@@ -140,7 +123,7 @@ struct MANGOS_DLL_DECL Cell
 
     Cell& operator=(const Cell &cell)
     {
-        data.All = cell.data.All;
+        this->data.All = cell.data.All;
         return *this;
     }
 
@@ -152,25 +135,20 @@ struct MANGOS_DLL_DECL Cell
         {
             unsigned grid_x : 6;
             unsigned grid_y : 6;
-            unsigned cell_x : 6;
-            unsigned cell_y : 6;
+            unsigned cell_x : 4;
+            unsigned cell_y : 4;
             unsigned nocreate : 1;
-            unsigned reserved : 7;
+            unsigned reserved : 11;
         } Part;
         uint32 All;
     } data;
 
     template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &, TypeContainerVisitor<T, CONTAINER> &visitor, Map &) const;
-    template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m, const WorldObject &obj, float radius) const;
-
-    static CellArea CalculateCellArea(const WorldObject &obj, float radius);
-
-private:
-    template<class LOCK_TYPE, class T, class CONTAINER> void VisitCircle(const CellLock<LOCK_TYPE> &, TypeContainerVisitor<T, CONTAINER> &, Map &, const CellPair& , const CellPair& ) const;
+    template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &, TypeContainerVisitor<T, CONTAINER> &visitor, Map &, float radius, float x_off, float y_off) const;
 };
 
 template<class T>
-struct MANGOS_DLL_DECL CellLock
+struct RIBON_DLL_DECL CellLock
 {
     const Cell& i_cell;
     const CellPair &i_cellPair;
@@ -181,9 +159,10 @@ struct MANGOS_DLL_DECL CellLock
     operator const Cell &(void) const { return i_cell; }
     CellLock<T>& operator=(const CellLock<T> &cell)
     {
-        ~CellLock();
+        this->~CellLock();
         new (this) CellLock<T>(cell);
         return *this;
     }
 };
 #endif
+
