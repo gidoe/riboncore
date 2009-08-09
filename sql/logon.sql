@@ -16,26 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `realmd_db_version`
---
-
-DROP TABLE IF EXISTS `realmd_db_version`;
-CREATE TABLE `realmd_db_version` (
-  `required_7938_01_realmd_account` bit(1) default NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
-
---
--- Dumping data for table `realmd_db_version`
---
-
-LOCK TABLES `realmd_db_version` WRITE;
-/*!40000 ALTER TABLE `realmd_db_version` DISABLE KEYS */;
-INSERT INTO `realmd_db_version` VALUES
-(NULL);
-/*!40000 ALTER TABLE `realmd_db_version` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `account`
 --
 
@@ -50,7 +30,7 @@ CREATE TABLE `account` (
   `s` longtext,
   `email` text,
   `joindate` timestamp NOT NULL default CURRENT_TIMESTAMP,
-  `last_ip` varchar(30) NOT NULL default '0.0.0.0',
+  `last_ip` varchar(30) NOT NULL default '127.0.0.1',
   `failed_logins` int(11) unsigned NOT NULL default '0',
   `locked` tinyint(3) unsigned NOT NULL default '0',
   `last_login` timestamp NOT NULL default '0000-00-00 00:00:00',
@@ -107,7 +87,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `ip_banned`;
 CREATE TABLE `ip_banned` (
-  `ip` varchar(32) NOT NULL default '0.0.0.0',
+  `ip` varchar(32) NOT NULL default '127.0.0.1',
   `bandate` bigint(40) NOT NULL,
   `unbandate` bigint(40) NOT NULL,
   `bannedby` varchar(50) NOT NULL default '[Console]',
@@ -122,6 +102,27 @@ CREATE TABLE `ip_banned` (
 LOCK TABLES `ip_banned` WRITE;
 /*!40000 ALTER TABLE `ip_banned` DISABLE KEYS */;
 /*!40000 ALTER TABLE `ip_banned` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `logs`
+--
+
+DROP TABLE IF EXISTS `logs`;
+CREATE TABLE `logs` (
+  `time` int(14) NOT NULL,
+  `realm` int(4) NOT NULL,
+  `type` int(4) NOT NULL,
+  `string` text
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `logs`
+--
+
+LOCK TABLES `logs` WRITE;
+/*!40000 ALTER TABLE `logs` DISABLE KEYS */;
+/*!40000 ALTER TABLE `logs` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -171,7 +172,7 @@ CREATE TABLE `realmlist` (
 LOCK TABLES `realmlist` WRITE;
 /*!40000 ALTER TABLE `realmlist` DISABLE KEYS */;
 INSERT INTO `realmlist` VALUES
-(1,'MaNGOS','127.0.0.1',8085,1,0,1,0,0);
+(1,'Trinity','127.0.0.1',8085,1,0,1,0,0);
 /*!40000 ALTER TABLE `realmlist` ENABLE KEYS */;
 UNLOCK TABLES;
 

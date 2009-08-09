@@ -1,5 +1,7 @@
 # Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
 #
+# Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -7,12 +9,12 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 ## Process this file with automake to produce Makefile.in
 
@@ -20,16 +22,18 @@
 SUBDIRS = updates tools
 
 ## Change installation location
-#  datadir = mangos/sql
-pkgdatadir = $(datadir)/mangos/sql
+#  datadir = ribon/sql
+pkgdatadir = $(datadir)/ribon/sql
 
 ## Files to be installed
 #  Install basic SQL files to datadir
 pkgdata_DATA = \
-	mangos.sql \
-	realmd.sql \
+	world.sql \
+	logon.sql \
 	characters.sql \
 	create_mysql.sql \
+	world_scripts_full.sql \
+	world_scripts_structure.sql \
 	drop_mysql.sql
 
 ## Additional files to include when running 'make dist'
@@ -38,5 +42,7 @@ EXTRA_DIST = \
 	create_mysql.sql \
 	drop_mysql.sql \
 	characters.sql \
-	mangos.sql \
-	realmd.sql
+	world.sql \
+	world_scripts_full.sql \
+	world_scripts_structure.sql \
+	logon.sql

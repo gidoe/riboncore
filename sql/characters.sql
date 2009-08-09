@@ -16,26 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `character_db_version`
---
-
-DROP TABLE IF EXISTS `character_db_version`;
-CREATE TABLE `character_db_version` (
-  `required_8104_01_characters` bit(1) default NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
-
---
--- Dumping data for table `character_db_version`
---
-
-LOCK TABLES `character_db_version` WRITE;
-/*!40000 ALTER TABLE `character_db_version` DISABLE KEYS */;
-INSERT INTO `character_db_version` VALUES
-(NULL);
-/*!40000 ALTER TABLE `character_db_version` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `account_data`
 --
 
@@ -165,6 +145,86 @@ LOCK TABLES `auctionhouse` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `auctionhousebot`
+--
+
+DROP TABLE IF EXISTS `auctionhousebot`;
+CREATE TABLE `auctionhousebot` (
+  `auctionhouse` int(11) NOT NULL default '0' COMMENT 'mapID of the auctionhouse.',
+  `name` char(25) default NULL COMMENT 'Text name of the auctionhouse.',
+  `minitems` int(11) default '0' COMMENT 'This is the minimum number of items you want to keep in the auction house. a 0 here will make it the same as the maximum.',
+  `maxitems` int(11) default '0' COMMENT 'This is the number of items you want to keep in the auction house.',
+  `percentgreytradegoods` int(11) default '0' COMMENT 'Sets the percentage of the Grey Trade Goods auction items',
+  `percentwhitetradegoods` int(11) default '27' COMMENT 'Sets the percentage of the White Trade Goods auction items',
+  `percentgreentradegoods` int(11) default '12' COMMENT 'Sets the percentage of the Green Trade Goods auction items',
+  `percentbluetradegoods` int(11) default '10' COMMENT 'Sets the percentage of the Blue Trade Goods auction items',
+  `percentpurpletradegoods` int(11) default '1' COMMENT 'Sets the percentage of the Purple Trade Goods auction items',
+  `percentorangetradegoods` int(11) default '0' COMMENT 'Sets the percentage of the Orange Trade Goods auction items',
+  `percentyellowtradegoods` int(11) default '0' COMMENT 'Sets the percentage of the Yellow Trade Goods auction items',
+  `percentgreyitems` int(11) default '0' COMMENT 'Sets the percentage of the non trade Grey auction items',
+  `percentwhiteitems` int(11) default '10' COMMENT 'Sets the percentage of the non trade White auction items',
+  `percentgreenitems` int(11) default '30' COMMENT 'Sets the percentage of the non trade Green auction items',
+  `percentblueitems` int(11) default '8' COMMENT 'Sets the percentage of the non trade Blue auction items',
+  `percentpurpleitems` int(11) default '2' COMMENT 'Sets the percentage of the non trade Purple auction items',
+  `percentorangeitems` int(11) default '0' COMMENT 'Sets the percentage of the non trade Orange auction items',
+  `percentyellowitems` int(11) default '0' COMMENT 'Sets the percentage of the non trade Yellow auction items',
+  `minpricegrey` int(11) default '100' COMMENT 'Minimum price of Grey items (percentage).',
+  `maxpricegrey` int(11) default '150' COMMENT 'Maximum price of Grey items (percentage).',
+  `minpricewhite` int(11) default '150' COMMENT 'Minimum price of White items (percentage).',
+  `maxpricewhite` int(11) default '250' COMMENT 'Maximum price of White items (percentage).',
+  `minpricegreen` int(11) default '800' COMMENT 'Minimum price of Green items (percentage).',
+  `maxpricegreen` int(11) default '1400' COMMENT 'Maximum price of Green items (percentage).',
+  `minpriceblue` int(11) default '1250' COMMENT 'Minimum price of Blue items (percentage).',
+  `maxpriceblue` int(11) default '1750' COMMENT 'Maximum price of Blue items (percentage).',
+  `minpricepurple` int(11) default '2250' COMMENT 'Minimum price of Purple items (percentage).',
+  `maxpricepurple` int(11) default '4550' COMMENT 'Maximum price of Purple items (percentage).',
+  `minpriceorange` int(11) default '3250' COMMENT 'Minimum price of Orange items (percentage).',
+  `maxpriceorange` int(11) default '5550' COMMENT 'Maximum price of Orange items (percentage).',
+  `minpriceyellow` int(11) default '5250' COMMENT 'Minimum price of Yellow items (percentage).',
+  `maxpriceyellow` int(11) default '6550' COMMENT 'Maximum price of Yellow items (percentage).',
+  `minbidpricegrey` int(11) default '70' COMMENT 'Starting bid price of Grey items as a percentage of the randomly chosen buyout price. Default: 70',
+  `maxbidpricegrey` int(11) default '100' COMMENT 'Starting bid price of Grey items as a percentage of the randomly chosen buyout price. Default: 100',
+  `minbidpricewhite` int(11) default '70' COMMENT 'Starting bid price of White items as a percentage of the randomly chosen buyout price. Default: 70',
+  `maxbidpricewhite` int(11) default '100' COMMENT 'Starting bid price of White items as a percentage of the randomly chosen buyout price. Default: 100',
+  `minbidpricegreen` int(11) default '80' COMMENT 'Starting bid price of Green items as a percentage of the randomly chosen buyout price. Default: 80',
+  `maxbidpricegreen` int(11) default '100' COMMENT 'Starting bid price of Green items as a percentage of the randomly chosen buyout price. Default: 100',
+  `minbidpriceblue` int(11) default '75' COMMENT 'Starting bid price of Blue items as a percentage of the randomly chosen buyout price. Default: 75',
+  `maxbidpriceblue` int(11) default '100' COMMENT 'Starting bid price of Blue items as a percentage of the randomly chosen buyout price. Default: 100',
+  `minbidpricepurple` int(11) default '80' COMMENT 'Starting bid price of Purple items as a percentage of the randomly chosen buyout price. Default: 80',
+  `maxbidpricepurple` int(11) default '100' COMMENT 'Starting bid price of Purple items as a percentage of the randomly chosen buyout price. Default: 100',
+  `minbidpriceorange` int(11) default '80' COMMENT 'Starting bid price of Orange items as a percentage of the randomly chosen buyout price. Default: 80',
+  `maxbidpriceorange` int(11) default '100' COMMENT 'Starting bid price of Orange items as a percentage of the randomly chosen buyout price. Default: 100',
+  `minbidpriceyellow` int(11) default '80' COMMENT 'Starting bid price of Yellow items as a percentage of the randomly chosen buyout price. Default: 80',
+  `maxbidpriceyellow` int(11) default '100' COMMENT 'Starting bid price of Yellow items as a percentage of the randomly chosen buyout price. Default: 100',
+  `maxstackgrey` int(11) default '0' COMMENT 'Stack size limits for item qualities - a value of 0 will disable a maximum stack size for that quality, which will allow the bot to create items in stack as large as the item allows.',
+  `maxstackwhite` int(11) default '0' COMMENT 'Stack size limits for item qualities - a value of 0 will disable a maximum stack size for that quality, which will allow the bot to create items in stack as large as the item allows.',
+  `maxstackgreen` int(11) default '3' COMMENT 'Stack size limits for item qualities - a value of 0 will disable a maximum stack size for that quality, which will allow the bot to create items in stack as large as the item allows.',
+  `maxstackblue` int(11) default '2' COMMENT 'Stack size limits for item qualities - a value of 0 will disable a maximum stack size for that quality, which will allow the bot to create items in stack as large as the item allows.',
+  `maxstackpurple` int(11) default '1' COMMENT 'Stack size limits for item qualities - a value of 0 will disable a maximum stack size for that quality, which will allow the bot to create items in stack as large as the item allows.',
+  `maxstackorange` int(11) default '1' COMMENT 'Stack size limits for item qualities - a value of 0 will disable a maximum stack size for that quality, which will allow the bot to create items in stack as large as the item allows.',
+  `maxstackyellow` int(11) default '1' COMMENT 'Stack size limits for item qualities - a value of 0 will disable a maximum stack size for that quality, which will allow the bot to create items in stack as large as the item allows.',
+  `buyerpricegrey` int(11) default '1' COMMENT 'Multiplier to vendorprice when buying grey items from auctionhouse',
+  `buyerpricewhite` int(11) default '3' COMMENT 'Multiplier to vendorprice when buying white items from auctionhouse',
+  `buyerpricegreen` int(11) default '5' COMMENT 'Multiplier to vendorprice when buying green items from auctionhouse',
+  `buyerpriceblue` int(11) default '12' COMMENT 'Multiplier to vendorprice when buying blue items from auctionhouse',
+  `buyerpricepurple` int(11) default '15' COMMENT 'Multiplier to vendorprice when buying purple items from auctionhouse',
+  `buyerpriceorange` int(11) default '20' COMMENT 'Multiplier to vendorprice when buying orange items from auctionhouse',
+  `buyerpriceyellow` int(11) default '22' COMMENT 'Multiplier to vendorprice when buying yellow items from auctionhouse',
+  `buyerbiddinginterval` int(11) default '1' COMMENT 'Interval how frequently AHB bids on each AH. Time in minutes',
+  `buyerbidsperinterval` int(11) default '1' COMMENT 'number of bids to put in per bidding interval',
+  PRIMARY KEY  (`auctionhouse`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Data for table `auctionhousebot`
+--
+
+insert  into `auctionhousebot`(`auctionhouse`,`name`,`minitems`,`maxitems`,`percentgreytradegoods`,`percentwhitetradegoods`,`percentgreentradegoods`,`percentbluetradegoods`,`percentpurpletradegoods`,`percentorangetradegoods`,`percentyellowtradegoods`,`percentgreyitems`,`percentwhiteitems`,`percentgreenitems`,`percentblueitems`,`percentpurpleitems`,`percentorangeitems`,`percentyellowitems`,`minpricegrey`,`maxpricegrey`,`minpricewhite`,`maxpricewhite`,`minpricegreen`,`maxpricegreen`,`minpriceblue`,`maxpriceblue`,`minpricepurple`,`maxpricepurple`,`minpriceorange`,`maxpriceorange`,`minpriceyellow`,`maxpriceyellow`,`minbidpricegrey`,`maxbidpricegrey`,`minbidpricewhite`,`maxbidpricewhite`,`minbidpricegreen`,`maxbidpricegreen`,`minbidpriceblue`,`maxbidpriceblue`,`minbidpricepurple`,`maxbidpricepurple`,`minbidpriceorange`,`maxbidpriceorange`,`minbidpriceyellow`,`maxbidpriceyellow`,`maxstackgrey`,`maxstackwhite`,`maxstackgreen`,`maxstackblue`,`maxstackpurple`,`maxstackorange`,`maxstackyellow`,`buyerpricegrey`,`buyerpricewhite`,`buyerpricegreen`,`buyerpriceblue`,`buyerpricepurple`,`buyerpriceorange`,`buyerpriceyellow`,`buyerbiddinginterval`,`buyerbidsperinterval`) values
+(2,'Alliance',0,0,0,27,12,10,1,0,0,0,10,30,8,2,0,0,100,150,150,250,800,1400,1250,1750,2250,4550,3250,5550,5250,6550,70,100,70,100,80,100,75,100,80,100,80,100,80,100,0,0,3,2,1,1,1,1,3,5,12,15,20,22,1,1),
+(6,'Horde',0,0,0,27,12,10,1,0,0,0,10,30,8,2,0,0,100,150,150,250,800,1400,1250,1750,2250,4550,3250,5550,5250,6550,70,100,70,100,80,100,75,100,80,100,80,100,80,100,0,0,3,2,1,1,1,1,3,5,12,15,20,22,1,1),
+(7,'Neutral',0,0,0,27,12,10,1,0,0,0,10,30,8,2,0,0,100,150,150,250,800,1400,1250,1750,2250,4550,3250,5550,5250,6550,70,100,70,100,80,100,75,100,80,100,80,100,80,100,0,0,3,2,1,1,1,1,3,5,12,15,20,22,1,1);
+
+--
 -- Table structure for table `bugreport`
 --
 
@@ -184,6 +244,21 @@ LOCK TABLES `bugreport` WRITE;
 /*!40000 ALTER TABLE `bugreport` DISABLE KEYS */;
 /*!40000 ALTER TABLE `bugreport` ENABLE KEYS */;
 UNLOCK TABLES;
+
+-- ----------------------------
+-- Table structure for channels
+-- ----------------------------
+DROP TABLE IF EXISTS `channels`;
+CREATE TABLE `channels` (
+  `m_name` text NOT NULL,
+  `m_team` int(10) unsigned NOT NULL,
+  `m_ownerGUID` int(11) unsigned NOT NULL default '0',
+  `m_announce` tinyint(1) unsigned NOT NULL default '0',
+  `m_moderate` tinyint(1) unsigned NOT NULL default '0',
+  `m_password` text,
+  `BannedList` longtext,
+  PRIMARY KEY  (`m_name`(10),`m_team`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Channel System';
 
 --
 -- Table structure for table `characters`
@@ -208,7 +283,8 @@ CREATE TABLE `characters` (
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
   `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
-  `dungeon_difficulty` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `instance_id` int(11) unsigned NOT NULL default '0',
+  `dungeon_difficulty` tinyint(1) unsigned NOT NULL default '0',
   `orientation` float NOT NULL default '0',
   `taximask` longtext,
   `online` tinyint(3) unsigned NOT NULL default '0',
@@ -232,6 +308,14 @@ CREATE TABLE `characters` (
   `death_expire_time` bigint(20) unsigned NOT NULL default '0',
   `taxi_path` text,
   `arena_pending_points` int(10) UNSIGNED NOT NULL default '0',
+  `latency` int(11) unsigned NOT NULL default '0',
+  `bgid` int(10) unsigned NOT NULL default '0',
+  `bgteam` int(10) unsigned NOT NULL default '0',
+  `bgmap` int(10) unsigned NOT NULL default '0',
+  `bgx` float NOT NULL default '0',
+  `bgy` float NOT NULL default '0',
+  `bgz` float NOT NULL default '0',
+  `bgo` float NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`),
@@ -321,13 +405,15 @@ CREATE TABLE `character_aura` (
   `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `caster_guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Full Global Unique Identifier',
   `spell` int(11) unsigned NOT NULL default '0',
-  `effect_index` int(11) unsigned NOT NULL default '0',
+  `effect_mask` int(11) unsigned NOT NULL default '0',
   `stackcount` int(11) NOT NULL default '1',
-  `amount` int(11) NOT NULL default '0',
+  `amount0` int(11) NOT NULL default '0',
+  `amount1` int(11) NOT NULL default '0',
+  `amount2` int(11) NOT NULL default '0',
   `maxduration` int(11) NOT NULL default '0',
   `remaintime` int(11) NOT NULL default '0',
   `remaincharges` int(11) NOT NULL default '0',
-  PRIMARY KEY  (`guid`,`spell`,`effect_index`)
+  PRIMARY KEY  (`guid`,`spell`,`effect_mask`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
@@ -337,35 +423,6 @@ CREATE TABLE `character_aura` (
 LOCK TABLES `character_aura` WRITE;
 /*!40000 ALTER TABLE `character_aura` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_aura` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `character_battleground_data`
---
-
-DROP TABLE IF EXISTS `character_battleground_data`;
-CREATE TABLE `character_battleground_data` (
-  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `instance_id` int(11) unsigned NOT NULL default '0',
-  `team` int(11) unsigned NOT NULL default '0',
-  `join_x` float NOT NULL default '0',
-  `join_y` float NOT NULL default '0',
-  `join_z` float NOT NULL default '0',
-  `join_o` float NOT NULL default '0',
-  `join_map` int(11) NOT NULL default '0',
-  `taxi_start` int(11) NOT NULL default '0',
-  `taxi_end` int(11) NOT NULL default '0',
-  `mount_spell` int(11) NOT NULL default '0',
-  PRIMARY KEY  (`guid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
-
---
--- Dumping data for table `character_battleground_data`
---
-
-LOCK TABLES `character_battleground_data` WRITE;
-/*!40000 ALTER TABLE `character_battleground_data` DISABLE KEYS */;
-/*!40000 ALTER TABLE `character_battleground_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -739,28 +796,6 @@ LOCK TABLES `character_spell_cooldown` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `character_ticket`
---
-
-DROP TABLE IF EXISTS `character_ticket`;
-CREATE TABLE `character_ticket` (
-  `ticket_id` int(11) unsigned NOT NULL auto_increment,
-  `guid` int(11) unsigned NOT NULL default '0',
-  `ticket_text` text,
-  `ticket_lastchange` TIMESTAMP ON  UPDATE  CURRENT_TIMESTAMP  NOT  NULL  DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY  (`ticket_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
-
---
--- Dumping data for table `character_ticket`
---
-
-LOCK TABLES `character_ticket` WRITE;
-/*!40000 ALTER TABLE `character_ticket` DISABLE KEYS */;
-/*!40000 ALTER TABLE `character_ticket` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `character_tutorial`
 --
 
@@ -823,6 +858,79 @@ LOCK TABLES `corpse` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `game_event_condition_save`
+--
+
+DROP TABLE IF EXISTS `game_event_condition_save`;
+CREATE TABLE `game_event_condition_save` (
+  `event_id` mediumint(8) unsigned NOT NULL,
+  `condition_id` mediumint(8) unsigned NOT NULL default '0',
+  `done` float default '0',
+  PRIMARY KEY  (`event_id`,`condition_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `game_event_condition_save`
+--
+
+LOCK TABLES `game_event_condition_save` WRITE;
+/*!40000 ALTER TABLE `game_event_condition_save` DISABLE KEYS */;
+/*!40000 ALTER TABLE `game_event_condition_save` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `game_event_save`
+--
+
+DROP TABLE IF EXISTS `game_event_save`;
+CREATE TABLE `game_event_save` (
+  `event_id` mediumint(8) unsigned NOT NULL,
+  `state` tinyint(3) unsigned NOT NULL default '1',
+  `next_start` timestamp NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (`event_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `game_event_save`
+--
+
+LOCK TABLES `game_event_save` WRITE;
+/*!40000 ALTER TABLE `game_event_save` DISABLE KEYS */;
+/*!40000 ALTER TABLE `game_event_save` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `gm_tickets`
+--
+
+DROP TABLE IF EXISTS `gm_tickets`;
+CREATE TABLE `gm_tickets` (
+  `guid` int(10) NOT NULL auto_increment,
+  `playerGuid` int(11) unsigned NOT NULL default '0',
+  `name` varchar(15) NOT NULL,
+  `message` text NOT NULL,
+  `createtime` int(10) NOT NULL default '0',
+  `map` int NOT NULL DEFAULT '0',
+  `posX` float NOT NULL DEFAULT '0',
+  `posY` float NOT NULL DEFAULT '0',
+  `posZ` float NOT NULL DEFAULT '0',
+  `timestamp` int(10) NOT NULL default '0',
+  `closed` int(10) NOT NULL default '0',
+  `assignedto` int(10) NOT NULL default '0',
+  `comment` text NOT NULL,
+  PRIMARY KEY  (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+
+--
+-- Dumping data for table `gm_tickets`
+--
+
+LOCK TABLES `gm_tickets` WRITE;
+/*!40000 ALTER TABLE `gm_tickets` DISABLE KEYS */;
+/*!40000 ALTER TABLE `gm_tickets` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `groups`
 --
 
@@ -856,9 +964,10 @@ LOCK TABLES `groups` WRITE;
 /*!40000 ALTER TABLE `groups` ENABLE KEYS */;
 UNLOCK TABLES;
 
--- ----------------------------
--- Table structure for group_instance
--- ----------------------------
+--
+-- Table structure for table `group_instance`
+--
+
 DROP TABLE IF EXISTS `group_instance`;
 CREATE TABLE `group_instance` (
   `leaderGuid` int(11) unsigned NOT NULL default '0',
@@ -1140,9 +1249,10 @@ LOCK TABLES `instance` WRITE;
 /*!40000 ALTER TABLE `instance` ENABLE KEYS */;
 UNLOCK TABLES;
 
--- ----------------------------
--- Table structure for instance_reset
--- ----------------------------
+--
+-- Table structure for table `instance_reset`
+--
+
 DROP TABLE IF EXISTS `instance_reset`;
 CREATE TABLE `instance_reset` (
   `mapid` int(11) unsigned NOT NULL default '0',
@@ -1266,13 +1376,15 @@ CREATE TABLE `pet_aura` (
   `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `caster_guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Full Global Unique Identifier',
   `spell` int(11) unsigned NOT NULL default '0',
-  `effect_index` int(11) unsigned NOT NULL default '0',
+  `effect_mask` int(11) unsigned NOT NULL default '0',
   `stackcount` int(11) NOT NULL default '1',
-  `amount` int(11) NOT NULL default '0',
+  `amount0` int(11) NOT NULL default '0',
+  `amount1` int(11) NOT NULL default '0',
+  `amount2` int(11) NOT NULL default '0',
   `maxduration` int(11) NOT NULL default '0',
   `remaintime` int(11) NOT NULL default '0',
   `remaincharges` int(11) NOT NULL default '0',
-  PRIMARY KEY  (`guid`,`spell`,`effect_index`)
+  PRIMARY KEY  (`guid`,`spell`,`effect_mask`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet System';
 
 --
@@ -1371,7 +1483,6 @@ LOCK TABLES `petition_sign` WRITE;
 /*!40000 ALTER TABLE `petition_sign` DISABLE KEYS */;
 /*!40000 ALTER TABLE `petition_sign` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 --
 -- Table structure for table `saved_variables`
@@ -1402,3 +1513,5 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2008-01-10 11:37:06
+
+-- Updated on 2003-02-22 01:44:45
