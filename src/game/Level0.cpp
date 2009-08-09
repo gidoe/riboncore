@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "Common.h"
@@ -27,36 +29,8 @@
 #include "AccountMgr.h"
 #include "SystemConfig.h"
 #include "revision.h"
-#include "revision_nr.h"
 #include "Util.h"
-#include "math.h"
-
-bool ChatHandler::HandleLeaveCombatCommand(const char* args)
-{
-    Player *chr = m_session->GetPlayer();
-
-    if(!chr)
-       return false;
-
-    if(chr->isAlive())
-    {
-        chr->CombatStop();
-
-        chr->CastSpell(chr,2479,true);
-        chr->SetHealth(1);
-        chr->SetPower(POWER_ENERGY,0);
-        chr->SetPower(POWER_MANA,0);
-        chr->SetPower(POWER_RAGE,0);
-        SendSysMessage("Riesci a scappare dal combattimento, ma rimani debole e ferito ");
-
-        return true;
-    }
-    else
-    {
-        SendSysMessage("Sei morto, non puoi essere in combat ");
-        return true;
-    }
-}
+#define _FULLVERSION (_REVISION)
 
 bool ChatHandler::HandleHelpCommand(const char* args)
 {
@@ -75,7 +49,7 @@ bool ChatHandler::HandleHelpCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleCommandsCommand(const char* /*args*/)
+bool ChatHandler::HandleCommandsCommand(const char* args)
 {
     ShowHelpForCommand(getCommandTable(), "");
     return true;
@@ -89,14 +63,7 @@ bool ChatHandler::HandleAccountCommand(const char* /*args*/)
 }
 
 bool ChatHandler::HandleStartCommand(const char* /*args*/)
-{   
-    // Jail by WarHead
-    if (m_session->GetPlayer()->m_jail_isjailed)
-    {
-        SendSysMessage(LANG_JAIL_DENIED);
-        return true;
-    }
-
+{
     Player *chr = m_session->GetPlayer();
 
     if(chr->isInFlight())
@@ -129,16 +96,12 @@ bool ChatHandler::HandleServerInfoCommand(const char* /*args*/)
     std::string uptime = secsToTimeString(sWorld.GetUptime());
     uint32 updateTime = sWorld.GetUpdateTime();
 
-    char const* full;
-    if(m_session)
-        full = _FULLVERSION(REVISION_DATE,REVISION_TIME,REVISION_NR,"|cffffffff|Hurl:" REVISION_ID "|h" REVISION_ID "|h|r");
-    else
-        full = _FULLVERSION(REVISION_DATE,REVISION_TIME,REVISION_NR,REVISION_ID);
+    PSendSysMessage(_FULLVERSION);
 
-    SendSysMessage(full);
-    PSendSysMessage(LANG_USING_SCRIPT_LIB,sWorld.GetScriptsVersion());
-    PSendSysMessage(LANG_USING_WORLD_DB,sWorld.GetDBVersion());
-    PSendSysMessage(LANG_USING_EVENT_AI,sWorld.GetCreatureEventAIVersion());
+    //SendSysMessage(full);
+    //PSendSysMessage(LANG_USING_SCRIPT_LIB,sWorld.GetScriptsVersion());
+    //PSendSysMessage(LANG_USING_WORLD_DB,sWorld.GetDBVersion());
+    //PSendSysMessage(LANG_USING_EVENT_AI,sWorld.GetCreatureEventAIVersion());
     PSendSysMessage(LANG_CONNECTED_PLAYERS, PlayersNum, MaxPlayersNum);
     PSendSysMessage(LANG_CONNECTED_USERS, activeClientsNum, maxActiveClientsNum, queuedClientsNum, maxQueuedClientsNum);
     PSendSysMessage(LANG_UPTIME, uptime.c_str());
@@ -165,20 +128,13 @@ bool ChatHandler::HandleDismountCommand(const char* /*args*/)
     }
 
     m_session->GetPlayer()->Unmount();
-    m_session->GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+    m_session->GetPlayer()->RemoveAurasByType(SPELL_AURA_MOUNTED);
     return true;
 }
 
 bool ChatHandler::HandleSaveCommand(const char* /*args*/)
 {
     Player *player=m_session->GetPlayer();
-
-    // Jail by WarHead
-    if (player->m_jail_isjailed)
-    {
-        SendSysMessage(LANG_JAIL_DENIED);
-        return true;
-    }
 
     // save GM account without delay and output message (testing, etc)
     if(m_session->GetSecurity() > SEC_PLAYER)
@@ -240,7 +196,7 @@ bool ChatHandler::HandleAccountPasswordCommand(const char* args)
     std::string password_new = new_pass;
     std::string password_new_c = new_pass_c;
 
-    if (password_new != password_new_c)
+    if (strcmp(new_pass, new_pass_c) != 0)
     {
         SendSysMessage (LANG_NEW_PASSWORDS_NOT_MATCH);
         SetSentErrorMessage (true);
@@ -273,40 +229,6 @@ bool ChatHandler::HandleAccountPasswordCommand(const char* args)
     }
 
     return true;
-}
-
-bool ChatHandler::HandleJailInfoCommand(const char* args)
-{
-    time_t localtime;
-    localtime = time(NULL);
-    Player *chr = m_session->GetPlayer();
-
-    if (chr->m_jail_release > 0)
-    {
-        uint32 min_left = (uint32)floor(float(chr->m_jail_release - localtime) / 60);
-
-        if (min_left <= 0)
-        {
-            chr->m_jail_release = 0;
-            chr->_SaveJail();
-            SendSysMessage(LANG_JAIL_NOTJAILED_INFO);
-            return true;
-        }
-        else
-        {
-            if (min_left >= 60) PSendSysMessage(LANG_JAIL_JAILED_H_INFO, (uint32)floor(float(chr->m_jail_release - localtime) / 60 / 60));
-            else PSendSysMessage(LANG_JAIL_JAILED_M_INFO, min_left);
-            PSendSysMessage(LANG_JAIL_REASON, chr->m_jail_gmchar.c_str(), chr->m_jail_reason.c_str());
-
-            return true;
-        }
-    }
-    else
-    {
-        SendSysMessage(LANG_JAIL_NOTJAILED_INFO);
-        return true;
-    }
-    return false;
 }
 
 bool ChatHandler::HandleAccountLockCommand(const char* args)
@@ -342,3 +264,4 @@ bool ChatHandler::HandleServerMotdCommand(const char* /*args*/)
     PSendSysMessage(LANG_MOTD_CURRENT, sWorld.GetMotd());
     return true;
 }
+

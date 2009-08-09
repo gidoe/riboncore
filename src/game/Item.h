@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOSSERVER_ITEM_H
-#define MANGOSSERVER_ITEM_H
+#ifndef RIBONCORE_ITEM_H
+#define RIBONCORE_ITEM_H
 
 #include "Common.h"
 #include "Object.h"
@@ -216,7 +218,7 @@ struct ItemRequiredTarget
 
 bool ItemCanGoIntoBag(ItemPrototype const *proto, ItemPrototype const *pBagProto);
 
-class MANGOS_DLL_SPEC Item : public Object
+class RIBON_DLL_SPEC Item : public Object
 {
     public:
         static Item* CreateItem( uint32 item, uint32 count, Player const* player = NULL );
@@ -311,6 +313,8 @@ class MANGOS_DLL_SPEC Item : public Object
         bool hasQuest(uint32 quest_id) const { return GetProto()->StartQuest == quest_id; }
         bool hasInvolvedQuest(uint32 /*quest_id*/) const { return false; }
         bool IsPotion() const { return GetProto()->IsPotion(); }
+        bool IsWeaponVellum() const { return GetProto()->IsWeaponVellum(); }
+        bool IsArmorVellum() const { return GetProto()->IsArmorVellum(); }
         bool IsConjuredConsumable() const { return GetProto()->IsConjuredConsumable(); }
 
     private:
@@ -321,3 +325,4 @@ class MANGOS_DLL_SPEC Item : public Object
         bool mb_in_trade;                                   // true if item is currently in trade-window
 };
 #endif
+

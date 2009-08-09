@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -511,7 +513,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 
     recv_data >> vendorguid >> itemguid >> _count;
 
-    // prevent possible overflow, as mangos uses uint32 for item count
+    // prevent possible overflow, as Ribon uses uint32 for item count
     uint32 count = _count;
 
     if(!itemguid)
@@ -527,7 +529,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 
     // remove fake death
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
     Item *pItem = _player->GetItemByGuid( itemguid );
     if( pItem )
@@ -560,7 +562,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
         }
         else
         {
-            // prevent sell more items that exist in stack (possable only not from client)
+            // prevent sell more items that exist in stack (possible only not from client)
             if(count > pItem->GetCount())
             {
                 _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
@@ -632,7 +634,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
 
     // remove fake death
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
     Item *pItem = _player->GetItemFromBuyBackSlot( slot );
     if( pItem )
@@ -743,7 +745,7 @@ void WorldSession::SendListInventory( uint64 vendorguid )
 
     // remove fake death
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
     // Stop the npc if moving
     pCreature->StopMoving();
@@ -1377,3 +1379,4 @@ void WorldSession::HandleCancelTempEnchantmentOpcode(WorldPacket& recv_data)
     GetPlayer()->ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,false);
     item->ClearEnchantment(TEMP_ENCHANTMENT_SLOT);
 }
+

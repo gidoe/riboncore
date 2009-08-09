@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -115,7 +117,7 @@ enum ITEM_FLAGS
     ITEM_FLAGS_THROWABLE                      = 0x00400000, // not used in game for check trow possibility, only for item in game tooltip
     ITEM_FLAGS_SPECIALUSE                     = 0x00800000, // last used flag in 2.3.0
     ITEM_FLAGS_BOA                            = 0x08000000, // bind on account (set in template for items that can binded in like way)
-    ITEM_FLAGS_SCROLL_ENCHANT                 = 0x10000000,
+    ITEM_FLAGS_TRIGGERED_CAST                 = 0x10000000, // used by enchanting scrolls made with vellum
     ITEM_FLAGS_MILLABLE                       = 0x20000000
 };
 
@@ -261,6 +263,10 @@ enum ItemSubclassWeapon
     ITEM_SUBCLASS_WEAPON_WAND                   = 19,
     ITEM_SUBCLASS_WEAPON_FISHING_POLE           = 20
 };
+
+#define ITEM_SUBCLASS_MASK_WEAPON_RANGED (\
+    (1 << ITEM_SUBCLASS_WEAPON_BOW) | (1 << ITEM_SUBCLASS_WEAPON_GUN) |\
+    (1 << ITEM_SUBCLASS_WEAPON_CROSSBOW) | (1 << ITEM_SUBCLASS_WEAPON_THROWN))
 
 #define MAX_ITEM_SUBCLASS_WEAPON                  21
 
@@ -622,8 +628,9 @@ struct ItemPrototype
     }
 
     bool IsPotion() const { return Class==ITEM_CLASS_CONSUMABLE && SubClass==ITEM_SUBCLASS_POTION; }
+    bool IsWeaponVellum() const { return Class==ITEM_CLASS_TRADE_GOODS && SubClass==ITEM_SUBCLASS_WEAPON_ENCHANTMENT; }
+    bool IsArmorVellum() const { return Class==ITEM_CLASS_TRADE_GOODS && SubClass==ITEM_SUBCLASS_ARMOR_ENCHANTMENT; }
     bool IsConjuredConsumable() const { return Class == ITEM_CLASS_CONSUMABLE && (Flags & ITEM_FLAGS_CONJURED); }
-    bool IsVellum() const { return Class == ITEM_CLASS_TRADE_GOODS && (0xC000 & (1<<SubClass)); }
 };
 
 struct ItemLocale
@@ -639,3 +646,4 @@ struct ItemLocale
 #pragma pack(pop)
 #endif
 #endif
+

@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "IdleMovementGenerator.h"
@@ -22,9 +24,19 @@
 
 IdleMovementGenerator si_idleMovement;
 
-void
-IdleMovementGenerator::Reset(Unit& /*owner*/)
+// StopMoving is needed to make unit stop if its last movement generator expires
+// But it should not be sent otherwise there are many redundent packets
+void IdleMovementGenerator::Initialize(Unit &owner)
 {
+    if(owner.hasUnitState(UNIT_STAT_MOVE))
+        owner.StopMoving();
+}
+
+void
+IdleMovementGenerator::Reset(Unit& owner)
+{
+    if(owner.hasUnitState(UNIT_STAT_MOVE))
+        owner.StopMoving();
 }
 
 void
@@ -40,7 +52,7 @@ DistractMovementGenerator::Finalize(Unit& owner)
 }
 
 bool
-DistractMovementGenerator::Update(Unit& /*owner*/, const uint32& time_diff)
+DistractMovementGenerator::Update(Unit& owner, const uint32& time_diff)
 {
     if(time_diff > m_timer)
         return false;
@@ -53,12 +65,5 @@ void
 AssistanceDistractMovementGenerator::Finalize(Unit &unit)
 {
     unit.clearUnitState(UNIT_STAT_DISTRACTED);
-    if (Unit* victim = unit.getVictim())
-    {
-        if (unit.isAlive())
-        {
-            unit.AttackStop(true);
-            ((Creature*)&unit)->AI()->AttackStart(victim);
-        }
-    }
+    ((Creature*)&unit)->SetReactState(REACT_AGGRESSIVE);
 }

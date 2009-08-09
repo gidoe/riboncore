@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -22,6 +24,8 @@
 #include "WorldPacket.h"
 #include "Database/DatabaseEnv.h"
 #include "ItemEnchantmentMgr.h"
+#include "SpellMgr.h"
+#include "ScriptCalls.h"
 
 void AddItemsSetItem(Player*player,Item *item)
 {
@@ -263,7 +267,7 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player const* owner)
     SetUInt32Value(ITEM_FIELD_MAXDURABILITY, itemProto->MaxDurability);
     SetUInt32Value(ITEM_FIELD_DURABILITY, itemProto->MaxDurability);
 
-    for(int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+    for(uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
         SetSpellCharges(i,itemProto->Spells[i].SpellCharges);
 
     SetUInt32Value(ITEM_FIELD_FLAGS, itemProto->Flags);
@@ -282,6 +286,7 @@ void Item::UpdateDuration(Player* owner, uint32 diff)
     if (GetUInt32Value(ITEM_FIELD_DURATION)<=diff)
     {
         owner->DestroyItem(GetBagSlot(), GetSlot(), true);
+        Script->ItemExpire(owner, GetProto());
         return;
     }
 
@@ -653,14 +658,14 @@ void Item::AddToUpdateQueueOf(Player *player)
         player = GetOwner();
         if (!player)
         {
-            sLog.outError("Item::AddToUpdateQueueOf - GetPlayer didn't find a player matching owner's guid (%u)!", GUID_LOPART(GetOwnerGUID()));
+            sLog.outDebug("Item::AddToUpdateQueueOf - GetPlayer didn't find a player matching owner's guid (%u)!", GUID_LOPART(GetOwnerGUID()));
             return;
         }
     }
 
     if (player->GetGUID() != GetOwnerGUID())
     {
-        sLog.outError("Item::AddToUpdateQueueOf - Owner's guid (%u) and player's guid (%u) don't match!", GUID_LOPART(GetOwnerGUID()), player->GetGUIDLow());
+        sLog.outDebug("Item::AddToUpdateQueueOf - Owner's guid (%u) and player's guid (%u) don't match!", GUID_LOPART(GetOwnerGUID()), player->GetGUIDLow());
         return;
     }
 
@@ -679,14 +684,14 @@ void Item::RemoveFromUpdateQueueOf(Player *player)
         player = GetOwner();
         if (!player)
         {
-            sLog.outError("Item::RemoveFromUpdateQueueOf - GetPlayer didn't find a player matching owner's guid (%u)!", GUID_LOPART(GetOwnerGUID()));
+            sLog.outDebug("Item::RemoveFromUpdateQueueOf - GetPlayer didn't find a player matching owner's guid (%u)!", GUID_LOPART(GetOwnerGUID()));
             return;
         }
     }
 
     if (player->GetGUID() != GetOwnerGUID())
     {
-        sLog.outError("Item::RemoveFromUpdateQueueOf - Owner's guid (%u) and player's guid (%u) don't match!", GUID_LOPART(GetOwnerGUID()), player->GetGUIDLow());
+        sLog.outDebug("Item::RemoveFromUpdateQueueOf - Owner's guid (%u) and player's guid (%u) don't match!", GUID_LOPART(GetOwnerGUID()), player->GetGUIDLow());
         return;
     }
 
@@ -751,22 +756,14 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
 {
     ItemPrototype const* proto = GetProto();
 
-    //Lava Lash
-    if (spellInfo->Id==60103 && spellInfo->EquippedItemClass==ITEM_CLASS_WEAPON)
-         return true;
-
-    // Enchant spells have only effect[0]
-    if(proto->IsVellum() && spellInfo->Effect[0] == SPELL_EFFECT_ENCHANT_ITEM && spellInfo->EffectItemType[0])
-    {
-        if(proto->SubClass == ITEM_SUBCLASS_WEAPON_ENCHANTMENT && spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON)
-            return true;
-        else if(proto->SubClass == ITEM_SUBCLASS_ARMOR_ENCHANTMENT && spellInfo->EquippedItemClass == ITEM_CLASS_ARMOR)
-            return true;
-    }
-    // Vellum enchant case should ignore everything below
-
     if (spellInfo->EquippedItemClass != -1)                 // -1 == any item class
     {
+        // Special case - accept vellum for armor/weapon requirements
+        if( (spellInfo->EquippedItemClass==ITEM_CLASS_ARMOR && proto->IsArmorVellum())
+            ||( spellInfo->EquippedItemClass==ITEM_CLASS_WEAPON && proto->IsWeaponVellum()))
+            if (spellmgr.IsSkillTypeSpell(spellInfo->Id, SKILL_ENCHANTING)) // only for enchanting spells
+                return true;
+
         if(spellInfo->EquippedItemClass != int32(proto->Class))
             return false;                                   //  wrong item class
 
@@ -779,8 +776,12 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
 
     if(spellInfo->EquippedItemInventoryTypeMask != 0)       // 0 == any inventory type
     {
-        if(!((spellInfo->EquippedItemInventoryTypeMask & (1 << proto->InventoryType)) ||
-            (spellInfo->EquippedItemInventoryTypeMask & 0x400000 && proto->InventoryType == 13)))
+        // Special case - accept weapon type for main and offhand requirements
+        if(proto->InventoryType == INVTYPE_WEAPON &&
+            (spellInfo->EquippedItemInventoryTypeMask & (1 << INVTYPE_WEAPONMAINHAND) ||
+            spellInfo->EquippedItemInventoryTypeMask & (1 << INVTYPE_WEAPONOFFHAND)))
+            return true;
+        else if ((spellInfo->EquippedItemInventoryTypeMask & (1 << proto->InventoryType)) == 0)
             return false;                                   // inventory type not present in mask
     }
 

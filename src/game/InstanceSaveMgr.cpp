@@ -1,5 +1,8 @@
 /*
- * Copyright (C) 2005,2006,2007 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+ *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +11,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "Common.h"
@@ -37,6 +40,8 @@
 #include "Group.h"
 #include "InstanceData.h"
 #include "ProgressBar.h"
+#include "Policies/Singleton.h"
+#include "Policies/SingletonImp.h"
 
 INSTANTIATE_SINGLETON_1( InstanceSaveManager );
 
@@ -160,11 +165,11 @@ void InstanceSave::SaveToDB()
     if(map)
     {
         assert(map->IsDungeon());
-        InstanceData *iData = ((InstanceMap *)map)->GetInstanceData();
-        if(iData && iData->Save())
+        if(InstanceData *iData = ((InstanceMap*)map)->GetInstanceData())
         {
-            data = iData->Save();
-            CharacterDatabase.escape_string(data);
+            data = iData->GetSaveData();
+            if(!data.empty())
+                CharacterDatabase.escape_string(data);
         }
     }
 
@@ -218,7 +223,7 @@ void InstanceSaveManager::_DelHelper(DatabaseType &db, const char *fields, const
     va_list ap;
     char szQueryTail [MAX_QUERY_LEN];
     va_start(ap, queryTail);
-    vsnprintf( szQueryTail, MAX_QUERY_LEN, queryTail, ap );
+    int res = vsnprintf( szQueryTail, MAX_QUERY_LEN, queryTail, ap );
     va_end(ap);
 
     QueryResult *result = db.PQuery("SELECT %s FROM %s %s", fields, table, szQueryTail);
@@ -242,6 +247,8 @@ void InstanceSaveManager::_DelHelper(DatabaseType &db, const char *fields, const
 
 void InstanceSaveManager::CleanupInstances()
 {
+    uint64 now = (uint64)time(NULL);
+
     barGoLink bar(2);
     bar.step();
 
@@ -302,6 +309,20 @@ void InstanceSaveManager::CleanupInstances()
         delete result;
     }
 
+    // gameobject_respawn
+    result = CharacterDatabase.Query("SELECT DISTINCT(instance_id) FROM characters WHERE instance_id <> 0");
+    if( result )
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            if(InstanceSet.find(fields[0].GetUInt32()) == InstanceSet.end())
+                CharacterDatabase.PExecute("UPDATE characters SET instance_id = '0' WHERE instance_id = '%u'", fields[0].GetUInt32());
+        }
+        while (result->NextRow());
+        delete result;
+    }
+
     bar.step();
     sLog.outString();
     sLog.outString( ">> Initialized %u instances", (uint32)InstanceSet.size());
@@ -342,6 +363,7 @@ void InstanceSaveManager::PackInstances()
             // remap instance id
             WorldDatabase.PExecute("UPDATE creature_respawn SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
             WorldDatabase.PExecute("UPDATE gameobject_respawn SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
+            CharacterDatabase.PExecute("UPDATE characters SET instance_id = '%u' WHERE instance_id = '%u'", InstanceNumber, *i);
             CharacterDatabase.PExecute("UPDATE corpse SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
             CharacterDatabase.PExecute("UPDATE character_instance SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
             CharacterDatabase.PExecute("UPDATE instance SET id = '%u' WHERE id = '%u'", InstanceNumber, *i);
@@ -642,3 +664,4 @@ uint32 InstanceSaveManager::GetNumBoundGroupsTotal()
         ret += itr->second->GetGroupCount();
     return ret;
 }
+

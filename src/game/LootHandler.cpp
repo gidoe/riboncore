@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "Common.h"
@@ -24,7 +26,6 @@
 #include "Player.h"
 #include "ObjectAccessor.h"
 #include "WorldSession.h"
-#include "InstanceSaveMgr.h"
 #include "LootMgr.h"
 #include "Object.h"
 #include "Group.h"
@@ -316,25 +317,6 @@ void WorldSession::DoLootRelease( uint64 lguid )
                 uint32 go_min = go->GetGOInfo()->chest.minSuccessOpens;
                 uint32 go_max = go->GetGOInfo()->chest.maxSuccessOpens;
 
-                if (player->GetInstanceId())
-                {
-                    Map *map = go->GetMap();
-                    if (map->IsDungeon())
-                    {
-                        if (map->IsRaid() || map->IsHeroic())
-                        {
-                            ((InstanceMap *)map)->PermBindAllPlayers(player);
-                        }
-                        else
-                        {
-                            // the reset time is set but not added to the scheduler
-                            // until the players leave the instance
-                            time_t resettime = go->GetRespawnTimeEx() + 2 * HOUR;
-                            if(InstanceSave *save = sInstanceSaveManager.GetInstanceSave(player->GetInstanceId()))
-                            if(save->GetResetTime() < resettime) save->SetResetTime(resettime);
-                        }
-                    }
-                }
                 // only vein pass this check
                 if(go_min != 0 && go_max > go_min)
                 {
@@ -542,3 +524,4 @@ void WorldSession::HandleLootMasterGiveOpcode( WorldPacket & recv_data )
     pLoot->NotifyItemRemoved(slotid);
     --pLoot->unlootedCount;
 }
+
