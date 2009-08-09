@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOSSERVER_GAMEOBJECT_H
-#define MANGOSSERVER_GAMEOBJECT_H
+#ifndef RIBONCORE_GAMEOBJECT_H
+#define RIBONCORE_GAMEOBJECT_H
 
 #include "Common.h"
 #include "SharedDefines.h"
@@ -358,15 +360,15 @@ struct GameObjectInfo
         {
             uint32 intactNumHits;                           //0
             uint32 creditProxyCreature;                     //1
-            uint32 empty1;                                  //2
+            uint32 state1Name;                              //2
             uint32 intactEvent;                             //3
-            uint32 empty2;                                  //4
+            uint32 damagedDisplayId;                        //4
             uint32 damagedNumHits;                          //5
             uint32 empty3;                                  //6
             uint32 empty4;                                  //7
             uint32 empty5;                                  //8
             uint32 damagedEvent;                            //9
-            uint32 empty6;                                  //10
+            uint32 destroyedDisplayId;                      //10
             uint32 empty7;                                  //11
             uint32 empty8;                                  //12
             uint32 empty9;                                  //13
@@ -380,7 +382,7 @@ struct GameObjectInfo
             uint32 empty13;                                 //21
             uint32 damageEvent;                             //22
             uint32 empty14;                                 //23
-        } destructibleBuilding;
+        } building;
         //34 GAMEOBJECT_TYPE_GUILDBANK - empty
         //35 GAMEOBJECT_TYPE_TRAPDOOR
         struct
@@ -446,7 +448,7 @@ struct GameObjectInfo
     {
         switch(type)
         {
-            case GAMEOBJECT_TYPE_TRAP:        return trap.charges;
+            //case GAMEOBJECT_TYPE_TRAP:        return trap.charges;
             case GAMEOBJECT_TYPE_GUARDPOST:   return guardpost.charges;
             case GAMEOBJECT_TYPE_SPELLCASTER: return spellcaster.charges;
             default: return 0;
@@ -491,6 +493,22 @@ struct GameObjectInfo
     }
 };
 
+class OPvPCapturePoint;
+
+union GameObjectValue
+{
+    //29 GAMEOBJECT_TYPE_CAPTURE_POINT
+    struct
+    {
+        OPvPCapturePoint *OPvPObj;
+    }capturePoint;
+    //33 GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING
+    struct
+    {
+        uint32 health;
+    }building;
+};
+
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
 #pragma pack()
@@ -517,6 +535,7 @@ enum GOState
 // from `gameobject`
 struct GameObjectData
 {
+    explicit GameObjectData() : dbData(true) {}
     uint32 id;                                              // entry in gamobject_template
     uint16 mapid;
     uint16 phaseMask;
@@ -533,6 +552,7 @@ struct GameObjectData
     GOState go_state;
     uint8 spawnMask;
     uint8 ArtKit;
+    bool dbData;
 };
 
 // For containers:  [GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY        -> ...
@@ -552,7 +572,7 @@ class Unit;
 // 5 sec for bobber catch
 #define FISHING_BOBBER_READY_TIME 5
 
-class MANGOS_DLL_SPEC GameObject : public WorldObject
+class RIBON_DLL_SPEC GameObject : public WorldObject
 {
     public:
         explicit GameObject();
@@ -562,19 +582,14 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void RemoveFromWorld();
         void CleanupsBeforeDelete();
 
-        bool Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMask, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state, uint8 ArtKit = 0);
+        bool Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMask, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state, uint32 ArtKit = 0);
         void Update(uint32 p_time);
-        GameObjectInfo const* GetGOInfo() const;
+        static GameObject* GetGameObject(WorldObject& object, uint64 guid);
+        GameObjectInfo const* GetGOInfo() const { return m_goInfo; }
+        GameObjectData const* GetGOData() const { return m_goData; }
+        GameObjectValue * GetGOValue() const { return m_goValue; }
 
         bool IsTransport() const;
-
-        void SetOwnerGUID(uint64 owner)
-        {
-            m_spawnedByDefault = false;                     // all object with owner is despawned after delay
-            SetUInt64Value(OBJECT_FIELD_CREATED_BY, owner);
-        }
-        uint64 GetOwnerGUID() const { return GetUInt64Value(OBJECT_FIELD_CREATED_BY); }
-        Unit* GetOwner() const;
 
         uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
 
@@ -593,6 +608,26 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask);
         bool LoadFromDB(uint32 guid, Map *map);
         void DeleteFromDB();
+
+        void SetOwnerGUID(uint64 owner)
+        {
+            // Owner already found and different than expected owner - remove object from old owner
+            if (owner && GetOwnerGUID() && GetOwnerGUID() != owner)
+            {
+                assert(false);
+            }
+            m_spawnedByDefault = false;                     // all object with owner is despawned after delay
+            SetUInt64Value(OBJECT_FIELD_CREATED_BY, owner);
+        }
+        uint64 GetOwnerGUID() const { return GetUInt64Value(OBJECT_FIELD_CREATED_BY); }
+        Unit* GetOwner(bool inWorld = true) const;
+
+        void SetSpellId(uint32 id)
+        {
+            m_spawnedByDefault = false;                     // all summoned object is despawned after delay
+            m_spellId = id;
+        }
+        uint32 GetSpellId() const { return m_spellId;}
 
         time_t GetRespawnTime() const { return m_respawnTime; }
         time_t GetRespawnTimeEx() const
@@ -617,18 +652,18 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
                 (m_respawnTime == 0 && m_spawnedByDefault);
         }
         bool isSpawnedByDefault() const { return m_spawnedByDefault; }
+        void SetSpawnedByDefault(bool b) { m_spawnedByDefault = b; }
         uint32 GetRespawnDelay() const { return m_respawnDelayTime; }
         void Refresh();
         void Delete();
-        void SetSpellId(uint32 id) { m_spellId = id;}
-        uint32 GetSpellId() const { return m_spellId;}
+        void DeleteObjectWithOwner();
         void getFishLoot(Loot *loot, Player* loot_owner);
         GameobjectTypes GetGoType() const { return GameobjectTypes(GetByteValue(GAMEOBJECT_BYTES_1, 1)); }
         void SetGoType(GameobjectTypes type) { SetByteValue(GAMEOBJECT_BYTES_1, 1, type); }
         GOState GetGoState() const { return GOState(GetByteValue(GAMEOBJECT_BYTES_1, 0)); }
         void SetGoState(GOState state) { SetByteValue(GAMEOBJECT_BYTES_1, 0, state); }
         uint8 GetGoArtKit() const { return GetByteValue(GAMEOBJECT_BYTES_1, 2); }
-        void SetGoArtKit(uint8 artkit) { SetByteValue(GAMEOBJECT_BYTES_1, 2, artkit); }
+        void SetGoArtKit(uint8 artkit);
         uint8 GetGoAnimProgress() const { return GetByteValue(GAMEOBJECT_BYTES_1, 3); }
         void SetGoAnimProgress(uint8 animprogress) { SetByteValue(GAMEOBJECT_BYTES_1, 3, animprogress); }
 
@@ -667,21 +702,27 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void TriggeringLinkedGameObject( uint32 trapEntry, Unit* target);
 
         bool isVisibleForInState(Player const* u, bool inVisibleList) const;
+        bool canDetectTrap(Player const* u, float distance) const;
 
         GameObject* LookupFishingHoleAround(float range);
 
         GridReference<GameObject> &GetGridRef() { return m_gridRef; }
 
-        bool isActiveObject() const { return false; }
+        void CastSpell(Unit *target, uint32 spell);
+        void SendCustomAnim();
+        bool IsInRange(float x, float y, float z, float radius) const;
+        void TakenDamage(uint32 damage);
+        void Rebuild();
+
+        void EventInform(uint32 eventId);
+
         uint64 GetRotation() const { return m_rotation; }
-        void DealSiegeDamage(uint32 damage);
     protected:
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
         uint32      m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer
         LootState   m_lootState;
         bool        m_spawnedByDefault;
-        int32       m_actualHealth;                         // current health state
         time_t      m_cooldownTime;                         // used as internal reaction delay time store (not state change reaction).
                                                             // For traps this: spell casting cooldown, for doors/buttons: reset time.
         std::list<uint32> m_SkillupList;
@@ -691,6 +732,9 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         uint32 m_DBTableGuid;                               ///< For new or temporary gameobjects is 0 for saved it is lowguid
         GameObjectInfo const* m_goInfo;
+        GameObjectData const* m_goData;
+        GameObjectValue * const m_goValue;
+
         uint64 m_rotation;
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);
@@ -698,3 +742,4 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         GridReference<GameObject> m_gridRef;
 };
 #endif
+

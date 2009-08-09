@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOSSERVER_GOSSIP_H
-#define MANGOSSERVER_GOSSIP_H
+#ifndef RIBONCORE_GOSSIP_H
+#define RIBONCORE_GOSSIP_H
 
 #include "Common.h"
 #include "QuestDef.h"
@@ -95,7 +97,7 @@ struct QuestMenuItem
 
 typedef std::vector<QuestMenuItem> QuestMenuItemList;
 
-class MANGOS_DLL_SPEC GossipMenu
+class RIBON_DLL_SPEC GossipMenu
 {
     public:
         GossipMenu();
@@ -163,7 +165,7 @@ class QuestMenu
         QuestMenuItemList m_qItems;
 };
 
-class MANGOS_DLL_SPEC PlayerMenu
+class RIBON_DLL_SPEC PlayerMenu
 {
     private:
         GossipMenu mGossipMenu;
@@ -201,7 +203,8 @@ class MANGOS_DLL_SPEC PlayerMenu
         void SendQuestQueryResponse ( Quest const *pQuest );
         void SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID, bool ActivateAccept);
 
-        void SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID, bool EnbleNext );
+        void SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID, bool EnableNext );
         void SendQuestGiverRequestItems( Quest const *pQuest, uint64 npcGUID, bool Completable, bool CloseOnCancel );
 };
 #endif
+
