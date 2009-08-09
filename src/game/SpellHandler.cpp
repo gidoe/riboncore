@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -27,7 +29,7 @@
 #include "Spell.h"
 #include "ScriptCalls.h"
 #include "Totem.h"
-#include "Vehicle.h"
+#include "TemporarySummon.h"
 #include "SpellAuras.h"
 
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
@@ -50,7 +52,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
     recvPacket >> bagIndex >> slot >> cast_count >> spellid >> item_guid >> glyphIndex >> unk_flags;
 
-    Item *pItem = pUser->GetItemByPos(bagIndex, slot);
+    Item *pItem = pUser->GetUseableItemByPos(bagIndex, slot);
     if(!pItem)
     {
         pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
@@ -134,13 +136,12 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         // send spell error
         if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid))
         {
-            // for implicit area/coord target spells
-            if (IsPointEffectTarget(Targets(spellInfo->EffectImplicitTargetA[0])) ||
-                IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[0])))
+            // for implicit area/coord target spells 
+            if(!targets.getUnitTarget())
                 Spell::SendCastResult(_player,spellInfo,cast_count,SPELL_FAILED_NO_VALID_TARGETS);
-            // for explicit target spells
+            // for explicit target spells 
             else
-                Spell::SendCastResult(_player,spellInfo,cast_count,SPELL_FAILED_BAD_TARGETS);
+                Spell::SendCastResult(_player,spellInfo,cast_count,SPELL_FAILED_BAD_TARGETS);                
         }
         return;
     }
@@ -302,11 +303,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     if(mover != _player && mover->GetTypeId()==TYPEID_PLAYER)
         return;
 
-    // vehicle spells are handled by CMSG_PET_CAST_SPELL,
-    // but player is still able to cast own spells
-    if(_player->GetCharmGUID() && _player->GetCharmGUID() == _player->GetVehicleGUID())
-        mover = _player;
-
     sLog.outDebug("WORLD: got cast spell packet, spellId - %u, cast_count: %u, unk_flags %u, data length = %i",
         spellId, cast_count, unk_flags, (uint32)recvPacket.size());
 
@@ -337,6 +333,16 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         }
     }
 
+    // Client is resending autoshot cast opcode when other spell is casted during shoot rotation
+    // Skip it to prevent "interrupt" message
+    if (IsAutoRepeatRangedSpell(spellInfo) && _player->m_currentSpells[CURRENT_AUTOREPEAT_SPELL]
+        && _player->m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo == spellInfo)
+        return;
+
+    // can't use our own spells when we're in possession of another unit,
+    if(_player->isPossessing())
+        return;
+
     // client provided targets
     SpellCastTargets targets;
     if(!targets.read(&recvPacket,mover))
@@ -361,23 +367,14 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
 {
     CHECK_PACKET_SIZE(recvPacket,5);
 
-    // ignore for remote control state (for player case)
-    Unit* mover = _player->m_mover;
-    if(mover != _player && mover->GetTypeId()==TYPEID_PLAYER)
-        return;
-
     // increments with every CANCEL packet, don't use for now
     uint8 counter;
     uint32 spellId;
     recvPacket >> counter;
     recvPacket >> spellId;
 
-    //FIXME: hack, ignore unexpected client cancel Deadly Throw cast
-    if(spellId==26679)
-        return;
-
-    if(mover->IsNonMeleeSpellCasted(false))
-        mover->InterruptNonMeleeSpells(false,spellId);
+    if(_player->IsNonMeleeSpellCasted(false))
+        _player->InterruptNonMeleeSpells(false,spellId,false);
 }
 
 void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
@@ -391,33 +388,9 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
     if (!spellInfo)
         return;
 
-    if (spellInfo->Attributes & SPELL_ATTR_CANT_CANCEL)
+    // not allow remove non positive spells and spells with attr SPELL_ATTR_CANT_CANCEL
+    if(!IsPositiveSpell(spellId) || (spellInfo->Attributes & SPELL_ATTR_CANT_CANCEL))
         return;
-
-    if(!IsPositiveSpell(spellId))
-    {
-        // ignore for remote control state
-        if (_player->m_mover != _player)
-        {
-            // except own aura spells
-            bool allow = false;
-            for(int k = 0; k < 3; ++k)
-            {
-                if (spellInfo->EffectApplyAuraName[k] == SPELL_AURA_MOD_POSSESS ||
-                    spellInfo->EffectApplyAuraName[k] == SPELL_AURA_MOD_POSSESS_PET)
-                {
-                    allow = true;
-                    break;
-                }
-            }
-
-            // this also include case when aura not found
-            if(!allow)
-                return;
-        }
-        else
-            return;
-    }
 
     // channeled spell case (it currently casted then)
     if (IsChanneledSpell(spellInfo))
@@ -429,16 +402,13 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
     }
 
     // non channeled case
-    _player->RemoveAurasDueToSpellByCancel(spellId);
+    // maybe should only remove one buff when there are multiple?
+    _player->RemoveAurasDueToSpell(spellId, 0, AURA_REMOVE_BY_CANCEL);
 }
 
 void WorldSession::HandlePetCancelAuraOpcode( WorldPacket& recvPacket)
 {
     CHECK_PACKET_SIZE(recvPacket, 8+4);
-
-    // ignore for remote control state
-    if(_player->m_mover != _player)
-        return;
 
     uint64 guid;
     uint32 spellId;
@@ -461,7 +431,7 @@ void WorldSession::HandlePetCancelAuraOpcode( WorldPacket& recvPacket)
         return;
     }
 
-    if(pet != GetPlayer()->GetPet() && pet != GetPlayer()->GetCharm())
+    if(pet != GetPlayer()->GetGuardianPet() && pet != GetPlayer()->GetCharm())
     {
         sLog.outError( "HandlePetCancelAura.Pet %u isn't pet of player %s", uint32(GUID_LOPART(guid)),GetPlayer()->GetName() );
         return;
@@ -487,7 +457,7 @@ void WorldSession::HandleCancelAutoRepeatSpellOpcode( WorldPacket& /*recvPacket*
 {
     // may be better send SMSG_CANCEL_AUTO_REPEAT?
     // cancel and prepare for deleting
-    _player->m_mover->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+    _player->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
 }
 
 /// \todo Complete HandleCancelChanneling function
@@ -513,14 +483,16 @@ void WorldSession::HandleTotemDestroyed( WorldPacket& recvPacket)
 
     recvPacket >> slotId;
 
-    if (slotId >= MAX_TOTEM)
+    ++slotId;
+    if (slotId >= MAX_TOTEM_SLOT)
         return;
 
-    if(!_player->m_TotemSlot[slotId])
+    if(!_player->m_SummonSlot[slotId])
         return;
 
-    Creature* totem = GetPlayer()->GetMap()->GetCreature(_player->m_TotemSlot[slotId]);
-    if(totem && totem->isTotem())
+    Creature* totem = GetPlayer()->GetMap()->GetCreature(_player->m_SummonSlot[slotId]);
+    // Don't unsummon sentry totem
+    if(totem && totem->isTotem() && totem->GetEntry() != SENTRY_TOTEM_ENTRY)
         ((Totem*)totem)->UnSummon();
 }
 
@@ -545,70 +517,99 @@ void WorldSession::HandleSpellClick( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
-    if (_player->isInCombat())                              // client prevent click and set different icon at combat state
-        return;
-
     Creature *unit = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, guid);
-    if (!unit || unit->isInCombat())                        // client prevent click and set different icon at combat state
+
+    if(!unit)
         return;
 
-    if(!_player->IsWithinDistInMap(unit, 10))
-        return;
-
-    // cheater?
-    if(!unit->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_SPELLCLICK))
-        return;
-
-    uint32 vehicleId = 0;
-    CreatureDataAddon const *cainfo = unit->GetCreatureAddon();
-    if(cainfo)
-        vehicleId = cainfo->vehicle_id;
-
-    // handled other (hacky) way to avoid overwriting auras
-    if(vehicleId || unit->isVehicle())
+    SpellClickInfoMapBounds clickPair = objmgr.GetSpellClickInfoMapBounds(unit->GetEntry());
+    for(SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
     {
-        if(!unit->isAlive())
-            return;
-
-        if(_player->GetVehicleGUID())
-            return;
-
-        // create vehicle if no one present and kill the original creature to avoid double, triple etc spawns
-        if(!unit->isVehicle())
+        if(itr->second.IsFitToRequirements(_player))
         {
-            Vehicle *v = _player->SummonVehicle(unit->GetEntry(), unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ(), unit->GetOrientation(), vehicleId);
-            if(!v)
-                return;
+            Unit *caster = (itr->second.castFlags & 0x1) ? (Unit*)_player : (Unit*)unit;
+            Unit *target = (itr->second.castFlags & 0x2) ? (Unit*)_player : (Unit*)unit;
 
-            if(v->GetVehicleFlags() & VF_DESPAWN_NPC)
-            {
-                v->SetSpawnDuration(unit->GetRespawnDelay()*IN_MILISECONDS);
-                unit->setDeathState(JUST_DIED);
-                unit->RemoveCorpse();
-                unit->SetHealth(0);
-            }
-            unit = v;
+            caster->CastSpell(target, itr->second.spellId, true);
         }
+    }
 
-        if(((Vehicle*)unit)->GetVehicleData())
-            if(uint32 r_aura = ((Vehicle*)unit)->GetVehicleData()->req_aura)
-                if(!_player->HasAura(r_aura))
-                    return;
+    if(unit->isVehicle())
+        _player->EnterVehicle((Vehicle*)unit);
+}
 
-        _player->EnterVehicle((Vehicle*)unit, 0);
+void WorldSession::HandleMirrrorImageDataRequest( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: CMSG_GET_MIRRORIMAGE_DATA");
+    CHECK_PACKET_SIZE(recv_data, 8);
+    uint64 guid;
+    recv_data >> guid;
+
+    // Get unit for which data is needed by client
+    Unit *unit = ObjectAccessor::GetObjectInWorld(guid, (Unit*)NULL);
+    if(!unit)
+        return;
+    // Get creator of the unit
+    Unit *creator = ObjectAccessor::GetObjectInWorld(unit->GetCreatorGUID(),(Unit*)NULL);
+    if (!creator)
+        return;
+    WorldPacket data(SMSG_MIRRORIMAGE_DATA, 68);
+    data << (uint64)guid;
+    data << (uint32)creator->GetDisplayId();
+    if (creator->GetTypeId()==TYPEID_PLAYER)
+    {
+        Player * pCreator = (Player *)creator;
+        data << (uint8)pCreator->getRace();
+        data << (uint8)pCreator->getGender();
+        data << (uint8)pCreator->getClass();
+        data << (uint8)pCreator->GetByteValue(PLAYER_BYTES, 0); // skin
+
+        data << (uint8)pCreator->GetByteValue(PLAYER_BYTES, 1); // face
+        data << (uint8)pCreator->GetByteValue(PLAYER_BYTES, 2); // hair
+        data << (uint8)pCreator->GetByteValue(PLAYER_BYTES, 3); // haircolor
+        data << (uint8)pCreator->GetByteValue(PLAYER_BYTES_2, 0); // facialhair
+
+        data << (uint32)0;  // unk
+        static const EquipmentSlots ItemSlots[] = 
+        {
+            EQUIPMENT_SLOT_HEAD,
+            EQUIPMENT_SLOT_SHOULDERS,
+            EQUIPMENT_SLOT_BODY,
+            EQUIPMENT_SLOT_CHEST,
+            EQUIPMENT_SLOT_WAIST,
+            EQUIPMENT_SLOT_LEGS,
+            EQUIPMENT_SLOT_FEET,
+            EQUIPMENT_SLOT_WRISTS,
+            EQUIPMENT_SLOT_HANDS,
+            EQUIPMENT_SLOT_BACK,
+            EQUIPMENT_SLOT_TABARD,
+            EQUIPMENT_SLOT_END
+        };
+        // Display items in visible slots
+        for (EquipmentSlots const* itr = &ItemSlots[0];*itr!=EQUIPMENT_SLOT_END;++itr)
+            if (Item const *item =  pCreator->GetItemByPos(INVENTORY_SLOT_BAG_0, *itr))
+                data << (uint32)item->GetProto()->DisplayInfoID;
+            else
+                data << (uint32)0;
     }
     else
     {
-        SpellClickInfoMapBounds clickPair = objmgr.GetSpellClickInfoMapBounds(unit->GetEntry());
-        for(SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
-        {
-            if (itr->second.IsFitToRequirements(_player))
-            {
-                Unit *caster = (itr->second.castFlags & 0x1) ? (Unit*)_player : (Unit*)unit;
-                Unit *target = (itr->second.castFlags & 0x2) ? (Unit*)_player : (Unit*)unit;
-     
-                caster->CastSpell(target, itr->second.spellId, true);
-            }
-        }
+        // Skip player data for creatures
+        data << (uint32)0;
+        data << (uint32)0;
+        data << (uint32)0;
+        data << (uint32)0;
+        data << (uint32)0;
+        data << (uint32)0;
+        data << (uint32)0;
+        data << (uint32)0;
+        data << (uint32)0;
+        data << (uint32)0;
+        data << (uint32)0;
+        data << (uint32)0;
+        data << (uint32)0;
+        data << (uint32)0;
     }
+    SendPacket( &data );
 }
+
