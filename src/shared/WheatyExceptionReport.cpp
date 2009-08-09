@@ -14,10 +14,10 @@
 #define _NO_CVCONST_H
 #include <dbghelp.h>
 #include "WheatyExceptionReport.h"
+#include "SystemConfig.h"
 #include "revision.h"
-#include "revision_nr.h"
-#define CrashFolder _T("Crashs")
-//#pragma comment(linker, "/defaultlib:dbghelp.lib")
+#define CrashFolder _T("Crashes")
+#define _FULLVERSION (_REVISION)
 
 inline LPTSTR ErrorMessage(DWORD dw)
 {
@@ -375,6 +375,7 @@ void WheatyExceptionReport::printTracesForAllThreads()
   CloseHandle( hThreadSnap );
 }
 
+
 //===========================================================================
 // Open the report file, and write the desired information to it.  Called by
 // WheatyUnhandledExceptionFilter
@@ -386,7 +387,7 @@ PEXCEPTION_POINTERS pExceptionInfo )
     GetLocalTime(&systime);
 
     // Start out with a banner
-    _tprintf(_T("Revision: %s %s %s %s\r\n"), REVISION_DATE, REVISION_TIME, REVISION_NR, REVISION_ID);
+    _tprintf(_T("Revision: %s\r\n"), _FULLVERSION);
     _tprintf(_T("Date %u:%u:%u. Time %u:%u \r\n"), systime.wDay, systime.wMonth, systime.wYear, systime.wHour, systime.wMinute);
     PEXCEPTION_RECORD pExceptionRecord = pExceptionInfo->ExceptionRecord;
 
@@ -601,7 +602,7 @@ struct CSymbolInfoPackage : public SYMBOL_INFO_PACKAGE
 //============================================================
 void WheatyExceptionReport::WriteStackDetails(
 PCONTEXT pContext,
-bool bWriteVariables, HANDLE pThreadHandle)                 // true if local/params should be output
+bool bWriteVariables, HANDLE pThreadHandle)                                      // true if local/params should be output
 {
     _tprintf( _T("\r\nCall stack:\r\n") );
 
@@ -1012,3 +1013,4 @@ int __cdecl WheatyExceptionReport::_tprintf(const TCHAR * format, ...)
 
     return retValue;
 }
+

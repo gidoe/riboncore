@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -69,7 +71,7 @@ bool
 Database::AsyncQuery(Class *object, void (Class::*method)(QueryResult*), const char *sql)
 {
     ASYNC_QUERY_BODY(sql, itr)
-    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback<Class>(object, method), itr->second));
+    return m_threadBody->Delay(new SqlQuery(sql, new Ribon::QueryCallback<Class>(object, method), itr->second));
 }
 
 template<class Class, typename ParamType1>
@@ -77,7 +79,7 @@ bool
 Database::AsyncQuery(Class *object, void (Class::*method)(QueryResult*, ParamType1), ParamType1 param1, const char *sql)
 {
     ASYNC_QUERY_BODY(sql, itr)
-    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback<Class, ParamType1>(object, method, (QueryResult*)NULL, param1), itr->second));
+    return m_threadBody->Delay(new SqlQuery(sql, new Ribon::QueryCallback<Class, ParamType1>(object, method, (QueryResult*)NULL, param1), itr->second));
 }
 
 template<class Class, typename ParamType1, typename ParamType2>
@@ -85,7 +87,7 @@ bool
 Database::AsyncQuery(Class *object, void (Class::*method)(QueryResult*, ParamType1, ParamType2), ParamType1 param1, ParamType2 param2, const char *sql)
 {
     ASYNC_QUERY_BODY(sql, itr)
-    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback<Class, ParamType1, ParamType2>(object, method, (QueryResult*)NULL, param1, param2), itr->second));
+    return m_threadBody->Delay(new SqlQuery(sql, new Ribon::QueryCallback<Class, ParamType1, ParamType2>(object, method, (QueryResult*)NULL, param1, param2), itr->second));
 }
 
 template<class Class, typename ParamType1, typename ParamType2, typename ParamType3>
@@ -93,7 +95,7 @@ bool
 Database::AsyncQuery(Class *object, void (Class::*method)(QueryResult*, ParamType1, ParamType2, ParamType3), ParamType1 param1, ParamType2 param2, ParamType3 param3, const char *sql)
 {
     ASYNC_QUERY_BODY(sql, itr)
-    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback<Class, ParamType1, ParamType2, ParamType3>(object, method, (QueryResult*)NULL, param1, param2, param3), itr->second));
+    return m_threadBody->Delay(new SqlQuery(sql, new Ribon::QueryCallback<Class, ParamType1, ParamType2, ParamType3>(object, method, (QueryResult*)NULL, param1, param2, param3), itr->second));
 }
 
 // -- Query / static --
@@ -103,7 +105,7 @@ bool
 Database::AsyncQuery(void (*method)(QueryResult*, ParamType1), ParamType1 param1, const char *sql)
 {
     ASYNC_QUERY_BODY(sql, itr)
-    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::SQueryCallback<ParamType1>(method, (QueryResult*)NULL, param1), itr->second));
+    return m_threadBody->Delay(new SqlQuery(sql, new Ribon::SQueryCallback<ParamType1>(method, (QueryResult*)NULL, param1), itr->second));
 }
 
 template<typename ParamType1, typename ParamType2>
@@ -111,7 +113,7 @@ bool
 Database::AsyncQuery(void (*method)(QueryResult*, ParamType1, ParamType2), ParamType1 param1, ParamType2 param2, const char *sql)
 {
     ASYNC_QUERY_BODY(sql, itr)
-    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::SQueryCallback<ParamType1, ParamType2>(method, (QueryResult*)NULL, param1, param2), itr->second));
+    return m_threadBody->Delay(new SqlQuery(sql, new Ribon::SQueryCallback<ParamType1, ParamType2>(method, (QueryResult*)NULL, param1, param2), itr->second));
 }
 
 template<typename ParamType1, typename ParamType2, typename ParamType3>
@@ -119,7 +121,7 @@ bool
 Database::AsyncQuery(void (*method)(QueryResult*, ParamType1, ParamType2, ParamType3), ParamType1 param1, ParamType2 param2, ParamType3 param3, const char *sql)
 {
     ASYNC_QUERY_BODY(sql, itr)
-    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::SQueryCallback<ParamType1, ParamType2, ParamType3>(method, (QueryResult*)NULL, param1, param2, param3), itr->second));
+    return m_threadBody->Delay(new SqlQuery(sql, new Ribon::SQueryCallback<ParamType1, ParamType2, ParamType3>(method, (QueryResult*)NULL, param1, param2, param3), itr->second));
 }
 
 // -- PQuery / member --
@@ -189,7 +191,7 @@ bool
 Database::DelayQueryHolder(Class *object, void (Class::*method)(QueryResult*, SqlQueryHolder*), SqlQueryHolder *holder)
 {
     ASYNC_DELAYHOLDER_BODY(holder, itr)
-    return holder->Execute(new MaNGOS::QueryCallback<Class, SqlQueryHolder*>(object, method, (QueryResult*)NULL, holder), m_threadBody, itr->second);
+    return holder->Execute(new Ribon::QueryCallback<Class, SqlQueryHolder*>(object, method, (QueryResult*)NULL, holder), m_threadBody, itr->second);
 }
 
 template<class Class, typename ParamType1>
@@ -197,9 +199,10 @@ bool
 Database::DelayQueryHolder(Class *object, void (Class::*method)(QueryResult*, SqlQueryHolder*, ParamType1), SqlQueryHolder *holder, ParamType1 param1)
 {
     ASYNC_DELAYHOLDER_BODY(holder, itr)
-    return holder->Execute(new MaNGOS::QueryCallback<Class, SqlQueryHolder*, ParamType1>(object, method, (QueryResult*)NULL, holder, param1), m_threadBody, itr->second);
+    return holder->Execute(new Ribon::QueryCallback<Class, SqlQueryHolder*, ParamType1>(object, method, (QueryResult*)NULL, holder, param1), m_threadBody, itr->second);
 }
 
 #undef ASYNC_QUERY_BODY
 #undef ASYNC_PQUERY_BODY
 #undef ASYNC_DELAYHOLDER_BODY
+

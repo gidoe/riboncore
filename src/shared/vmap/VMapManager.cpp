@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "VMapManager.h"
@@ -64,7 +66,7 @@ namespace VMAP
 
     //=========================================================
 
-    Vector3 VMapManager::convertPositionToMangosRep(float x, float y, float z) const
+    Vector3 VMapManager::convertPositionToRibonRep(float x, float y, float z) const
     {
         float pos[3];
         pos[0] = z;
@@ -428,7 +430,7 @@ namespace VMAP
                 Vector3 resultPos;
                 MapTree* mapTree = iInstanceMapTrees.get(pMapId);
                 result = mapTree->getObjectHitPos(pos1, pos2, resultPos, pModifyDist);
-                resultPos = convertPositionToMangosRep(resultPos.x,resultPos.y,resultPos.z);
+                resultPos = convertPositionToRibonRep(resultPos.x,resultPos.y,resultPos.z);
                 rx = resultPos.x;
                 ry = resultPos.y;
                 rz = resultPos.z;
@@ -456,27 +458,6 @@ namespace VMAP
             Vector3 pos = convertPositionToInternalRep(x,y,z);
             MapTree* mapTree = iInstanceMapTrees.get(pMapId);
             height = mapTree->getHeight(pos);
-            if(!(height < inf()))
-            {
-                height = VMAP_INVALID_HEIGHT_VALUE;         //no height
-            }
-#ifdef _VMAP_LOG_DEBUG
-            Command c = Command();
-            c.fillTestHeightCmd(pMapId,Vector3(x,y,z),height);
-            iCommandLogger.appendCmd(c);
-#endif
-        }
-        return(height);
-    }
-
-    float VMapManager::getHeight(unsigned int pMapId, float x, float y, float z, float RayLenght)
-    {
-        float height = VMAP_INVALID_HEIGHT_VALUE;           //no height
-        if(isHeightCalcEnabled() && iInstanceMapTrees.containsKey(pMapId))
-        {
-            Vector3 pPos = convertPositionToInternalRep(x,y,z);
-            MapTree* mapTree = iInstanceMapTrees.get(pMapId);
-            height = mapTree->getHeight(pPos,RayLenght);
             if(!(height < inf()))
             {
                 height = VMAP_INVALID_HEIGHT_VALUE;         //no height
@@ -666,19 +647,6 @@ namespace VMAP
         return(height);
     }
 
-    float MapTree::getHeight(const Vector3& pPos, float RayLenght)
-    {
-        float height = inf();
-        Vector3 dir = Vector3(0,-1,0);
-        Ray ray = Ray::fromOriginAndDirection(pPos, dir);   // direction with length of 1
-        float dist = getIntersectionTime(ray, RayLenght, false);
-        if(dist < inf())
-        {
-            height = (pPos + dir * dist).y;
-        }
-        return(height);
-    }
-
     //=========================================================
 
     bool MapTree::PrepareTree()
@@ -806,3 +774,4 @@ namespace VMAP
     //=========================================================
     //=========================================================
 }
+

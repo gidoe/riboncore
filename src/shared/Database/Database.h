@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -32,14 +34,14 @@ typedef UNORDERED_MAP<ACE_Based::Thread* , SqlResultQueue*> QueryQueues;
 
 #define MAX_QUERY_LEN   32*1024
 
-class MANGOS_DLL_SPEC Database
+class RIBON_DLL_SPEC Database
 {
     protected:
         Database() : m_threadBody(NULL), m_delayThread(NULL) {};
 
         TransactionQueues m_tranQueues;                     ///< Transaction queues from diff. threads
         QueryQueues m_queryQueues;                          ///< Query queues from diff threads
-        SqlDelayThread* m_threadBody;                       ///< Pointer to delay sql executer
+        SqlDelayThread* m_threadBody;                       ///< Pointer to delay sql executer (owned by m_delayThread)
         ACE_Based::Thread* m_delayThread;                   ///< Pointer to executer thread
 
     public:
@@ -100,7 +102,7 @@ class MANGOS_DLL_SPEC Database
         virtual bool DirectExecute(const char* sql) = 0;
         bool DirectPExecute(const char *format,...) ATTR_PRINTF(2,3);
 
-        // Writes SQL commands to a LOG file (see mangosd.conf "LogSQL")
+        // Writes SQL commands to a LOG file (see Ribond.conf "LogSQL")
         bool PExecuteLog(const char *format,...) ATTR_PRINTF(2,3);
 
         virtual bool BeginTransaction()                     // nothing do if DB not support transactions
@@ -134,3 +136,4 @@ class MANGOS_DLL_SPEC Database
         std::string m_logsDir;
 };
 #endif
+

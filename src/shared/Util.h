@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef _UTIL_H
@@ -41,24 +43,24 @@ inline uint32 secsToTimeBitFields(time_t secs)
 }
 
 /* Return a random number in the range min..max; (max-min) must be smaller than 32768. */
-MANGOS_DLL_SPEC int32 irand(int32 min, int32 max);
+RIBON_DLL_SPEC int32 irand(int32 min, int32 max);
 
 /* Return a random number in the range min..max (inclusive). For reliable results, the difference
 * between max and min should be less than RAND32_MAX. */
-MANGOS_DLL_SPEC uint32 urand(uint32 min, uint32 max);
+RIBON_DLL_SPEC uint32 urand(uint32 min, uint32 max);
 
 /* Return a random number in the range 0 .. RAND32_MAX. */
-MANGOS_DLL_SPEC int32 rand32();
+RIBON_DLL_SPEC int32 rand32();
 
 /* Return a random double from 0.0 to 1.0 (exclusive). Floats support only 7 valid decimal digits.
  * A double supports up to 15 valid decimal digits and is used internally (RAND32_MAX has 10 digits).
  * With an FPU, there is usually no difference in performance between float and double. */
-MANGOS_DLL_SPEC double rand_norm(void);
+RIBON_DLL_SPEC double rand_norm(void);
 
 /* Return a random double from 0.0 to 99.9999999999999. Floats support only 7 valid decimal digits.
  * A double supports up to 15 valid decimal digits and is used internaly (RAND32_MAX has 10 digits).
  * With an FPU, there is usually no difference in performance between float and double. */
-MANGOS_DLL_SPEC double rand_chance(void);
+RIBON_DLL_SPEC double rand_chance(void);
 
 /* Return true if a random roll fits in the specified chance (range 0-100). */
 inline bool roll_chance_f(float chance)
@@ -313,4 +315,245 @@ bool Utf8FitTo(const std::string& str, std::wstring search);
 bool IsIPAddress(char const* ipaddress);
 uint32 CreatePIDFile(const std::string& filename);
 
+#endif
+
+//handler for operations on large flags
+#ifndef _FLAG96
+#define _FLAG96
+
+#ifndef PAIR64_HIPART
+#define PAIR64_HIPART(x)   (uint32)((uint64(x) >> 32) & UI64LIT(0x00000000FFFFFFFF))
+#define PAIR64_LOPART(x)   (uint32)(uint64(x)         & UI64LIT(0x00000000FFFFFFFF))
+#endif
+
+class flag96
+{
+private:
+    uint32 part[3];
+public:
+    flag96(uint32 p1=0,uint32 p2=0,uint32 p3=0)
+    {
+        part[0]=p1;
+        part[1]=p2;
+        part[2]=p3;
+    }
+
+    flag96(uint64 p1, uint32 p2)
+    {
+        part[0]=PAIR64_LOPART(p1);
+        part[1]=PAIR64_HIPART(p1);
+        part[2]=p2;
+    }
+
+    inline bool IsEqual(uint32 p1=0, uint32 p2=0, uint32 p3=0) const
+    {
+        return (
+            part[0]==p1 &&
+            part[1]==p2 &&
+            part[2]==p3);
+    };
+
+    inline bool HasFlag(uint32 p1=0, uint32 p2=0, uint32 p3=0) const
+    {
+        return (
+            part[0]&p1 ||
+            part[1]&p2 ||
+            part[2]&p3);
+    };
+
+    inline void Set(uint32 p1=0, uint32 p2=0, uint32 p3=0)
+    {
+        part[0]=p1;
+        part[1]=p2;
+        part[2]=p3;
+    };
+
+    template<class type>
+    inline bool operator < (type & right)
+    {
+        for (uint8 i=3;i>0;i--)
+        {
+            if (part[i-1]<right.part[i-1])
+                return 1;
+            else if (part[i-1]>right.part[i-1])
+                return 0;
+        }
+        return 0;
+    };
+
+    template<class type>
+    inline bool operator < (type & right) const
+    {
+        for (uint8 i=3;i>0;i--)
+        {
+            if (part[i-1]<right.part[i-1])
+                return 1;
+            else if (part[i-1]>right.part[i-1])
+                return 0;
+        }
+        return 0;
+    };
+
+    template<class type>
+    inline bool operator != (type & right)
+    {
+        if (part[0]!=right.part[0]
+            || part[1]!=right.part[1]
+            || part[2]!=right.part[2])
+                return true;
+        return false;
+    }
+
+    template<class type>
+    inline bool operator != (type & right) const
+    {
+        if (part[0]!=right.part[0]
+            || part[1]!=right.part[1]
+            || part[2]!=right.part[2])
+                return true;
+        return false;
+    };
+
+    template<class type>
+    inline bool operator == (type & right)
+    {
+        if (part[0]!=right.part[0]
+            || part[1]!=right.part[1]
+            || part[2]!=right.part[2])
+                return false;
+        return true;
+    };
+
+    template<class type>
+    inline bool operator == (type & right) const
+    {
+        if (part[0]!=right.part[0]
+            || part[1]!=right.part[1]
+            || part[2]!=right.part[2])
+                return false;
+        return true;
+    };
+
+    template<class type>
+    inline void operator = (type & right)
+    {
+        part[0]=right.part[0];
+        part[1]=right.part[1];
+        part[2]=right.part[2];
+    };
+
+    template<class type>
+    inline flag96 operator & (type & right)
+    {
+        flag96 ret(part[0] & right.part[0],part[1] & right.part[1],part[2] & right.part[2]);
+        return
+            ret;
+    };
+    template<class type>
+    inline flag96 operator & (type & right) const
+    {
+        flag96 ret(part[0] & right.part[0],part[1] & right.part[1],part[2] & right.part[2]);
+        return
+            ret;
+    };
+
+    template<class type>
+    inline void operator &= (type & right)
+    {
+        *this=*this & right;
+    };
+
+    template<class type>
+    inline flag96 operator | (type & right)
+    {
+        flag96 ret(part[0] | right.part[0],part[1] | right.part[1],part[2] | right.part[2]);
+        return
+            ret;
+    };
+
+    template<class type>
+    inline flag96 operator | (type & right) const
+    {
+        flag96 ret(part[0] | right.part[0],part[1] | right.part[1],part[2] | right.part[2]);
+        return
+            ret;
+    };
+
+    template<class type>
+    inline void operator |= (type & right)
+    {
+        *this=*this | right;
+    };
+
+    inline void operator ~ ()
+    {
+        part[2]=~part[2];
+        part[1]=~part[1];
+        part[0]=~part[0];
+    };
+
+    template<class type>
+    inline flag96 operator ^ (type & right)
+    {
+        flag96 ret(part[0] ^ right.part[0],part[1] ^ right.part[1],part[2] ^ right.part[2]);
+        return
+            ret;
+    };
+
+    template<class type>
+    inline flag96 operator ^ (type & right) const
+    {
+        flag96 ret(part[0] ^ right.part[0],part[1] ^ right.part[1],part[2] ^ right.part[2]);
+        return
+            ret;
+    };
+
+    template<class type>
+    inline void operator ^= (type & right)
+    {
+        *this=*this^right;
+    };
+
+    inline operator bool() const
+    {
+        return(
+            part[0] != 0 ||
+            part[1] != 0 ||
+            part[2] != 0);
+    };
+
+    inline operator bool()
+    {
+        return(
+            part[0] != 0 ||
+            part[1] != 0 ||
+            part[2] != 0);
+    };
+
+    inline bool operator ! () const
+    {
+        return(
+            part[0] == 0 &&
+            part[1] == 0 &&
+            part[2] == 0);
+    };
+
+    inline bool operator ! ()
+    {
+        return(
+            part[0] == 0 &&
+            part[1] == 0 &&
+            part[2] == 0);
+    };
+
+    inline uint32 & operator[](uint8 el)
+    {
+        return (part[el]);
+    };
+
+    inline const uint32 & operator[](uint8 el) const
+    {
+        return (part[el]);
+    };
+};
 #endif

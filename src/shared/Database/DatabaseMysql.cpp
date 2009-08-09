@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -151,7 +153,7 @@ bool DatabaseMysql::Initialize(const char *infoString)
         // by default. In crash case you can lose data!!!
         // So better to turn this off
         // ---
-        // This is wrong since mangos use transactions,
+        // This is wrong since Ribon use transactions,
         // autocommit is turned of during it.
         // Setting it to on makes atomic updates work
         if (!mysql_autocommit(mMysql, 1))
@@ -165,8 +167,7 @@ bool DatabaseMysql::Initialize(const char *infoString)
         PExecute("SET NAMES `utf8`");
         PExecute("SET CHARACTER SET `utf8`");
 
-#if MYSQL_VERSION_ID >= 50003
-//  #if MYSQL_VERSIOB_ID >= 50013
+    #if MYSQL_VERSION_ID >= 50003
         my_bool my_true = (my_bool)1;
         if (mysql_options(mMysql, MYSQL_OPT_RECONNECT, &my_true))
         {
@@ -174,13 +175,12 @@ bool DatabaseMysql::Initialize(const char *infoString)
         }
         else
         {
-            sLog.outDetail("Successfully turned on MYSQL_OPT_RECONNECT.");
+           sLog.outDetail("Successfully turned on MYSQL_OPT_RECONNECT.");
         }
-#else
-        sLog.outDetail("Your mySQL client lib version does not support reconnecting after a timeout.");
-        sLog.outDetail("If this causes you any trouble we advice you to upgrade");
-        sLog.outDetail("your mySQL client libs to at least mySQL 6.0.9 to resolve this problem.");
-#endif
+    #else
+        #warning "Your mySQL client lib version does not support reconnecting after a timeout.\nIf this causes you any trouble we advice you to upgrade your mySQL client libs to at least mySQL 5.0.13 to resolve this problem."
+    #endif
+
         return true;
     }
     else
@@ -211,7 +211,7 @@ bool DatabaseMysql::_Query(const char *sql, MYSQL_RES **pResult, MYSQL_FIELD **p
         }
         else
         {
-            #ifdef MANGOS_DEBUG
+            #ifdef RIBON_DEBUG
             sLog.outDebug("[%u ms] SQL: %s", getMSTimeDiff(_s,getMSTime()), sql );
             #endif
         }
@@ -316,7 +316,7 @@ bool DatabaseMysql::DirectExecute(const char* sql)
         }
         else
         {
-            #ifdef MANGOS_DEBUG
+            #ifdef RIBON_DEBUG
             sLog.outDebug("[%u ms] SQL: %s", getMSTimeDiff(_s,getMSTime()), sql );
             #endif
         }
@@ -440,8 +440,8 @@ void DatabaseMysql::InitDelayThread()
     assert(!m_delayThread);
 
     //New delay thread for delay execute
-    m_threadBody = new MySQLDelayThread(this);
-    m_delayThread = new ACE_Based::Thread(*m_threadBody);
+    m_threadBody = new MySQLDelayThread(this);              // will deleted at m_delayThread delete
+    m_delayThread = new ACE_Based::Thread(m_threadBody);
 }
 
 void DatabaseMysql::HaltDelayThread()
@@ -455,3 +455,4 @@ void DatabaseMysql::HaltDelayThread()
     m_threadBody = NULL;
 }
 #endif
+

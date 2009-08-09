@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "Util.h"
@@ -26,12 +28,14 @@
 typedef ACE_TSS<MTRand> MTRandTSS;
 static MTRandTSS mtRand;
 
+#ifdef MULTI_THREAD_MAP
+
 int32 irand (int32 min, int32 max)
 {
     int32 result;
 #pragma omp critical (mtrand)
 {
-    result = mtRand->randInt (max-min) + min;
+    result = int32 (mtRand->randInt (max - min)) + min;
 }
   return result;
 }
@@ -41,40 +45,69 @@ uint32 urand (uint32 min, uint32 max)
     uint32 result;
 #pragma omp critical (mtrand)
 {
-  result =  mtRand->randInt (max - min) + min;
+    result = mtRand->randInt (max - min) + min;
 }
   return result;
 }
 
 int32 rand32 ()
 {
-   int32 result;
+    int32 result;
 #pragma omp critical (mtrand)
 {
-  result =  mtRand->randInt ();
+    result = mtRand->randInt ();
 }
   return result;
 }
 
 double rand_norm(void)
 {
-   double result;
+    double result;
 #pragma omp critical (mtrand)
 {
-  result = mtRand->randExc ();
+    result = mtRand->randExc ();
 }
   return result;
 }
 
 double rand_chance (void)
 {
-   double result;
+    double result;
 #pragma omp critical (mtrand)
 {
-  result = mtRand->randExc (100.0);
+    result = mtRand->randExc (100.0);
 }
   return result;
 }
+
+#else
+
+int32 irand (int32 min, int32 max)
+{
+    return int32 (mtRand->randInt (max - min)) + min;
+}
+
+uint32 urand (uint32 min, uint32 max)
+{
+    return mtRand->randInt (max - min) + min;
+}
+
+int32 rand32 ()
+{
+    return mtRand->randInt ();
+}
+
+double rand_norm(void)
+{
+    return mtRand->randExc ();
+}
+
+double rand_chance (void)
+{
+    return mtRand->randExc (100.0);
+}
+
+#endif
 
 Tokens StrSplit(const std::string &src, const std::string &sep)
 {
@@ -98,7 +131,7 @@ Tokens StrSplit(const std::string &src, const std::string &sep)
 
 void stripLineInvisibleChars(std::string &str)
 {
-    static std::string invChars = " \t\7";
+    static std::string invChars = " \t\7\n";
 
     size_t wpos = 0;
 
@@ -444,3 +477,4 @@ bool Utf8FitTo(const std::string& str, std::wstring search)
 
     return true;
 }
+

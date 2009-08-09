@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Trinity <http://www.trinitycore.org/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifdef DO_POSTGRESQL
@@ -139,7 +141,7 @@ bool DatabasePostgre::_Query(const char *sql, PGresult** pResult, uint64* pRowCo
     }
     else
     {
-        #ifdef MANGOS_DEBUG
+        #ifdef TRINITY_DEBUG
         sLog.outDebug("[%u ms] SQL: %s", getMSTime() - _s, sql );
         #endif
     }
@@ -240,7 +242,7 @@ bool DatabasePostgre::DirectExecute(const char* sql)
         }
         else
         {
-            #ifdef MANGOS_DEBUG
+            #ifdef TRINITY_DEBUG
             sLog.outDebug("[%u ms] SQL: %s", getMSTime() - _s, sql );
             #endif
         }
@@ -364,8 +366,8 @@ void DatabasePostgre::InitDelayThread()
     assert(!m_delayThread);
 
     //New delay thread for delay execute
-    m_threadBody = new PGSQLDelayThread(this);
-    m_delayThread = new ACE_Based::Thread(*m_threadBody);
+    m_threadBody = new PGSQLDelayThread(this);             // Will be deleted on m_delayThread delete
+    m_delayThread = new ACE_Based::Thread(m_threadBody);
 }
 
 void DatabasePostgre::HaltDelayThread()
@@ -379,3 +381,4 @@ void DatabasePostgre::HaltDelayThread()
     m_threadBody = NULL;
 }
 #endif
+

@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -80,10 +82,10 @@ class SqlQuery : public SqlOperation
 {
     private:
         const char *m_sql;
-        MaNGOS::IQueryCallback * m_callback;
+        Ribon::IQueryCallback * m_callback;
         SqlResultQueue * m_queue;
     public:
-        SqlQuery(const char *sql, MaNGOS::IQueryCallback * callback, SqlResultQueue * queue)
+        SqlQuery(const char *sql, Ribon::IQueryCallback * callback, SqlResultQueue * queue)
             : m_sql(strdup(sql)), m_callback(callback), m_queue(queue) {}
         ~SqlQuery() { void* tofree = const_cast<char*>(m_sql); free(tofree); }
         void Execute(Database *db);
@@ -103,18 +105,19 @@ class SqlQueryHolder
         void SetSize(size_t size);
         QueryResult* GetResult(size_t index);
         void SetResult(size_t index, QueryResult *result);
-        bool Execute(MaNGOS::IQueryCallback * callback, SqlDelayThread *thread, SqlResultQueue *queue);
+        bool Execute(Ribon::IQueryCallback * callback, SqlDelayThread *thread, SqlResultQueue *queue);
 };
 
 class SqlQueryHolderEx : public SqlOperation
 {
     private:
         SqlQueryHolder * m_holder;
-        MaNGOS::IQueryCallback * m_callback;
+        Ribon::IQueryCallback * m_callback;
         SqlResultQueue * m_queue;
     public:
-        SqlQueryHolderEx(SqlQueryHolder *holder, MaNGOS::IQueryCallback * callback, SqlResultQueue * queue)
+        SqlQueryHolderEx(SqlQueryHolder *holder, Ribon::IQueryCallback * callback, SqlResultQueue * queue)
             : m_holder(holder), m_callback(callback), m_queue(queue) {}
         void Execute(Database *db);
 };
 #endif                                                      //__SQLOPERATIONS_H
+

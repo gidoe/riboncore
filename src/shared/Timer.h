@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,16 +10,16 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOS_TIMER_H
-#define MANGOS_TIMER_H
+#ifndef RIBON_TIMER_H
+#define RIBON_TIMER_H
 
 #include "Platform/CompilerDefs.h"
 
@@ -93,27 +95,5 @@ struct TimeTrackerSmall
     int32 i_expiryTime;
 };
 
-struct PeriodicTimer
-{
-    PeriodicTimer(int32 period, int32 start_time) :
-        i_expirity(start_time), i_period(period) {}
-        
-    bool Update(const uint32 &diff)
-    {
-        if((i_expirity -= diff) > 0)
-            return false;
-
-        i_expirity += i_period;
-        return true;
-    }
-
-	void SetPeriodic(int32 period, int32 start_time)
-	{
-        i_expirity=start_time, i_period=period;
-	}
-
-    int32 i_period;
-    int32 i_expirity;
-};
-
 #endif
+

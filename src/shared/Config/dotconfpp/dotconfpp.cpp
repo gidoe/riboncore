@@ -67,13 +67,13 @@ DOTCONFDocument::DOTCONFDocument(DOTCONFDocument::CaseSensitive caseSensitivity)
 
 DOTCONFDocument::~DOTCONFDocument()
 {
-    for(std::list<DOTCONFDocumentNode*>::iterator i = nodeTree.begin(); i != nodeTree.end(); i++){
+    for(std::list<DOTCONFDocumentNode*>::iterator i = nodeTree.begin(); i != nodeTree.end(); ++i){
         delete(*i);
     }
-    for(std::list<char*>::iterator i = requiredOptions.begin(); i != requiredOptions.end(); i++){
+    for(std::list<char*>::iterator i = requiredOptions.begin(); i != requiredOptions.end(); ++i){
         free(*i);
     }
-    for(std::list<char*>::iterator i = processedFiles.begin(); i != processedFiles.end(); i++){
+    for(std::list<char*>::iterator i = processedFiles.begin(); i != processedFiles.end(); ++i){
         free(*i);
     }
     free(fileName);
@@ -114,7 +114,7 @@ int DOTCONFDocument::cleanupLine(char * line)
         }
 
         // Allowing \" in there causes problems with directory paths
-        // like "C:\MaNGOS\"
+        // like "C:\Ribon\"
         //if(*line == '\\' && (*(line+1) == '"' || *(line+1) == '\'')){
         if(*line == '\\' && (*(line+1) == '\'')) {
             *bg++ = *(line+1);
@@ -189,7 +189,7 @@ int DOTCONFDocument::parseLine()
     DOTCONFDocumentNode * tagNode = NULL;
     bool newNode = false;
 
-    for(std::list<char*>::iterator i = words.begin(); i != words.end(); i++) {
+    for(std::list<char*>::iterator i = words.begin(); i != words.end(); ++i) {
         word = *i;
 
         if(*word == '<'){
@@ -307,7 +307,7 @@ int DOTCONFDocument::checkConfig(const std::list<DOTCONFDocumentNode*>::iterator
 
     DOTCONFDocumentNode * tagNode = NULL;
     int vi = 0;
-    for(std::list<DOTCONFDocumentNode*>::iterator i = from; i != nodeTree.end(); i++){
+    for(std::list<DOTCONFDocumentNode*>::iterator i = from; i != nodeTree.end(); ++i){
         tagNode = *i;
         if(!tagNode->closed){
             error(tagNode->lineNum, tagNode->fileName, "unclosed tag %s", tagNode->name);
@@ -371,7 +371,7 @@ int DOTCONFDocument::setContent(const char * _fileName)
         std::list<DOTCONFDocumentNode*>::iterator from;
         DOTCONFDocumentNode * tagNode = NULL;
         int vi = 0;
-        for(std::list<DOTCONFDocumentNode*>::iterator i = nodeTree.begin(); i!=nodeTree.end(); i++){
+        for(std::list<DOTCONFDocumentNode*>::iterator i = nodeTree.begin(); i!=nodeTree.end(); ++i){
             tagNode = *i;
             if(!cmp_func("DOTCONFPPIncludeFile", tagNode->name)){
                 vi = 0;
@@ -386,7 +386,7 @@ int DOTCONFDocument::setContent(const char * _fileName)
                     }
 
                     bool processed = false;
-                    for(std::list<char*>::const_iterator itInode = processedFiles.begin(); itInode != processedFiles.end(); itInode++){
+                    for(std::list<char*>::const_iterator itInode = processedFiles.begin(); itInode != processedFiles.end(); ++itInode){
                         if(!strcmp(*itInode, realpathBuf)){
                             processed = true;
                             break;
@@ -429,9 +429,9 @@ int DOTCONFDocument::setContent(const char * _fileName)
 
 int DOTCONFDocument::checkRequiredOptions()
 {
-    for(std::list<char*>::const_iterator ci = requiredOptions.begin(); ci != requiredOptions.end(); ci++){
+    for(std::list<char*>::const_iterator ci = requiredOptions.begin(); ci != requiredOptions.end(); ++ci){
         bool matched = false;
-        for(std::list<DOTCONFDocumentNode*>::iterator i = nodeTree.begin(); i!=nodeTree.end(); i++){
+        for(std::list<DOTCONFDocumentNode*>::iterator i = nodeTree.begin(); i!=nodeTree.end(); ++i){
             if(!cmp_func((*i)->name, *ci)){
                 matched = true;
                 break;
@@ -579,7 +579,7 @@ const DOTCONFDocumentNode * DOTCONFDocument::findNode(const char * nodeName, con
         if( i != nodeTree.end() ) ++i;
     }
 
-    for(; i!=nodeTree.end(); i++){
+    for(; i!=nodeTree.end(); ++i){
 
     if((*i)->parentNode != parentNode){
             continue;
@@ -598,3 +598,4 @@ void DOTCONFDocument::setRequiredOptionNames(const char ** requiredOptionNames)
         ++requiredOptionNames;
     }
 }
+

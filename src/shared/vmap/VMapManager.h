@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef _VMAPMANAGER_H
@@ -88,14 +90,14 @@ namespace VMAP
 
         private:
             float getIntersectionTime(const G3D::Ray& pRay, float pMaxDist, bool pStopAtFirstHit);
-            bool isAlreadyLoaded(const std::string& pName) const { return(iLoadedModelContainer.containsKey(pName)); }
+            bool isAlreadyLoaded(const std::string& pName) { return(iLoadedModelContainer.containsKey(pName)); }
             void setLoadedMapTile(unsigned int pTileIdent) { iLoadedMapTiles.set(pTileIdent, true); }
             void removeLoadedMapTile(unsigned int pTileIdent) { iLoadedMapTiles.remove(pTileIdent); }
-            bool hasLoadedMapTiles() const { return iLoadedMapTiles.size() > 0; }
-            bool containsLoadedMapTile(unsigned int pTileIdent) const { return(iLoadedMapTiles.containsKey(pTileIdent)); }
+            bool hasLoadedMapTiles() { return(iLoadedMapTiles.size() > 0); }
+            bool containsLoadedMapTile(unsigned int pTileIdent) { return(iLoadedMapTiles.containsKey(pTileIdent)); }
         public:
             ManagedModelContainer *getModelContainer(const std::string& pName) { return(iLoadedModelContainer.get(pName)); }
-            bool hasDirFile(const std::string& pDirName) const { return(iLoadedDirFiles.containsKey(pDirName)); }
+            const bool hasDirFile(const std::string& pDirName) const { return(iLoadedDirFiles.containsKey(pDirName)); }
             FilesInDir& getDirFiles(const std::string& pDirName) const { return(iLoadedDirFiles.get(pDirName)); }
         public:
             MapTree(const char *pBasePath);
@@ -104,7 +106,6 @@ namespace VMAP
             bool isInLineOfSight(const G3D::Vector3& pos1, const G3D::Vector3& pos2);
             bool getObjectHitPos(const G3D::Vector3& pos1, const G3D::Vector3& pos2, G3D::Vector3& pResultHitPos, float pModifyDist);
             float getHeight(const G3D::Vector3& pPos);
-            float getHeight(const G3D::Vector3& pPos, float RayLenght);
 
             bool PrepareTree();
             bool loadMap(const std::string& pDirFileName, unsigned int pMapTileIdent);
@@ -112,7 +113,7 @@ namespace VMAP
             void unloadMap(const std::string& dirFileName, unsigned int pMapTileIdent, bool pForce=false);
 
             void getModelContainer(G3D::Array<ModelContainer *>& pArray ) { iTree->getMembers(pArray); }
-            void addDirFile(const std::string& pDirName, const FilesInDir& pFilesInDir) { iLoadedDirFiles.set(pDirName, pFilesInDir); }
+            const void addDirFile(const std::string& pDirName, const FilesInDir& pFilesInDir) { iLoadedDirFiles.set(pDirName, pFilesInDir); }
             size_t size() { return(iTree->size()); }
     };
 
@@ -144,7 +145,7 @@ namespace VMAP
         public:
             // public for debug
             G3D::Vector3 convertPositionToInternalRep(float x, float y, float z) const;
-            G3D::Vector3 convertPositionToMangosRep(float x, float y, float z) const;
+            G3D::Vector3 convertPositionToRibonRep(float x, float y, float z) const;
             std::string getDirFileName(unsigned int pMapId) const;
             std::string getDirFileName(unsigned int pMapId, int x, int y) const;
             MapTree* getInstanceMapTree(int pMapId) { return(iInstanceMapTrees.get(pMapId)); }
@@ -165,7 +166,6 @@ namespace VMAP
             */
             bool getObjectHitPos(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float &ry, float& rz, float pModifyDist);
             float getHeight(unsigned int pMapId, float x, float y, float z);
-            float getHeight(unsigned int pMapId, float x, float y, float z, float RayLenght);
 
             bool processCommand(char *pCommand);            // for debug and extensions
 
@@ -173,3 +173,4 @@ namespace VMAP
     };
 }
 #endif
+

@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,19 +10,24 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOSSERVER_COMMON_H
-#define MANGOSSERVER_COMMON_H
+#ifndef RIBONCORE_COMMON_H
+#define RIBONCORE_COMMON_H
 
 // config.h needs to be included 1st
+// TODO this thingy looks like hack ,but its not, need to
+// make separate header however, because It makes mess here.
 #ifdef HAVE_CONFIG_H
+// Remove Some things that we will define
+// This is in case including another config.h
+// before Ribon config.h
 #ifdef PACKAGE
 #undef PACKAGE
 #endif //PACKAGE
@@ -65,11 +72,9 @@
 #   pragma warning(disable:4311)                            // 'variable' : pointer truncation from 'type' to 'type'
 #   pragma warning(disable:4355)                            // 'this' : used in base member initializer list
 #   pragma warning(disable:4800)                            // 'type' : forcing value to bool 'true' or 'false' (performance warning)
+#   pragma warning(disable:4522)                            //warning when class has 2 constructosr
 #endif                                                      // __SHOW_STUPID_WARNINGS__
 #endif                                                      // __GNUC__
-
-// must be the first thing to include for it to work
-#include "MemoryLeaks.h"
 
 #include "Utilities/UnorderedMap.h"
 #include <stdio.h>
@@ -170,12 +175,9 @@ enum AccountTypes
 {
     SEC_PLAYER         = 0,
     SEC_MODERATOR      = 1,
-    SEC_SCRIPTER  = 2,
-    SEC_SUPPORTER     = 3,
-    SEC_UNNAMED  = 4,
-    SEC_GAMEMASTER  = 5,
-    SEC_ADMINISTRATOR  = 6,
-    SEC_CONSOLE        = 7                                  // must be always last in list, accounts must have less security level always also
+    SEC_GAMEMASTER     = 2,
+    SEC_ADMINISTRATOR  = 3,
+    SEC_CONSOLE        = 4                                  // must be always last in list, accounts must have less security level always also
 };
 
 enum LocaleConstant
@@ -211,3 +213,4 @@ LocaleConstant GetLocaleByName(const std::string& name);
 #endif
 
 #endif
+

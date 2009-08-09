@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -73,13 +75,13 @@ void SqlResultQueue::Update()
     /// execute the callbacks waiting in the synchronization queue
     while(!empty())
     {
-        MaNGOS::IQueryCallback * callback = next();
+        Ribon::IQueryCallback * callback = next();
         callback->Execute();
         delete callback;
     }
 }
 
-bool SqlQueryHolder::Execute(MaNGOS::IQueryCallback * callback, SqlDelayThread *thread, SqlResultQueue *queue)
+bool SqlQueryHolder::Execute(Ribon::IQueryCallback * callback, SqlDelayThread *thread, SqlResultQueue *queue)
 {
     if(!callback || !thread || !queue)
         return false;
@@ -197,3 +199,4 @@ void SqlQueryHolderEx::Execute(Database *db)
     /// sync with the caller thread
     m_queue->add(m_callback);
 }
+

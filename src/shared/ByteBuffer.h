@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef _BYTEBUFFER_H
@@ -404,9 +406,6 @@ class ByteBuffer
             uint32 j = 1, k = 1;
             sLog.outDebug("STORAGE_SIZE: %lu", (unsigned long)size() );
 
-            if(sLog.IsIncludeTime())
-                sLog.outDebugInLine("         ");
-
             for(uint32 i = 0; i < size(); ++i)
             {
                 if ((i == (j * 8)) && ((i != (k * 16))))
@@ -426,16 +425,12 @@ class ByteBuffer
                     if (read<uint8>(i) < 0x10)
                     {
                         sLog.outDebugInLine("\n");
-                        if(sLog.IsIncludeTime())
-                            sLog.outDebugInLine("         ");
 
                         sLog.outDebugInLine("0%X ", read<uint8>(i) );
                     }
                     else
                     {
                         sLog.outDebugInLine("\n");
-                        if(sLog.IsIncludeTime())
-                            sLog.outDebugInLine("         ");
 
                         sLog.outDebugInLine("%X ", read<uint8>(i) );
                     }
@@ -543,4 +538,13 @@ template <typename K, typename V> ByteBuffer &operator>>(ByteBuffer &b, std::map
     }
     return b;
 }
+
+// TODO: Make a ByteBuffer.cpp and move all this inlining to it.
+template<> inline std::string ByteBuffer::read<std::string>()
+{
+    std::string tmp;
+    *this >> tmp;
+    return tmp;
+}
 #endif
+

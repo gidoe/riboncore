@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef _MODELCONTAINER_H
@@ -52,9 +54,8 @@ namespace VMAP
             SubModel *iSubModel;
             G3D::AABox iBox;
 
-            // not allowed copy
-            explicit ModelContainer (const ModelContainer&);
-            ModelContainer& operator=(const ModelContainer&);
+            ModelContainer (const ModelContainer& c): BaseModel(c) {}
+            ModelContainer& operator=(const ModelContainer& ) {}
 
         public:
             ModelContainer() : BaseModel() { iNSubModel =0; iSubModel = 0; };
@@ -66,7 +67,7 @@ namespace VMAP
 
             ~ModelContainer(void);
 
-            inline void setSubModel(const SubModel& pSubModel, int pPos) { iSubModel[pPos] = pSubModel; }
+            inline const void setSubModel(const SubModel& pSubModel, int pPos) { iSubModel[pPos] = pSubModel; }
 
             inline const SubModel& getSubModel(int pPos) const { return iSubModel[pPos]; }
 
@@ -107,3 +108,4 @@ namespace VMAP
     void getBounds(const ModelContainer* pMc, G3D::AABox& pAABox);
 }
 #endif
+
