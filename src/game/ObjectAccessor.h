@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOS_OBJECTACCESSOR_H
-#define MANGOS_OBJECTACCESSOR_H
+#ifndef RIBON_OBJECTACCESSOR_H
+#define RIBON_OBJECTACCESSOR_H
 
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
@@ -81,7 +83,7 @@ class HashMapHolder
 class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLevelLockable<ObjectAccessor, ACE_Thread_Mutex> >
 {
 
-    friend class MaNGOS::OperatorNew<ObjectAccessor>;
+    friend class Ribon::OperatorNew<ObjectAccessor>;
     ObjectAccessor();
     ~ObjectAccessor();
     ObjectAccessor(const ObjectAccessor &);
@@ -110,25 +112,46 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
                 return u;
             }
 
-            if (IS_PET_GUID(guid))
+            if(IS_CREATURE_GUID(guid))
+                return (Unit*)HashMapHolder<Creature>::Find(guid);
+
+            if(IS_PET_GUID(guid))
                 return (Unit*)HashMapHolder<Pet>::Find(guid);
 
-            return (Unit*)HashMapHolder<Creature>::Find(guid);
+            return (Unit*)HashMapHolder<Vehicle>::Find(guid);
         }
+
+        static Unit* GetUnitInOrOutOfWorld(uint64 guid, Unit* /*fake*/)
+        {
+            if(!guid)
+                return NULL;
+
+            if (IS_PLAYER_GUID(guid))
+            {
+                Unit * u = (Unit*)HashMapHolder<Player>::Find(guid);
+                if(!u)
+                    return NULL;
+
+                return u;
+            }
+            // Other object types than player are unloaded while out of world
+            return GetObjectInWorld(guid, ((Unit*)NULL));
+        }
+
 
         template<class T> static T* GetObjectInWorld(uint32 mapid, float x, float y, uint64 guid, T* /*fake*/)
         {
             T* obj = HashMapHolder<T>::Find(guid);
             if(!obj || obj->GetMapId() != mapid) return NULL;
 
-            CellPair p = MaNGOS::ComputeCellPair(x,y);
+            CellPair p = Ribon::ComputeCellPair(x,y);
             if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
             {
                 sLog.outError("ObjectAccessor::GetObjectInWorld: invalid coordinates supplied X:%f Y:%f grid cell [%u:%u]", x, y, p.x_coord, p.y_coord);
                 return NULL;
             }
 
-            CellPair q = MaNGOS::ComputeCellPair(obj->GetPositionX(),obj->GetPositionY());
+            CellPair q = Ribon::ComputeCellPair(obj->GetPositionX(),obj->GetPositionY());
             if(q.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || q.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
             {
                 sLog.outError("ObjectAccessor::GetObjecInWorld: object (GUID: %u TypeId: %u) has invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUIDLow(), obj->GetTypeId(), obj->GetPositionX(), obj->GetPositionY(), q.x_coord, q.y_coord);
@@ -144,7 +167,8 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         static Object*   GetObjectByTypeMask(WorldObject const &, uint64, uint32 typemask);
         static Creature* GetCreatureOrPetOrVehicle(WorldObject const &, uint64);
-        static Unit* GetUnit(WorldObject const &, uint64);
+        static Unit* GetUnit(WorldObject const &, uint64 guid) { return GetObjectInWorld(guid, (Unit*)NULL); }
+        static Unit* GetUnitInOrOutOfWorld(WorldObject const &, uint64 guid) { return GetUnitInOrOutOfWorld(guid, (Unit*)NULL); }
         static Pet* GetPet(Unit const &, uint64 guid) { return GetPet(guid); }
         static Player* GetPlayer(Unit const &, uint64 guid) { return FindPlayer(guid); }
         static Corpse* GetCorpse(WorldObject const &u, uint64 guid);
@@ -157,6 +181,16 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         HashMapHolder<Player>::MapType& GetPlayers()
         {
             return HashMapHolder<Player>::GetContainer();
+        }
+
+        HashMapHolder<Creature>::MapType& GetCreatures()
+        {
+            return HashMapHolder<Creature>::GetContainer();
+        }
+
+        HashMapHolder<GameObject>::MapType& GetGameObjects()
+        {
+            return HashMapHolder<GameObject>::GetContainer();
         }
 
         template<class T> void AddObject(T *object)
@@ -195,7 +229,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         Corpse* GetCorpseForPlayerGUID(uint64 guid);
         void RemoveCorpse(Corpse *corpse);
-        void AddCorpse(Corpse* corpse);
+        void AddCorpse(Corpse *corpse);
         void AddCorpsesToGrid(GridPair const& gridpair,GridType& grid,Map* map);
         Corpse* ConvertCorpseForPlayer(uint64 player_guid, bool insignia = false);
 
@@ -203,14 +237,18 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         static void _buildUpdateObject(Object* obj, UpdateDataMapType &);
 
         static void UpdateObjectVisibility(WorldObject* obj);
-        static void UpdateVisibilityForPlayer(Player* player);
+        //static void UpdateVisibilityForPlayer(Player* player);
     private:
         struct WorldObjectChangeAccumulator
         {
             UpdateDataMapType &i_updateDatas;
             WorldObject &i_object;
+            std::set<uint64> plr_list;
             WorldObjectChangeAccumulator(WorldObject &obj, UpdateDataMapType &d) : i_updateDatas(d), i_object(obj) {}
             void Visit(PlayerMapType &);
+            void Visit(CreatureMapType &);
+            void Visit(DynamicObjectMapType &);
+            void BuildPacket(Player* plr);
             template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
         };
 
@@ -222,6 +260,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         static void _buildChangeObjectForPlayer(WorldObject *, UpdateDataMapType &);
         static void _buildPacket(Player *, Object *, UpdateDataMapType &);
+        void _update(void);
         std::set<Object *> i_objects;
         LockType i_playerGuard;
         LockType i_updateGuard;
@@ -229,3 +268,4 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         LockType i_petGuard;
 };
 #endif
+

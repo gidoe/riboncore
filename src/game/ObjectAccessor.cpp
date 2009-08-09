@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -44,7 +46,11 @@ INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ACE_Thread_Mutex);
 
 ObjectAccessor::ObjectAccessor() {}
-ObjectAccessor::~ObjectAccessor() {}
+ObjectAccessor::~ObjectAccessor()
+{
+    for(Player2CorpsesMapType::const_iterator itr = i_player2corpse.begin(); itr != i_player2corpse.end(); ++itr)
+        delete itr->second;
+}
 
 Creature*
 ObjectAccessor::GetCreatureOrPetOrVehicle(WorldObject const &u, uint64 guid)
@@ -61,6 +67,7 @@ ObjectAccessor::GetCreatureOrPetOrVehicle(WorldObject const &u, uint64 guid)
     return u.IsInWorld() ? u.GetMap()->GetCreature(guid) : NULL;
 }
 
+/*
 Unit*
 ObjectAccessor::GetUnit(WorldObject const &u, uint64 guid)
 {
@@ -72,6 +79,7 @@ ObjectAccessor::GetUnit(WorldObject const &u, uint64 guid)
 
     return GetCreatureOrPetOrVehicle(u, guid);
 }
+*/
 
 Corpse*
 ObjectAccessor::GetCorpse(WorldObject const &u, uint64 guid)
@@ -157,10 +165,7 @@ ObjectAccessor::SaveAllPlayers()
     HashMapHolder<Player>::MapType& m = HashMapHolder<Player>::GetContainer();
     HashMapHolder<Player>::MapType::iterator itr = m.begin();
     for(; itr != m.end(); ++itr)
-    {
-        if (itr->second->m_jail_isjailed) continue; // Prevent jailed players to be saved
         itr->second->SaveToDB();
-    }
 }
 
 void
@@ -184,30 +189,13 @@ ObjectAccessor::UpdateObject(Object* obj, Player* exceptPlayer)
 void
 ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_players)
 {
-    bool build_for_all = true;
-    Player *pl = NULL;
-    if( obj->isType(TYPEMASK_ITEM) )
+    if(obj->isType(TYPEMASK_ITEM))
     {
-        Item *item = static_cast<Item *>(obj);
-        pl = item->GetOwner();
-        build_for_all = false;
+        if(Player *owner = ((Item*)obj)->GetOwner())
+           _buildPacket(owner, obj, update_players);
     }
-
-    if( pl != NULL )
-        _buildPacket(pl, obj, update_players);
-
-    // Capt: okey for all those fools who think its a real fix
-    //       THIS IS A TEMP FIX
-    if( build_for_all )
-    {
-        WorldObject * temp = dynamic_cast<WorldObject*>(obj);
-
-        //assert(dynamic_cast<WorldObject*>(obj)!=NULL);
-        if (temp)
-            _buildChangeObjectForPlayer(temp, update_players);
-        else
-            sLog.outDebug("ObjectAccessor: Ln 405 Temp bug fix");
-    }
+    else
+        _buildChangeObjectForPlayer((WorldObject*)obj, update_players);
 }
 
 void
@@ -228,16 +216,14 @@ ObjectAccessor::_buildPacket(Player *pl, Object *obj, UpdateDataMapType &update_
 void
 ObjectAccessor::_buildChangeObjectForPlayer(WorldObject *obj, UpdateDataMapType &update_players)
 {
-    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
+    CellPair p = Ribon::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     Cell cell(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
     WorldObjectChangeAccumulator notifier(*obj, update_players);
     TypeContainerVisitor<WorldObjectChangeAccumulator, WorldTypeMapContainer > player_notifier(notifier);
     CellLock<GridReadGuard> cell_lock(cell, p);
-    Map& map = *obj->GetMap();
-    //we must build packets for all visible players
-    cell_lock->Visit(cell_lock, player_notifier, map, *obj, map.GetVisibilityDistance());
+    cell_lock->Visit(cell_lock, player_notifier, *obj->GetMap());
 }
 
 Pet*
@@ -276,7 +262,7 @@ ObjectAccessor::RemoveCorpse(Corpse *corpse)
         return;
 
     // build mapid*cellid -> guid_set map
-    CellPair cell_pair = MaNGOS::ComputeCellPair(corpse->GetPositionX(), corpse->GetPositionY());
+    CellPair cell_pair = Ribon::ComputeCellPair(corpse->GetPositionX(), corpse->GetPositionY());
     uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
     objmgr.DeleteCorpseCellData(corpse->GetMapId(), cell_id, corpse->GetOwnerGUID());
@@ -295,7 +281,7 @@ ObjectAccessor::AddCorpse(Corpse *corpse)
     i_player2corpse[corpse->GetOwnerGUID()] = corpse;
 
     // build mapid*cellid -> guid_set map
-    CellPair cell_pair = MaNGOS::ComputeCellPair(corpse->GetPositionX(), corpse->GetPositionY());
+    CellPair cell_pair = Ribon::ComputeCellPair(corpse->GetPositionX(), corpse->GetPositionY());
     uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
     objmgr.AddCorpseCellData(corpse->GetMapId(), cell_id, corpse->GetOwnerGUID(), corpse->GetInstanceId());
@@ -398,9 +384,8 @@ ObjectAccessor::Update(uint32 diff)
         while(!i_objects.empty())
         {
             Object* obj = *i_objects.begin();
+            assert(obj && obj->IsInWorld());
             i_objects.erase(i_objects.begin());
-            if (!obj || !obj->IsInWorld())
-                continue;
             _buildUpdateObject(obj, update_players);
             obj->ClearUpdateMask(false);
         }
@@ -419,28 +404,76 @@ void
 ObjectAccessor::WorldObjectChangeAccumulator::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
-        if(iter->getSource()->HaveAtClient(&i_object))
-            ObjectAccessor::_buildPacket(iter->getSource(), &i_object, i_updateDatas);
+    {
+        BuildPacket(iter->getSource());
+        if (!iter->getSource()->GetSharedVisionList().empty())
+        {
+            SharedVisionList::const_iterator it = iter->getSource()->GetSharedVisionList().begin();
+            for ( ; it != iter->getSource()->GetSharedVisionList().end(); ++it)
+                BuildPacket(*it);
+        }
+    }
+}
+
+void
+ObjectAccessor::WorldObjectChangeAccumulator::Visit(CreatureMapType &m)
+{
+    for(CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    {
+        if (!iter->getSource()->GetSharedVisionList().empty())
+        {
+            SharedVisionList::const_iterator it = iter->getSource()->GetSharedVisionList().begin();
+            for ( ; it != iter->getSource()->GetSharedVisionList().end(); ++it)
+                BuildPacket(*it);
+        }
+    }
+}
+
+void
+ObjectAccessor::WorldObjectChangeAccumulator::Visit(DynamicObjectMapType &m)
+{
+    for(DynamicObjectMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    {
+        uint64 guid = iter->getSource()->GetCasterGUID();
+        if(IS_PLAYER_GUID(guid))
+        {
+            //Caster may be NULL if DynObj is in removelist
+            if(Player *caster = FindPlayer(guid))
+                if (caster->GetUInt64Value(PLAYER_FARSIGHT) == iter->getSource()->GetGUID())
+                    BuildPacket(caster);
+        }
+    }
+}
+
+void
+ObjectAccessor::WorldObjectChangeAccumulator::BuildPacket(Player* plr)
+{
+    // Only send update once to a player
+    if (plr_list.find(plr->GetGUID()) == plr_list.end() && plr->HaveAtClient(&i_object))
+    {
+        ObjectAccessor::_buildPacket(plr, &i_object, i_updateDatas);
+        plr_list.insert(plr->GetGUID());
+    }
 }
 
 void
 ObjectAccessor::UpdateObjectVisibility(WorldObject *obj)
 {
-    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
+    CellPair p = Ribon::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     Cell cell(p);
 
     obj->GetMap()->UpdateObjectVisibility(obj, cell, p);
 }
 
-void ObjectAccessor::UpdateVisibilityForPlayer( Player* player )
+/*void ObjectAccessor::UpdateVisibilityForPlayer( Player* player )
 {
-    CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
+    CellPair p = Ribon::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
     Cell cell(p);
     Map* m = player->GetMap();
 
     m->UpdatePlayerVisibility(player, cell, p);
     m->UpdateObjectsVisibilityFor(player, cell, p);
-}
+}*/
 
 /// Define the static member of HashMapHolder
 
@@ -464,3 +497,4 @@ template Creature* ObjectAccessor::GetObjectInWorld<Creature>(uint32 mapid, floa
 template Corpse* ObjectAccessor::GetObjectInWorld<Corpse>(uint32 mapid, float x, float y, uint64 guid, Corpse* /*fake*/);
 template GameObject* ObjectAccessor::GetObjectInWorld<GameObject>(uint32 mapid, float x, float y, uint64 guid, GameObject* /*fake*/);
 template DynamicObject* ObjectAccessor::GetObjectInWorld<DynamicObject>(uint32 mapid, float x, float y, uint64 guid, DynamicObject* /*fake*/);
+
