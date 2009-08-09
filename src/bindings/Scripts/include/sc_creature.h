@@ -1,220 +1,258 @@
-/* Copyright (C) 2006 - 2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+/* Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
+ * Thanks to the original authors: ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ *
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
 #ifndef SC_CREATURE_H
 #define SC_CREATURE_H
 
-#include "CreatureAI.h"
 #include "Creature.h"
-#include "TemporarySummon.h"
+#include "CreatureAI.h"
+#include "CreatureAIImpl.h"
+#include "InstanceData.h"
 
 #define SCRIPT_CAST_TYPE dynamic_cast
+//#define SCRIPT_CAST_TYPE static_cast
 
 #define CAST_PLR(a)     (SCRIPT_CAST_TYPE<Player*>(a))
 #define CAST_CRE(a)     (SCRIPT_CAST_TYPE<Creature*>(a))
 #define CAST_VEH(a)     (SCRIPT_CAST_TYPE<Vehicle*>(a))
-#define CAST_SUM(a)     (SCRIPT_CAST_TYPE<TemporarySummon*>(a))
+#define CAST_SUM(a)     (SCRIPT_CAST_TYPE<TempSummon*>(a))
 #define CAST_PET(a)     (SCRIPT_CAST_TYPE<Pet*>(a))
 #define CAST_AI(a,b)    (SCRIPT_CAST_TYPE<a*>(b))
 
 #define GET_SPELL(a)    (const_cast<SpellEntry*>(GetSpellStore()->LookupEntry(a)))
 
-//Spell targets used by SelectSpell
-enum SelectTarget
+class ScriptedInstance;
+
+class SummonList : private std::list<uint64>
 {
-    SELECT_TARGET_DONTCARE = 0,                             //All target types allowed
-
-    SELECT_TARGET_SELF,                                     //Only Self casting
-
-    SELECT_TARGET_SINGLE_ENEMY,                             //Only Single Enemy
-    SELECT_TARGET_AOE_ENEMY,                                //Only AoE Enemy
-    SELECT_TARGET_ANY_ENEMY,                                //AoE or Single Enemy
-
-    SELECT_TARGET_SINGLE_FRIEND,                            //Only Single Friend
-    SELECT_TARGET_AOE_FRIEND,                               //Only AoE Friend
-    SELECT_TARGET_ANY_FRIEND,                               //AoE or Single Friend
-};
-
-//Spell Effects used by SelectSpell
-enum SelectEffect
-{
-    SELECT_EFFECT_DONTCARE = 0,                             //All spell effects allowed
-    SELECT_EFFECT_DAMAGE,                                   //Spell does damage
-    SELECT_EFFECT_HEALING,                                  //Spell does healing
-    SELECT_EFFECT_AURA,                                     //Spell applies an aura
-};
-
-//Selection method used by SelectTarget
-enum SelectAggroTarget
-{
-    SELECT_TARGET_RANDOM = 0,                               //Just selects a random target
-    SELECT_TARGET_TOPAGGRO,                                 //Selects targes from top aggro to bottom
-    SELECT_TARGET_BOTTOMAGGRO,                              //Selects targets from bottom aggro to top
-};
-
-enum SCEquip
-{
-    EQUIP_NO_CHANGE = -1,
-    EQUIP_UNEQUIP   = 0
+    public:
+        explicit SummonList(Creature* creature) : m_creature(creature) {}
+        void Summon(Creature *summon) { push_back(summon->GetGUID()); }
+        void Despawn(Creature *summon) { remove(summon->GetGUID()); }
+        void DespawnEntry(uint32 entry);
+        void DespawnAll();
+        void DoAction(uint32 entry, uint32 info);
+        void DoZoneInCombat(uint32 entry = 0);
+    private:
+        Creature *m_creature;
 };
 
 struct PointMovement
 {
     uint32 m_uiCreatureEntry;
     uint32 m_uiPointId;
-    float  m_fX;
-    float  m_fY;
-    float  m_fZ;
+    float m_fX;
+    float m_fY;
+    float m_fZ;
     uint32 m_uiWaitTime;
 };
 
-struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
+struct RIBON_DLL_DECL ScriptedAI : public CreatureAI
 {
-    explicit ScriptedAI(Creature* pCreature) : CreatureAI(pCreature),
-        m_bCombatMovement(true), m_uiEvadeCheckCooldown(2500) {}
+    explicit ScriptedAI(Creature* creature);
     ~ScriptedAI() {}
 
     //*************
     //CreatureAI Functions
     //*************
 
-    //Called if IsVisible(Unit *who) is true at each *who move
-    void MoveInLineOfSight(Unit*);
-
-    //Called at each attack of m_creature by any victim
-    void AttackStart(Unit*);
-
-    // Called for reaction at enter to combat if not in combat yet (enemy can be NULL)
-    void EnterCombat(Unit*);
-
-    //Called at stoping attack by any attacker
-    void EnterEvadeMode();
-
-    //Called at any heal cast/item used (call non implemented in mangos)
-    void HealBy(Unit* pHealer, uint32 uiAmountHealed) {}
-
-    // Called at any Damage to any victim (before damage apply)
-    void DamageDeal(Unit* pDoneTo, uint32& uiDamage) {}
+    void AttackStartNoMove(Unit *target);
 
     // Called at any Damage from any attacker (before damage apply)
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage) {}
-
-    //Is unit visible for MoveInLineOfSight
-    bool IsVisible(Unit *who) const;
+    void DamageTaken(Unit *done_by, uint32 &damage) {}
 
     //Called at World update tick
     void UpdateAI(const uint32);
 
     //Called at creature death
-    void JustDied(Unit*) {}
+    void JustDied(Unit* who){}
 
     //Called at creature killing another unit
-    void KilledUnit(Unit*) {}
+    void KilledUnit(Unit* who){}
 
     // Called when the creature summon successfully other creature
-    void JustSummoned(Creature*) {}
+    void JustSummoned(Creature* ) {}
 
     // Called when a summoned creature is despawned
-    void SummonedCreatureDespawn(Creature*) {}
+    void SummonedCreatureDespawn(Creature* /*unit*/) {}
 
     // Called when hit by a spell
-    void SpellHit(Unit*, const SpellEntry*) {}
+    void SpellHit(Unit* caster, const SpellEntry *spell) {}
 
-    // Called when creature is spawned or respawned (for reseting variables)
-    void JustRespawned();
+    // Called when spell hits a target
+    void SpellHitTarget(Unit* target, const SpellEntry *spell) {}
 
     //Called at waypoint reached or PointMovement end
-    void MovementInform(uint32, uint32) {}
+    void MovementInform(uint32 type, uint32 id){}
+
+    // Called when AI is temporarily replaced or put back when possess is applied or removed
+    void OnPossess(bool apply) {}
 
     //*************
     // Variables
     //*************
+
+    //Pointer to creature we are manipulating
+    Creature* m_creature;
+
+    //For fleeing
+    bool IsFleeing;
+
+    bool HeroicMode;
 
     //*************
     //Pure virtual functions
     //*************
 
     //Called at creature reset either by death or evade
-    virtual void Reset() = 0;
+    void Reset() {}
 
-    //Called at creature EnterCombat
-    virtual void Aggro(Unit*);
+    //Called at creature aggro either by MoveInLOS or Attack Start
+    void EnterCombat(Unit* who) {}
 
     //*************
     //AI Helper Functions
     //*************
 
     //Start movement toward victim
-    void DoStartMovement(Unit* pVictim, float fDistance = 0, float fAngle = 0);
+    void DoStartMovement(Unit* victim, float distance = 0, float angle = 0);
 
     //Start no movement on victim
-    void DoStartNoMovement(Unit* pVictim);
-
-    //Do melee swing of current victim if in rnage and ready and not casting
-    void DoMeleeAttackIfReady();
+    void DoStartNoMovement(Unit* victim);
 
     //Stop attack of current victim
     void DoStopAttack();
 
-    //Cast spell by Id
-    void DoCast(Unit* pVictim, uint32 uiSpellId, bool bTriggered = false);
-
     //Cast spell by spell info
-    void DoCastSpell(Unit* pwho, SpellEntry const* pSpellInfo, bool bTriggered = false);
+    void DoCastSpell(Unit* who,SpellEntry const *spellInfo, bool triggered = false);
+
+    //Creature say
+    void DoSay(const char* text, uint32 language, Unit* target, bool SayEmote = false);
+
+    //Creature Yell
+    void DoYell(const char* text, uint32 language, Unit* target);
+
+    //Creature Text emote, optional bool for boss emote text
+    void DoTextEmote(const char* text, Unit* target, bool IsBossEmote = false);
+
+    //Creature whisper, optional bool for boss whisper
+    void DoWhisper(const char* text, Unit* reciever, bool IsBossWhisper = false);
 
     //Plays a sound to all nearby players
-    void DoPlaySoundToSet(WorldObject* pSource, uint32 uiSoundId);
+    void DoPlaySoundToSet(WorldObject* pSource, uint32 sound);
 
     //Drops all threat to 0%. Does not remove players from the threat list
     void DoResetThreat();
 
+    float DoGetThreat(Unit *u);
+    void DoModifyThreatPercent(Unit *pUnit, int32 pct);
+
+    void DoTeleportTo(float x, float y, float z, uint32 time = 0);
+    void DoTeleportTo(const float pos[4]);
+
+    void DoAction(const int32 param) {}
+
     //Teleports a player without dropping threat (only teleports to same map)
-    void DoTeleportPlayer(Unit* pUnit, float fX, float fY, float fZ, float fO);
+    void DoTeleportPlayer(Unit* pUnit, float x, float y, float z, float o);
+    void DoTeleportAll(float x, float y, float z, float o);
 
     //Returns friendly unit with the most amount of hp missing from max hp
-    Unit* DoSelectLowestHpFriendly(float fRange, uint32 uiMinHPDiff = 1);
+    Unit* DoSelectLowestHpFriendly(float range, uint32 MinHPDiff = 1);
 
     //Returns a list of friendly CC'd units within range
-    std::list<Creature*> DoFindFriendlyCC(float fRange);
+    std::list<Creature*> DoFindFriendlyCC(float range);
 
     //Returns a list of all friendly units missing a specific buff within range
-    std::list<Creature*> DoFindFriendlyMissingBuff(float fRange, uint32 uiSpellId);
+    std::list<Creature*> DoFindFriendlyMissingBuff(float range, uint32 spellid);
 
     //Return a player with at least minimumRange from m_creature
     Player* GetPlayerAtMinimumRange(float fMinimumRange);
 
     //Spawns a creature relative to m_creature
-    Creature* DoSpawnCreature(uint32 uiId, float fX, float fY, float fZ, float fAngle, uint32 uiType, uint32 uiDespawntime);
+    Creature* DoSpawnCreature(uint32 id, float x, float y, float z, float angle, uint32 type, uint32 despawntime);
+    Creature *DoSummon(uint32 entry, const float pos[4], uint32 despawntime = 30000, TempSummonType type = TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+    Creature *DoSummon(uint32 entry, WorldObject *obj, float radius = 5.0f, uint32 despawntime = 30000, TempSummonType type = TEMPSUMMON_CORPSE_TIMED_DESPAWN);
 
     //Selects a unit from the creature's current aggro list
-    Unit* SelectUnit(SelectAggroTarget target, uint32 uiPosition);
+    Unit* SelectUnit(SelectAggroTarget target, uint32 position);
+
+    bool HealthBelowPct(uint32 pct) const { return me->GetHealth() * 100 < m_creature->GetMaxHealth() * pct; }
 
     //Returns spells that meet the specified criteria from the creatures spell list
-    SpellEntry const* SelectSpell(Unit* pTarget, int32 uiSchool, int32 uiMechanic, SelectTarget selectTargets, uint32 uiPowerCostMin, uint32 uiPowerCostMax, float fRangeMin, float fRangeMax, SelectEffect selectEffect);
+    SpellEntry const* SelectSpell(Unit* Target, int32 School, int32 Mechanic, SelectTargetType Targets,  uint32 PowerCostMin, uint32 PowerCostMax, float RangeMin, float RangeMax, SelectEffect Effect);
 
     //Checks if you can cast the specified spell
-    bool CanCast(Unit* pTarget, SpellEntry const* pSpell, bool bTriggered = false);
+    bool CanCast(Unit* Target, SpellEntry const *Spell, bool Triggered = false);
 
     void SetEquipmentSlots(bool bLoadDefault, int32 uiMainHand = EQUIP_NO_CHANGE, int32 uiOffHand = EQUIP_NO_CHANGE, int32 uiRanged = EQUIP_NO_CHANGE);
-
-    //Generally used to control if MoveChase() is to be used or not in AttackStart(). Some creatures does not chase victims
-    void SetCombatMovement(bool bCombatMove);
-    bool IsCombatMovement() { return m_bCombatMovement; }
+    
+    void SetCombatMovement(bool CombatMove);
 
     bool EnterEvadeIfOutOfCombatArea(const uint32 uiDiff);
+    
+    protected:
+        bool CombatMovement;
 
     private:
-        bool   m_bCombatMovement;
         uint32 m_uiEvadeCheckCooldown;
 };
 
-struct MANGOS_DLL_DECL Scripted_NoMovementAI : public ScriptedAI
+struct RIBON_DLL_DECL Scripted_NoMovementAI : public ScriptedAI
 {
-    Scripted_NoMovementAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+    Scripted_NoMovementAI(Creature* creature) : ScriptedAI(creature) {}
+
+    //Called if IsVisible(Unit *who) is true at each *who move
+    //void MoveInLineOfSight(Unit* who);
 
     //Called at each attack of m_creature by any victim
-    void AttackStart(Unit*);
+    void AttackStart(Unit* who);
 };
 
+struct RIBON_DLL_DECL BossAI : public ScriptedAI
+{
+    BossAI(Creature *c, uint32 id);
+
+    const uint32 bossId;
+    EventMap events;
+    SummonList summons;
+    InstanceData * const instance;
+    const BossBoundaryMap * const boundary;
+
+    void JustSummoned(Creature *summon);
+    void SummonedCreatureDespawn(Creature *summon);
+
+    void UpdateAI(const uint32 diff) = 0;
+
+    void Reset() { _Reset(); }
+    void EnterCombat(Unit *who) { _EnterCombat(); }
+    void JustDied(Unit *killer) { _JustDied(); }
+    void JustReachedHome() { me->setActive(false); }
+
+    protected:
+        void _Reset();
+        void _EnterCombat();
+        void _JustDied();
+        void _JustReachedHome() { me->setActive(false); }
+
+        bool CheckInRoom()
+        {
+            if(CheckBoundary(me))
+                return true;
+            EnterEvadeMode();
+            return false;
+        }
+        bool CheckBoundary(Unit *who);
+        void TeleportCheaters();
+};
+
+// SD2's grid searchers
+
+//return closest creature alive in grid, with range from pSource
+Creature* GetClosestCreatureWithEntry(WorldObject* pSource, uint32 Entry, float MaxSearchRange);
+
 #endif
+

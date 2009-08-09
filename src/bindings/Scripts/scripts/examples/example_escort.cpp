@@ -22,200 +22,191 @@ SDCategory: Script Examples
 EndScriptData */
 
 #include "precompiled.h"
-#include "escort_ai.h"
+#include "../npc/npc_escortAI.h"
 
-enum
+#define SAY_AGGRO1      -1999910
+#define SAY_AGGRO2      -1999911
+#define SAY_WP_1        -1999912
+#define SAY_WP_2        -1999913
+#define SAY_WP_3        -1999914
+#define SAY_WP_4        -1999915
+#define SAY_DEATH_1     -1999916
+#define SAY_DEATH_2     -1999917
+#define SAY_DEATH_3     -1999918
+#define SAY_SPELL       -1999919
+#define SAY_RAND_1      -1999920
+#define SAY_RAND_2      -1999921
+
+#define GOSSIP_ITEM_1   "Click to Test Escort(Attack, Defend, Run)"
+#define GOSSIP_ITEM_2   "Click to Test Escort(NoAttack, NoDefend, Walk)"
+#define GOSSIP_ITEM_3   "Click to Test Escort(NoAttack, Defend, Walk)"
+
+struct RIBON_DLL_DECL example_escortAI : public npc_escortAI
 {
-    NPC_FELBOAR                 = 21878,
+    public:
 
-    SPELL_DEATH_COIL            = 33130,
-    SPELL_ELIXIR_OF_FORTITUDE   = 3593,
-    SPELL_BLUE_FIREWORK         = 11540,
+        // CreatureAI functions
+        example_escortAI(Creature *c) : npc_escortAI(c) {Reset();}
 
-    SAY_AGGRO1                  = -1999910,
-    SAY_AGGRO2                  = -1999911,
-    SAY_WP_1                    = -1999912,
-    SAY_WP_2                    = -1999913,
-    SAY_WP_3                    = -1999914,
-    SAY_WP_4                    = -1999915,
-    SAY_DEATH_1                 = -1999916,
-    SAY_DEATH_2                 = -1999917,
-    SAY_DEATH_3                 = -1999918,
-    SAY_SPELL                   = -1999919,
-    SAY_RAND_1                  = -1999920,
-    SAY_RAND_2                  = -1999921
-};
+        uint32 DeathCoilTimer;
+        uint32 ChatTimer;
 
-#define GOSSIP_ITEM_1   "Click to Test Escort(Attack, Run)"
-#define GOSSIP_ITEM_2   "Click to Test Escort(NoAttack, Walk)"
-#define GOSSIP_ITEM_3   "Click to Test Escort(NoAttack, Run)"
-
-struct MANGOS_DLL_DECL example_escortAI : public npc_escortAI
-{
-    // CreatureAI functions
-    example_escortAI(Creature* pCreature) : npc_escortAI(pCreature) {Reset();}
-
-    uint32 m_uiDeathCoilTimer;
-    uint32 m_uiChatTimer;
-
-    void JustSummoned(Creature* pSummoned)
-    {
-        pSummoned->AI()->AttackStart(m_creature);
-    }
-
-    // Pure Virtual Functions (Have to be implemented)
-    void WaypointReached(uint32 uiWP)
-    {
-        switch (uiWP)
+        // Pure Virtual Functions
+        void WaypointReached(uint32 i)
         {
-            case 1:
-                DoScriptText(SAY_WP_1, m_creature);
-                break;
-            case 3:
-                DoScriptText(SAY_WP_2, m_creature);
-                m_creature->SummonCreature(NPC_FELBOAR, m_creature->GetPositionX()+5.0f, m_creature->GetPositionY()+7.0f, m_creature->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 3000);
-                break;
-            case 4:
-                if (Unit* pTmpPlayer = Unit::GetUnit(*m_creature, PlayerGUID))
+            switch (i)
+            {
+                case 1:
+                    DoScriptText(SAY_WP_1, m_creature);
+                    break;
+
+                case 3:
                 {
-                    //pTmpPlayer is the target of the text
-                    DoScriptText(SAY_WP_3, m_creature, pTmpPlayer);
-                    //pTmpPlayer is the source of the text
-                    DoScriptText(SAY_WP_4, pTmpPlayer);
+                    DoScriptText(SAY_WP_2, m_creature);
+                    Creature* temp = m_creature->SummonCreature(21878, m_creature->GetPositionX()+5, m_creature->GetPositionY()+7, m_creature->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 3000);
+                    if(temp)
+                    temp->AI()->AttackStart(m_creature);
                 }
                 break;
-        }
-    }
 
-    void Aggro(Unit* pWho)
-    {
-        if (IsBeingEscorted)
-        {
-            if (Unit* pTemp = Unit::GetUnit(*m_creature, PlayerGUID))
-                DoScriptText(SAY_AGGRO1, m_creature, pTemp);
-        }
-        else
-            DoScriptText(SAY_AGGRO2, m_creature);
-    }
-
-    void Reset()
-    {
-        m_uiDeathCoilTimer = 4000;
-        m_uiChatTimer = 4000;
-    }
-
-    void JustDied(Unit* pKiller)
-    {
-        if (IsBeingEscorted)
-        {
-            if (Unit *pTemp = Unit::GetUnit(*m_creature,PlayerGUID))
-            {
-                // not a likely case, code here for the sake of example
-                if (pKiller == m_creature)
+                case 4:
                 {
-                    //This is actually a whisper. You control the text type in database
-                    DoScriptText(SAY_DEATH_1, m_creature, pTemp);
+                    Unit* temp = Unit::GetUnit(*m_creature, PlayerGUID);
+                    if (temp)
+                    {
+                        //temp is the target of the text
+                        DoScriptText(SAY_WP_3, m_creature, temp);
+                        //temp is the source of the text
+                        DoScriptText(SAY_WP_4, temp);
+                    }
                 }
-                else
-                    DoScriptText(SAY_DEATH_2, m_creature, pTemp);
+                break;
             }
         }
-        else
-            DoScriptText(SAY_DEATH_3, m_creature);
-    }
 
-    void UpdateAI(const uint32 uiDiff)
-    {
-        //Must update npc_escortAI
-        npc_escortAI::UpdateAI(uiDiff);
-
-        //Combat check
-        if (m_creature->getVictim())
+        void EnterCombat(Unit* who)
         {
-            if (m_uiDeathCoilTimer < uiDiff)
-            {
-                DoScriptText(SAY_SPELL, m_creature);
-                m_creature->CastSpell(m_creature->getVictim(), SPELL_DEATH_COIL, false);
-                m_uiDeathCoilTimer = 4000;
-            }
-            else
-                m_uiDeathCoilTimer -= uiDiff;
-        }
-        else
-        {
-            //Out of combat but being escorted
             if (IsBeingEscorted)
             {
-                if (m_uiChatTimer < uiDiff)
+                if (Unit* temp = Unit::GetUnit(*m_creature, PlayerGUID))
+                    DoScriptText(SAY_AGGRO1, m_creature, temp);
+            }
+            else DoScriptText(SAY_AGGRO2, m_creature);
+        }
+
+        void Reset()
+        {
+            DeathCoilTimer = 4000;
+            ChatTimer = 4000;
+        }
+
+        void JustDied(Unit* killer)
+        {
+            if (IsBeingEscorted)
+            {
+                Unit *pTemp = Unit::GetUnit(*m_creature,PlayerGUID);
+                //killer = m_creature when player got to far from creature
+                if (killer == m_creature)
                 {
-                    if (m_creature->HasAura(SPELL_ELIXIR_OF_FORTITUDE, 0))
+                    //This is actually a whisper. You control the text type in database
+                    if (pTemp)
+                        DoScriptText(SAY_DEATH_1, m_creature, pTemp);
+                }
+                else if (pTemp) DoScriptText(SAY_DEATH_2, m_creature, pTemp);
+            }
+            else DoScriptText(SAY_DEATH_3, m_creature);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            //Must update npc_escortAI
+            npc_escortAI::UpdateAI(diff);
+
+            //Combat check
+            if (m_creature->getVictim())
+            {
+                if (DeathCoilTimer < diff)
+                {
+                    DoScriptText(SAY_SPELL, m_creature);
+                    m_creature->CastSpell(m_creature->getVictim(), 33130, false);
+
+                    DeathCoilTimer = 4000;
+                }else DeathCoilTimer -= diff;
+            }
+            else if(!m_creature->isInCombat())
+            {
+                //Out of combat but being escorted
+                if (IsBeingEscorted)
+                    if (ChatTimer < diff)
+                {
+                    if (m_creature->HasAura(3593))
                     {
                         DoScriptText(SAY_RAND_1, m_creature);
-                        m_creature->CastSpell(m_creature, SPELL_BLUE_FIREWORK, false);
-                    }
-                    else
+                        m_creature->CastSpell(m_creature, 11540, false);
+                    }else
                     {
                         DoScriptText(SAY_RAND_2, m_creature);
-                        m_creature->CastSpell(m_creature, SPELL_ELIXIR_OF_FORTITUDE, false);
+                        m_creature->CastSpell(m_creature, 3593, false);
                     }
 
-                    m_uiChatTimer = 12000;
-                }
-                else
-                    m_uiChatTimer -= uiDiff;
+                    ChatTimer = 12000;
+                }else ChatTimer -= diff;
             }
         }
-    }
 };
 
-CreatureAI* GetAI_example_escort(Creature* pCreature)
+CreatureAI* GetAI_example_escort(Creature *_Creature)
 {
-    return new example_escortAI(pCreature);
+    example_escortAI* testAI = new example_escortAI(_Creature);
+
+    testAI->AddWaypoint(0, 1231, -4419, 23);
+    testAI->AddWaypoint(1, 1198, -4440, 23, 0);
+    testAI->AddWaypoint(2, 1208, -4392, 23);
+    testAI->AddWaypoint(3, 1231, -4419, 23, 5000);
+    testAI->AddWaypoint(4, 1208, -4392, 23, 5000);
+
+    return testAI;
 }
 
-bool GossipHello_example_escort(Player* pPlayer, Creature* pCreature)
+bool GossipHello_example_escort(Player *player, Creature *_Creature)
 {
-    pPlayer->TalkedToCreature(pCreature->GetEntry(), pCreature->GetGUID());
-    pCreature->prepareGossipMenu(pPlayer, 0);
+    player->TalkedToCreature(_Creature->GetEntry(),_Creature->GetGUID());
+    _Creature->prepareGossipMenu(player,0);
 
-    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
-    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
 
-    pCreature->sendPreparedGossip(pPlayer);
-
+    _Creature->sendPreparedGossip( player );
     return true;
 }
 
-bool GossipSelect_example_escort(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
+bool GossipSelect_example_escort(Player *player, Creature *_Creature, uint32 sender, uint32 action )
 {
-    example_escortAI* pEscortAI = dynamic_cast<example_escortAI*>(pCreature->AI());
-
-    switch(uiAction)
+    if (action == GOSSIP_ACTION_INFO_DEF+1)
     {
-        case GOSSIP_ACTION_INFO_DEF+1:
-            pPlayer->CLOSE_GOSSIP_MENU();
+        player->CLOSE_GOSSIP_MENU();
+        CAST_AI(npc_escortAI, (_Creature->AI()))->Start(true, true, true, player->GetGUID());
 
-            if (pEscortAI)
-                pEscortAI->Start(true, true, pPlayer->GetGUID());
-            break;
-        case GOSSIP_ACTION_INFO_DEF+2:
-            pPlayer->CLOSE_GOSSIP_MENU();
-
-            if (pEscortAI)
-                pEscortAI->Start(false, false, pPlayer->GetGUID());
-            break;
-        case GOSSIP_ACTION_INFO_DEF+3:
-            pPlayer->CLOSE_GOSSIP_MENU();
-
-            if (pEscortAI)
-                pEscortAI->Start(false, true, pPlayer->GetGUID());
-            break;
-        default:
-            return false;                                   // nothing defined      -> mangos core handling
+        return true;                                        // prevent mangos core handling
     }
 
-    return true;                                            // no default handling  -> prevent mangos core handling
+    if (action == GOSSIP_ACTION_INFO_DEF+2)
+    {
+        player->CLOSE_GOSSIP_MENU();
+        CAST_AI(npc_escortAI, (_Creature->AI()))->Start(false, false, false, player->GetGUID());
+
+        return true;                                        // prevent mangos core handling
+    }
+
+    if (action == GOSSIP_ACTION_INFO_DEF+3)
+    {
+        player->CLOSE_GOSSIP_MENU();
+        CAST_AI(npc_escortAI, (_Creature->AI()))->Start(false, true, false, player->GetGUID());
+
+        return true;                                        // prevent mangos core handling
+    }
+    return false;
 }
 
 void AddSC_example_escort()
