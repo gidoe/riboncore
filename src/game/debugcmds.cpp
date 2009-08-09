@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -30,7 +32,12 @@
 #include "BattleGroundMgr.h"
 #include <fstream>
 #include "ObjectMgr.h"
+#include "Cell.h"
+#include "CellImpl.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 #include "SpellMgr.h"
+#include "ScriptCalls.h"
 
 bool ChatHandler::HandleDebugSendSpellFailCommand(const char* args)
 {
@@ -124,8 +131,12 @@ bool ChatHandler::HandleDebugSendBuyErrorCommand(const char* args)
 bool ChatHandler::HandleDebugSendOpcodeCommand(const char* /*args*/)
 {
     Unit *unit = getSelectedUnit();
+    Player *player = NULL;
     if (!unit || (unit->GetTypeId() != TYPEID_PLAYER))
-        unit = m_session->GetPlayer();
+        player = m_session->GetPlayer();
+    else
+        player = (Player*)unit;
+    if(!unit) unit = player;
 
     std::ifstream ifs("opcode.txt");
     if (ifs.bad())
@@ -180,9 +191,57 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(const char* /*args*/)
             ifs >> val6;
             data << val6;
         }
-        else if(type == "pguid")
+        else if(type == "appitsguid")
         {
             data.append(unit->GetPackGUID());
+        }
+        else if(type == "appmyguid")
+        {
+            data.append(player->GetPackGUID());
+        }
+        else if(type == "appgoguid")
+        {
+            GameObject *obj = GetNearbyGameObject();
+            if(!obj)
+            {
+                PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, 0);
+                SetSentErrorMessage(true);
+                ifs.close();
+                return false;
+            }
+            data.append(obj->GetPackGUID());
+        }
+        else if(type == "goguid")
+        {
+            GameObject *obj = GetNearbyGameObject();
+            if(!obj)
+            {
+                PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, 0);
+                SetSentErrorMessage(true);
+                ifs.close();
+                return false;
+            }
+            data << uint64(obj->GetGUID());
+        }
+        else if(type == "myguid")
+        {
+            data << uint64(player->GetGUID());
+        }
+        else if(type == "itsguid")
+        {
+            data << uint64(unit->GetGUID());
+        }
+        else if(type == "pos")
+        {
+            data << unit->GetPositionX();
+            data << unit->GetPositionY();
+            data << unit->GetPositionZ();
+        }
+        else if(type == "mypos")
+        {
+            data << player->GetPositionX();
+            data << player->GetPositionY();
+            data << player->GetPositionZ();
         }
         else
         {
@@ -193,7 +252,7 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(const char* /*args*/)
     ifs.close();
     sLog.outDebug("Sending opcode %u", data.GetOpcode());
     data.hexlike();
-    ((Player*)unit)->GetSession()->SendPacket(&data);
+    player->GetSession()->SendPacket(&data);
     PSendSysMessage(LANG_COMMAND_OPCODESENT, data.GetOpcode(), unit->GetName());
     return true;
 }
@@ -600,6 +659,104 @@ bool ChatHandler::HandleDebugArenaCommand(const char * /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleDebugThreatList(const char * /*args*/)
+{
+    Creature* target = getSelectedCreature();
+    if(!target || target->isTotem() || target->isPet())
+        return false;
+
+    std::list<HostilReference*>& tlist = target->getThreatManager().getThreatList();
+    std::list<HostilReference*>::iterator itr;
+    uint32 cnt = 0;
+    PSendSysMessage("Threat list of %s (guid %u)",target->GetName(), target->GetGUIDLow());
+    for(itr = tlist.begin(); itr != tlist.end(); ++itr)
+    {
+        Unit* unit = (*itr)->getTarget();
+        if(!unit)
+            continue;
+        ++cnt;
+        PSendSysMessage("   %u.   %s   (guid %u)  - threat %f",cnt,unit->GetName(), unit->GetGUIDLow(), (*itr)->getThreat());
+    }
+    SendSysMessage("End of threat list.");
+    return true;
+}
+
+bool ChatHandler::HandleDebugHostilRefList(const char * /*args*/)
+{
+    Unit* target = getSelectedUnit();
+    if(!target)
+        target = m_session->GetPlayer();
+    HostilReference* ref = target->getHostilRefManager().getFirst();
+    uint32 cnt = 0;
+    PSendSysMessage("Hostil reference list of %s (guid %u)",target->GetName(), target->GetGUIDLow());
+    while(ref)
+    {
+        if(Unit * unit = ref->getSource()->getOwner())
+        {
+            ++cnt;
+            PSendSysMessage("   %u.   %s   (guid %u)  - threat %f",cnt,unit->GetName(), unit->GetGUIDLow(), ref->getThreat());
+        }
+        ref = ref->next();
+    }
+    SendSysMessage("End of hostil reference list.");
+    return true;
+}
+
+bool ChatHandler::HandleDebugSetVehicleId(const char *args)
+{
+    Unit* target = getSelectedUnit();
+    if(!target || target->GetTypeId() != TYPEID_UNIT || !((Creature*)target)->isVehicle())
+        return false;
+
+    if(!args)
+        return false;
+
+    char* i = strtok((char*)args, " ");
+    if(!i)
+        return false;
+
+    uint32 id = (uint32)atoi(i);
+    ((Vehicle*)target)->SetVehicleId(id);
+    target->SendUpdateObjectToAllExcept(NULL);
+    PSendSysMessage("Vehicle id set to %u", id);
+    return true;
+}
+
+bool ChatHandler::HandleDebugEnterVehicle(const char * args)
+{
+    Unit* target = getSelectedUnit();
+    if(!target || target->GetTypeId() != TYPEID_UNIT || !((Creature*)target)->isVehicle())
+        return false;
+
+    if(!args)
+        return false;
+
+    char* i = strtok((char*)args, " ");
+    if(!i)
+        return false;
+
+    char* j = strtok(NULL, " ");
+
+    uint32 entry = (uint32)atoi(i);
+    int8 seatId = j ? (int8)atoi(j) : -1;
+
+    if(!entry)
+        m_session->GetPlayer()->EnterVehicle((Vehicle*)target, seatId);
+    else
+    {
+        Creature *passenger = NULL;
+        Ribon::AllCreaturesOfEntryInRange check(m_session->GetPlayer(), entry, 20.0f);
+	    Ribon::CreatureSearcher<Ribon::AllCreaturesOfEntryInRange> searcher(m_session->GetPlayer(), passenger, check);
+        m_session->GetPlayer()->VisitNearbyObject(30.0f, searcher);
+        if(!passenger || passenger == target)
+            return false;
+        passenger->EnterVehicle((Vehicle*)target, seatId);
+    }
+
+    PSendSysMessage("Unit %u entered vehicle %d", entry, (int32)seatId);
+    return true;
+}
+
 bool ChatHandler::HandleDebugSpawnVehicle(const char* args)
 {
     if (!*args)
@@ -608,10 +765,17 @@ bool ChatHandler::HandleDebugSpawnVehicle(const char* args)
     char* e = strtok((char*)args, " ");
     char* i = strtok(NULL, " ");
 
-    if (!e || !i)
+    if (!e)
         return false;
 
     uint32 entry = (uint32)atoi(e);
+
+    float x, y, z, o = m_session->GetPlayer()->GetOrientation();
+    m_session->GetPlayer()->GetClosePoint(x, y, z, m_session->GetPlayer()->GetObjectSize());
+
+    if(!i)
+        return m_session->GetPlayer()->SummonVehicle(entry, x, y, z, o);
+
     uint32 id = (uint32)atoi(i);
 
     CreatureInfo const *ci = objmgr.GetCreatureTemplate(entry);
@@ -627,38 +791,16 @@ bool ChatHandler::HandleDebugSpawnVehicle(const char* args)
     Vehicle *v = new Vehicle;
     Map *map = m_session->GetPlayer()->GetMap();
 
-    if (!v->Create(objmgr.GenerateLowGuid(HIGHGUID_VEHICLE), map, m_session->GetPlayer()->GetPhaseMaskForSpawn(), entry, id, m_session->GetPlayer()->GetTeam()))
+    if(!v->Create(objmgr.GenerateLowGuid(HIGHGUID_VEHICLE), map, m_session->GetPlayer()->GetPhaseMask(), entry, id, m_session->GetPlayer()->GetTeam(), x, y, z, o))
     {
-        delete v;
-        return false;
-    }
-
-    float px, py, pz;
-    m_session->GetPlayer()->GetClosePoint(px, py, pz, m_session->GetPlayer()->GetObjectSize());
-
-    v->Relocate(px, py, pz, m_session->GetPlayer()->GetOrientation());
-
-    if (!v->IsPositionValid())
-    {
-        sLog.outError("Vehicle (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %f Y: %f)",
-            v->GetGUIDLow(), v->GetEntry(), v->GetPositionX(), v->GetPositionY());
         delete v;
         return false;
     }
 
     map->Add((Creature*)v);
-    v->AIM_Initialize();
 
     return true;
 }
-
-bool ChatHandler::HandleDebugSpellCheckCommand(const char* /*args*/)
-{
-    sLog.outString( "Check expected in code spell properties base at table 'spell_check' content...");
-    spellmgr.CheckUsedSpells("spell_check");
-    return true;
-}
-
 
 bool ChatHandler::HandleDebugSendLargePacketCommand(const char* /*args*/)
 {
@@ -700,6 +842,28 @@ bool ChatHandler::HandleDebugSetItemFlagCommand(const char* args)
         return false;
 
     i->SetUInt32Value(ITEM_FIELD_FLAGS, flag);
+
+    return true;
+}
+
+bool ChatHandler::HandleDebugItemExpireCommand(const char* args)
+{
+    if (!*args)
+        return false;
+
+    char* e = strtok((char*)args, " ");
+    if (!e)
+        return false;
+
+    uint32 guid = (uint32)atoi(e);
+
+    Item *i = m_session->GetPlayer()->GetItemByGuid(MAKE_NEW_GUID(guid, 0, HIGHGUID_ITEM));
+
+    if (!i)
+        return false;
+
+    m_session->GetPlayer()->DestroyItem( i->GetBagSlot(),i->GetSlot(), true);
+    Script->ItemExpire(m_session->GetPlayer(),i->GetProto());
 
     return true;
 }
@@ -757,7 +921,7 @@ bool ChatHandler::HandleDebugSetValueCommand(const char* args)
     if (!px || !py)
         return false;
 
-    Unit* target = getSelectedUnit();
+    WorldObject* target = getSelectedObject();
     if(!target)
     {
         SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
@@ -781,14 +945,14 @@ bool ChatHandler::HandleDebugSetValueCommand(const char* args)
     if(isint32)
     {
         iValue = (uint32)atoi(py);
-        sLog.outDebug(GetMangosString(LANG_SET_UINT), GUID_LOPART(guid), Opcode, iValue);
+        sLog.outDebug(GetRibonString(LANG_SET_UINT), GUID_LOPART(guid), Opcode, iValue);
         target->SetUInt32Value( Opcode , iValue );
         PSendSysMessage(LANG_SET_UINT_FIELD, GUID_LOPART(guid), Opcode,iValue);
     }
     else
     {
         fValue = (float)atof(py);
-        sLog.outDebug(GetMangosString(LANG_SET_FLOAT), GUID_LOPART(guid), Opcode, fValue);
+        sLog.outDebug(GetRibonString(LANG_SET_FLOAT), GUID_LOPART(guid), Opcode, fValue);
         target->SetFloatValue( Opcode , fValue );
         PSendSysMessage(LANG_SET_FLOAT_FIELD, GUID_LOPART(guid), Opcode,fValue);
     }
@@ -832,13 +996,13 @@ bool ChatHandler::HandleDebugGetValueCommand(const char* args)
     if(isint32)
     {
         iValue = target->GetUInt32Value( Opcode );
-        sLog.outDebug(GetMangosString(LANG_GET_UINT), GUID_LOPART(guid), Opcode, iValue);
+        sLog.outDebug(GetRibonString(LANG_GET_UINT), GUID_LOPART(guid), Opcode, iValue);
         PSendSysMessage(LANG_GET_UINT_FIELD, GUID_LOPART(guid), Opcode,    iValue);
     }
     else
     {
         fValue = target->GetFloatValue( Opcode );
-        sLog.outDebug(GetMangosString(LANG_GET_FLOAT), GUID_LOPART(guid), Opcode, fValue);
+        sLog.outDebug(GetRibonString(LANG_GET_FLOAT), GUID_LOPART(guid), Opcode, fValue);
         PSendSysMessage(LANG_GET_FLOAT_FIELD, GUID_LOPART(guid), Opcode, fValue);
     }
 
@@ -865,7 +1029,7 @@ bool ChatHandler::HandleDebugMod32ValueCommand(const char* args)
         return false;
     }
 
-    sLog.outDebug(GetMangosString(LANG_CHANGE_32BIT), Opcode, Value);
+    sLog.outDebug(GetRibonString(LANG_CHANGE_32BIT), Opcode, Value);
 
     int CurrentValue = (int)m_session->GetPlayer( )->GetUInt32Value( Opcode );
 

@@ -1,20 +1,22 @@
 /*
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+* Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+*
+* Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
 
 #include <ace/Message_Block.h>
 #include <ace/OS_NS_string.h>
@@ -110,9 +112,6 @@ m_OverSpeedPings (0),
 m_LastPingTime (ACE_Time_Value::zero)
 {
     reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
-
-    msg_queue()->high_water_mark(8*1024*1024);
-    msg_queue()->low_water_mark(8*1024*1024);
 }
 
 WorldSocket::~WorldSocket (void)
@@ -126,6 +125,10 @@ WorldSocket::~WorldSocket (void)
     closing_ = true;
 
     peer ().close ();
+
+    WorldPacket* pct;
+    while (m_PacketQueue.dequeue_head (pct) == 0)
+        delete pct;
 }
 
 bool WorldSocket::IsClosed (void) const
@@ -167,7 +170,7 @@ int WorldSocket::SendPacket (const WorldPacket& pct)
     // Dump outgoing packet.
     if (sWorldLog.LogWorld ())
     {
-        sWorldLog.Log ("SERVER:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
+        sWorldLog.outTimestampLog ("SERVER:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
                      (uint32) get_handle (),
                      pct.size (),
                      LookupOpcodeName (pct.GetOpcode ()),
@@ -177,43 +180,25 @@ int WorldSocket::SendPacket (const WorldPacket& pct)
         while (p < pct.size ())
         {
             for (uint32 j = 0; j < 16 && p < pct.size (); j++)
-                sWorldLog.Log ("%.2X ", const_cast<WorldPacket&>(pct)[p++]);
+                sWorldLog.outLog ("%.2X ", const_cast<WorldPacket&>(pct)[p++]);
 
-            sWorldLog.Log ("\n");
+            sWorldLog.outLog ("\n");
         }
-
-        sWorldLog.Log ("\n\n");
+        sWorldLog.outLog ("\n");
     }
 
-    ServerPktHeader header(pct.size()+2, pct.GetOpcode());
-    m_Crypt.EncryptSend ((uint8*)header.header, header.getHeaderLength());
-
-    if (m_OutBuffer->space () >= pct.size () + header.getHeaderLength() && msg_queue()->is_empty())
+    if (iSendPacket (pct) == -1)
     {
-        // Put the packet on the buffer.
-        if (m_OutBuffer->copy ((char*) header.header, header.getHeaderLength()) == -1)
-            ACE_ASSERT (false);
+        WorldPacket* npct;
 
-        if (!pct.empty ())
-            if (m_OutBuffer->copy ((char*) pct.contents (), pct.size ()) == -1)
-                ACE_ASSERT (false);
-    }
-    else
-    {
-        // Enqueue the packet.
-        ACE_Message_Block* mb;
+        ACE_NEW_RETURN (npct, WorldPacket (pct), -1);
 
-        ACE_NEW_RETURN(mb, ACE_Message_Block(pct.size () + header.getHeaderLength()), -1);
-
-        mb->copy((char*) header.header, header.getHeaderLength());
-
-        if (!pct.empty ())
-            mb->copy((const char*)pct.contents(), pct.size ());
-
-        if(msg_queue()->enqueue_tail(mb,(ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
+        // NOTE maybe check of the size of the queue can be good ?
+        // to make it bounded instead of unbounded
+        if (m_PacketQueue.enqueue_tail (npct) == -1)
         {
-            sLog.outError("WorldSocket::SendPacket enqueue_tail");
-            mb->release();
+            delete npct;
+            sLog.outError ("WorldSocket::SendPacket: m_PacketQueue.enqueue_tail failed");
             return -1;
         }
     }
@@ -338,7 +323,7 @@ int WorldSocket::handle_output (ACE_HANDLE)
     const size_t send_len = m_OutBuffer->length ();
 
     if (send_len == 0)
-        return handle_output_queue (Guard);
+        return cancel_wakeup_output (Guard);
 
 #ifdef MSG_NOSIGNAL
     ssize_t n = peer ().send (m_OutBuffer->rd_ptr (), send_len, MSG_NOSIGNAL);
@@ -368,71 +353,13 @@ int WorldSocket::handle_output (ACE_HANDLE)
     {
         m_OutBuffer->reset ();
 
-        return handle_output_queue (Guard);
+        if (!iFlushPacketQueue ())
+            return cancel_wakeup_output (Guard);
+        else
+            return schedule_wakeup_output (Guard);
     }
 
     ACE_NOTREACHED (return 0);
-}
-
-int WorldSocket::handle_output_queue (GuardType& g)
-{
-    if(msg_queue()->is_empty())
-        return cancel_wakeup_output(g);
-
-    ACE_Message_Block *mblk;
-
-    if(msg_queue()->dequeue_head(mblk, (ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
-    {
-        sLog.outError("WorldSocket::handle_output_queue dequeue_head");
-        return -1;
-    }
-
-    const size_t send_len = mblk->length ();
-
-#ifdef MSG_NOSIGNAL
-    ssize_t n = peer ().send (mblk->rd_ptr (), send_len, MSG_NOSIGNAL);
-#else
-    ssize_t n = peer ().send (mblk->rd_ptr (), send_len);
-#endif // MSG_NOSIGNAL
-
-    if (n == 0)
-    {
-        mblk->release();
-
-        return -1;
-    }
-    else if (n == -1)
-    {
-        if (errno == EWOULDBLOCK || errno == EAGAIN)
-        {
-            msg_queue()->enqueue_head(mblk, (ACE_Time_Value*) &ACE_Time_Value::zero);
-            return schedule_wakeup_output (g);
-        }
-
-        mblk->release();
-        return -1;
-    }
-    else if (n < send_len) //now n > 0
-    {
-        mblk->rd_ptr (static_cast<size_t> (n));
-
-        if (msg_queue()->enqueue_head(mblk, (ACE_Time_Value*) &ACE_Time_Value::zero) == -1)
-        {
-            sLog.outError("WorldSocket::handle_output_queue enqueue_head");
-            mblk->release();
-            return -1;
-        }
-
-        return schedule_wakeup_output (g);
-    }
-    else //now n == send_len
-    {
-        mblk->release();
-
-        return msg_queue()->is_empty() ? cancel_wakeup_output(g) : ACE_Event_Handler::WRITE_MASK;
-    }
-
-    ACE_NOTREACHED(return -1);
 }
 
 int WorldSocket::handle_close (ACE_HANDLE h, ACE_Reactor_Mask)
@@ -462,15 +389,10 @@ int WorldSocket::Update (void)
     if (closing_)
         return -1;
 
-    if (m_OutActive || (m_OutBuffer->length () == 0 && msg_queue()->is_empty()))
+    if (m_OutActive || m_OutBuffer->length () == 0)
         return 0;
 
-    int ret;
-    do
-        ret = handle_output (get_handle ());
-    while( ret > 0 );
-
-    return ret;
+    return handle_output (get_handle ());
 }
 
 int WorldSocket::handle_input_header (void)
@@ -488,7 +410,7 @@ int WorldSocket::handle_input_header (void)
 
     if ((header.size < 4) || (header.size > 10240) || (header.cmd  > 10240))
     {
-        sLog.outError ("WorldSocket::handle_input_header: client sent mailformed packet size = %d , cmd = %d",
+        sLog.outError ("WorldSocket::handle_input_header: client sent malformed packet size = %d , cmd = %d",
                        header.size, header.cmd);
 
         errno = EINVAL;
@@ -678,7 +600,7 @@ int WorldSocket::ProcessIncoming (WorldPacket* new_pct)
     // Dump received packet.
     if (sWorldLog.LogWorld ())
     {
-        sWorldLog.Log ("CLIENT:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
+        sWorldLog.outTimestampLog ("CLIENT:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
                      (uint32) get_handle (),
                      new_pct->size (),
                      LookupOpcodeName (new_pct->GetOpcode ()),
@@ -688,10 +610,11 @@ int WorldSocket::ProcessIncoming (WorldPacket* new_pct)
         while (p < new_pct->size ())
         {
             for (uint32 j = 0; j < 16 && p < new_pct->size (); j++)
-                sWorldLog.Log ("%.2X ", (*new_pct)[p++]);
-            sWorldLog.Log ("\n");
+                sWorldLog.outLog ("%.2X ", (*new_pct)[p++]);
+
+            sWorldLog.outLog ("\n");
         }
-        sWorldLog.Log ("\n\n");
+        sWorldLog.outLog ("\n");
     }
 
     // like one switch ;)
@@ -746,7 +669,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     uint32 unk2, unk3;
     uint32 BuiltNumberClient;
     uint32 id, security;
-    uint8 expansion = 0;
+    //uint8 expansion = 0;
     LocaleConstant locale;
     std::string account;
     Sha1Hash sha1;
@@ -758,6 +681,16 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     if (recvPacket.size () < (4 + 4 + 1 + 4 + 4 + 20))
     {
         sLog.outError ("WorldSocket::HandleAuthSession: wrong packet size");
+        return -1;
+    }
+
+    if(sWorld.IsClosed())
+    {
+        packet.Initialize(SMSG_AUTH_RESPONSE, 1);
+        packet << uint8(AUTH_REJECT);
+        SendPacket (packet);
+
+        sLog.outError ("WorldSocket::HandleAuthSession: World closed, denying client (%s).", m_Session->GetRemoteAddress());
         return -1;
     }
 
@@ -819,7 +752,11 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
 
     Field* fields = result->Fetch ();
 
-    expansion = ((sWorld.getConfig(CONFIG_EXPANSION) > fields[8].GetUInt8()) ? fields[8].GetUInt8() : sWorld.getConfig(CONFIG_EXPANSION));
+    uint8 expansion = fields[8].GetUInt8();
+    uint32 world_expansion = sWorld.getConfig(CONFIG_EXPANSION);
+    if(expansion > world_expansion)
+        expansion = world_expansion;
+    //expansion = ((sWorld.getConfig(CONFIG_EXPANSION) > fields[8].GetUInt8()) ? fields[8].GetUInt8() : sWorld.getConfig(CONFIG_EXPANSION));
 
     N.SetHexStr ("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword (7);
@@ -890,8 +827,10 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
 
     id = fields[0].GetUInt32 ();
     security = fields[1].GetUInt16 ();
+    /*
     if(security > SEC_ADMINISTRATOR)                        // prevent invalid security settings in DB
         security = SEC_ADMINISTRATOR;
+        */
 
     K.SetHexStr (fields[2].GetString ());
 
@@ -935,7 +874,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
 
         SendPacket (packet);
 
-        sLog.outBasic ("WorldSocket::HandleAuthSession: User tries to login but his security level is not enough");
+        sLog.outDetail ("WorldSocket::HandleAuthSession: User tries to login but his security level is not enough");
         return -1;
     }
 
@@ -1064,3 +1003,54 @@ int WorldSocket::HandlePing (WorldPacket& recvPacket)
     packet << ping;
     return SendPacket (packet);
 }
+
+int WorldSocket::iSendPacket (const WorldPacket& pct)
+{
+    ServerPktHeader header(pct.size()+2, pct.GetOpcode());
+    if (m_OutBuffer->space () < pct.size () + header.getHeaderLength())
+    {
+        errno = ENOBUFS;
+        return -1;
+    }
+ 
+ 
+    m_Crypt.EncryptSend ( header.header, header.getHeaderLength());
+ 
+    if (m_OutBuffer->copy ((char*) header.header, header.getHeaderLength()) == -1)
+        ACE_ASSERT (false);
+
+    if (!pct.empty ())
+        if (m_OutBuffer->copy ((char*) pct.contents (), pct.size ()) == -1)
+            ACE_ASSERT (false);
+
+    return 0;
+}
+
+bool WorldSocket::iFlushPacketQueue ()
+{
+    WorldPacket *pct;
+    bool haveone = false;
+
+    while (m_PacketQueue.dequeue_head (pct) == 0)
+    {
+        if (iSendPacket (*pct) == -1)
+        {
+            if (m_PacketQueue.enqueue_head (pct) == -1)
+            {
+                delete pct;
+                sLog.outError ("WorldSocket::iFlushPacketQueue m_PacketQueue->enqueue_head");
+                return false;
+            }
+
+            break;
+        }
+        else
+        {
+            haveone = true;
+            delete pct;
+        }
+    }
+
+    return haveone;
+}
+
