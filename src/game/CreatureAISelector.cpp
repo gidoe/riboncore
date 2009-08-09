@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,13 +19,14 @@
  */
 
 #include "Creature.h"
-#include "CreatureAIImpl.h"
 #include "CreatureAISelector.h"
 #include "NullCreatureAI.h"
 #include "Policies/SingletonImp.h"
 #include "MovementGenerator.h"
 #include "ScriptCalls.h"
 #include "Pet.h"
+#include "TemporarySummon.h"
+#include "CreatureAIFactory.h"
 
 INSTANTIATE_SINGLETON_1(CreatureAIRegistry);
 INSTANTIATE_SINGLETON_1(MovementGeneratorRegistry);
@@ -32,37 +35,62 @@ namespace FactorySelector
 {
     CreatureAI* selectAI(Creature *creature)
     {
-        // Allow scripting AI for normal creatures and not controlled pets (guardians and mini-pets)
-        if ((!creature->isPet() || !((Pet*)creature)->isControlled()) && !creature->isCharmed())
+        const CreatureAICreator *ai_factory = NULL;
+        CreatureAIRegistry &ai_registry(CreatureAIRepository::Instance());
+
+        if(creature->isPet())
+            ai_factory = ai_registry.GetRegistryItem("PetAI");
+
+        //scriptname in db
+        if(!ai_factory)
             if(CreatureAI* scriptedAI = Script->GetAI(creature))
                 return scriptedAI;
 
-        CreatureAIRegistry &ai_registry(CreatureAIRepository::Instance());
-
-        const CreatureAICreator *ai_factory = NULL;
-
+        // AIname in db
         std::string ainame=creature->GetAIName();
-
-        // select by NPC flags _first_ - otherwise EventAI might be choosen for pets/totems
-        // excplicit check for isControlled() and owner type to allow guardian, mini-pets and pets controlled by NPCs to be scripted by EventAI
-        Unit *owner=NULL;
-        if (creature->isPet() && ((Pet*)creature)->isControlled() &&
-            ((owner=creature->GetOwner()) && owner->GetTypeId()==TYPEID_PLAYER) || creature->isCharmed())
-            ai_factory = ai_registry.GetRegistryItem("PetAI");
-        else if (creature->isTotem())
-            ai_factory = ai_registry.GetRegistryItem("TotemAI");
-
-        // select by script name
-        if (!ai_factory && !ainame.empty())
+        if(!ai_factory && !ainame.empty())
             ai_factory = ai_registry.GetRegistryItem( ainame.c_str() );
 
-        if (!ai_factory && creature->isGuard() )
-            ai_factory = ai_registry.GetRegistryItem("GuardAI");
+        // select by NPC flags
+        if(!ai_factory)
+        {
+            if(creature->HasSummonMask(SUMMON_MASK_CONTROLABLE_GUARDIAN) && ((Guardian*)creature)->GetOwner()->GetTypeId() == TYPEID_PLAYER)
+                ai_factory = ai_registry.GetRegistryItem("PetAI");
+            else if(creature->isVehicle() || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK))
+                ai_factory = ai_registry.GetRegistryItem("NullCreatureAI");
+            else if(creature->isGuard())
+                ai_factory = ai_registry.GetRegistryItem("GuardAI");
+            else if(creature->HasSummonMask(SUMMON_MASK_CONTROLABLE_GUARDIAN))
+                ai_factory = ai_registry.GetRegistryItem("PetAI");
+            else if(creature->isTotem())
+                ai_factory = ai_registry.GetRegistryItem("TotemAI");
+            else if(creature->isTrigger())
+            {
+                if(creature->m_spells[0])
+                    ai_factory = ai_registry.GetRegistryItem("TriggerAI");
+                else
+                    ai_factory = ai_registry.GetRegistryItem("NullCreatureAI");
+            }
+            else if(creature->GetCreatureType() == CREATURE_TYPE_CRITTER && !creature->HasSummonMask(SUMMON_MASK_GUARDIAN))
+                ai_factory = ai_registry.GetRegistryItem("CritterAI");
+        }
+
+        if(!ai_factory)
+        {
+            for(uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
+            {
+                if(creature->m_spells[i])
+                {
+                    ai_factory = ai_registry.GetRegistryItem("SpellAI");
+                    break;
+                }
+            }
+        }
 
         // select by permit check
-        if (!ai_factory)
+        if(!ai_factory)
         {
-            int best_val = PERMIT_BASE_NO;
+            int best_val = -1;
             typedef CreatureAIRegistry::RegistryMapType RMT;
             RMT const &l = ai_registry.GetRegisteredItems();
             for( RMT::const_iterator iter = l.begin(); iter != l.end(); ++iter)
@@ -115,3 +143,4 @@ namespace FactorySelector
 
     }
 }
+

@@ -60,6 +60,7 @@ extern DBCStorage <AchievementEntry>             sAchievementStore;
 extern DBCStorage <AchievementCriteriaEntry>     sAchievementCriteriaStore;
 extern DBCStorage <AreaTableEntry>               sAreaStore;// recommend access using functions
 extern DBCStorage <AreaGroupEntry>               sAreaGroupStore;
+extern DBCStorage <AreaPOIEntry>                 sAreaPOIStore;
 extern DBCStorage <AreaTriggerEntry>             sAreaTriggerStore;
 extern DBCStorage <AuctionHouseEntry>            sAuctionHouseStore;
 extern DBCStorage <BankBagSlotPricesEntry>       sBankBagSlotPricesStore;
@@ -149,12 +150,12 @@ extern DBCStorage <WorldSafeLocsEntry>           sWorldSafeLocsStore;
 void LoadDBCStores(const std::string& dataPath);
 
 // script support functions
-MANGOS_DLL_SPEC DBCStorage <SoundEntriesEntry>          const* GetSoundEntriesStore();
-MANGOS_DLL_SPEC DBCStorage <SpellEntry>                 const* GetSpellStore();
-MANGOS_DLL_SPEC DBCStorage <SpellRangeEntry>            const* GetSpellRangeStore();
-MANGOS_DLL_SPEC DBCStorage <FactionEntry>               const* GetFactionStore();
-MANGOS_DLL_SPEC DBCStorage <ItemEntry>                  const* GetItemDisplayStore();
-MANGOS_DLL_SPEC DBCStorage <CreatureDisplayInfoEntry>   const* GetCreatureDisplayStore();
-MANGOS_DLL_SPEC DBCStorage <EmotesEntry>                const* GetEmotesStore();
-MANGOS_DLL_SPEC DBCStorage <EmotesTextEntry>            const* GetEmotesTextStore();
+RIBON_DLL_SPEC DBCStorage <SoundEntriesEntry>          const* GetSoundEntriesStore();
+RIBON_DLL_SPEC DBCStorage <SpellEntry>                 const* GetSpellStore();
+RIBON_DLL_SPEC DBCStorage <SpellRangeEntry>            const* GetSpellRangeStore();
+RIBON_DLL_SPEC DBCStorage <FactionEntry>               const* GetFactionStore();
+RIBON_DLL_SPEC DBCStorage <ItemEntry>                  const* GetItemDisplayStore();
+RIBON_DLL_SPEC DBCStorage <CreatureDisplayInfoEntry>   const* GetCreatureDisplayStore();
+RIBON_DLL_SPEC DBCStorage <EmotesEntry>                const* GetEmotesStore();
+RIBON_DLL_SPEC DBCStorage <EmotesTextEntry>            const* GetEmotesTextStore();
 #endif

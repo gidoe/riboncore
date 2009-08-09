@@ -1,5 +1,7 @@
 /*
- * Copyright (C) 2009 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+ *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +30,7 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "InstanceData.h"
+#include "SpellMgr.h"
 
 bool CreatureEventAIHolder::UpdateRepeatTimer( Creature* creature, uint32 repeatMin, uint32 repeatMax )
 {
@@ -63,11 +66,11 @@ CreatureEventAI::CreatureEventAI(Creature *c ) : CreatureAI(c)
         {
 
             //Debug check
-            #ifndef MANGOS_DEBUG
+            #ifndef RIBON_DEBUG
             if ((*i).event_flags & EFLAG_DEBUG_ONLY)
                 continue;
             #endif
-            if (m_creature->GetMap()->IsDungeon())
+            if(((*i).event_flags & (EFLAG_HEROIC | EFLAG_NORMAL)) && m_creature->GetMap()->IsDungeon() )
             {
                 if( (m_creature->GetMap()->IsHeroic() && (*i).event_flags & EFLAG_HEROIC) ||
                     (!m_creature->GetMap()->IsHeroic() && (*i).event_flags & EFLAG_NORMAL))
@@ -102,7 +105,6 @@ CreatureEventAI::CreatureEventAI(Creature *c ) : CreatureAI(c)
             if (SpawnedEventConditionsCheck((*i).Event))
                 ProcessEvent(*i);
     }
-    Reset();
 }
 
 bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvoker)
@@ -463,9 +465,8 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             // If cast flag CAST_AURA_NOT_PRESENT is active, check if target already has aura on them
             if(action.cast.castFlags & CAST_AURA_NOT_PRESENT)
             {
-                for(uint8 i = 0; i < 3; ++i)
-                    if(target->HasAura(action.cast.spellId, i))
-                        return;
+                if(target->HasAura(action.cast.spellId))
+                    return;
             }
 
             if (canCast)
@@ -487,7 +488,6 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                                 AttackDistance = 0.0f;
                                 AttackAngle = 0.0f;
 
-                                m_creature->GetMotionMaster()->Clear(false);
                                 m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), AttackDistance, AttackAngle);
                             }
                         }
@@ -585,11 +585,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                     if(Unit* victim = m_creature->getVictim())
                         m_creature->SendMeleeAttackStart(victim);
 
-                if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
-                {
-                    m_creature->GetMotionMaster()->Clear(false);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), AttackDistance, AttackAngle);
-                }
+                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), AttackDistance, AttackAngle);
             }
             else
             {
@@ -597,12 +593,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                     if(Unit* victim = m_creature->getVictim())
                         m_creature->SendMeleeAttackStop(victim);
 
-                if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE)
-                {
-                    m_creature->GetMotionMaster()->Clear(false);
-                    m_creature->GetMotionMaster()->MoveIdle();
-                    m_creature->StopMoving();
-                }
+                m_creature->GetMotionMaster()->MoveIdle();
             }
             break;
         case ACTION_T_SET_PHASE:
@@ -659,12 +650,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
 
             if (CombatMovementEnabled)
             {
-                if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE)
-                {
-                    //Drop current movement gen
-                    m_creature->GetMotionMaster()->Clear(false);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), AttackDistance, AttackAngle);
-                }
+                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), AttackDistance, AttackAngle);
             }
             break;
         case ACTION_T_RANDOM_PHASE:
@@ -772,6 +758,32 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_creature->CallForHelp(action.call_for_help.radius);
             break;
         }
+        break;
+
+        // RIBON ONLY
+        case ACTION_T_SET_ACTIVE:
+            me->setActive(action.raw.param1 ? true : false);
+            break;
+        case ACTION_T_SET_AGGRESSIVE:
+            me->SetReactState(ReactStates(action.raw.param1));
+            break;
+        case ACTION_T_ATTACK_START_PULSE:
+            AttackStart(me->SelectNearestTarget((float)action.raw.param1));
+            break;
+        case ACTION_T_SUMMON_GO:
+        {
+            GameObject* pObject = NULL;
+
+            float x,y,z;
+            m_creature->GetPosition(x,y,z);
+            pObject = m_creature->SummonGameObject(action.raw.param1, x, y, z, 0, 0, 0, 0, 0, action.raw.param2);
+            if (!pObject)
+            {
+                sLog.outErrorDb("RSCR: EventAI failed to spawn object %u. Spawn event %d is on creature %d", action.raw.param1, EventId, m_creature->GetEntry());
+            }
+            break;
+        }
+
         case ACTION_T_SET_SHEATH:
         {
             m_creature->SetSheath(SheathState(action.set_sheath.sheath));
@@ -828,7 +840,7 @@ void CreatureEventAI::Reset()
                 break;
             }
             //default:
-            //TODO: enable below code line / verify this is correct to enable events previously disabled (ex. aggro yell), instead of enable this in void Aggro()
+            //TODO: enable below code line / verify this is correct to enable events previously disabled (ex. aggro yell), instead of enable this in void EnterCombat()
             //(*i).Enabled = true;
             //(*i).Time = 0;
             //break;
@@ -854,16 +866,7 @@ void CreatureEventAI::JustReachedHome()
 
 void CreatureEventAI::EnterEvadeMode()
 {
-    m_creature->ExitVehicle();
-    m_creature->RemoveAllAuras();
-    m_creature->DeleteThreatList();
-    m_creature->CombatStop(true);
-
-    if (m_creature->isAlive())
-        m_creature->GetMotionMaster()->MoveTargetedHome();
-
-    m_creature->SetLootRecipient(NULL);
-    m_creature->ResetObtainedDamage();
+    CreatureAI::EnterEvadeMode();
 
     if (bEmptyList)
         return;
@@ -957,10 +960,6 @@ void CreatureEventAI::AttackStart(Unit *who)
 
     if (m_creature->Attack(who, MeleeEnabled))
     {
-        m_creature->AddThreat(who, 0.0f);
-        m_creature->SetInCombatWith(who);
-        who->SetInCombatWith(m_creature);
-
         if (CombatMovementEnabled)
         {
             m_creature->GetMotionMaster()->MoveChase(who, AttackDistance, AttackAngle);
@@ -968,18 +967,17 @@ void CreatureEventAI::AttackStart(Unit *who)
         else
         {
             m_creature->GetMotionMaster()->MoveIdle();
-            m_creature->StopMoving();
         }
     }
 }
 
 void CreatureEventAI::MoveInLineOfSight(Unit *who)
 {
-    if (!who)
+    if(me->getVictim())
         return;
 
     //Check for OOC LOS Event
-    if (!bEmptyList && !m_creature->getVictim())
+    if (!bEmptyList)
     {
         for (std::list<CreatureEventAIHolder>::iterator itr = CreatureEventAIList.begin(); itr != CreatureEventAIList.end(); ++itr)
         {
@@ -1000,30 +998,12 @@ void CreatureEventAI::MoveInLineOfSight(Unit *who)
         }
     }
 
-    if (m_creature->isCivilian() || m_creature->IsNeutralToAll())
-        return;
-
-    if (!m_creature->hasUnitState(UNIT_STAT_STUNNED) && who->isTargetableForAttack() &&
-        m_creature->IsHostileTo(who) && who->isInAccessablePlaceFor(m_creature))
-    {
-        if (!m_creature->canFly() && m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
-            return;
-
-        float attackRadius = m_creature->GetAttackDistance(who);
-        if (m_creature->IsWithinDistInMap(who, attackRadius) && m_creature->IsWithinLOSInMap(who))
-        {
-            if (!m_creature->getVictim())
-            {
-                AttackStart(who);
-                who->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-            }
-            else if (m_creature->GetMap()->IsDungeon())
-            {
-                m_creature->AddThreat(who, 0.0f);
-                who->SetInCombatWith(m_creature);
-            }
-        }
-    }
+    if(me->canStartAttack(who, false))
+        AttackStart(who);
+    else if(who->getVictim() && me->IsFriendlyTo(who)
+        && me->IsWithinDistInMap(who, sWorld.getConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS))
+        && me->canStartAttack(who->getVictim(), true))
+        AttackStart(who->getVictim());
 }
 
 void CreatureEventAI::SpellHit(Unit* pUnit, const SpellEntry* pSpell)
@@ -1043,11 +1023,7 @@ void CreatureEventAI::SpellHit(Unit* pUnit, const SpellEntry* pSpell)
 void CreatureEventAI::UpdateAI(const uint32 diff)
 {
     //Check if we are in combat (also updates calls threat update code)
-    bool Combat = m_creature->SelectHostilTarget() && m_creature->getVictim();
-
-    //Must return if creature isn't alive. Normally select hostil target and get victim prevent this
-    if (!m_creature->isAlive())
-        return;
+    bool Combat = UpdateVictim();
 
     if (!bEmptyList)
     {
@@ -1086,11 +1062,11 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
                     case EVENT_T_TARGET_HP:
                     case EVENT_T_TARGET_CASTING:
                     case EVENT_T_FRIENDLY_HP:
-                        if (Combat)
+                        if (me->getVictim())
                             ProcessEvent(*i);
                         break;
                     case EVENT_T_RANGE:
-                        if (Combat)
+                        if (me->getVictim())
                             if (m_creature->IsInMap(m_creature->getVictim()))
                                 if (m_creature->IsInRange(m_creature->getVictim(),(float)(*i).Event.range.minDist,(float)(*i).Event.range.maxDist))
                                     ProcessEvent(*i);
@@ -1111,12 +1087,6 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
     //Melee Auto-Attack
     if (Combat && MeleeEnabled)
         DoMeleeAttackIfReady();
-}
-
-bool CreatureEventAI::IsVisible(Unit *pl) const
-{
-    return m_creature->IsWithinDist(pl,sWorld.getConfig(CONFIG_SIGHT_MONSTER))
-        && pl->isVisibleForOrDetect(m_creature,true);
 }
 
 inline Unit* CreatureEventAI::SelectUnit(AttackingTarget target, uint32 position)
@@ -1214,7 +1184,7 @@ Unit* CreatureEventAI::DoSelectLowestHpFriendly(float range, uint32 MinHPDiff)
     TypeContainerVisitor<MaNGOS::UnitLastSearcher<MaNGOS::MostHPMissingInRange>, GridTypeMapContainer >  grid_unit_searcher(searcher);
 
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, grid_unit_searcher, *m_creature->GetMap(), *m_creature, range);
+    cell_lock->Visit(cell_lock, grid_unit_searcher, *m_creature->GetMap());
     return pUnit;
 }
 
@@ -1231,7 +1201,7 @@ void CreatureEventAI::DoFindFriendlyCC(std::list<Creature*>& _list, float range)
     TypeContainerVisitor<MaNGOS::CreatureListSearcher<MaNGOS::FriendlyCCedInRange>, GridTypeMapContainer >  grid_creature_searcher(searcher);
 
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, grid_creature_searcher, *m_creature->GetMap(), *m_creature, range);
+    cell_lock->Visit(cell_lock, grid_creature_searcher, *m_creature->GetMap());
 }
 
 void CreatureEventAI::DoFindFriendlyMissingBuff(std::list<Creature*>& _list, float range, uint32 spellid)
@@ -1247,7 +1217,7 @@ void CreatureEventAI::DoFindFriendlyMissingBuff(std::list<Creature*>& _list, flo
     TypeContainerVisitor<MaNGOS::CreatureListSearcher<MaNGOS::FriendlyMissingBuffInRange>, GridTypeMapContainer >  grid_creature_searcher(searcher);
 
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, grid_creature_searcher, *m_creature->GetMap(), *m_creature, range);
+    cell_lock->Visit(cell_lock, grid_creature_searcher, *m_creature->GetMap());
 }
 
 //*********************************
@@ -1327,20 +1297,6 @@ void CreatureEventAI::DoScriptText(int32 textEntry, WorldObject* pSource, Unit* 
     }
 }
 
-void CreatureEventAI::DoMeleeAttackIfReady()
-{
-    //Make sure our attack is ready before checking distance
-    if (m_creature->isAttackReady())
-    {
-        //If we are within range melee the target
-        if (m_creature->IsWithinDistInMap(m_creature->getVictim(), ATTACK_DISTANCE))
-        {
-            m_creature->AttackerStateUpdate(m_creature->getVictim());
-            m_creature->resetAttackTimer();
-        }
-    }
-}
-
 bool CreatureEventAI::CanCast(Unit* Target, SpellEntry const *Spell, bool Triggered)
 {
     //No target so we can't cast
@@ -1348,11 +1304,11 @@ bool CreatureEventAI::CanCast(Unit* Target, SpellEntry const *Spell, bool Trigge
         return false;
 
     //Silenced so we can't cast
-    if (!Triggered && m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
+    if (!Triggered && me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
         return false;
 
     //Check for power
-    if (!Triggered && m_creature->GetPower((Powers)Spell->powerType) < Spell->manaCost)
+    if (!Triggered && me->GetPower((Powers)Spell->powerType) < CalculatePowerCost(Spell, me, GetSpellSchoolMask(Spell)))
         return false;
 
     SpellRangeEntry const *TempRange = NULL;
@@ -1364,7 +1320,7 @@ bool CreatureEventAI::CanCast(Unit* Target, SpellEntry const *Spell, bool Trigge
         return false;
 
     //Unit is out of range of this spell
-    if (!m_creature->IsInRange(Target,TempRange->minRange,TempRange->maxRange))
+    if (!m_creature->IsInRange(Target,TempRange->minRangeHostile,TempRange->maxRangeHostile))
         return false;
 
     return true;

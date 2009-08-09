@@ -36,7 +36,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Texts()
     m_CreatureEventAI_TextMap.clear();
 
     // Load EventAI Text
-    objmgr.LoadMangosStrings(WorldDatabase,"creature_ai_texts",MIN_CREATURE_AI_TEXT_STRING_ID,MAX_CREATURE_AI_TEXT_STRING_ID);
+    objmgr.LoadRibonStrings(WorldDatabase,"creature_ai_texts",MIN_CREATURE_AI_TEXT_STRING_ID,MAX_CREATURE_AI_TEXT_STRING_ID);
 
     // Gather Additional data from EventAI Texts
     QueryResult *result = WorldDatabase.Query("SELECT entry, sound, type, language, emote FROM creature_ai_texts");
@@ -67,7 +67,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Texts()
             }
 
             // range negative (don't must be happen, loaded from same table)
-            if (!objmgr.GetMangosStringLocale(i))
+            if (!objmgr.GetRibonStringLocale(i))
             {
                 sLog.outErrorDb("CreatureEventAI:  Entry %i in table `creature_ai_texts` not found",i);
                 continue;
@@ -544,7 +544,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_QUEST_EVENT:
                         if (Quest const* qid = objmgr.GetQuestTemplate(action.quest_event.questId))
                         {
-                            if (!qid->HasFlag(QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT))
+                            if (!qid->HasFlag(QUEST_RIBON_FLAGS_EXPLORATION_OR_EVENT))
                                 sLog.outErrorDb("CreatureEventAI:  Event %u Action %u. SpecialFlags for quest entry %u does not include |2, Action will not have any effect.", i, j+1, action.quest_event.questId);
                         }
                         else
@@ -586,7 +586,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_QUEST_EVENT_ALL:
                         if (Quest const* qid = objmgr.GetQuestTemplate(action.quest_event_all.questId))
                         {
-                            if (!qid->HasFlag(QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT))
+                            if (!qid->HasFlag(QUEST_RIBON_FLAGS_EXPLORATION_OR_EVENT))
                                 sLog.outErrorDb("CreatureEventAI:  Event %u Action %u. SpecialFlags for quest entry %u does not include |2, Action will not have any effect.", i, j+1, action.quest_event_all.questId);
                         }
                         else
@@ -687,6 +687,13 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_RANDOM_TEXTEMOTE:
                         sLog.outErrorDb("CreatureEventAI:  Event %u Action %u currently unused ACTION type. Did you forget to update database?", i, j+1);
                         break;
+
+                    case ACTION_T_SET_ACTIVE:
+                    case ACTION_T_SET_AGGRESSIVE:
+                    case ACTION_T_ATTACK_START_PULSE:
+                    case ACTION_T_SUMMON_GO:
+                        break;
+
                     default:
                         sLog.outErrorDb("CreatureEventAI:  Event %u Action %u have currently not checked at load action type (%u). Need check code update?", i, j+1, temp.action[j].type);
                         break;
@@ -696,6 +703,25 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
             //Add to list
             m_CreatureEventAI_Event_Map[creature_id].push_back(temp);
             ++Count;
+
+            if(CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(temp.creature_id))
+            {
+                if(!cInfo->AIName || !cInfo->AIName[0])
+                {
+                    //sLog.outErrorDb("CreatureEventAI: Creature Entry %u has EventAI script but its AIName is empty. Set to EventAI as default.", cInfo->Entry);
+                    size_t len = strlen("EventAI")+1;
+                    const_cast<CreatureInfo*>(cInfo)->AIName = new char[len];
+                    strncpy(const_cast<char*>(cInfo->AIName), "EventAI", len);
+                }
+                if(strcmp(cInfo->AIName, "EventAI"))
+                {
+                    //sLog.outErrorDb("CreatureEventAI: Creature Entry %u has EventAI script but it has AIName %s. EventAI script will be overriden.", cInfo->Entry, cInfo->AIName);
+                }
+                if(cInfo->ScriptID)
+                {
+                    //sLog.outErrorDb("CreatureEventAI: Creature Entry %u has EventAI script but it also has C++ script. EventAI script will be overriden.", cInfo->Entry);
+                }
+            }            
         } while (result->NextRow());
 
         delete result;

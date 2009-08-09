@@ -105,9 +105,15 @@ enum EventAI_ActionType
     ACTION_T_ZONE_COMBAT_PULSE          = 38,               // No Params
     ACTION_T_CALL_FOR_HELP              = 39,               // Radius
     ACTION_T_SET_SHEATH                 = 40,               // Sheath (0-passive,1-melee,2-ranged)
+
+    ACTION_T_SET_ACTIVE                 = 101,  //Apply
+    ACTION_T_SET_AGGRESSIVE             = 102,  //Apply
+    ACTION_T_ATTACK_START_PULSE         = 103,  //Distance
+    ACTION_T_SUMMON_GO                  = 104,  //GameObjectID, DespawnTime in ms
+
     ACTION_T_FORCE_DESPAWN              = 41,               // No Params
+    ACTION_T_END = 105,
     ACTION_T_SET_INVINCIBILITY_HP_LEVEL = 42,               // MinHpValue, format(0-flat,1-percent from max health)
-    ACTION_T_END,
 };
 
 enum Target
@@ -562,7 +568,7 @@ struct CreatureEventAIHolder
     bool UpdateRepeatTimer(Creature* creature, uint32 repeatMin, uint32 repeatMax);
 };
 
-class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
+class RIBON_DLL_SPEC CreatureEventAI : public CreatureAI
 {
 
     public:
@@ -584,7 +590,6 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         void SpellHit(Unit* pUnit, const SpellEntry* pSpell);
         void DamageTaken(Unit* done_by, uint32& damage);
         void UpdateAI(const uint32 diff);
-        bool IsVisible(Unit *) const;
         void ReceiveEmote(Player* pPlayer, uint32 text_emote);
         static int Permissible(const Creature *);
 
@@ -596,7 +601,6 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         inline Unit* SelectUnit(AttackingTarget target, uint32 position);
 
         void DoScriptText(int32 textEntry, WorldObject* pSource, Unit* target);
-        void DoMeleeAttackIfReady();
         bool CanCast(Unit* Target, SpellEntry const *Spell, bool Triggered);
 
         bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event);
