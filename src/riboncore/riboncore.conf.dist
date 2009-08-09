@@ -1,18 +1,18 @@
-#####################################
-# MaNGOS Configuration file         #
-#####################################
-ConfVersion=2009072801
+##########################################
+#  RibonCore worldd configuration file   #
+##########################################
+ConfVersion=2009032201
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
 #
 #    RealmID
-#        RealmID must match the realmlist inside the realmd database
+#        RealmID must match the realmlist inside the logon database
 #
 #    DataDir
 #        Data directory setting.
 #        Important: DataDir needs to be quoted, as it is a string which may contain space characters.
-#        Example: "@prefix@/share/mangos"
+#        Example: "@prefix@/share/riboncore"
 #
 #    LogsDir
 #        Logs directory setting.
@@ -24,7 +24,6 @@ ConfVersion=2009072801
 #    LoginDatabaseInfo
 #    WorldDatabaseInfo
 #    CharacterDatabaseInfo
-#    ScriptsDatabaseInfo
 #        Database connection settings for the world server.
 #        Default:
 #                ---MYSQL---
@@ -50,13 +49,27 @@ ConfVersion=2009072801
 RealmID = 1
 DataDir = "Data"
 LogsDir = "Logs"
-LoginDatabaseInfo     = "127.0.0.1;3306;root;mangos;realmd"
-WorldDatabaseInfo     = "127.0.0.1;3306;root;mangos;mangos"
-CharacterDatabaseInfo = "127.0.0.1;3306;root;mangos;characters"
-ScriptsDatabaseInfo   = "127.0.0.1;3306;root;mangos;mangos"
+LoginDatabaseInfo     = "127.0.0.1;3306;ribon;ribon;realmd"
+WorldDatabaseInfo     = "127.0.0.1;3306;ribon;ribon;world"
+CharacterDatabaseInfo = "127.0.0.1;3306;ribon;ribon;characters"
 MaxPingTime = 30
 WorldServerPort = 8085
 BindIP = "0.0.0.0"
+
+###################################################################################################################
+# SCRIPTING SETTINGS
+#
+# Locale
+#     Setting for current (DBC) locale to use
+#
+# EventAI Error reporting
+# 0 - Only startup (Default)
+# 1 - Startup errors and Runtime event errors
+# 2 - Startup errors, Runtime event errors, and Creation errors
+###################################################################################################################
+
+Locale = 0
+EAIErrorLevel = 2
 
 ###################################################################################################################
 # PERFORMANCE SETINGS
@@ -133,7 +146,12 @@ BindIP = "0.0.0.0"
 #    vmap.ignoreSpellIds
 #        These spells are ignored for LoS calculation
 #        List of ids with delimiter ','
-#
+#        
+#    vmap.petLOS
+#        Check LOS for pets, to avoid them going through walls etc.
+#        Default: 0 (disable, less CPU usage)
+#                 1 (enable, each pet attack command will check for LOS)
+#       
 #    DetectPosCollision
 #        Check final move position, summon position, etc for visible collision with other objects or
 #        wall (wall only if vmaps are enabled)
@@ -150,6 +168,15 @@ BindIP = "0.0.0.0"
 #        Update realm uptime period in minutes (for save data in 'uptime' table). Must be > 0
 #        Default: 10 (minutes)
 #
+#    LogDB.Opt.ClearInterval
+#        Time for the WUPDATE_CLEANDB timer that clears the `logs` table of old entries. Must be > 0.
+#        Default: 10 (minutes)
+#
+#    LogDB.Opt.ClearTime
+#        The maximum time in seconds of old `logs` table entries to keep.
+#        Default: 1209600 (14 days)
+#                 0 - don't clear
+#
 #    MaxCoreStuckTime
 #        Periodically check if the process got freezed, if this is the case force crash after the specified
 #        amount of seconds. Must be > 0. Recommended > 10 secs if you use this.
@@ -161,14 +188,10 @@ BindIP = "0.0.0.0"
 #        Default: 1 (permit addon channel)
 #                 0 (do not permit addon channel)
 #
-#    RecordUpdateTimeDiffInterval
-#        record update time diff to the log file
-#        update diff can be used as a criterion of performance
-#        diff < 300: good performance
-#        diff > 600: bad performance, may be caused by high cpu usage
-#        Default: 60000 (diff is written into log every 60000 ms or 1 minute.
-#        >0 = Interval
-#        0 = Disable
+#    MapUpdate.Threads
+#	Number of threads to update maps.
+#	Default: 1
+#
 ###################################################################################################################
 
 UseProcessors = 0
@@ -177,7 +200,7 @@ Compression = 1
 PlayerLimit = 100
 SaveRespawnTimeImmediately = 1
 MaxOverspeedPings = 2
-GridUnload = 0
+GridUnload = 1
 SocketSelectTime = 10000
 GridCleanUpDelay = 300000
 MapUpdateInterval = 100
@@ -187,26 +210,15 @@ vmap.enableLOS = 0
 vmap.enableHeight = 0
 vmap.ignoreMapIds = "369"
 vmap.ignoreSpellIds = "7720"
+vmap.petLOS = 0
 DetectPosCollision = 1
 TargetPosRecalculateRange = 1.5
 UpdateUptimeInterval = 10
+LogDB.Opt.ClearInterval = 10
+LogDB.Opt.ClearTime = 1209600
 MaxCoreStuckTime = 0
 AddonChannel = 1
-RecordUpdateTimeDiffInterval = 60000
-
-###################################################################################################################
-# OpenMP Config
-#
-#    OpenMP
-#    MapUpdate.Threads
-#        Number of threads to run if the binary was compiled with OpenMP support.
-#        Default: 4 (recommend)
-#        If online 2000+ : 8
-#        1 (minimum, normal behavior (single-threaded updates)
-#
-###################################################################################################################
-
-MapUpdate.Threads = 4
+MapUpdate.Threads = 1
 
 ###################################################################################################################
 # SERVER LOGGING
@@ -225,18 +237,18 @@ MapUpdate.Threads = 4
 #
 #    LogLevel
 #        Server console level of logging
-#        0 = Minimum; 1 = Basic&Error; 2 = Detail; 3 = Full/Debug
+#        0 = Minimum; 1 = Basic; 2 = Detail; 3 = Full/Debug
 #        Default: 3
-#
-#    LogTime
-#        Include time in server console output [hh:mm:ss]
-#        Default: 0 (no time)
-#                 1 (print time)
 #
 #    LogFile
 #        Logfile name
 #        Default: "Server.log"
 #                 "" - Empty name disable creating log file
+#
+#    ChatLogFile
+#        Log file for chat logs
+#        Default: "chat.log"
+#                 "" - Empty name for disable
 #
 #    LogTimestamp
 #        Logfile with timestamp of server start in name
@@ -245,7 +257,7 @@ MapUpdate.Threads = 4
 #
 #    LogFileLevel
 #        Server file level of logging
-#        0 = Minimum; 1 = Error; 2 = Detail; 3 = Full/Debug
+#        0 = Minimum; 1 = Basic; 2 = Detail; 3 = Full/Debug
 #        Default: 0
 #
 #    LogFilter_AchievementUpdates
@@ -282,8 +294,9 @@ MapUpdate.Threads = 4
 #                 1 - include dumping chars to log
 #
 #    GmLogFile
-#        GM Log file of gm commands
-#        Default: "" (Disable)
+#        Log file of gm commands
+#        Default: "gm_commands.log"
+#                 "" - Empty name for disable
 #
 #    GmLogTimestamp
 #        GM Logfile with timestamp of server start in name
@@ -302,108 +315,138 @@ MapUpdate.Threads = 4
 #        Default: "Ra.log"
 #                 "" - Empty name for disable
 #
+#	ArenaLogFile
+#        Log file of arena fights and arena team creations
+#        Default: "" - do not create arena log file
+#
 #    LogColors
-#        Color for messages (format "normal_color details_color debug_color error_color")
+#        Color for messages (format "normal basic detail debug")
 #        Colors: 0 - BLACK, 1 - RED, 2 - GREEN,  3 - BROWN, 4 - BLUE, 5 - MAGENTA, 6 -  CYAN, 7 - GREY,
 #                8 - YELLOW, 9 - LRED, 10 - LGREEN, 11 - LBLUE, 12 - LMAGENTA, 13 - LCYAN, 14 - WHITE
 #        Default: "" - none colors
-#        Example: "13 7 11 9"
+#        Example: "13 11 9 5"
+#
+#    EnableLogDB
+#        Enable/disable logging to database (LogDatabaseInfo).
+#        Default: 0 - disabled
+#                 1 - enabled
+#
+#    DBLogLevel
+#        Log level of DB logging.
+#        0 = Minimum; 1 = Basic; 2 = Detail; 3 = Full/Debug
+#        Default: 3
+#
+#    LogDB.Char
+#        Enable/disable logging character outputs to DB.
+#        Default: 0 - off
+#                 1 - on
+#
+#    LogDB.GM
+#        Enable/disable logging GM commands to DB.
+#        Default: 0 - off
+#                 1 - on
+#
+#    LogDB.RA
+#        Enable/disable logging remote access events to DB.
+#        Default: 0 - off
+#                 1 - on
+#
+#    LogDB.World
+#        Enable/disable logging world packets to DB.
+#        Default: 0 - off
+#                 1 - on (very heavy)
+#
+#    LogDB.Chat
+#        Enable/disable logging chat messages to the database.
+#        Default: 0 - off
+#                 1 - on
+#
+#    ChatLogs.Channel
+#        Enable logging chatting in custom channels.
+#        Default: 0 - off
+#                 1 - on
+#
+#    ChatLogs.Whisper
+#        Enable logging whispers between players.
+#        Default: 0 - off
+#                 1 - on
+#
+#    ChatLogs.Party
+#        Enable logging party messages.
+#        Default: 0 - off
+#                 1 - on
+#
+#    ChatLogs.Raid
+#        Enable logging raid messages.
+#        Default: 0 - off
+#                 1 - on
+#
+#    ChatLogs.Guild
+#        Enable logging guild messages.
+#        Default: 0 - off
+#                 1 - on
+#
+#    ChatLogs.Public
+#        Enable logging public chat events (say/yell/emote).
+#        Default: 0 - off
+#                 1 - on
+#
+#    ChatLogs.Addon
+#        Enable logging addon messages.
+#        Default: 0 - off
+#                 1 - on
+#
+#    ChatLogs.BattleGround
+#        Enable logging battleground chats.
+#        Default: 0 - off
+#                 1 - on
+#
+#    ChatLogTimestamp
+#        Chat Logfile with timestamp of server start in name
+#        Default: 0 - no timestamp in name
+#                 1 - add timestamp in name in form Logname_YYYY-MM-DD_HH-MM-SS.Ext for Logname.Ext
 #
 ###################################################################################################################
 
 LogSQL = 1
 PidFile = ""
-LogLevel = 3
-LogTime = 0
+LogLevel = 1
 LogFile = "Server.log"
+ChatLogFile = "chat.log"
 LogTimestamp = 0
 LogFileLevel = 0
 LogFilter_AchievementUpdates = 1
 LogFilter_CreatureMoves = 1
 LogFilter_TransportMoves = 1
 LogFilter_VisibilityChanges = 1
-WorldLogFile = ""
-DBErrorLogFile = "DBErrors.log"
-CharLogFile = "Char.log"
+WorldLogFile = "world.log"
+DBErrorLogFile = "db_errors.log"
+CharLogFile = "characters.log"
 CharLogTimestamp = 0
 CharLogDump = 0
-GmLogFile = ""
+GmLogFile = "gm_commands.log"
 GmLogTimestamp = 0
 GmLogPerAccount = 0
-RaLogFile = ""
-LogColors = "10 2 1 9"
-
-# Chat log parameters
-ChatLogEnable = 1
-
-# If this is enabled, all $d in file names are replaced with current date
-# This does include innormative lexics log
-ChatLogDateSplit = 1
-
-# If this is enabled, UTF8 header is written into new files
-ChatLogUTFHeader = 1
-
-# If this is enabled, chat log will ignore messages with unprintable chars
-ChatLogIgnoreUnprintable = 1
-
-# Chat log files
-ChatLogChatFile = /set/to/your/path/Logs/main_chat-$d.log
-ChatLogPartyFile = /set/to/your/path/Logs/party_chat-$d.log
-ChatLogGuildFile = /set/to/your/path/Logs/guild_chat-$d.log
-ChatLogWhisperFile = /set/to/your/path/Logs/whisper_chat-$d.log
-ChatLogChannelFile = /set/to/your/path/Logs/channel_chat-$d.log
-ChatLogRaidFile = /set/to/your/path/Logs/raid_chat-$d.log
-ChatLogBattleGroundFile = /set/to/your/path/Logs/bg_chat-$d.log
-
-# Chat log screen logging
-ChatLogChatScreen = 0
-ChatLogPartyScreen = 0
-ChatLogGuildScreen = 0
-ChatLogWhisperScreen = 0
-ChatLogChannelScreen = 0
-ChatLogRaidScreen = 0
-ChatLogBattleGroundScreen = 0
-
-# Lexics cutter parameters
-LexicsCutterEnable = 1
-
-LexicsCutterInnormativeCut = 1
-LexicsCutterCutReplacement = &!@^%!^&*!!!
-LexicsCutterLogFile = Logs/innormative-$d.log
-LexicsCutterScreenLog = 0
-LexicsCutterAnalogsFile = Logs/letter_analogs.txt
-LexicsCutterWordsFile = Logs/innormative_words.txt
-
-# Where to cut lexics
-LexicsCutInChat = 1
-LexicsCutInParty = 1
-LexicsCutInGuild = 1
-LexicsCutInWhisper = 1
-LexicsCutInChannel = 1
-LexicsCutInRaid = 1
-LexicsCutInBattleGround = 1
-
-# Ignore word spaces like: W O R D
-LexicsCutterIgnoreSpaces = 1
-
-# Ignore repeats like: WWOOOORRRRRD
-LexicsCutterIgnoreRepeats = 1
-
-# --- Action:
-# ---   0: log only
-# ---   1: sheep
-# ---   2: stun
-# ---   3: kill
-# ---   4: leave 5 health
-# ---   5: disable chat
-# ---   6: stuck (works as stun + 50% health) [by KAPATEJIb]
-# ---   7: resurrection sickness [by Koshei]
-# ---   8: shear [by Koshei]
-LexicsCutterAction = 0
-LexicsCutterActionDuration = 60000
-
-# Do not perform action on GM if this is enabled
-LexicsCutterNoActionOnGM = 1
+RaLogFile = "ra_commands.log"
+ArenaLogFile = "arena.log"
+LogColors = ""
+EnableLogDB = 0
+DBLogLevel = 1
+LogDB.Char   = 0
+LogDB.GM     = 0
+LogDB.RA     = 0
+LogDB.World  = 0
+LogDB.Chat   = 0
+ChatLogs.Channel      = 0
+ChatLogs.SysChan      = 0
+ChatLogs.Whisper      = 0
+ChatLogs.Party        = 0
+ChatLogs.Raid         = 0
+ChatLogs.Guild        = 0
+ChatLogs.Public       = 0
+ChatLogs.Addon        = 0
+ChatLogs.BattleGround = 0
+ChatLogTimestamp = 0
 
 ###################################################################################################################
 # SERVER SETTINGS
@@ -511,6 +554,10 @@ LexicsCutterNoActionOnGM = 1
 #                 1 - disabled only for Alliance
 #                 2 - disabled only for Horde
 #                 3 - disabled for both teams
+#
+#    MaxWhoListReturns
+#        Set the maximum number of players returned in the /who list and interface.
+#        Default: 49 (stable)
 #
 #    CharactersPerAccount
 #        Limit numbers of characters per account (at all realms).
@@ -671,23 +718,29 @@ LexicsCutterNoActionOnGM = 1
 #                 1 (true)
 #
 #    BeepAtStart
-#        Beep at mangosd start finished (mostly work only at Unix/Linux systems)
+#        Beep at core start finished (mostly work only at Unix/Linux systems)
 #        Default: 1 (true)
 #                 0 (false)
 #
 #    Motd
 #        Message of the Day. Displayed at worldlogin for every user ('@' for a newline).
 #
+#    Server.LoginInfo
+#        Enable/disable sending server info (core version) on login.
+#        Default: 0 - disable
+#                 1 - enable
+#
 ###################################################################################################################
 
 GameType = 1
-RealmZone = 9
+RealmZone = 1
 Expansion = 2
 DBC.Locale = 255
 DeclinedNames = 0
 StrictPlayerNames = 0
 StrictCharterNames = 0
 StrictPetNames = 0
+MaxWhoListReturns = 49
 MinPlayerName = 2
 MinCharterName = 2
 MinPetName = 2
@@ -726,7 +779,8 @@ SkillChance.Milling = 0
 OffhandCheckAtTalentsReset = 0
 Event.Announce = 0
 BeepAtStart = 1
-Motd = "Welcome to the UECore Test Server."
+Motd = "Welcome to a Ribon Core Server."
+Server.LoginInfo = 1
 
 ###################################################################################################################
 # PLAYER INTERACTION
@@ -757,6 +811,11 @@ Motd = "Welcome to the UECore Test Server."
 #        Default: 0 (Not allowed)
 #                 1 (Allowed)
 #
+#    AllowTwoSide.Trade
+#        Allow or not trading with other team in party.
+#        Default: 0 (Not allowed)
+#                 1 (Allowed)
+#
 #    TalentsInspecting
 #        Allow other players see character talents in inspect dialog (Characters in Gamemaster mode can
 #        inspect talents always)
@@ -774,6 +833,7 @@ AllowTwoSide.Interaction.Auction = 0
 AllowTwoSide.Interaction.Mail = 0
 AllowTwoSide.WhoList = 0
 AllowTwoSide.AddFriend = 0
+AllowTwoSide.Trade = 0
 TalentsInspecting = 1
 
 ###################################################################################################################
@@ -782,7 +842,7 @@ TalentsInspecting = 1
 #    ThreatRadius
 #        Radius for creature to evade after being pulled away from combat start point
 #        If ThreatRadius is less than creature aggro radius then aggro radius will be used
-#        Default: 100 yards
+#        Default: 60 yards
 #
 #    Rate.Creature.Aggro
 #        Aggro radius percent or off.
@@ -822,7 +882,7 @@ TalentsInspecting = 1
 #
 #    Rate.Corpse.Decay.Looted
 #         Controls how long the creature corpse stays after it had been looted, as a multiplier of its Corpse.Decay.* config.
-#         Default: 0.1
+#         Default: 0.5
 #
 #    Rate.Creature.Normal.Damage
 #    Rate.Creature.Elite.Elite.Damage
@@ -862,7 +922,7 @@ TalentsInspecting = 1
 #
 ###################################################################################################################
 
-ThreatRadius = 100
+ThreatRadius = 60
 Rate.Creature.Aggro = 1
 CreatureFamilyFleeAssistanceRadius = 30
 CreatureFamilyAssistanceRadius = 10
@@ -874,8 +934,8 @@ Corpse.Decay.RARE = 300
 Corpse.Decay.ELITE = 300
 Corpse.Decay.RAREELITE = 300
 Corpse.Decay.WORLDBOSS = 3600
-Rate.Corpse.Decay.Looted = 1
-Rate.Creature.Normal.Damage = 0.60
+Rate.Corpse.Decay.Looted = 0.5
+Rate.Creature.Normal.Damage = 1
 Rate.Creature.Elite.Elite.Damage = 1
 Rate.Creature.Elite.RAREELITE.Damage = 1
 Rate.Creature.Elite.WORLDBOSS.Damage = 1
@@ -971,7 +1031,7 @@ Channel.SilentlyGMJoin = 0
 #
 #    GM.InGMList.Level
 #        Max GM level showed in GM list (if visible) in non-GM state (.gm off)
-#                 0 (none)
+#                 0 (only players)
 #                 1 (only moderators)
 #                 2 (only gamemasters)
 #        Default: 3 (anyone)
@@ -991,6 +1051,16 @@ Channel.SilentlyGMJoin = 0
 #    GM.StartLevel
 #        GM starting level (1-100)
 #        Default: 1
+#
+#    GM.AllowInvite
+#        Is GM accepting invites from players by default or not
+#        Default: 0 (false)
+#                 1 (true)
+#
+#    GM.AllowFriend
+#        Are players allowed to add GMs to their friend list
+#        Default: 0 (false)
+#                 1 (true)
 #
 #    GM.LowerSecurity
 #        Disallow a lower security member to interact with a higher one using commands
@@ -1012,7 +1082,9 @@ GM.WhisperingTo          = 2
 GM.InGMList.Level        = 3
 GM.InWhoList.Level       = 3
 GM.LogTrade              = 1
-GM.StartLevel            = 1
+GM.StartLevel            = 80
+GM.AllowInvite           = 0
+GM.AllowFriend           = 0
 GM.LowerSecurity         = 0
 GM.AllowAchievementGain  = 1
 
@@ -1025,13 +1097,12 @@ GM.AllowAchievementGain  = 1
 #                 1 (raid members 100% auto detect invisible player from same raid)
 #                 2 (players from same team can 100% auto detect invisible player)
 #
-#    Visibility.Distance.Continents
-#    Visibility.Distance.Instances
-#    Visibility.Distance.BGArenas
-#        Visibility distance for different ingame object in different maps.
-#		 Visibility on continents on offy ~90 yards. In BG/Arenas ~180. For instances default ~120.
-#        Max limited by active player zone: ~ 333
-#        Default: 90 (visibility on continents)
+#    Visibility.Distance.Creature
+#    Visibility.Distance.Player
+#        Visibility distance for different in game object
+#        Max limited by active player zone: ~ 166
+#        Min limit dependent from objects
+#        Default: 66 (cell size)
 #        Min limit is max aggro radius (45) * Rate.Creature.Aggro
 #
 #    Visibility.Distance.Object
@@ -1045,7 +1116,7 @@ GM.AllowAchievementGain  = 1
 #    Visibility.Distance.Grey.Unit
 #        Visibility grey distance for creatures/players (fast changing objects)
 #        addition to appropriate object type Visibility.Distance.* use in case visibility removing to
-#        object (except corpse around distences) If � is distance and G is grey distance then object
+#        object (except corpse around distences) If D is distance and G is grey distance then object
 #        make visible if distance to it <= D but make non visible if distance > D+G
 #        Default: 1 (yard)
 #
@@ -1057,17 +1128,12 @@ GM.AllowAchievementGain  = 1
 ###################################################################################################################
 
 Visibility.GroupMode = 0
-Visibility.Distance.Continents    = 90
-Visibility.Distance.Instances     = 120
-Visibility.Distance.BGArenas	  = 180
-Visibility.Distance.Object        = 100
-Visibility.Distance.InFlight      = 100
-Visibility.Distance.Grey.Unit     = 1
-Visibility.Distance.Grey.Object   = 10
-
-Visibility.Notify.Period.OnContinents = 600
-Visibility.Notify.Period.InInctances  = 600
-Visibility.Notify.Period.InBGArenas   = 600
+Visibility.Distance.Creature      = 999
+Visibility.Distance.Player        = 66
+Visibility.Distance.Object        = 999
+Visibility.Distance.InFlight      = 66
+Visibility.Distance.Grey.Unit   = 1
+Visibility.Distance.Grey.Object = 10
 
 ###################################################################################################################
 # SERVER RATES
@@ -1079,6 +1145,7 @@ Visibility.Notify.Period.InBGArenas   = 600
 #    Rate.RunicPower.Income
 #    Rate.RunicPower.Loss
 #    Rate.Focus
+#    Rate.Loyalty
 #        Health and power regeneration and rage income from damage.
 #        Default: 1
 #
@@ -1098,11 +1165,22 @@ Visibility.Notify.Period.InBGArenas   = 600
 #         Drop rates (items by quality and money)
 #         Default: 1
 #
+#    Rate.Drop.Money
+#         Drop rates
+#         Default: 1
+#
 #    Rate.XP.Kill
 #    Rate.XP.Quest
 #    Rate.XP.Explore
 #        XP rates
 #        Default: 1
+#
+#    Rate.XP.PastLevel70
+#        XP needed per level past 70 (Rates below 1 not recommended)
+#        Default: 1
+#
+#    Rate.RepairCost
+#        Repair cost rate (1 - standard, 2 - double cost, 0.5 - half cost, etc)
 #
 #    Rate.Rest.InGame
 #    Rate.Rest.Offline.InTavernOrCity
@@ -1165,6 +1243,14 @@ Visibility.Notify.Period.InBGArenas   = 600
 #         Default: 0  - no decrease
 #                  75 - in 2 times each 75 skill points
 #
+#    DurabilityLoss.InPvP
+#        If true, players take durability loss on death in PvP.
+#        Default: 0 (false)
+#                 1 (true)
+#
+#    DurabilityLoss.OnDeath
+#        Durability loss percentage on death (10 - standard, 20 - double, 5 - half)
+#
 #    DurabilityLossChance.Damage
 #         Chance lost one from equiped items durability point at damage apply or receive.
 #         Default: 0.5 (100/0.5 = 200) Each 200 damage apply one from 19 possible equipped items
@@ -1208,6 +1294,7 @@ Rate.Rage.Loss = 1
 Rate.RunicPower.Income = 1
 Rate.RunicPower.Loss = 1
 Rate.Focus = 1
+Rate.Loyalty = 1
 Rate.Skill.Discovery = 1
 Rate.Drop.Item.Poor = 1
 Rate.Drop.Item.Normal = 1
@@ -1221,6 +1308,8 @@ Rate.Drop.Money = 1
 Rate.XP.Kill    = 1
 Rate.XP.Quest   = 1
 Rate.XP.Explore = 1
+Rate.XP.PastLevel70 = 1
+Rate.RepairCost = 1
 Rate.Rest.InGame = 1
 Rate.Rest.Offline.InTavernOrCity = 1
 Rate.Rest.Offline.InWilderness = 1
@@ -1246,15 +1335,18 @@ SkillChance.Green  = 25
 SkillChance.Grey   = 0
 SkillChance.MiningSteps   = 0
 SkillChance.SkinningSteps = 0
+DurabilityLoss.InPvP = 0
+DurabilityLoss.OnDeath = 10
 DurabilityLossChance.Damage = 0.5
 DurabilityLossChance.Absorb = 0.5
 DurabilityLossChance.Parry  = 0.05
 DurabilityLossChance.Block  = 0.05
 Death.SicknessLevel = 11
 Death.CorpseReclaimDelay.PvP = 1
-Death.CorpseReclaimDelay.PvE = 1
+Death.CorpseReclaimDelay.PvE = 0
 Death.Bones.World = 1
 Death.Bones.BattlegroundOrArena = 1
+
 
 ###################################################################################################################
 # BATTLEGROUND CONFIG
@@ -1298,6 +1390,7 @@ Battleground.InvitationType = 0
 BattleGround.PrematureFinishTimer = 300000
 BattleGround.PremadeGroupWaitForMatch = 1800000
 
+
 ###################################################################################################################
 # ARENA CONFIG
 #
@@ -1323,13 +1416,8 @@ BattleGround.PremadeGroupWaitForMatch = 1800000
 #        If automatic distribution is enabled in days
 #        Default: 7 (weekly)
 #
-#    Arena.QueueEnterAnnouncer.Enable
-#        Enable arena queue announcer posting to chat at enter
-#        Default: 0 (disable)
-#                 1 (enable)
-#
-#    Arena.QueueLeaveAnnouncer.Enable
-#        Enable arena queue announcer posting to chat at leave
+#    Arena.QueueAnnouncer.Enable
+#        Enable bg queue announcer posting to chat
 #        Default: 0 (disable)
 #                 1 (enable)
 #
@@ -1348,10 +1436,11 @@ Arena.MaxRatingDifference = 150
 Arena.RatingDiscardTimer = 600000
 Arena.AutoDistributePoints = 0
 Arena.AutoDistributeInterval = 7
-Arena.QueueEnterAnnouncer.Enable = 0
-Arena.QueueLeaveAnnouncer.Enable = 0
+Arena.QueueAnnouncer.Enable = 0
+Arena.QueueAnnouncer.PlayerOnly = 0
 Arena.ArenaSeason.ID = 1
 Arena.ArenaSeason.InProgress = 1
+
 
 ###################################################################################################################
 # NETWORK CONFIG
@@ -1381,30 +1470,11 @@ Network.OutUBuff = 65536
 Network.TcpNodelay = 1
 
 ###################################################################################################################
-#     --AUTO BROADCAST--
-#
-#    AutoBroadcast.On
-#        Enable auto broadcast
-#    Default: 0 - off
-#            1 - on
-#
-#    AutoBroadcast.Center
-#        Display method
-#        Default: 0 - announce
-#                 1 - notify
-#                 2 - both
-#
-#    AutoBroadcast.Timer
-#        Timer for auto broadcast
-#
-###################################################################################################################
-
-AutoBroadcast.On = 1
-AutoBroadcast.Center = 0
-AutoBroadcast.Timer = 900000
-
-###################################################################################################################
 # AUCTION HOUSE BOT SETTINGS
+#
+#    AuctionHouseBot.DEBUG
+#        Enable/Disable Debugging output
+#    Default 0 (disabled)
 #
 #    AuctionHouseBot.EnableSeller
 #        Enable/Disable the part of AHBot that puts items up for auction
@@ -1414,40 +1484,6 @@ AutoBroadcast.Timer = 900000
 #        Enable/Disable the part of AHBot that buys items from players
 #    Default 0 (disabled)
 #
-#    Auction House Bot character data
-#        AuctionHouseBot.Account is the account number (in realmd->account table) of the player you want to run as the auction bot.
-#       AuctionHouseBot.GUID is the GUID (in characters->characters table) of the player you want to run as the auction bot.
-#    Default: 0 (Auction House Bot disabled)
-#
-#    AuctionHouseBot.VendorItems
-#        Include items that can be bought from vendors.
-#    Default 0
-#
-#    AuctionHouseBot.LootItems
-#        Include items that can be looted or fished for.
-#    Default 1
-#
-#    AuctionHouseBot.OtherItems
-#        Include misc. items.
-#    Default 0
-#
-#    AuctionHouseBot.Bonding_types
-#        Indicates which bonding types to allow seller to put up for auction
-#            No_Bind
-#             Default 1
-#            Bind_When_Picked_Up
-#             Default 0
-#            Bind_When_Equipped
-#             Default 1
-#            Bind_When_Use
-#             Default 1
-#            Bind_Quest_Item
-#             Default 0
-#
-#    AuctionHouseBot.ItemsPerCycle
-#        Number of Items to Add/Remove from the AH during mass operations
-#    Default 200
-#
 #    AuctionHouseBot.UseBuyPriceForSeller
 #        Should the Seller use BuyPrice or SellPrice to determine Bid Prices
 #    Default 0 (use SellPrice)
@@ -1456,14 +1492,99 @@ AutoBroadcast.Timer = 900000
 #        Should the Buyer use BuyPrice or SellPrice to determine Bid Prices
 #    Default 0 (use SellPrice)
 #
-#    All other settings have been moved to sql
+#    Auction House Bot character data
+#        AuctionHouseBot.Account is the account number (in logon->account table) of the player you want to run as the auction bot.
+#        AuctionHouseBot.GUID is the GUID (in characters->characters table) of the player you want to run as the auction bot.
+#    Default: 0 (Auction House Bot disabled)
+#
+#    AuctionHouseBot.ItemsPerCycle
+#        Number of Items to Add/Remove from the AH during mass operations
+#    Default 200
 #
 ###################################################################################################################
 
+AuctionHouseBot.DEBUG = 0
 AuctionHouseBot.EnableSeller = 0
 AuctionHouseBot.EnableBuyer = 0
+AuctionHouseBot.UseBuyPriceForSeller = 0
+AuctionHouseBot.UseBuyPriceForBuyer = 0
 AuctionHouseBot.Account = 0
 AuctionHouseBot.GUID = 0
+AuctionHouseBot.ItemsPerCycle = 200
+
+###################################################################################################################
+# AUCTION HOUSE BOT FILTERS PART 1
+#
+#    AuctionHouseBot.VendorItems
+#        Include items that can be bought from vendors.
+#    Default 0 (False)
+#
+#    AuctionHouseBot.LootItems
+#        Include items that can be looted or fished for.
+#    Default 1 (True)
+#
+#    AuctionHouseBot.OtherItems
+#        Include misc. items.
+#    Default 0 (False)
+#
+#    AuctionHouseBot.Bonding_types
+#        Indicates which bonding types to allow seller to put up for auction
+#            No_Bind
+#             Default 1 (True)
+#            Bind_When_Picked_Up
+#             Default 0 (False)
+#            Bind_When_Equipped
+#             Default 1 (True)
+#            Bind_When_Use
+#             Default 1 (True)
+#            Bind_Quest_Item
+#             Default 0 (False)
+#
+#    AuctionHouseBot.DisableBeta_PTR_Unused
+#        Disable certain items that are usually unavailable to Players
+#    Default 0 (False)
+#
+#    AuctionHouseBot.DisablePermEnchant
+#        Disable Items with a Permanent Enchantment
+#    Default 0 (False)
+#
+#    AuctionHouseBot.DisableConjured
+#        Disable Conjured Items
+#    Default 0 (False)
+#
+#    AuctionHouseBot.DisableGems
+#        Disable Gems
+#    Default 0 (False)
+#
+#    AuctionHouseBot.DisableMoney
+#        Disable Items that are used as money
+#    Default 0 (False)
+#
+#    AuctionHouseBot.DisableMoneyLoot
+#        Disable Items that have Money as a loot
+#    Default 0 (False)
+#
+#    AuctionHouseBot.DisableLootable
+#        Disable Items that have other items as loot
+#    Default 0 (False)
+#
+#    AuctionHouseBot.DisableKeys
+#        Disable Items that are keys
+#    Default 0 (False)
+#
+#    AuctionHouseBot.DisableDuration
+#        Disable Items with a duration
+#    Default 0 (False)
+#
+#    AuctionHouseBot.DisableBOP_Or_Quest_NoReqLevel
+#        Disable items that are BOP or Quest Item
+#        with a Required level that is less than the Item Level
+#        (This prevents a level 10 with a level 60 weapon or armor)
+#        (May need further refinement)
+#    Default 0 (False)
+#
+###################################################################################################################
+
 AuctionHouseBot.VendorItems = 0
 AuctionHouseBot.LootItems = 1
 AuctionHouseBot.OtherItems = 0
@@ -1472,9 +1593,123 @@ AuctionHouseBot.Bind_When_Picked_Up = 0
 AuctionHouseBot.Bind_When_Equipped = 1
 AuctionHouseBot.Bind_When_Use = 1
 AuctionHouseBot.Bind_Quest_Item = 0
-AuctionHouseBot.ItemsPerCycle = 200
-AuctionHouseBot.UseBuyPriceForSeller = 0
-AuctionHouseBot.UseBuyPriceForBuyer = 0
+AuctionHouseBot.DisableBeta_PTR_Unused = 0
+AuctionHouseBot.DisablePermEnchant = 0
+AuctionHouseBot.DisableConjured = 0
+AuctionHouseBot.DisableGems = 0
+AuctionHouseBot.DisableMoney = 0
+AuctionHouseBot.DisableMoneyLoot = 0
+AuctionHouseBot.DisableLootable = 0
+AuctionHouseBot.DisableKeys = 0
+AuctionHouseBot.DisableDuration = 0
+AuctionHouseBot.DisableBOP_Or_Quest_NoReqLevel = 0
+
+###################################################################################################################
+# AUCTION HOUSE BOT FILTERS PART 2
+#
+#     These Filters are boolean (0 or 1) and will disable items that are
+#     specifically meant for the Class named.
+#     (UnusedClass is Class 10, which was skipped for some reason)
+#     Default 0 (allowed)
+###################################################################################################################
+
+AuctionHouseBot.DisableWarriorItems = 0
+AuctionHouseBot.DisablePaladinItems = 0
+AuctionHouseBot.DisableHunterItems = 0
+AuctionHouseBot.DisableRogueItems = 0
+AuctionHouseBot.DisablePriestItems = 0
+AuctionHouseBot.DisableDKItems = 0
+AuctionHouseBot.DisableShamanItems = 0
+AuctionHouseBot.DisableMageItems = 0
+AuctionHouseBot.DisableWarlockItems = 0
+AuctionHouseBot.DisableUnusedClassItems = 0
+AuctionHouseBot.DisableDruidItems = 0
+
+###################################################################################################################
+# AUCTION HOUSE BOT FILTERS PART 3
+#
+#    AuctionHouseBot.DisableItemsBelowLevel
+#        Prevent Seller from listing Items below this Level
+#    Default 0 (Off)
+#
+#    AuctionHouseBot.DisableItemsAboveLevel
+#        Prevent Seller from listing Items above this Level
+#    Default 0 (Off)
+#
+#    AuctionHouseBot.DisableTGsBelowLevel
+#        Prevent Seller from listing Trade Goods below this Level
+#    Default 0 (Off)
+#
+#    AuctionHouseBot.DisableTGsAboveLevel
+#        Prevent Seller from listing Trade Goods above this Level
+#    Default 0 (Off)
+#
+#    AuctionHouseBot.DisableItemsBelowGUID
+#        Prevent Seller from listing Items below this GUID
+#    Default 0 (Off)
+#
+#    AuctionHouseBot.DisableItemsAboveGUID
+#        Prevent Seller from listing Items above this GUID
+#    Default 0 (Off)
+#
+#    AuctionHouseBot.DisableTGsBelowGUID
+#        Prevent Seller from listing Trade Goods below this GUID
+#    Default 0 (Off)
+#
+#    AuctionHouseBot.DisableTGsAboveGUID
+#        Prevent Seller from listing Trade Goods above this GUID
+#    Default 0 (Off)
+#
+#    AuctionHouseBot.DisableItemsBelowReqLevel
+#        Prevent Seller from listing Items below this Required Level
+#    Default 0 (Off)
+#
+#    AuctionHouseBot.DisableItemsAboveReqLevel
+#        Prevent Seller from listing Items above this Required Level
+#    Default 0 (Off)
+#
+#    AuctionHouseBot.DisableTGsBelowReqLevel
+#        Prevent Seller from listing Trade Goods below this Required Level
+#    Default 0 (Off)
+#
+#    AuctionHouseBot.DisableTGsAboveReqLevel
+#        Prevent Seller from listing Trade Goods above this Required Level
+#    Default 0 (Off)
+#
+#    AuctionHouseBot.DisableItemsBelowReqSkillRank
+#        Prevent Seller from listing Items below this Required Skill Rank
+#    Default 0 (Off)
+#
+#    AuctionHouseBot.DisableItemsAboveReqSkillRank
+#        Prevent Seller from listing Items above this Required Skill Rank
+#    Default 0 (Off)
+#
+#    AuctionHouseBot.DisableTGsBelowReqSkillRank
+#        Prevent Seller from listing Trade Goods below this Required Skill Rank
+#    Default 0 (Off)
+#
+#    AuctionHouseBot.DisableTGsAboveReqSkillRank
+#        Prevent Seller from listing Trade Goods above this Required Skill Rank
+#    Default 0 (Off)
+#
+###################################################################################################################
+
+AuctionHouseBot.DisableItemsBelowLevel = 0
+AuctionHouseBot.DisableItemsAboveLevel = 0
+AuctionHouseBot.DisableTGsBelowLevel = 0
+AuctionHouseBot.DisableTGsAboveLevel = 0
+AuctionHouseBot.DisableItemsBelowGUID = 0
+AuctionHouseBot.DisableItemsAboveGUID = 0
+AuctionHouseBot.DisableTGsBelowGUID = 0
+AuctionHouseBot.DisableTGsAboveGUID = 0
+AuctionHouseBot.DisableItemsBelowReqLevel = 0
+AuctionHouseBot.DisableItemsAboveReqLevel = 0
+AuctionHouseBot.DisableTGsBelowReqLevel = 0
+AuctionHouseBot.DisableTGsAboveReqLevel = 0
+AuctionHouseBot.DisableItemsBelowReqSkillRank = 0
+AuctionHouseBot.DisableItemsAboveReqSkillRank = 0
+AuctionHouseBot.DisableTGsBelowReqSkillRank = 0
+AuctionHouseBot.DisableTGsAboveReqSkillRank = 0
 
 ###################################################################################################################
 # CONSOLE AND REMOTE ACCESS
@@ -1504,11 +1739,121 @@ AuctionHouseBot.UseBuyPriceForBuyer = 0
 ###################################################################################################################
 
 Console.Enable = 1
-Ra.Enable = 1
+Ra.Enable = 0
 Ra.IP = 0.0.0.0
 Ra.Port = 3443
 Ra.MinLevel = 3
 Ra.Secure = 1
+
+###################################################################################################################
+# CUSTOM SERVER OPTIONS
+#
+#	PlayerStart.AllReputation
+#		Players will start with most of the high level reputations that are needed for items, mounts etc.
+#		If there are any reputation faction you want to be added, just tell me.
+#
+#	PlayerStart.AllSpells
+#		If enabled, players will start with all their class spells (not talents). Useful for instant 70 servers.
+#		You must import playercreateinfo_spell_custom.sql, it's included in the SQL folder.
+#		Default: 0 - off
+#				 1 - on
+#
+#	PlayerStart.MapsExplored
+#		Players will start with all maps explored if enabled
+#
+#	MusicInBattleground
+#		If enabled, "L70ETC - Power of the horde" will be played when BG starts ;)
+#
+#	HonorPointsAfterDuel
+#		The amount of honor points the duel winner will get after a duel.
+#		Default: 0 - disable
+#
+#	AlwaysMaxWeaponSkill
+#		Players will automatically gain max weapon/defense skill when logging in, leveling up etc.
+#
+#	PvPToken.Enable
+#		Enable/disable PvP Token System. Players will get a token after slaying another player that gives honor.
+#
+#	PvPToken.MapAllowType
+#		Where players can receive the pvp token
+#		4 - In all maps
+#		3 - In battlegrounds only
+#		2 - In FFA areas only (gurubashi arena etc)
+#		1 - In battlegrounds AND FFA areas only
+#
+#	PvPToken.ItemID
+#		The item players will get after killing someone if PvP Token system is enabled.
+#		Default: 29434 - Badge of justice
+#
+#	PvPToken.ItemCount
+#		Modify the item ID count - Default: 1
+#
+#	NoResetTalentsCost
+#		Enable or disable no cost when reseting talents
+#
+#
+#   OutdoorPvP.Wintergrasp.StartTime = 30
+#       The start time of the first battle after server starts (default: 30 minutes)
+#   OutdoorPvP.Wintergrasp.BattleTime = 30
+#       Time limit of a battle
+#   OutdoorPvP.Wintergrasp.Interval
+#       Interval between battles (default: 150 minutes)
+#
+#   ForbiddenMaps
+#       map ids that users below SEC_GAMEMASTER cannot enter, with delimiter ','
+#       Default: ""
+#       example: "538,90"
+#       Note that it's HIGHLY DISCOURAGED to forbid starting maps (0, 1, 530)!
+#
+#   ShowKickInWorld
+#        determines wether a message is broadcasted to the entire server when a player gets kicked
+#        Default: 0
+#        1 = Enable
+#        0 = Disable
+#
+#   RecordUpdateTimeDiffInterval
+#        record update time diff to the log file
+#        update diff can be used as a criterion of performance
+#        diff < 300: good performance
+#        diff > 600: bad performance, may be caused by high cpu usage
+#        Default: 60000 (diff is written into log every 60000 ms or 1 minute.
+#        >0 = Interval
+#        0 = Disable
+#
+#   MinRecordUpdateTimeDiff
+#        only record update time diff which is greater than this value
+#
+#   PlayerStart.String
+#       If set to anything else than "", this string will be displayed to players when they login
+#       to a newly created character.
+#       Default: "" - send no text
+#
+#   CheckDB
+#       Check if your DB is outdated. Disabling this option means that you decide to use a DB which is
+#       not compatible with RibonCore and are ready for all kinds of bugs. 
+#       Default: 1 = enable
+#
+###################################################################################################################
+
+PlayerStart.AllReputation = 0
+PlayerStart.AllSpells = 0
+PlayerStart.MapsExplored = 0
+MusicInBattleground = 0
+HonorPointsAfterDuel = 0
+AlwaysMaxWeaponSkill = 0
+PvPToken.Enable = 0
+PvPToken.MapAllowType = 4
+PvPToken.ItemID = 29434
+PvPToken.ItemCount = 1
+OutdoorPvP.Wintergrasp.StartTime = 30
+OutdoorPvP.Wintergrasp.BattleTime = 30
+OutdoorPvP.Wintergrasp.Interval = 150
+NoResetTalentsCost = 0
+ShowKickInWorld = 0
+RecordUpdateTimeDiffInterval = 60000
+MinRecordUpdateTimeDiff = 10
+PlayerStart.String = ""
+CheckDB = 1
 
 ###################################################################################################################
 # MOVEMENT ANTICHEAT
@@ -1533,3 +1878,26 @@ Anticheat.Movement.Enable = 1
 Anticheat.Movement.TeleportToPlaneAlarms = 50
 Anticheat.Movement.MistimingDelta = 10000
 Anticheat.Movement.MistimingAlarms = 20
+
+###################################################################################################################
+# AUTO BROADCAST
+#
+#    AutoBroadcast.On
+#        Enable auto broadcast
+#        Default: 0 - off
+#                 1 - on
+#
+#    AutoBroadcast.Center
+#        Display method
+#        Default: 0 - announce
+#                 1 - notify
+#                 2 - both
+#
+#    AutoBroadcast.Timer
+#        Timer for auto broadcast
+#
+###################################################################################################################
+
+AutoBroadcast.On = 0
+AutoBroadcast.Center = 0
+AutoBroadcast.Timer = 60000

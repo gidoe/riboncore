@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,26 +18,35 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/// \addtogroup mangosd Mangos Daemon
+/// \addtogroup Ribond Ribon Daemon
 /// @{
 /// \file
+
+#include <openssl/opensslv.h>
+#include <openssl/crypto.h>
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/ConfigEnv.h"
+
 #include "Log.h"
 #include "Master.h"
-#include "SystemConfig.h"
-#include "revision.h"
-#include "revision_nr.h"
-#include "World.h"
-#include <openssl/opensslv.h>
-#include <openssl/crypto.h>
+
+
+#ifndef _RIBON_CORE_CONFIG
+# define _RIBON_CORE_CONFIG  "RibonCore.conf"
+#endif //_RIBON_CORE_CONFIG
+
+// Format is YYYYMMDDRR where RR is the change in the conf file
+// for that day.
+#ifndef _RIBON_CORE_CONFVER
+# define _RIBON_CORE_CONFVER 2009032201
+#endif //_RIBON_CORE_CONFVER
 
 #ifdef WIN32
 #include "ServiceWin32.h"
-char serviceName[] = "mangosd";
-char serviceLongName[] = "MaNGOS world service";
+char serviceName[] = "RibonCore";
+char serviceLongName[] = "Ribon core service";
 char serviceDescription[] = "Massive Network Game Object Server";
 /*
  * -1 - not in service mode
@@ -56,7 +67,6 @@ uint32 realmID;                                             ///< Id of the realm
 void usage(const char *prog)
 {
     sLog.outString("Usage: \n %s [<options>]\n"
-        "    --version                print version and exist\n\r"
         "    -c config_file           use config_file as configuration file\n\r"
         #ifdef WIN32
         "    Running as service functions:\n\r"
@@ -67,16 +77,11 @@ void usage(const char *prog)
         ,prog);
 }
 
-/// Launch the mangos server
+/// Launch the Ribon server
 extern int main(int argc, char **argv)
 {
-    // - Construct Memory Manager Instance
-    MaNGOS::Singleton<MemoryManager>::Instance();
-
-    //char *leak = new char[1000];                          // test leak detection
-
     ///- Command line parsing to get the configuration file name
-    char const* cfg_file = _MANGOSD_CONFIG;
+    char const* cfg_file = _RIBON_CORE_CONFIG;
     int c=1;
     while( c < argc )
     {
@@ -90,12 +95,6 @@ extern int main(int argc, char **argv)
             }
             else
                 cfg_file = argv[c];
-        }
-
-        if( strcmp(argv[c],"--version") == 0)
-        {
-            printf("%s\n", _FULLVERSION(REVISION_DATE,REVISION_TIME,REVISION_NR,REVISION_ID));
-            return 0;
         }
 
         #ifdef WIN32
@@ -143,22 +142,20 @@ extern int main(int argc, char **argv)
         sLog.outError("Could not find configuration file %s.", cfg_file);
         return 1;
     }
-
-    sLog.outString( "%s [world-daemon]", _FULLVERSION(REVISION_DATE,REVISION_TIME,REVISION_NR,REVISION_ID) );
-    sLog.outString( "<Ctrl-C> to stop.\n\n" );
-
-    sLog.outTitle( " **     ** ********  ******                        ");
-    sLog.outTitle( "/**    /**/**/////  **////**                       ");
-    sLog.outTitle( "/**    /**/**      **    //   ******  ****** ***** ");
-    sLog.outTitle( "/**    /**/*******/**        **////**//**//***///**");
-    sLog.outTitle( "/**    /**/**//// /**       /**   /** /** //*******");
-    sLog.outTitle( "/**    /**/**     //**    **/**   /** /**  /**//// ");
-    sLog.outTitle( "//******* /********//****** //****** /***  //******");
-    sLog.outTitle( " ///////  ////////  //////   //////  ///    ////// ");
-    sLog.outTitle( "Based on MaNGOS - Modify by Thyros, Filipper, Sanzzes.");
-    sLog.outString( "[UECore-Revision]: 284\n\n");
-
     sLog.outString("Using configuration file %s.", cfg_file);
+
+    uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
+    if (confVersion < _RIBON_CORE_CONFVER)
+    {
+        sLog.outError("*****************************************************************************");
+        sLog.outError(" WARNING: Your RibonCore.conf version indicates your conf file is out of date!");
+        sLog.outError("          Please check for updates, as your current default values may cause");
+        sLog.outError("          strange behavior.");
+        sLog.outError("*****************************************************************************");
+        clock_t pause = 3000 + clock();
+
+        while (pause > clock()) {}
+    }
 
     sLog.outDetail("%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
     if (SSLeay() < 0x009080bfL )
@@ -174,7 +171,7 @@ extern int main(int argc, char **argv)
     // at sMaster return function exist with codes
     // 0 - normal shutdown
     // 1 - shutdown at error
-    // 2 - restart command used, this code can be used by restarter for restart mangosd
+    // 2 - restart command used, this code can be used by restarter for restart Ribond
 }
 
 /// @}

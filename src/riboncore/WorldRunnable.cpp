@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,21 +19,21 @@
  */
 
 /** \file
-    \ingroup mangosd
+    \ingroup Ribond
 */
 
-#include "WorldSocketMgr.h"
 #include "Common.h"
-#include "World.h"
-#include "WorldRunnable.h"
-#include "Timer.h"
 #include "ObjectAccessor.h"
-#include "MapManager.h"
-#include "BattleGroundMgr.h"
-
+#include "World.h"
+#include "WorldSocketMgr.h"
 #include "Database/DatabaseEnv.h"
 
-#ifdef WIN32
+#include "BattleGroundMgr.h"
+#include "MapManager.h"
+#include "Timer.h"
+#include "WorldRunnable.h"
+
+#if (defined(WIN32) || defined(SHORT_SLEEP))
 #define WORLD_SLEEP_CONST 50
 #else
 #define WORLD_SLEEP_CONST 100                               //Is this still needed?? [On linux some time ago not working 50ms]
@@ -47,6 +49,8 @@ void WorldRunnable::run()
 {
     ///- Init new SQL thread for the world database
     WorldDatabase.ThreadStart();                                // let thread do safe mySQL requests (one connection call enough)
+    CharacterDatabase.ThreadStart();
+    loginDatabase.ThreadStart();
     sWorld.InitResultQueue();
 
     uint32 realCurrTime = 0;
@@ -95,4 +99,6 @@ void WorldRunnable::run()
 
     ///- End the database thread
     WorldDatabase.ThreadEnd();                                  // free mySQL thread resources
+    CharacterDatabase.ThreadStart();
+    loginDatabase.ThreadEnd();
 }

@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,26 +19,27 @@
  */
 
 /** \file
-    \ingroup mangosd
+    \ingroup Ribond
 */
 
 #include <ace/OS_NS_signal.h>
 
-#include "WorldSocketMgr.h"
 #include "Common.h"
-#include "Master.h"
-#include "WorldSocket.h"
-#include "WorldRunnable.h"
-#include "World.h"
-#include "Log.h"
-#include "Timer.h"
-#include "Policies/SingletonImp.h"
 #include "SystemConfig.h"
+#include "World.h"
+#include "WorldRunnable.h"
+#include "WorldSocket.h"
+#include "WorldSocketMgr.h"
 #include "Config/ConfigEnv.h"
 #include "Database/DatabaseEnv.h"
+#include "Policies/SingletonImp.h"
+
 #include "CliRunnable.h"
+#include "Log.h"
+#include "Master.h"
 #include "RASocket.h"
 #include "ScriptCalls.h"
+#include "Timer.h"
 #include "Util.h"
 
 #include "sockets/TcpSocket.h"
@@ -46,6 +49,7 @@
 #include "sockets/SocketHandler.h"
 #include "sockets/ListenSocket.h"
 
+#define _FULLVERSION (_REVISION)
 #ifdef WIN32
 #include "ServiceWin32.h"
 extern int m_ServiceStatus;
@@ -78,7 +82,6 @@ public:
         while(!World::IsStopped())
         {
             ACE_Based::Thread::Sleep(1000);
-
             uint32 curtime = getMSTime();
             //DEBUG_LOG("anti-freeze: time=%u, counters=[%u; %u]",curtime,Master::m_masterLoopCounter,World::m_worldLoopCounter);
 
@@ -153,9 +156,9 @@ public:
             std::string stringip = sConfig.GetStringDefault ("Ra.IP", "0.0.0.0");
             ipaddr_t raip;
             if (!Utility::u2ip (stringip, raip))
-                sLog.outError ("MaNGOS RA can not bind to ip %s", stringip.c_str ());
+                sLog.outError ("Ribon RA can not bind to ip %s", stringip.c_str ());
             else if (RAListenSocket.Bind (raip, raport))
-                sLog.outError ("MaNGOS RA can not bind to port %d on %s", raport, stringip.c_str ());
+                sLog.outError ("Ribon RA can not bind to port %d on %s", raport, stringip.c_str ());
             else
             {
                 h.Add (&RAListenSocket);
@@ -198,6 +201,22 @@ Master::~Master()
 /// Main function
 int Master::Run()
 {
+    sLog.outString( "(core-daemon) Revision: %s ", _FULLVERSION );
+    sLog.outString( "Build Date: %s", __DATE__ );
+    sLog.outString( "Build Time: %s", __TIME__ );
+    sLog.outString( "<Ctrl-C> to stop.\n" );
+
+    sLog.outString( "'########::'####:'########:::'#######::'##::: ##:");
+    sLog.outString( " ##.... ##:. ##:: ##.... ##:'##.... ##: ###:: ##:");
+    sLog.outString( " ##:::: ##:: ##:: ##:::: ##: ##:::: ##: ####: ##:");
+    sLog.outString( " ########::: ##:: ########:: ##:::: ##: ## ## ##:");
+    sLog.outString( " ##.. ##:::: ##:: ##.... ##: ##:::: ##: ##. ####:");
+    sLog.outString( " ##::. ##::: ##:: ##:::: ##: ##:::: ##: ##:. ###:");
+    sLog.outString( " ##:::. ##:'####: ########::. #######:: ##::. ##:");
+    sLog.outString( "..:::::..::....::........::::.......:::..::::..::");
+	sLog.outString( "                                          C O R E");
+    sLog.outString( "http://www.dark-resurrection.de/wowsp/         \n");
+
     /// worldd PID file creation
     std::string pidfile = sConfig.GetStringDefault("PidFile", "");
     if(!pidfile.empty())
@@ -223,11 +242,13 @@ int Master::Run()
     _HookSignals();
 
     ///- Launch WorldRunnable thread
-    ACE_Based::Thread t(*new WorldRunnable);
-    t.setPriority(ACE_Based::Highest);
+    ACE_Based::Thread world_thread(new WorldRunnable);
+    world_thread.setPriority(ACE_Based::Highest);
 
     // set server online
     loginDatabase.PExecute("UPDATE realmlist SET color = 0, population = 0 WHERE id = '%d'",realmID);
+
+    ACE_Based::Thread* cliThread = NULL;
 
 #ifdef WIN32
     if (sConfig.GetBoolDefault("Console.Enable", true) && (m_ServiceStatus == -1)/* need disable console in service mode*/)
@@ -236,10 +257,10 @@ int Master::Run()
 #endif
     {
         ///- Launch CliRunnable thread
-        ACE_Based::Thread td1(*new CliRunnable);
+        cliThread = new ACE_Based::Thread(new CliRunnable);
     }
 
-    ACE_Based::Thread td2(*new RARunnable);
+    ACE_Based::Thread rar_thread(new RARunnable);
 
     ///- Handle affinity for multiple processors and process priority on Windows
     #ifdef WIN32
@@ -258,7 +279,7 @@ int Master::Run()
 
                 if(!curAff )
                 {
-                    sLog.outError("Processors marked in UseProcessors bitmask (hex) %x not accessible for mangosd. Accessible processors bitmask (hex): %x",Aff,appAff);
+                    sLog.outError("Processors marked in UseProcessors bitmask (hex) %x not accessible for Ribond. Accessible processors bitmask (hex): %x",Aff,appAff);
                 }
                 else
                 {
@@ -268,7 +289,7 @@ int Master::Run()
                         sLog.outError("Can't set used processors (hex): %x",curAff);
                 }
             }
-            sLog.outString();
+            sLog.outString("");
         }
 
         bool Prio = sConfig.GetBoolDefault("ProcessPriority", false);
@@ -277,10 +298,10 @@ int Master::Run()
         if(Prio)
         {
             if(SetPriorityClass(hProcess,HIGH_PRIORITY_CLASS))
-                sLog.outString("mangosd process priority class set to HIGH");
+                sLog.outString("RibonCore process priority class set to HIGH");
             else
-                sLog.outError("ERROR: Can't set mangosd process priority class.");
-            sLog.outString();
+                sLog.outError("ERROR: Can't set Ribon process priority class.");
+            sLog.outString("");
         }
     }
     #endif
@@ -295,13 +316,12 @@ int Master::Run()
     uint32 loopCounter = 0;
 
     ///- Start up freeze catcher thread
-    uint32 freeze_delay = sConfig.GetIntDefault("MaxCoreStuckTime", 0);
-    if(freeze_delay)
+    if(uint32 freeze_delay = sConfig.GetIntDefault("MaxCoreStuckTime", 0))
     {
         FreezeDetectorRunnable *fdr = new FreezeDetectorRunnable();
         fdr->SetDelayTime(freeze_delay*1000);
-        ACE_Based::Thread t(*fdr);
-        t.setPriority(ACE_Based::Highest);
+        ACE_Based::Thread freeze_thread(fdr);
+        freeze_thread.setPriority(ACE_Based::Highest);
     }
 
     ///- Launch the world listener socket
@@ -325,8 +345,8 @@ int Master::Run()
 
     // when the main thread closes the singletons get unloaded
     // since worldrunnable uses them, it will crash if unloaded after master
-    t.wait();
-    td2.wait ();
+    world_thread.wait();
+    rar_thread.wait ();
 
     ///- Clean database before leaving
     clearOnlineAccounts();
@@ -338,9 +358,10 @@ int Master::Run()
 
     sLog.outString( "Halting process..." );
 
-    #ifdef WIN32
-    if (sConfig.GetBoolDefault("Console.Enable", true))
+    if (cliThread)
     {
+        #ifdef WIN32
+
         // this only way to terminate CLI thread exist at Win32 (alt. way exist only in Windows Vista API)
         //_exit(1);
         // send keyboard input to safely unblock the CLI thread
@@ -375,8 +396,17 @@ int Master::Run()
         b[3].Event.KeyEvent.wRepeatCount = 1;
         DWORD numb;
         BOOL ret = WriteConsoleInput(hStdIn, b, 4, &numb);
+
+        cliThread->wait();
+
+        #else 
+
+        cliThread->destroy();
+
+        #endif
+
+        delete cliThread;
     }
-    #endif
 
     // for some unknown reason, unloading scripts here and not in worldrunnable
     // fixes a memory leak related to detaching threads from the module
@@ -389,14 +419,16 @@ int Master::Run()
 /// Initialize connection to the databases
 bool Master::_StartDB()
 {
-    ///- Get world database info from configuration file
+    sLog.SetLogDB(false);
     std::string dbstring;
-    if(!sConfig.GetString("WorldDatabaseInfo", &dbstring))
+
+    ///- Get world database info from configuration file
+    dbstring = sConfig.GetStringDefault("WorldDatabaseInfo", "");
+    if(dbstring.empty())
     {
         sLog.outError("Database not specified in configuration file");
         return false;
     }
-    sLog.outString("World Database: %s", dbstring.c_str());
 
     ///- Initialise the world database
     if(!WorldDatabase.Initialize(dbstring.c_str()))
@@ -405,12 +437,13 @@ bool Master::_StartDB()
         return false;
     }
 
-    if(!sConfig.GetString("CharacterDatabaseInfo", &dbstring))
+    ///- Get character database info from configuration file
+    dbstring = sConfig.GetStringDefault("CharacterDatabaseInfo", "");
+    if(dbstring.empty())
     {
         sLog.outError("Character Database not specified in configuration file");
         return false;
     }
-    sLog.outString("Character Database: %s", dbstring.c_str());
 
     ///- Initialise the Character database
     if(!CharacterDatabase.Initialize(dbstring.c_str()))
@@ -420,14 +453,14 @@ bool Master::_StartDB()
     }
 
     ///- Get login database info from configuration file
-    if(!sConfig.GetString("LoginDatabaseInfo", &dbstring))
+    dbstring = sConfig.GetStringDefault("loginDatabaseInfo", "");
+    if(dbstring.empty())
     {
         sLog.outError("Login database not specified in configuration file");
         return false;
     }
 
     ///- Initialise the login database
-    sLog.outString("Login Database: %s", dbstring.c_str() );
     if(!loginDatabase.Initialize(dbstring.c_str()))
     {
         sLog.outError("Cannot connect to login database %s",dbstring.c_str());
@@ -443,8 +476,26 @@ bool Master::_StartDB()
     }
     sLog.outString("Realm running as realm ID %d", realmID);
 
+    ///- Initialize the DB logging system
+    if(sConfig.GetBoolDefault("EnableLogDB", false))
+    {
+        // everything successful - set var to enable DB logging once startup finished.
+        sLog.SetLogDBLater(true);
+        sLog.SetLogDB(false);
+        sLog.SetRealmID(realmID);
+    }
+    else
+    {
+        sLog.SetLogDBLater(false);
+        sLog.SetLogDB(false);
+        sLog.SetRealmID(realmID);
+    }
+
     ///- Clean the database before starting
     clearOnlineAccounts();
+
+    ///- Insert version info into DB
+    WorldDatabase.PExecute("UPDATE `version` SET `core_version` = '%s', `core_revision` = '%s'", _FULLVERSION, _REVISION);
 
     sWorld.LoadDBVersion();
 
@@ -465,7 +516,7 @@ void Master::clearOnlineAccounts()
     CharacterDatabase.Execute("UPDATE characters SET online = 0 WHERE online<>0");
 
     // Battleground instance ids reset at server restart
-    CharacterDatabase.Execute("UPDATE character_battleground_data SET instance_id = 0");
+    CharacterDatabase.Execute("UPDATE characters SET bgid = 0 WHERE bgid<>0");
 }
 
 /// Handle termination signals

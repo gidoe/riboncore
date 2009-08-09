@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,24 +18,75 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/// \addtogroup mangosd
+/// \addtogroup Ribond
 /// @{
 /// \file
 
 #include "Common.h"
-#include "Language.h"
-#include "Log.h"
-#include "World.h"
-#include "ScriptCalls.h"
 #include "ObjectMgr.h"
+#include "World.h"
 #include "WorldSession.h"
 #include "Config/ConfigEnv.h"
-#include "Util.h"
+
 #include "AccountMgr.h"
+#include "Chat.h"
 #include "CliRunnable.h"
+#include "Language.h"
+#include "Log.h"
 #include "MapManager.h"
 #include "Player.h"
-#include "Chat.h"
+#include "ScriptCalls.h"
+#include "Util.h"
+
+#if PLATFORM != WINDOWS
+#include <readline/readline.h>
+#include <readline/history.h>
+
+char * command_finder(const char* text, int state)
+{
+  static int idx,len;
+  const char* ret;
+  ChatCommand *cmd = ChatHandler::getCommandTable();
+
+  if(!state)
+    {
+      idx = 0;
+      len = strlen(text);
+    }
+
+  while(ret = cmd[idx].Name)
+    {
+      if(!cmd[idx].AllowConsole)
+	{
+	idx++;
+	continue;
+	}
+
+      idx++;
+      //printf("Checking %s \n", cmd[idx].Name);
+      if (strncmp(ret, text, len) == 0)
+	return strdup(ret);
+      if(cmd[idx].Name == NULL)
+	break;
+    }
+
+  return ((char*)NULL);
+
+}
+
+char ** cli_completion(const char * text, int start, int end)
+{
+  char ** matches;
+  matches = (char**)NULL;
+  
+  if(start == 0)
+    matches = rl_completion_matches((char*)text,&command_finder);
+  else
+    rl_bind_key('\t',rl_abort);
+  return (matches);
+}
+
+#endif
 
 void utf8print(const char* str)
 {
@@ -64,7 +117,7 @@ bool ChatHandler::HandleAccountDeleteCommand(const char* args)
         return false;
 
     std::string account_name = account_name_str;
-    if(!AccountMgr::normilizeString(account_name))
+    if(!AccountMgr::normalizeString(account_name))
     {
         PSendSysMessage(LANG_ACCOUNT_NOT_EXIST,account_name.c_str());
         SetSentErrorMessage(true);
@@ -219,7 +272,7 @@ bool ChatHandler::HandleAccountCreateCommand(const char* args)
     if(!szAcc || !szPassword)
         return false;
 
-    // normilized in accmgr.CreateAccount
+    // normalized in accmgr.CreateAccount
     std::string account_name = szAcc;
     std::string password = szPassword;
 
@@ -251,6 +304,20 @@ bool ChatHandler::HandleAccountCreateCommand(const char* args)
 }
 
 /// Set the level of logging
+bool ChatHandler::HandleServerSetLogFileLevelCommand(const char *args)
+{
+    if(!*args)
+        return false;
+
+    char *NewLevel = strtok((char*)args, " ");
+    if (!NewLevel)
+        return false;
+
+    sLog.SetLogFileLevel(NewLevel);
+    return true;
+}
+
+/// Set the level of logging
 bool ChatHandler::HandleServerSetLogLevelCommand(const char *args)
 {
     if(!*args)
@@ -263,6 +330,26 @@ bool ChatHandler::HandleServerSetLogLevelCommand(const char *args)
     sLog.SetLogLevel(NewLevel);
     return true;
 }
+
+/// set diff time record interval
+bool ChatHandler::HandleServerSetDiffTimeCommand(const char *args)
+{
+    if(!*args)
+        return false;
+
+    char *NewTimeStr = strtok((char*)args, " ");
+    if(!NewTimeStr)
+        return false;
+
+    int32 NewTime =atoi(NewTimeStr);
+    if(NewTime < 0)
+        return false;
+
+    sWorld.SetRecordDiffInterval(NewTime);
+    printf( "Record diff every %u ms\n", NewTime);
+    return true;
+}
+
 
 /// @}
 
@@ -288,30 +375,33 @@ void CliRunnable::run()
     WorldDatabase.ThreadStart();                                // let thread do safe mySQL requests
 
     char commandbuf[256];
-
+    bool canflush = true;
     ///- Display the list of available CLI functions then beep
-    sLog.outString();
-
+    sLog.outString("");
+	#if PLATFORM != WINDOWS
+    rl_attempted_completion_function = cli_completion;
+    	#endif
     if(sConfig.GetBoolDefault("BeepAtStart", true))
         printf("\a");                                       // \a = Alert
 
     // print this here the first time
     // later it will be printed after command queue updates
-    printf("mangos>");
+    printf("RC>");
 
     ///- As long as the World is running (no World::m_stopEvent), get the command line and handle it
     while (!World::IsStopped())
     {
         fflush(stdout);
-        #ifdef linux
-        while (!kb_hit_return() && !World::IsStopped())
-            // With this, we limit CLI to 10commands/second
-            usleep(100);
-        if (World::IsStopped())
-            break;
-        #endif
-        char *command_str = fgets(commandbuf,sizeof(commandbuf),stdin);
-        if (command_str != NULL)
+
+        char *command_str ;             // = fgets(commandbuf,sizeof(commandbuf),stdin);
+
+	#if PLATFORM == WINDOWS
+	command_str = fgets(commandbuf,sizeof(commandbuf),stdin);
+	#else
+	command_str = readline("RC>");
+	rl_bind_key('\t',rl_complete);
+	#endif
+	if (command_str != NULL)
         {
             for(int x=0;command_str[x];x++)
                 if(command_str[x]=='\r'||command_str[x]=='\n')
@@ -323,23 +413,32 @@ void CliRunnable::run()
 
             if(!*command_str)
             {
-                printf("mangos>");
+	      #if PLATFORM == WINDOWS
+	        printf("RC>");
+	      #endif
                 continue;
             }
 
             std::string command;
             if(!consoleToUtf8(command_str,command))         // convert from console encoding to utf8
             {
-                printf("mangos>");
+	      #if PLATFORM == WINDOWS
+	        printf("RC>");
+	      #endif
                 continue;
             }
-
+	    fflush(stdout);
             sWorld.QueueCliCommand(&utf8print,command.c_str());
-        }
+	     #if PLATFORM != WINDOWS
+	    add_history(command.c_str());
+	     #endif
+
+	}
         else if (feof(stdin))
         {
             World::StopNow(SHUTDOWN_EXIT_CODE);
         }
+
     }
 
     ///- End the database thread
