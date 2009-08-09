@@ -1,6 +1,6 @@
 -- MySQL dump 10.11
 --
--- Host: localhost    Database: tc2-world
+-- Host: localhost    Database: world
 -- ------------------------------------------------------
 -- Server version	5.0.51b-community-nt
 
