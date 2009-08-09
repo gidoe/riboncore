@@ -17,7 +17,7 @@ SET(ribon-core_LINK_FLAGS "")
 
 add_executable(ribon-core ${ribon-core_SRCS})
 add_definitions(
--D_RIBON_CORE_CONFIG='"${CONF_DIR}/RibonCore.conf"'
+-D_RIBON_CORE_CONFIG='"${CONF_DIR}/riboncore.conf"'
 )
 IF (DO_MYSQL)
     SET(ribon-core_LINK_FLAGS "-pthread ${ribon-core_LINK_FLAGS}")
@@ -70,5 +70,5 @@ install(TARGETS ribon-core DESTINATION bin)
 
 ########### install files ###############
 
-install(FILES  RibonCore.conf.dist DESTINATION etc)
+install(FILES  riboncore.conf.dist DESTINATION etc)
 
