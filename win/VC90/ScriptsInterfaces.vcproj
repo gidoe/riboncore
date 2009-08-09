@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="script"
+	Name="ScriptsInterfaces"
 	ProjectGUID="{4205C8A9-79B7-4354-8064-F05FB9CA0C96}"
-	RootNamespace="script"
+	RootNamespace="ScriptsInterfaces"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="0"
 	>
@@ -44,8 +44,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers"
-				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_WINDOWS;_USRDLL;SCRIPT"
+				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include"
+				PreprocessorDefinitions="WIN32;_DEBUG;RIBON_DEBUG;_WINDOWS;_USRDLL;SCRIPT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -67,16 +67,16 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mangosd.lib zlib.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib aced.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\MaNGOSScript.dll"
-				LinkIncremental="2"
-				AdditionalLibraryDirectories=";.\mangosd__$(PlatformName)_$(ConfigurationName);.\zlib__$(PlatformName)_$(ConfigurationName);..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
+				AdditionalDependencies="riboncore.lib zlib.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib aced.lib"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonScript.dll"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories=";.\riboncore__$(PlatformName)_$(ConfigurationName);.\zlib__$(PlatformName)_$(ConfigurationName);..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)\MaNGOSScript.pdb"
+				ProgramDatabaseFile="$(OutDir)\RibonScript.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)\MaNGOSScript.lib"
+				ImportLibrary="$(OutDir)\RibonScript.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -127,8 +127,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers"
-				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_WINDOWS;_USRDLL;SCRIPT"
+				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include"
+				PreprocessorDefinitions="WIN32;_DEBUG;RIBON_DEBUG;_WINDOWS;_USRDLL;SCRIPT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -150,16 +150,16 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mangosd.lib zlib.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib aced.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\MaNGOSScript.dll"
+				AdditionalDependencies="riboncore.lib zlib.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib aced.lib"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonScript.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories=";.\mangosd__$(PlatformName)_$(ConfigurationName);.\zlib__$(PlatformName)_$(ConfigurationName);..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
+				AdditionalLibraryDirectories=";.\trinitycore__$(PlatformName)_$(ConfigurationName);.\zlib__$(PlatformName)_$(ConfigurationName);..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)\MaNGOSScript.pdb"
+				ProgramDatabaseFile="$(OutDir)\RibonScript.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)\MaNGOSScript.lib"
+				ImportLibrary="$(OutDir)\RibonScript.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -209,7 +209,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers"
+				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT;_SECURE_SCL=0"
 				RuntimeLibrary="2"
 				EnableEnhancedInstructionSet="1"
@@ -230,17 +230,17 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mangosd.lib zlib.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib ace.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\MaNGOSScript.dll"
+				AdditionalDependencies="riboncore.lib zlib.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib ace.lib"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonScript.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories=";.\mangosd__$(PlatformName)_$(ConfigurationName);.\zlib__$(PlatformName)_$(ConfigurationName);..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
+				AdditionalLibraryDirectories=";.\trinitycore__$(PlatformName)_$(ConfigurationName);.\zlib__$(PlatformName)_$(ConfigurationName);..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="false"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)/MaNGOSScript.lib"
+				ImportLibrary="$(OutDir)/RibonScript.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -291,7 +291,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers"
+				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT;_SECURE_SCL=0"
 				RuntimeLibrary="2"
 				EnableEnhancedInstructionSet="0"
@@ -312,17 +312,17 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mangosd.lib zlib.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib ace.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\MaNGOSScript.dll"
+				AdditionalDependencies="riboncore.lib zlib.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib ace.lib"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonScript.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories=";.\mangosd__$(PlatformName)_$(ConfigurationName);.\zlib__$(PlatformName)_$(ConfigurationName);..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
+				AdditionalLibraryDirectories=";.\trinitycore__$(PlatformName)_$(ConfigurationName);.\zlib__$(PlatformName)_$(ConfigurationName);..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="false"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)/MaNGOSScript.lib"
+				ImportLibrary="$(OutDir)/RibonScript.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -372,8 +372,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers"
-				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_WINDOWS;_USRDLL;SCRIPT"
+				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\RibonLogon;..\..\dep\ACE_wrappers"
+				PreprocessorDefinitions="WIN32;_DEBUG;RIBON_DEBUG;_WINDOWS;_USRDLL;SCRIPT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -395,16 +395,16 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mangosd.lib zlib.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib aced.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\MaNGOSScript.dll"
+				AdditionalDependencies="riboncore.lib zlib.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib aced.lib"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonScript.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories=";.\mangosd__$(PlatformName)_$(ConfigurationName);.\zlib__$(PlatformName)_$(ConfigurationName);..\..\dep\lib\$(PlatformName)_debug"
+				AdditionalLibraryDirectories=";.\riboncore__$(PlatformName)_$(ConfigurationName);.\zlib__$(PlatformName)_$(ConfigurationName);..\..\dep\lib\$(PlatformName)_debug"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)\MaNGOSScript.pdb"
+				ProgramDatabaseFile="$(OutDir)\RibonScript.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)\MaNGOSScript.lib"
+				ImportLibrary="$(OutDir)\RibonScript.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -455,8 +455,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers"
-				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_WINDOWS;_USRDLL;SCRIPT"
+				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\RibonLogon;..\..\dep\ACE_wrappers"
+				PreprocessorDefinitions="WIN32;_DEBUG;RIBON_DEBUG;_WINDOWS;_USRDLL;SCRIPT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -478,16 +478,16 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mangosd.lib zlib.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib aced.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\MaNGOSScript.dll"
+				AdditionalDependencies="riboncore.lib zlib.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib aced.lib"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonScript.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories=";.\mangosd__$(PlatformName)_$(ConfigurationName);.\zlib__$(PlatformName)_$(ConfigurationName);..\..\dep\lib\$(PlatformName)_debug"
+				AdditionalLibraryDirectories=";.\trinitycore__$(PlatformName)_$(ConfigurationName);.\zlib__$(PlatformName)_$(ConfigurationName);..\..\dep\lib\$(PlatformName)_debug"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)\MaNGOSScript.pdb"
+				ProgramDatabaseFile="$(OutDir)\RibonScript.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)\MaNGOSScript.lib"
+				ImportLibrary="$(OutDir)\RibonScript.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -522,18 +522,18 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\bindings\universal\ScriptMgr.cpp"
+				RelativePath="..\..\src\bindings\interface\ScriptMgr.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\bindings\universal\system.cpp"
+				RelativePath="..\..\src\bindings\interface\system.cpp"
 				>
 			</File>
 			<Filter
 				Name="Scripts"
 				>
 				<File
-					RelativePath="..\..\src\bindings\universal\Scripts\sc_default.cpp"
+					RelativePath="..\..\src\bindings\interface\Scripts\sc_default.cpp"
 					>
 				</File>
 			</Filter>
@@ -544,18 +544,18 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\src\bindings\universal\config.h"
+				RelativePath="..\..\src\bindings\interface\config.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\bindings\universal\ScriptMgr.h"
+				RelativePath="..\..\src\bindings\interface\ScriptMgr.h"
 				>
 			</File>
 			<Filter
 				Name="Scripts"
 				>
 				<File
-					RelativePath="..\..\src\bindings\universal\Scripts\sc_defines.h"
+					RelativePath="..\..\src\bindings\interface\Scripts\sc_defines.h"
 					>
 				</File>
 			</Filter>

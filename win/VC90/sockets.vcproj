@@ -71,7 +71,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
+				PreprocessorDefinitions="NDEBUG;_SECURE_SCL=0"
 				Culture="1033"
 			/>
 			<Tool
@@ -134,7 +134,7 @@
 				EnableEnhancedInstructionSet="0"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\sockets__$(PlatformName)_$(ConfigurationName)/sockets.pch"
+				PrecompiledHeaderFile=".\sockets__$(PlatformName)_$(ConfigurationName)\sockets.pch"
 				AssemblerListingLocation=".\sockets__$(PlatformName)_$(ConfigurationName)\"
 				ObjectFile=".\sockets__$(PlatformName)_$(ConfigurationName)\"
 				ProgramDataBaseFileName=".\sockets__$(PlatformName)_$(ConfigurationName)\"
@@ -150,7 +150,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
+				PreprocessorDefinitions="NDEBUG;_SECURE_SCL=0"
 				Culture="1033"
 			/>
 			<Tool
@@ -206,13 +206,13 @@
 				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include\sockets"
-				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_DEBUG;RIBON_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\sockets__$(PlatformName)_$(ConfigurationName)\sockets.pch"
+				PrecompiledHeaderFile=".\sockets__$(PlatformName)_$(ConfigurationName)/sockets.pch"
 				AssemblerListingLocation=".\sockets__$(PlatformName)_$(ConfigurationName)\"
 				ObjectFile=".\sockets__$(PlatformName)_$(ConfigurationName)\"
 				ProgramDataBaseFileName=".\sockets__$(PlatformName)_$(ConfigurationName)\"
@@ -284,7 +284,7 @@
 				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include\sockets"
-				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_DEBUG;RIBON_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
@@ -362,7 +362,7 @@
 				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include\sockets"
-				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_DEBUG;RIBON_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
@@ -440,7 +440,7 @@
 				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include\sockets"
-				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_DEBUG;RIBON_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"

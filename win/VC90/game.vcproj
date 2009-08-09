@@ -45,7 +45,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /Zm200 /openmp"
+				AdditionalOptions="/MP /Zm200"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\shared\vmap;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;_SECURE_SCL=0"
@@ -155,7 +155,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
+				PreprocessorDefinitions="NDEBUG;_SECURE_SCL=0"
 				Culture="1033"
 			/>
 			<Tool
@@ -180,7 +180,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\src\tools\openmp\vcomp90.dll ..\..\bin\$(PlatformName)_$(ConfigurationName)\vcomp90.dll"
 			/>
 		</Configuration>
 		<Configuration
@@ -209,10 +208,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /openmp"
+				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\shared\vmap;..\..\dep\ACE_wrappers"
-				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;_SECURE_SCL=0"
+				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;"
 				StringPooling="false"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
@@ -290,7 +289,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /bigobj /Zm200 /openmp"
+				AdditionalOptions="/MP /bigobj /Zm200"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\shared\vmap;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;"
@@ -374,7 +373,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /bigobj /Zm200 /openmp"
+				AdditionalOptions="/MP /bigobj /Zm200"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\shared\vmap;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_SECURE_SCL=0"
@@ -402,7 +401,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
+				PreprocessorDefinitions="NDEBUG;_SECURE_SCL=0"
 				Culture="1033"
 			/>
 			<Tool
@@ -540,6 +539,118 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\AuctionHouseHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGround.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGround.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundAA.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundAA.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundAB.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundAB.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundAV.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundAV.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundBE.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundBE.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundDS.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundDS.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundEY.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundEY.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundMgr.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundNA.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundNA.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundRL.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundRL.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundRV.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundRV.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundSA.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundSA.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundWS.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundWS.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\CalendarHandler.cpp"
 				>
 			</File>
@@ -576,6 +687,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\Chat.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Chat.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ChatHandler.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\CombatHandler.cpp"
 				>
 			</File>
@@ -589,10 +712,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\GameEventMgr.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\GMTicketHandler.cpp"
 				>
 			</File>
 			<File
@@ -732,6 +851,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\pchdef.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\PetHandler.cpp"
 				>
 			</File>
@@ -824,6 +947,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\TicketHandler.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\TradeHandler.cpp"
 				>
 			</File>
@@ -876,14 +1003,6 @@
 			Name="Object"
 			>
 			<File
-				RelativePath="..\..\src\game\AggressorAI.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\AggressorAI.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\AnimalRandomMovementGenerator.h"
 				>
 			</File>
@@ -893,6 +1012,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\ArenaTeam.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\AuctionHouseMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\AuctionHouseMgr.h"
 				>
 			</File>
 			<File
@@ -936,47 +1063,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\CreatureAI.cpp"
+				RelativePath="..\..\src\game\CreatureGroups.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\CreatureAI.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\CreatureAIImpl.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\CreatureAIRegistry.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\CreatureAIRegistry.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\CreatureAISelector.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\CreatureAISelector.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\CreatureEventAI.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\CreatureEventAI.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\CreatureEventAIMgr.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\CreatureEventAIMgr.h"
+				RelativePath="..\..\src\game\CreatureGroups.h"
 				>
 			</File>
 			<File
@@ -1017,22 +1108,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\GameObject.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\GMTicketMgr.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\GMTicketMgr.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\GuardAI.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\GuardAI.h"
 				>
 			</File>
 			<File
@@ -1104,14 +1179,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\NullCreatureAI.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\NullCreatureAI.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\Object.cpp"
 				>
 			</File>
@@ -1140,27 +1207,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\ObjectPosSelector.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ObjectPosSelector.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\Pet.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\game\Pet.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\PetAI.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\PetAI.h"
 				>
 			</File>
 			<File
@@ -1185,14 +1236,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\RandomMovementGenerator.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ReactorAI.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ReactorAI.h"
 				>
 			</File>
 			<File
@@ -1248,14 +1291,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\TotemAI.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\TotemAI.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\Traveller.h"
 				>
 			</File>
@@ -1295,6 +1330,22 @@
 				RelativePath="..\..\src\game\WaypointMovementGenerator.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\game\ZoneScript.h"
+				>
+			</File>
+			<Filter
+				Name="AuctionHouseBot"
+				>
+				<File
+					RelativePath="..\..\src\game\AuctionHouseBot.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\game\AuctionHouseBot.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Server"
@@ -1465,26 +1516,110 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="AuctionHouseBot"
+			Name="AI"
 			>
 			<File
-				RelativePath="..\..\src\game\AuctionHouseBot.cpp"
+				RelativePath="..\..\src\game\AggressorAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\AuctionHouseBot.h"
+				RelativePath="..\..\src\game\AggressorAI.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\AuctionHouseHandler.cpp"
+				RelativePath="..\..\src\game\CreatureAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\AuctionHouseMgr.cpp"
+				RelativePath="..\..\src\game\CreatureAI.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\AuctionHouseMgr.h"
+				RelativePath="..\..\src\game\CreatureAIFactory.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureAIImpl.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureAIRegistry.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureAIRegistry.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureAISelector.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureAISelector.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureEventAI.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureEventAI.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureEventAIMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureEventAIMgr.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\GuardAI.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\GuardAI.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\NullCreatureAI.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\NullCreatureAI.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\PetAI.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\PetAI.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ReactorAI.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ReactorAI.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\TotemAI.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\TotemAI.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\UnitAI.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\UnitAI.h"
 				>
 			</File>
 		</Filter>
@@ -1516,11 +1651,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\OutdoorPvPLA.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\OutdoorPvPLA.h"
+				RelativePath="..\..\src\game\OutdoorPvPImpl.h"
 				>
 			</File>
 			<File
@@ -1537,14 +1668,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\OutdoorPvPNA.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\OutdoorPvPObjectiveAI.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\OutdoorPvPObjectiveAI.h"
 				>
 			</File>
 			<File
@@ -1571,148 +1694,12 @@
 				RelativePath="..\..\src\game\OutdoorPvPZM.h"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="BattleGround"
-			>
 			<File
-				RelativePath="..\..\src\game\BattleGround.cpp"
+				RelativePath="..\..\src\game\Wintergrasp.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\BattleGround.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundAA.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundAA.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundAB.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundAB.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundAV.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundAV.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundBE.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundBE.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundDS.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundDS.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundEY.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundEY.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundHandler.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundMgr.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundMgr.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundNA.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundNA.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundRL.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundRL.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundRV.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundRV.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundSA.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundSA.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundWS.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundWS.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Chatlog"
-			>
-			<File
-				RelativePath="..\..\src\game\Chat.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\Chat.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ChatHandler.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ChatLexicsCutter.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ChatLexicsCutter.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ChatLog.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ChatLog.h"
+				RelativePath="..\..\src\game\Wintergrasp.h"
 				>
 			</File>
 		</Filter>
@@ -1755,10 +1742,6 @@
 					PrecompiledHeaderThrough="pchdef.h"
 				/>
 			</FileConfiguration>
-		</File>
-		<File
-			RelativePath="..\..\src\game\pchdef.h"
-			>
 		</File>
 	</Files>
 	<Globals>
