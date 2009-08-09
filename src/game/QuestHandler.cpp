@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "Common.h"
@@ -99,7 +101,7 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
 
     // remove fake death
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
     // Stop the npc if moving
     pCreature->StopMoving();
 
@@ -405,6 +407,7 @@ void WorldSession::HandleQuestgiverCompleteQuest(WorldPacket& recv_data)
     Quest const *pQuest = objmgr.GetQuestTemplate(quest);
     if( pQuest )
     {
+        // TODO: need a virtual function
         if(GetPlayer()->InBattleGround())
             if(BattleGround* bg = GetPlayer()->GetBattleGround())
                 if(bg->GetTypeID() == BATTLEGROUND_AV)
@@ -584,7 +587,7 @@ uint32 WorldSession::getDialogStatus(Player *pPlayer, Object* questgiver, uint32
                         result2 = DIALOG_STATUS_REWARD_REP;
                     else if (pPlayer->getLevel() <= pPlayer->GetQuestLevel(pQuest) + sWorld.getConfig(CONFIG_QUEST_LOW_LEVEL_HIDE_DIFF) )
                     {
-                        if (pQuest->HasFlag(QUEST_FLAGS_DAILY))
+                        if (pQuest->IsDaily())
                             result2 = DIALOG_STATUS_AVAILABLE_REP;
                         else
                             result2 = DIALOG_STATUS_AVAILABLE;
@@ -654,3 +657,4 @@ void WorldSession::HandleQuestgiverStatusMultipleQuery(WorldPacket& /*recvPacket
     data.put<uint32>(0, count);                             // write real count
     SendPacket(&data);
 }
+

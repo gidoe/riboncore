@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "Common.h"
@@ -93,7 +95,7 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult *result, uint32
     std::string name = fields[1].GetCppString();
     uint8 pRace = 0, pGender = 0, pClass = 0;
     if(name == "")
-        name         = session->GetMangosString(LANG_NON_EXIST_CHARACTER);
+        name         = session->GetRibonString(LANG_NON_EXIST_CHARACTER);
     else
     {
         pRace        = fields[2].GetUInt8();
@@ -465,3 +467,4 @@ void WorldSession::HandlePageTextQueryOpcode( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: Sent SMSG_PAGE_TEXT_QUERY_RESPONSE" );
     }
 }
+

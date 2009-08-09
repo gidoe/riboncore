@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,16 +10,16 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOSSERVER_QUEST_H
-#define MANGOSSERVER_QUEST_H
+#ifndef RIBONCORE_QUEST_H
+#define RIBONCORE_QUEST_H
 
 #include "Platform/Define.h"
 #include "Database/DatabaseEnv.h"
@@ -94,9 +96,9 @@ enum QuestStatus
 {
     QUEST_STATUS_NONE           = 0,
     QUEST_STATUS_COMPLETE       = 1,
-    QUEST_STATUS_UNAVAILABLE    = 2,
+    //QUEST_STATUS_UNAVAILABLE    = 2,
     QUEST_STATUS_INCOMPLETE     = 3,
-    QUEST_STATUS_AVAILABLE      = 4,
+    //QUEST_STATUS_AVAILABLE      = 4,
     MAX_QUEST_STATUS
 };
 
@@ -131,17 +133,18 @@ enum __QuestFlags
     QUEST_FLAGS_AUTO_REWARDED  = 0x00000400,                // These quests are automatically rewarded on quest complete and they will never appear in quest log client side.
     QUEST_FLAGS_TBC_RACES      = 0x00000800,                // Not used currently: Blood elf/Draenei starting zone quests
     QUEST_FLAGS_DAILY          = 0x00001000,                // Used to know quest is Daily one
+    QUEST_FLAGS_WEEKLY         = 0x00008000,
 
-    // Mangos flags for set SpecialFlags in DB if required but used only at server
-    QUEST_MANGOS_FLAGS_REPEATABLE           = 0x010000,     // Set by 1 in SpecialFlags from DB
-    QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT = 0x020000,     // Set by 2 in SpecialFlags from DB (if required area explore, spell SPELL_EFFECT_QUEST_COMPLETE casting, table `*_script` command SCRIPT_COMMAND_QUEST_EXPLORED use, set from script DLL)
-    QUEST_MANGOS_FLAGS_DB_ALLOWED = 0xFFFF | QUEST_MANGOS_FLAGS_REPEATABLE | QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT,
+    // Ribon flags for set SpecialFlags in DB if required but used only at server
+    QUEST_RIBON_FLAGS_REPEATABLE           = 0x010000,     // Set by 1 in SpecialFlags from DB
+    QUEST_RIBON_FLAGS_EXPLORATION_OR_EVENT = 0x020000,     // Set by 2 in SpecialFlags from DB (if reequired area explore, spell SPELL_EFFECT_QUEST_COMPLETE casting, table `*_script` command SCRIPT_COMMAND_QUEST_EXPLORED use, set from script DLL)
+    QUEST_RIBON_FLAGS_DB_ALLOWED = 0xFFFF | QUEST_RIBON_FLAGS_REPEATABLE | QUEST_RIBON_FLAGS_EXPLORATION_OR_EVENT,
 
-    // Mangos flags for internal use only
-    QUEST_MANGOS_FLAGS_DELIVER              = 0x040000,     // Internal flag computed only
-    QUEST_MANGOS_FLAGS_SPEAKTO              = 0x080000,     // Internal flag computed only
-    QUEST_MANGOS_FLAGS_KILL_OR_CAST         = 0x100000,     // Internal flag computed only
-    QUEST_MANGOS_FLAGS_TIMED                = 0x200000,     // Internal flag computed only
+    // Ribon flags for internal use only
+    QUEST_RIBON_FLAGS_DELIVER              = 0x040000,     // Internal flag computed only
+    QUEST_RIBON_FLAGS_SPEAKTO              = 0x080000,     // Internal flag computed only
+    QUEST_RIBON_FLAGS_KILL_OR_CAST         = 0x100000,     // Internal flag computed only
+    QUEST_RIBON_FLAGS_TIMED                = 0x200000,     // Internal flag computed only
 };
 
 struct QuestLocale
@@ -220,10 +223,10 @@ class Quest
         uint32 GetCompleteEmote() const { return CompleteEmote; }
         uint32 GetQuestStartScript() const { return QuestStartScript; }
         uint32 GetQuestCompleteScript() const { return QuestCompleteScript; }
-        bool   IsRepeatable() const { return QuestFlags & QUEST_MANGOS_FLAGS_REPEATABLE; }
+        bool   IsRepeatable() const { return QuestFlags & QUEST_RIBON_FLAGS_REPEATABLE; }
         bool   IsAutoComplete() const { return QuestMethod ? false : true; }
         uint32 GetFlags() const { return QuestFlags; }
-        bool   IsDaily() const { return QuestFlags & QUEST_FLAGS_DAILY; }
+        bool   IsDaily() const { return QuestFlags & (QUEST_FLAGS_DAILY | QUEST_FLAGS_WEEKLY); }
 
         // multiple values
         std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];
@@ -342,3 +345,4 @@ struct QuestStatusData
     uint32 m_creatureOrGOcount[ QUEST_OBJECTIVES_COUNT ];
 };
 #endif
+
