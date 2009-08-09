@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -545,7 +547,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x204*/ { "CMSG_DECHARGE",                                STATUS_NEVER,    &WorldSession::Handle_NULL                     },
     /*0x205*/ { "CMSG_GMTICKET_CREATE",                         STATUS_LOGGEDIN, &WorldSession::HandleGMTicketCreateOpcode      },
     /*0x206*/ { "SMSG_GMTICKET_CREATE",                         STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
-    /*0x207*/ { "CMSG_GMTICKET_UPDATETEXT",                     STATUS_LOGGEDIN, &WorldSession::HandleGMTicketUpdateTextOpcode  },
+    /*0x207*/ { "CMSG_GMTICKET_UPDATETEXT",                     STATUS_LOGGEDIN, &WorldSession::HandleGMTicketUpdateOpcode       },
     /*0x208*/ { "SMSG_GMTICKET_UPDATETEXT",                     STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x209*/ { "SMSG_ACCOUNT_DATA_TIMES",                      STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x20A*/ { "CMSG_REQUEST_ACCOUNT_DATA",                    STATUS_LOGGEDIN, &WorldSession::HandleRequestAccountData        },
@@ -561,7 +563,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x214*/ { "SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE",          STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x215*/ { "SMSG_GAMEOBJECT_DESPAWN_ANIM",                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x216*/ { "MSG_CORPSE_QUERY",                             STATUS_LOGGEDIN, &WorldSession::HandleCorpseQueryOpcode         },
-    /*0x217*/ { "CMSG_GMTICKET_DELETETICKET",                   STATUS_LOGGEDIN, &WorldSession::HandleGMTicketDeleteTicketOpcode},
+    /*0x217*/ { "CMSG_GMTICKET_DELETETICKET",                   STATUS_LOGGEDIN, &WorldSession::HandleGMTicketDeleteOpcode      },
     /*0x218*/ { "SMSG_GMTICKET_DELETETICKET",                   STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x219*/ { "SMSG_CHAT_WRONG_FACTION",                      STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x21A*/ { "CMSG_GMTICKET_SYSTEMSTATUS",                   STATUS_LOGGEDIN, &WorldSession::HandleGMTicketSystemStatusOpcode},
@@ -836,7 +838,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x327*/ { "CMSG_GM_UPDATE_TICKET_STATUS",                 STATUS_NEVER,    &WorldSession::Handle_NULL                     },
     /*0x328*/ { "SMSG_GM_TICKET_STATUS_UPDATE",                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x329*/ { "MSG_SET_DUNGEON_DIFFICULTY",                   STATUS_LOGGEDIN, &WorldSession::HandleSetDungeonDifficultyOpcode},
-    /*0x32A*/ { "CMSG_GMSURVEY_SUBMIT",                         STATUS_LOGGEDIN, &WorldSession::HandleGMSurveySubmit            },
+    /*0x32A*/ { "CMSG_GMSURVEY_SUBMIT",                         STATUS_NEVER,    &WorldSession::Handle_NULL                     },//LOGGEDIN, &WorldSession::HandleGMSurveySubmit            },
     /*0x32B*/ { "SMSG_UPDATE_INSTANCE_OWNERSHIP",               STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x32C*/ { "CMSG_IGNORE_KNOCKBACK_CHEAT",                  STATUS_NEVER,    &WorldSession::Handle_NULL                     },
     /*0x32D*/ { "SMSG_CHAT_PLAYER_AMBIGUOUS",                   STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
@@ -1051,7 +1053,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x3FE*/ { "MSG_GUILD_BANK_MONEY_WITHDRAWN",               STATUS_LOGGEDIN, &WorldSession::HandleGuildBankMoneyWithdrawn   },
     /*0x3FF*/ { "MSG_GUILD_EVENT_LOG_QUERY",                    STATUS_LOGGEDIN, &WorldSession::HandleGuildEventLogQueryOpcode  },
     /*0x400*/ { "CMSG_MAELSTROM_RENAME_GUILD",                  STATUS_NEVER,    &WorldSession::Handle_NULL                     },
-    /*0x401*/ { "CMSG_GET_MIRRORIMAGE_DATA",                    STATUS_NEVER,    &WorldSession::Handle_NULL                     },
+    /*0x401*/ { "CMSG_GET_MIRRORIMAGE_DATA",                    STATUS_LOGGEDIN, &WorldSession::HandleMirrrorImageDataRequest                     },
     /*0x402*/ { "SMSG_MIRRORIMAGE_DATA",                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x403*/ { "SMSG_FORCE_DISPLAY_UPDATE",                    STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x404*/ { "SMSG_SPELL_CHANCE_RESIST_PUSHBACK",            STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
@@ -1065,7 +1067,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x40C*/ { "CMSG_SET_GRANTABLE_LEVELS",                    STATUS_NEVER,    &WorldSession::Handle_NULL                     },
     /*0x40D*/ { "CMSG_GRANT_LEVEL",                             STATUS_NEVER,    &WorldSession::Handle_NULL                     },
     /*0x40E*/ { "CMSG_REFER_A_FRIEND",                          STATUS_NEVER,    &WorldSession::Handle_NULL                     },
-    /*0x40F*/ { "MSG_GM_CHANGE_ARENA_RATING",                   STATUS_NEVER,    &WorldSession::Handle_NULL                     },
+    /*0x40F*/ { "CMSG_DECLINE_CHANNEL_INVITE",                  STATUS_LOGGEDIN, &WorldSession::HandleChannelDeclineInvite      },
     /*0x410*/ { "CMSG_DECLINE_CHANNEL_INVITE",                  STATUS_NEVER,    &WorldSession::Handle_NULL                     },
     /*0x411*/ { "CMSG_GROUPACTION_THROTTLED",                   STATUS_NEVER,    &WorldSession::Handle_NULL                     },
     /*0x412*/ { "SMSG_OVERRIDE_LIGHT",                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
@@ -1169,9 +1171,9 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x474*/ { "SMSG_CHAR_CUSTOMIZE",                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x475*/ { "SMSG_PET_RENAMEABLE",                          STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x476*/ { "CMSG_REQUEST_VEHICLE_EXIT",                    STATUS_LOGGEDIN, &WorldSession::HandleRequestVehicleExit        },
-    /*0x477*/ { "CMSG_REQUEST_VEHICLE_PREV_SEAT",               STATUS_LOGGEDIN, &WorldSession::HandleRequestVehiclePrevSeat    },
-    /*0x478*/ { "CMSG_REQUEST_VEHICLE_NEXT_SEAT",               STATUS_LOGGEDIN, &WorldSession::HandleRequestVehicleNextSeat    },
-    /*0x479*/ { "CMSG_REQUEST_VEHICLE_SWITCH_SEAT",             STATUS_LOGGEDIN, &WorldSession::HandleRequestVehicleSwitchSeat  },
+    /*0x477*/ { "CMSG_REQUEST_VEHICLE_PREV_SEAT",               STATUS_LOGGEDIN, &WorldSession::HandleChangeSeatsOnControlledVehicle},
+    /*0x478*/ { "CMSG_REQUEST_VEHICLE_NEXT_SEAT",               STATUS_LOGGEDIN, &WorldSession::HandleChangeSeatsOnControlledVehicle},
+    /*0x479*/ { "CMSG_REQUEST_VEHICLE_SWITCH_SEAT",             STATUS_LOGGEDIN, &WorldSession::HandleChangeSeatsOnControlledVehicle},
     /*0x47A*/ { "CMSG_PET_LEARN_TALENT",                        STATUS_LOGGEDIN, &WorldSession::HandlePetLearnTalent            },
     /*0x47B*/ { "CMSG_PET_UNLEARN_TALENTS",                     STATUS_NEVER,    &WorldSession::Handle_NULL                     },
     /*0x47C*/ { "SMSG_SET_PHASE_SHIFT",                         STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
@@ -1256,3 +1258,4 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x4CB*/ { "CMSG_EQUIPMENT_SET_USE",                       STATUS_LOGGEDIN, &WorldSession::HandleEquipmentSetUse           },
     /*0x4CC*/ { "SMSG_EQUIPMENT_SET_USE_RESULT",                STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
 };
+
