@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "Common.h"
@@ -28,7 +30,9 @@
 #include "Group.h"
 #include "SocialMgr.h"
 #include "Util.h"
-#include "Vehicle.h"
+#include "SpellAuras.h"
+
+class Aura;
 
 /* differeces from off:
     -you can uninvite yourself - is is useful
@@ -74,6 +78,12 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
         return;
     }
 
+    // restrict invite to GMs
+    if (!sWorld.getConfig(CONFIG_ALLOW_GM_GROUP) && !GetPlayer()->isGameMaster() && player->isGameMaster())
+    {
+        SendPartyResult(PARTY_OP_INVITE, membername, PARTY_RESULT_CANT_FIND_TARGET);
+        return;
+    }
     // can't group with
     if(!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) && GetPlayer()->GetTeam() != player->GetTeam())
     {
@@ -86,6 +96,12 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
         return;
     }
     // just ignore us
+    if(player->GetInstanceId() != 0 && player->GetDifficulty() != GetPlayer()->GetDifficulty())
+    {
+        SendPartyResult(PARTY_OP_INVITE, membername, PARTY_RESULT_TARGET_IGNORE_YOU);
+        return;
+    }
+
     if(player->GetSocial()->HasIgnore(GetPlayer()->GetGUIDLow()))
     {
         SendPartyResult(PARTY_OP_INVITE, membername, PARTY_RESULT_TARGET_IGNORE_YOU);
@@ -197,9 +213,6 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & /*recv_data*/ )
     if(!group->AddMember(GetPlayer()->GetGUID(), GetPlayer()->GetName()))
         return;
 
-    uint8 subgroup = group->GetMemberGroup(GetPlayer()->GetGUID());
-
-    GetPlayer()->SetGroup(group, subgroup);
     group->BroadcastGroupUpdate();
 }
 
@@ -539,8 +552,20 @@ void WorldSession::HandleGroupChangeSubGroupOpcode( WorldPacket & recv_data )
         return;
     /********************/
 
+    Player *movedPlayer=objmgr.GetPlayer(name.c_str());
+    if(!movedPlayer)
+        return;
+
+    //Do not allow leader to change group of player in combat
+    if (movedPlayer->isInCombat())
+    {
+        WorldPacket data(SMSG_GROUP_SWAP_FAILED, (0));
+        SendPacket(&data);
+        return;
+    }
+
     // everything's fine, do it
-    group->ChangeMembersGroup(objmgr.GetPlayer(name.c_str()), groupNr);
+    group->ChangeMembersGroup(movedPlayer, groupNr);
 }
 
 void WorldSession::HandleGroupAssistantLeaderOpcode( WorldPacket & recv_data )
@@ -702,19 +727,20 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
 
     if (mask & GROUP_UPDATE_FLAG_AURAS)
     {
-        const uint64& auramask = player->GetAuraUpdateMask();
+        const uint64& auramask = player->GetAuraUpdateMaskForRaid();
         *data << uint64(auramask);
         for(uint32 i = 0; i < MAX_AURAS; ++i)
         {
             if(auramask & (uint64(1) << i))
             {
-                *data << uint32(player->GetVisibleAura(i));
+                Aura * pAura = player->GetVisibleAura(i);
+                *data << uint32(pAura ? pAura->GetId() : 0);
                 *data << uint8(1);
             }
         }
     }
 
-    Unit *pet = player->GetCharmOrPet();
+    Pet *pet = player->GetPet();
     if (mask & GROUP_UPDATE_FLAG_PET_GUID)
     {
         if(pet)
@@ -783,24 +809,20 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
     {
         if(pet)
         {
-            const uint64& auramask = pet->GetAuraUpdateMask();
+            const uint64& auramask = pet->GetAuraUpdateMaskForRaid();
             *data << uint64(auramask);
             for(uint32 i = 0; i < MAX_AURAS; ++i)
             {
                 if(auramask & (uint64(1) << i))
                 {
-                    *data << uint32(pet->GetVisibleAura(i));
+                    Aura * pAura = pet->GetVisibleAura(i);
+                    *data << uint32(pAura ? pAura->GetId() : 0);
                     *data << uint8(1);
                 }
             }
         }
         else
             *data << (uint64) 0;
-    }
-
-    if (mask & GROUP_UPDATE_FLAG_VEHICLE_SEAT)
-    {
-        *data << (uint32) player->m_SeatData.dbc_seat;
     }
 }
 
@@ -825,7 +847,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
         return;
     }
 
-    Unit *pet = player->GetCharmOrPet();
+    Pet *pet = player->GetPet();
 
     WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 4+2+2+2+1+2*6+8+1+8);
     data << uint8(0);                                       // only for SMSG_PARTY_MEMBER_STATS_FULL, probably arena/bg related
@@ -833,7 +855,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
 
     uint32 mask1 = 0x00040BFF;                              // common mask, real flags used 0x000040BFF
     if(pet)
-        mask1 = 0xFFFFFFFF;                                 // for hunters and other classes with pets
+        mask1 = 0x7FFFFFFF;                                 // for hunters and other classes with pets
 
     Powers powerType = player->getPowerType();
     data << (uint32) mask1;                                 // group update mask
@@ -853,10 +875,10 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
     data << (uint64) auramask;                              // placeholder
     for(uint8 i = 0; i < MAX_AURAS; ++i)
     {
-        if(uint32 aura = player->GetVisibleAura(i))
+        if(Aura * pAura = player->GetVisibleAura(i))
         {
             auramask |= (uint64(1) << i);
-            data << (uint32) aura;
+            data << (uint32) pAura->GetId();
             data << (uint8)  1;
         }
     }
@@ -879,15 +901,14 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
         data << (uint64) petauramask;                       // placeholder
         for(uint8 i = 0; i < MAX_AURAS; ++i)
         {
-            if(uint32 petaura = pet->GetVisibleAura(i))
+            if(Aura * pAura = pet->GetVisibleAura(i))
             {
                 petauramask |= (uint64(1) << i);
-                data << (uint32) petaura;
+                data << (uint32) pAura->GetId();
                 data << (uint8)  1;
             }
         }
         data.put<uint64>(petMaskPos,petauramask);           // GROUP_UPDATE_FLAG_PET_AURAS
-        data << (uint32) player->m_SeatData.dbc_seat;
     }
     else
     {
@@ -929,3 +950,4 @@ void WorldSession::HandleOptOutOfLootOpcode( WorldPacket & recv_data )
     if(unkn!=0)
         sLog.outError("CMSG_GROUP_PASS_ON_LOOT: activation not implemented!");
 }
+

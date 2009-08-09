@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,16 +10,16 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOSSERVER_GUILD_H
-#define MANGOSSERVER_GUILD_H
+#ifndef RIBONCORE_GUILD_H
+#define RIBONCORE_GUILD_H
 
 #define WITHDRAW_MONEY_UNLIMITED    0xFFFFFFFF
 #define WITHDRAW_SLOT_UNLIMITED     0xFFFFFFFF
@@ -216,7 +218,7 @@ struct GuildBankEvent
     uint8  DestTabId;
     uint64 TimeStamp;
 
-    bool isMoneyEvent() const
+    const bool isMoneyEvent()
     {
         return LogEntry == GUILD_BANK_LOG_DEPOSIT_MONEY ||
             LogEntry == GUILD_BANK_LOG_WITHDRAW_MONEY ||
@@ -401,7 +403,7 @@ class Guild
         void   SetGuildBankTabInfo(uint8 TabId, std::string name, std::string icon);
         void   CreateBankRightForTab(uint32 rankid, uint8 TabId);
         const  GuildBankTab *GetBankTab(uint8 index) { if(index >= m_TabListMap.size()) return NULL; return m_TabListMap[index]; }
-        uint8 GetPurchasedTabs() const { return purchased_tabs; }
+        const  uint8 GetPurchasedTabs() const { return purchased_tabs; }
         uint32 GetBankRights(uint32 rankId, uint8 TabId) const;
         bool   IsMemberHaveRights(uint32 LowGuid, uint8 TabId,uint32 rights) const;
         bool   CanMemberViewTab(uint32 LowGuid, uint8 TabId) const;
@@ -458,8 +460,8 @@ class Guild
         TabListMap m_TabListMap;
 
         /** These are actually ordered lists. The first element is the oldest entry.*/
-        typedef std::list<GuildEventlogEntry*> GuildEventlog;
-        typedef std::list<GuildBankEvent*> GuildBankEventLog;
+        typedef std::list<GuildEventlogEntry> GuildEventlog;
+        typedef std::list<GuildBankEvent> GuildBankEventLog;
         GuildEventlog m_GuildEventlog;
         GuildBankEventLog m_GuildBankEventLog_Money;
         GuildBankEventLog m_GuildBankEventLog_Item[GUILD_BANK_MAX_TABS];
@@ -480,3 +482,4 @@ class Guild
         Item* _StoreItem( uint8 tab, uint8 slot, Item *pItem, uint32 count, bool clone );
 };
 #endif
+
