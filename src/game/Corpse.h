@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,16 +10,16 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOSSERVER_CORPSE_H
-#define MANGOSSERVER_CORPSE_H
+#ifndef RIBONCORE_CORPSE_H
+#define RIBONCORE_CORPSE_H
 
 #include "Object.h"
 #include "Database/DatabaseEnv.h"
@@ -59,11 +61,18 @@ class Corpse : public WorldObject
         bool Create( uint32 guidlow, Player *owner );
 
         void SaveToDB();
-        bool LoadFromDB(uint32 guid, QueryResult *result);
+        //bool LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId);
         bool LoadFromDB(uint32 guid, Field *fields);
 
         void DeleteBonesFromWorld();
         void DeleteFromDB();
+
+        void SetMap (Map * map) {WorldObject::SetMap(map); m_mapId = map->GetId(); SetInstanceId(map->GetInstanceId());}
+        // Used to check object existence in unloaded grids
+        uint32 GetMapId() const {return m_mapId;}
+        void SetMapId (uint32 id) {m_mapId = id;}
+        uint32 GetInstanceId() const {return m_instanceId;}
+        void SetInstanceId (uint32 id) {m_instanceId = id;}
 
         uint64 const& GetOwnerGUID() const { return GetUInt64Value(CORPSE_FIELD_OWNER); }
 
@@ -87,13 +96,14 @@ class Corpse : public WorldObject
         void YellToZone(int32 textId, uint32 language, uint64 TargetGuid) { MonsterYellToZone(textId,language,TargetGuid); }
 
         GridReference<Corpse> &GetGridRef() { return m_gridRef; }
-
-        bool isActiveObject() const { return false; }
     private:
         GridReference<Corpse> m_gridRef;
 
         CorpseType m_type;
         time_t m_time;
         GridPair m_grid;                                    // gride for corpse position for fast search
+        uint32 m_mapId;                                     // map id for fast corpse check at packet requests and in other situations with unloaded map of corpse.
+        uint32 m_instanceId;
 };
 #endif
+

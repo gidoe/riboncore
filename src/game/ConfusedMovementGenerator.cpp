@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "Creature.h"
@@ -21,6 +23,11 @@
 #include "Opcodes.h"
 #include "ConfusedMovementGenerator.h"
 #include "DestinationHolderImp.h"
+
+#ifdef MAP_BASED_RAND_GEN
+#define rand_norm() unit.rand_norm()
+#define urand(a,b) unit.urand(a,b)
+#endif
 
 template<class T>
 void
@@ -48,8 +55,8 @@ ConfusedMovementGenerator<T>::Initialize(T &unit)
         i_waypoints[idx][1] = y + wanderY;
 
         // prevent invalid coordinates generation
-        MaNGOS::NormalizeMapCoord(i_waypoints[idx][0]);
-        MaNGOS::NormalizeMapCoord(i_waypoints[idx][1]);
+        Ribon::NormalizeMapCoord(i_waypoints[idx][0]);
+        Ribon::NormalizeMapCoord(i_waypoints[idx][1]);
 
         bool is_water = map->IsInWater(i_waypoints[idx][0],i_waypoints[idx][1],z);
         // if generated wrong path just ignore
@@ -63,7 +70,11 @@ ConfusedMovementGenerator<T>::Initialize(T &unit)
         i_waypoints[idx][2] =  z;
     }
 
+    unit.SetUInt64Value(UNIT_FIELD_TARGET, 0);
+    unit.SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+    unit.CastStop();
     unit.StopMoving();
+    unit.RemoveUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
     unit.addUnitState(UNIT_STAT_CONFUSED);
 }
 
@@ -71,8 +82,6 @@ template<>
 void
 ConfusedMovementGenerator<Creature>::_InitSpecific(Creature &creature, bool &is_water_ok, bool &is_land_ok)
 {
-    creature.RemoveMonsterMoveFlag(MONSTER_MOVE_WALK);
-
     is_water_ok = creature.canSwim();
     is_land_ok  = creature.canWalk();
 }
@@ -102,19 +111,19 @@ ConfusedMovementGenerator<T>::Update(T &unit, const uint32 &diff)
     if(!&unit)
         return true;
 
-    if(unit.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_DISTRACTED | UNIT_STAT_ON_VEHICLE))
+    if(unit.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_DISTRACTED))
         return true;
 
     if( i_nextMoveTime.Passed() )
     {
         // currently moving, update location
         Traveller<T> traveller(unit);
-        if( i_destinationHolder.UpdateTraveller(traveller, diff, false))
+        if( i_destinationHolder.UpdateTraveller(traveller, diff))
         {
             if( i_destinationHolder.HasArrived())
             {
                 // arrived, stop and wait a bit
-                unit.StopMoving();
+                unit.clearUnitState(UNIT_STAT_MOVE);
 
                 i_nextMove = urand(1,MAX_CONF_WAYPOINTS);
                 i_nextMoveTime.Reset(urand(0, 1500-1));     // TODO: check the minimum reset time, should be probably higher
@@ -139,22 +148,22 @@ ConfusedMovementGenerator<T>::Update(T &unit, const uint32 &diff)
     return true;
 }
 
-template<>
-void ConfusedMovementGenerator<Player>::Finalize(Player &unit)
+template<class T>
+void
+ConfusedMovementGenerator<T>::Finalize(T &unit)
 {
+    unit.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
     unit.clearUnitState(UNIT_STAT_CONFUSED);
-}
-
-template<>
-void ConfusedMovementGenerator<Creature>::Finalize(Creature &unit)
-{
-    unit.clearUnitState(UNIT_STAT_CONFUSED);
-    unit.AddMonsterMoveFlag(MONSTER_MOVE_WALK);
+    if(unit.GetTypeId() == TYPEID_UNIT && unit.getVictim())
+        unit.SetUInt64Value(UNIT_FIELD_TARGET, unit.getVictim()->GetGUID());
 }
 
 template void ConfusedMovementGenerator<Player>::Initialize(Player &player);
 template void ConfusedMovementGenerator<Creature>::Initialize(Creature &creature);
+template void ConfusedMovementGenerator<Player>::Finalize(Player &player);
+template void ConfusedMovementGenerator<Creature>::Finalize(Creature &creature);
 template void ConfusedMovementGenerator<Player>::Reset(Player &player);
 template void ConfusedMovementGenerator<Creature>::Reset(Creature &creature);
 template bool ConfusedMovementGenerator<Player>::Update(Player &player, const uint32 &diff);
 template bool ConfusedMovementGenerator<Creature>::Update(Creature &creature, const uint32 &diff);
+

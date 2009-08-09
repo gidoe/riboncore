@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "Common.h"
@@ -36,6 +38,8 @@ Corpse::Corpse(CorpseType type) : WorldObject()
     m_valuesCount = CORPSE_END;
 
     m_type = type;
+
+    m_mapId = 0;
 
     m_time = time(NULL);
 
@@ -74,12 +78,11 @@ bool Corpse::Create( uint32 guidlow, Player *owner)
 {
     ASSERT(owner);
 
-    WorldObject::_Create(guidlow, HIGHGUID_CORPSE, owner->GetPhaseMask());
-    Relocate(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ(), owner->GetOrientation());
-
     //we need to assign owner's map for corpse
     //in other way we will get a crash in Corpse::SaveToDB()
     SetMap(owner->GetMap());
+
+    Relocate(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ(), owner->GetOrientation());
 
     if(!IsPositionValid())
     {
@@ -88,10 +91,12 @@ bool Corpse::Create( uint32 guidlow, Player *owner)
         return false;
     }
 
+    WorldObject::_Create(guidlow, HIGHGUID_CORPSE, owner->GetPhaseMask());
+
     SetFloatValue( OBJECT_FIELD_SCALE_X, 1 );
     SetUInt64Value( CORPSE_FIELD_OWNER, owner->GetGUID() );
 
-    m_grid = MaNGOS::ComputeGridPair(GetPositionX(), GetPositionY());
+    m_grid = Ribon::ComputeGridPair(GetPositionX(), GetPositionY());
 
     return true;
 }
@@ -147,7 +152,8 @@ void Corpse::DeleteFromDB()
         CharacterDatabase.PExecute("DELETE FROM corpse WHERE player = '%d' AND corpse_type <> '0'",  GUID_LOPART(GetOwnerGUID()));
 }
 
-bool Corpse::LoadFromDB(uint32 guid, QueryResult *result)
+/*
+bool Corpse::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 {
     bool external = (result != NULL);
     if (!external)
@@ -174,7 +180,7 @@ bool Corpse::LoadFromDB(uint32 guid, QueryResult *result)
         delete result;
 
     return true;
-}
+}*/
 
 bool Corpse::LoadFromDB(uint32 guid, Field *fields)
 {
@@ -184,7 +190,6 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
     float positionY = fields[1].GetFloat();
     float positionZ = fields[2].GetFloat();
     float ort       = fields[3].GetFloat();
-    uint32 mapid    = fields[4].GetUInt32();
 
     Object::_Create(guid, 0, HIGHGUID_CORPSE);
 
@@ -193,6 +198,9 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
         sLog.outError("Corpse #%d have broken data in `data` field. Can't be loaded.",guid);
         return false;
     }
+
+    SetMapId(fields[4].GetUInt32());
+    SetInstanceId(fields[8].GetUInt32());
 
     m_time = time_t(fields[6].GetUInt64());
     m_type = CorpseType(fields[7].GetUInt32());
@@ -203,15 +211,11 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
         return false;
     }
 
-    uint32 instanceid  = fields[8].GetUInt32();
     uint32 phaseMask   = fields[9].GetUInt32();
 
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_CORPSE));
 
-    // place
-    SetLocationInstanceId(instanceid);
-    SetLocationMapId(mapid);
     SetPhaseMask(phaseMask, false);
     Relocate(positionX, positionY, positionZ, ort);
 
@@ -222,12 +226,13 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
         return false;
     }
 
-    m_grid = MaNGOS::ComputeGridPair(GetPositionX(), GetPositionY());
+    m_grid = Ribon::ComputeGridPair(GetPositionX(), GetPositionY());
 
     return true;
 }
 
 bool Corpse::isVisibleForInState(Player const* u, bool inVisibleList) const
 {
-    return IsInWorld() && u->IsInWorld() && IsWithinDistInMap(u, World::GetMaxVisibleDistanceForObject() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
+    return IsInWorld() && u->IsInWorld() && IsWithinDistInMap(u->m_seer, World::GetMaxVisibleDistanceForObject() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
 }
+

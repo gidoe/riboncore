@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,22 +10,19 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOS_CREATUREAI_H
-#define MANGOS_CREATUREAI_H
+#ifndef RIBON_CREATUREAI_H
+#define RIBON_CREATUREAI_H
 
+#include "UnitAI.h"
 #include "Common.h"
-#include "Platform/Define.h"
-#include "Policies/Singleton.h"
-#include "Dynamic/ObjectRegistry.h"
-#include "Dynamic/FactoryHolder.h"
 
 class WorldObject;
 class Unit;
@@ -34,37 +33,68 @@ struct SpellEntry;
 #define TIME_INTERVAL_LOOK   5000
 #define VISIBILITY_RANGE    10000
 
-class MANGOS_DLL_SPEC CreatureAI
+//Spell targets used by SelectSpell
+enum SelectTargetType
 {
-    public:
-        explicit CreatureAI(Creature* creature) : m_creature(creature) {}
+    SELECT_TARGET_DONTCARE = 0,                             //All target types allowed
 
-        virtual ~CreatureAI();
+    SELECT_TARGET_SELF,                                     //Only Self casting
+
+    SELECT_TARGET_SINGLE_ENEMY,                             //Only Single Enemy
+    SELECT_TARGET_AOE_ENEMY,                                //Only AoE Enemy
+    SELECT_TARGET_ANY_ENEMY,                                //AoE or Single Enemy
+
+    SELECT_TARGET_SINGLE_FRIEND,                            //Only Single Friend
+    SELECT_TARGET_AOE_FRIEND,                               //Only AoE Friend
+    SELECT_TARGET_ANY_FRIEND,                               //AoE or Single Friend
+};
+
+//Spell Effects used by SelectSpell
+enum SelectEffect
+{
+    SELECT_EFFECT_DONTCARE = 0,                             //All spell effects allowed
+    SELECT_EFFECT_DAMAGE,                                   //Spell does damage
+    SELECT_EFFECT_HEALING,                                  //Spell does healing
+    SELECT_EFFECT_AURA,                                     //Spell applies an aura
+};
+
+enum SCEquip
+{
+    EQUIP_NO_CHANGE = -1,
+    EQUIP_UNEQUIP   = 0
+};
+
+class RIBON_DLL_SPEC CreatureAI : public UnitAI
+{
+    protected:
+        Creature * const me;
+        Creature * const m_creature;
+
+        bool UpdateVictim();
+        bool UpdateVictimWithGaze();
+        bool UpdateCombatState();
+
+        void SelectNearestTarget(Unit *who);
+    public:
+        explicit CreatureAI(Creature *c) : UnitAI((Unit*)c), me(c), m_creature(c) {}
+
+        virtual ~CreatureAI() {}
 
         ///== Reactions At =================================
 
         // Called if IsVisible(Unit *who) is true at each *who move, reaction at visibility zone enter
-        virtual void MoveInLineOfSight(Unit *) {}
+        virtual void MoveInLineOfSight(Unit *);
+
+        // Called for reaction at stopping attack at no attackers or targets
+        virtual void EnterEvadeMode();
 
         // Called for reaction at enter to combat if not in combat yet (enemy can be NULL)
         virtual void EnterCombat(Unit* /*enemy*/) {}
 
-        // Called for reaction at stopping attack at no attackers or targets
-        virtual void EnterEvadeMode() {}
-
-        // Called at reaching home after evade
-        virtual void JustReachedHome() {}
-
-        // Called at any heal cast/item used (call non implemented)
-        virtual void HealBy(Unit * /*healer*/, uint32 /*amount_healed*/) {}
-
-        // Called at any Damage to any victim (before damage apply)
-        virtual void DamageDeal(Unit * /*done_to*/, uint32 & /*damage*/) {}
-
         // Called at any Damage from any attacker (before damage apply)
         // Note: it for recalculation damage or special reaction at damage
         // for attack reaction use AttackedBy called for not DOT damage in Unit::DealDamage also
-        virtual void DamageTaken(Unit * /*done_by*/, uint32 & /*damage*/) {}
+        virtual void DamageTaken(Unit *done_by, uint32 & /*damage*/) {}
 
         // Called when the creature is killed
         virtual void JustDied(Unit *) {}
@@ -80,34 +110,44 @@ class MANGOS_DLL_SPEC CreatureAI
         // Called when hit by a spell
         virtual void SpellHit(Unit*, const SpellEntry*) {}
 
-        // Called when spell hits creature's target
-        virtual void SpellHitTarget(Unit*, const SpellEntry*) {}
+        // Called when spell hits a target
+        virtual void SpellHitTarget(Unit* target, const SpellEntry*) {}
 
         // Called when the creature is target of hostile action: swing, hostile spell landed, fear/etc)
-        virtual void AttackedBy(Unit* attacker);
+        //virtual void AttackedBy(Unit* attacker);
+        virtual bool IsEscorted () {return false;}
 
         // Called when creature is spawned or respawned (for reseting variables)
-        virtual void JustRespawned() {}
+        virtual void JustRespawned() { Reset(); }
 
         // Called at waypoint reached or point movement finished
         virtual void MovementInform(uint32 /*MovementType*/, uint32 /*Data*/) {}
 
-        // Called at text emote receive from player
-        virtual void ReceiveEmote(Player* /*pPlayer*/, uint32 /*text_emote*/) {}
+        void OnCharmed(bool apply);
+
+        //virtual void SpellClick(Player *player) {}
+
+        // Called at reaching home after evade
+        virtual void JustReachedHome() {}
+
+        void DoZoneInCombat(Creature* pUnit = NULL);
+
+        // Called at text emote receive from player 
+        virtual void ReceiveEmote(Player* pPlayer, uint32 text_emote) {}
 
         ///== Triggered Actions Requested ==================
 
         // Called when creature attack expected (if creature can and no have current victim)
         // Note: for reaction at hostile action must be called AttackedBy function.
-        virtual void AttackStart(Unit *) {}
+        //virtual void AttackStart(Unit *) {}
 
         // Called at World update tick
-        virtual void UpdateAI(const uint32 /*diff*/) {}
+        //virtual void UpdateAI(const uint32 diff ) {}
 
         ///== State checks =================================
 
         // Is unit visible for MoveInLineOfSight
-        virtual bool IsVisible(Unit *) const { return false; }
+        //virtual bool IsVisible(Unit *) const { return false; }
 
         // Called when victim entered water and creature can not enter water
         virtual bool canReachByRangeAttack(Unit*) { return false; }
@@ -115,23 +155,12 @@ class MANGOS_DLL_SPEC CreatureAI
         ///== Fields =======================================
 
         // Pointer to controlled by AI creature
-        Creature* const m_creature;
-};
+        //Creature* const m_creature;
 
-struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>
-{
+        void SetGazeOn(Unit *target);
 
-    SelectableAI(const char *id) : FactoryHolder<CreatureAI>(id) {}
-};
-
-template<class REAL_AI>
-struct CreatureAIFactory : public SelectableAI
-{
-    CreatureAIFactory(const char *name) : SelectableAI(name) {}
-
-    CreatureAI* Create(void *) const;
-
-    int Permit(const Creature *c) const { return REAL_AI::Permissible(c); }
+    protected:
+        bool _EnterEvadeMode();
 };
 
 enum Permitions
@@ -144,7 +173,4 @@ enum Permitions
     PERMIT_BASE_SPECIAL            = 800
 };
 
-typedef FactoryHolder<CreatureAI> CreatureAICreator;
-typedef FactoryHolder<CreatureAI>::FactoryHolderRegistry CreatureAIRegistry;
-typedef FactoryHolder<CreatureAI>::FactoryHolderRepository CreatureAIRepository;
 #endif
