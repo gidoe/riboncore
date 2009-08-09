@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,41 +10,39 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOSSERVER_TOTEM_H
-#define MANGOSSERVER_TOTEM_H
+#ifndef RIBONCORE_TOTEM_H
+#define RIBONCORE_TOTEM_H
 
-#include "Creature.h"
+#include "TemporarySummon.h"
 
 enum TotemType
 {
     TOTEM_PASSIVE    = 0,
     TOTEM_ACTIVE     = 1,
-    TOTEM_STATUE     = 2
 };
 
-class Totem : public Creature
+#define SENTRY_TOTEM_ENTRY  3968
+
+class Totem : public Minion
 {
     public:
-        explicit Totem();
+        explicit Totem(SummonPropertiesEntry const *properties, Unit *owner);
         virtual ~Totem(){};
         void Update( uint32 time );
-        void Summon(Unit* owner);
+        void InitStats(uint32 duration);
+        void InitSummon();
         void UnSummon();
-        uint32 GetSpell() const { return m_spells[0]; }
+        uint32 GetSpell(uint8 slot=0) const { return m_spells[slot]; }
         uint32 GetTotemDuration() const { return m_duration; }
-        Unit *GetOwner();
         TotemType GetTotemType() const { return m_type; }
-        void SetTypeBySummonSpell(SpellEntry const * spellProto);
-        void SetDuration(uint32 dur) { m_duration = dur; }
-        void SetOwner(uint64 guid);
 
         bool UpdateStats(Stats /*stat*/) { return true; }
         bool UpdateAllStats() { return true; }
@@ -60,3 +60,4 @@ class Totem : public Creature
         uint32 m_duration;
 };
 #endif
+

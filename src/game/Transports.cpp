@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "Common.h"
@@ -26,6 +28,8 @@
 #include "WorldPacket.h"
 #include "DBCStores.h"
 #include "ProgressBar.h"
+
+#include "World.h"
 
 void MapManager::LoadTransports()
 {
@@ -102,7 +106,7 @@ void MapManager::LoadTransports()
             m_TransportsByMap[*i].insert(t);
 
         //If we someday decide to use the grid to track transports, here:
-        t->SetMap(MapManager::Instance().CreateMap(mapid, t));
+        t->SetMap(MapManager::Instance().CreateMap(mapid, t, 0));
 
         //t->GetMap()->Add<GameObject>((GameObject *)t);
         ++count;
@@ -314,7 +318,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
     if (keyFrames[keyFrames.size() - 1].mapid != keyFrames[0].mapid)
         teleport = true;
 
-    WayPoint pos(keyFrames[0].mapid, keyFrames[0].x, keyFrames[0].y, keyFrames[0].z, teleport);
+    WayPoint pos(keyFrames[0].mapid, keyFrames[0].x, keyFrames[0].y, keyFrames[0].z, teleport, 0);
     m_WayPoints[0] = pos;
     t += keyFrames[0].delay * 1000;
 
@@ -348,7 +352,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
                     }
 
                     //                    sLog.outString("T: %d, D: %f, x: %f, y: %f, z: %f", t, d, newX, newY, newZ);
-                    WayPoint pos(keyFrames[i].mapid, newX, newY, newZ, teleport);
+                    WayPoint pos(keyFrames[i].mapid, newX, newY, newZ, teleport, i);
                     if (teleport)
                         m_WayPoints[t] = pos;
                 }
@@ -394,10 +398,13 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
             cM = keyFrames[i + 1].mapid;
         }
 
-        WayPoint pos(keyFrames[i + 1].mapid, keyFrames[i + 1].x, keyFrames[i + 1].y, keyFrames[i + 1].z, teleport);
+        WayPoint pos(keyFrames[i + 1].mapid, keyFrames[i + 1].x, keyFrames[i + 1].y, keyFrames[i + 1].z, teleport, i);
 
         //        sLog.outString("T: %d, x: %f, y: %f, z: %f, t:%d", t, pos.x, pos.y, pos.z, teleport);
-
+/*
+        if(keyFrames[i+1].delay > 5)
+            pos.delayed = true;
+*/
         //if (teleport)
         m_WayPoints[t] = pos;
 
@@ -433,17 +440,10 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
     Map const* oldMap = GetMap();
     Relocate(x, y, z);
 
-    for(PlayerSet::iterator itr = m_passengers.begin(); itr != m_passengers.end();)
+    for(PlayerSet::const_iterator itr = m_passengers.begin(); itr != m_passengers.end();)
     {
-        PlayerSet::iterator it2 = itr;
+        Player *plr = *itr;
         ++itr;
-
-        Player *plr = *it2;
-        if(!plr)
-        {
-            m_passengers.erase(it2);
-            continue;
-        }
 
         if (plr->isDead() && !plr->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         {
@@ -459,8 +459,12 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
     //we need to create and save new Map object with 'newMapid' because if not done -> lead to invalid Map object reference...
     //player far teleport would try to create same instance, but we need it NOW for transport...
     //correct me if I'm wrong O.o
-    Map * newMap = MapManager::Instance().CreateMap(newMapid, this);
+    //yes, you're right
+
+    ResetMap();
+    Map * newMap = MapManager::Instance().CreateMap(newMapid, this, 0);
     SetMap(newMap);
+    assert (GetMap());
 
     if(oldMap != newMap)
     {
@@ -471,11 +475,8 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
 
 bool Transport::AddPassenger(Player* passenger)
 {
-    if (m_passengers.find(passenger) == m_passengers.end())
-    {
+    if(m_passengers.insert(passenger).second)
         sLog.outDetail("Player %s boarded transport %s.", passenger->GetName(), GetName());
-        m_passengers.insert(passenger);
-    }
     return true;
 }
 
@@ -484,6 +485,13 @@ bool Transport::RemovePassenger(Player* passenger)
     if (m_passengers.erase(passenger))
         sLog.outDetail("Player %s removed from transport %s.", passenger->GetName(), GetName());
     return true;
+}
+
+void Transport::CheckForEvent(uint32 entry, uint32 wp_id)
+{
+    uint32 key = entry*100+wp_id;
+    if(objmgr.TransportEventMap.find(key) != objmgr.TransportEventMap.end())
+        GetMap()->ScriptsStart(sEventScripts, objmgr.TransportEventMap[key], this, NULL);
 }
 
 void Transport::Update(uint32 /*p_time*/)
@@ -506,7 +514,27 @@ void Transport::Update(uint32 /*p_time*/)
         {
             Relocate(m_curr->second.x, m_curr->second.y, m_curr->second.z);
         }
-
+/*
+        if(m_curr->second.delayed)
+        {
+            switch (GetEntry())
+            {
+                case 176495:
+                case 164871:
+                case 175080:
+                    SendPlaySound(11804, false); break;     // ZeppelinDocked
+                case 20808:
+                case 181646:
+                case 176231:
+                case 176244:
+                case 176310:
+                case 177233:
+                    SendPlaySound(5495, false);break;       // BoatDockingWarning
+                default:
+                    SendPlaySound(5154, false); break;      // ShipDocked
+            }
+        }
+*/
         /*
         for(PlayerSet::const_iterator itr = m_passengers.begin(); itr != m_passengers.end();)
         {
@@ -519,10 +547,13 @@ void Transport::Update(uint32 /*p_time*/)
         m_nextNodeTime = m_curr->first;
 
         if (m_curr == m_WayPoints.begin() && (sLog.getLogFilter() & LOG_FILTER_TRANSPORT_MOVES)==0)
-            sLog.outDetail(" ************ BEGIN ************** %s", GetName());
+            sLog.outDetail(" ************ BEGIN ************** %s", this->m_name.c_str());
 
         if ((sLog.getLogFilter() & LOG_FILTER_TRANSPORT_MOVES)==0)
-            sLog.outDetail("%s moved to %f %f %f %d", GetName(), m_curr->second.x, m_curr->second.y, m_curr->second.z, m_curr->second.mapid);
+            sLog.outDetail("%s moved to %d %f %f %f %d", this->m_name.c_str(), m_curr->second.id, m_curr->second.x, m_curr->second.y, m_curr->second.z, m_curr->second.mapid);
+
+        //Transport Event System
+        CheckForEvent(this->GetEntry(), m_curr->second.id);
     }
 }
 
@@ -558,3 +589,4 @@ void Transport::UpdateForMap(Map const* targetMap)
                 itr->getSource()->SendDirectMessage(&out_packet);
     }
 }
+
