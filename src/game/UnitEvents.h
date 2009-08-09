@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -67,7 +69,7 @@ enum UNIT_EVENT_TYPE
 
 //==============================================================
 
-class MANGOS_DLL_SPEC UnitBaseEvent
+class RIBON_DLL_SPEC UnitBaseEvent
 {
     private:
         uint32 iType;
@@ -82,7 +84,7 @@ class MANGOS_DLL_SPEC UnitBaseEvent
 
 //==============================================================
 
-class MANGOS_DLL_SPEC ThreatRefStatusChangeEvent : public UnitBaseEvent
+class RIBON_DLL_SPEC ThreatRefStatusChangeEvent : public UnitBaseEvent
 {
     private:
         HostilReference* iHostilReference;
@@ -119,7 +121,7 @@ class MANGOS_DLL_SPEC ThreatRefStatusChangeEvent : public UnitBaseEvent
 
 //==============================================================
 
-class MANGOS_DLL_SPEC ThreatManagerEvent : public ThreatRefStatusChangeEvent
+class RIBON_DLL_SPEC ThreatManagerEvent : public ThreatRefStatusChangeEvent
 {
     private:
         ThreatContainer* iThreatContainer;
@@ -134,3 +136,4 @@ class MANGOS_DLL_SPEC ThreatManagerEvent : public ThreatRefStatusChangeEvent
 
 //==============================================================
 #endif
+

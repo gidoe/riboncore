@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,16 +10,16 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef MANGOS_TRAVELLER_H
-#define MANGOS_TRAVELLER_H
+#ifndef RIBON_TRAVELLER_H
+#define RIBON_TRAVELLER_H
 
 #include "Creature.h"
 #include "Player.h"
@@ -29,14 +31,14 @@
 #define PLAYER_FLIGHT_SPEED        32.0f
 
 template<class T>
-struct MANGOS_DLL_DECL Traveller
+struct RIBON_DLL_DECL Traveller
 {
     T &i_traveller;
     Traveller(T &t) : i_traveller(t) {}
     Traveller(const Traveller &obj) : i_traveller(obj) {}
     Traveller& operator=(const Traveller &obj)
     {
-        ~Traveller();
+        this->~Traveller();
         new (this) Traveller(obj);
         return *this;
     }
@@ -61,9 +63,11 @@ template<class T>
 inline uint32 Traveller<T>::GetTotalTrevelTimeTo(float x, float y, float z)
 {
     float dist = GetMoveDestinationTo(x,y,z);
-    double speed = Speed();
-
-    speed *=  0.001f;                                       // speed is in seconds so convert from second to millisecond
+    float speed = Speed();;
+    if (speed <= 0.0f)
+        return 0xfffffffe;  // almost infinity-unit should stop
+    else
+        speed *= 0.001f;   // speed is in seconds so convert from second to millisecond
     return static_cast<uint32>(dist/speed);
 }
 
@@ -71,9 +75,11 @@ inline uint32 Traveller<T>::GetTotalTrevelTimeTo(float x, float y, float z)
 template<>
 inline float Traveller<Creature>::Speed()
 {
-    if(i_traveller.HasMonsterMoveFlag(MONSTER_MOVE_WALK))
+    if(i_traveller.hasUnitState(UNIT_STAT_CHARGING))
+        return i_traveller.m_TempSpeed;
+    else if(i_traveller.HasUnitMovementFlag(MOVEMENTFLAG_WALK_MODE))
         return i_traveller.GetSpeed(MOVE_WALK);
-    else if(i_traveller.HasMonsterMoveFlag(MONSTER_MOVE_FLY))
+    else if(i_traveller.HasUnitMovementFlag(MOVEMENTFLAG_FLYING))
         return i_traveller.GetSpeed(MOVE_FLIGHT);
     else
         return i_traveller.GetSpeed(MOVE_RUN);
@@ -92,7 +98,7 @@ inline float Traveller<Creature>::GetMoveDestinationTo(float x, float y, float z
     float dy = y - GetPositionY();
     float dz = z - GetPositionZ();
 
-    if(i_traveller.hasUnitState(UNIT_STAT_IN_FLIGHT))
+    if(i_traveller.HasUnitMovementFlag(MOVEMENTFLAG_FLYING))
         return sqrt((dx*dx) + (dy*dy) + (dz*dz));
     else                                                    //Walking on the ground
         return sqrt((dx*dx) + (dy*dy));
@@ -102,14 +108,17 @@ inline float Traveller<Creature>::GetMoveDestinationTo(float x, float y, float z
 template<>
 inline void Traveller<Creature>::MoveTo(float x, float y, float z, uint32 t)
 {
-    i_traveller.AI_SendMoveToPacket(x, y, z, t, i_traveller.GetMonsterMoveFlags(), 0);
+    //i_traveller.AI_SendMoveToPacket(x, y, z, t, i_traveller.GetUnitMovementFlags(), 0);
+    i_traveller.SendMonsterMove(x, y, z, t);
 }
 
 // specialization for players
 template<>
 inline float Traveller<Player>::Speed()
 {
-    if (i_traveller.isInFlight())
+    if(i_traveller.hasUnitState(UNIT_STAT_CHARGING))
+        return i_traveller.m_TempSpeed;
+    else if(i_traveller.isInFlight())
         return PLAYER_FLIGHT_SPEED;
     else
         return i_traveller.GetSpeed(i_traveller.m_movementInfo.HasMovementFlag(MOVEMENTFLAG_WALK_MODE) ? MOVE_WALK : MOVE_RUN);
@@ -138,9 +147,10 @@ template<>
 inline void Traveller<Player>::MoveTo(float x, float y, float z, uint32 t)
 {
     //Only send MOVEMENTFLAG_WALK_MODE, client has strange issues with other move flags
-    i_traveller.SendMonsterMove(x, y, z, 0, MONSTER_MOVE_WALK, t);
+    i_traveller.SendMonsterMove(x, y, z, t);
 }
 
 typedef Traveller<Creature> CreatureTraveller;
 typedef Traveller<Player> PlayerTraveller;
 #endif
+
