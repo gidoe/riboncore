@@ -1,6 +1,6 @@
-/** 
+/**
   @file System.cpp
- 
+
   @maintainer Morgan McGuire, matrix@graphics3d.com
 
   Note: every routine must call init() first.
@@ -33,7 +33,7 @@
     #include <sys/timeb.h>
     #include "G3D/RegistryUtil.h"
 
-#elif defined(G3D_LINUX) 
+#elif defined(G3D_LINUX)
 
     #include <stdlib.h>
     #include <stdio.h>
@@ -129,7 +129,7 @@ public:
       */
     enum {tinyBufferSize = 128, smallBufferSize = 1024, medBufferSize = 4096};
 
-    /** 
+    /**
        Most buffers we're allowed to store.
        64000 * 128  = 8 MB (preallocated)
         1024 * 1024 = 1 MB (allocated on demand)
@@ -187,7 +187,7 @@ private:
 #       endif
     }
 
-    /** 
+    /**
      Malloc out of the tiny heap.
      */
     inline void* tinyMalloc(size_t bytes) {
@@ -209,7 +209,7 @@ private:
 
     /** Returns true if this is a pointer into the tiny heap. */
     bool inTinyHeap(void* ptr) {
-        return (ptr >= tinyHeap) && 
+        return (ptr >= tinyHeap) &&
                (ptr < (uint8*)tinyHeap + maxTinyBuffers * tinyBufferSize);
     }
 
@@ -232,9 +232,9 @@ private:
     }
 
 
-    /**  Allocate out of a specific pool->  Return NULL if no suitable 
-         memory was found. 
-    
+    /**  Allocate out of a specific pool->  Return NULL if no suitable
+         memory was found.
+
          */
     void* malloc(MemBlock* pool, int& poolSize, size_t bytes) {
 
@@ -268,7 +268,7 @@ public:
     int mallocsFromSmallPool;
     int mallocsFromMedPool;
 
-    /** Amount of memory currently allocated (according to the application). 
+    /** Amount of memory currently allocated (according to the application).
         This does not count the memory still remaining in the buffer pool,
         but does count extra memory required for rounding off to the size
         of a buffer.
@@ -318,7 +318,7 @@ public:
 #       endif
     }
 
-    
+
     void* realloc(void* ptr, size_t bytes) {
         if (ptr == NULL) {
             return malloc(bytes);
@@ -330,7 +330,7 @@ public:
                 return ptr;
             } else {
                 // Free the old pointer and malloc
-                
+
                 void* newPtr = malloc(bytes);
                 System::memcpy(newPtr, ptr, tinyBufferSize);
                 tinyFree(ptr);
@@ -370,12 +370,12 @@ public:
                 return ptr;
             }
 
-        } 
-        
+        }
+
         // Failure to allocate a tiny buffer is allowed to flow
         // through to a small buffer
         if (bytes <= smallBufferSize) {
-            
+
             void* ptr = malloc(smallPool, smallPoolSize, bytes);
 
             if (ptr) {
@@ -480,7 +480,7 @@ public:
     std::string performance() const {
         if (totalMallocs > 0) {
             int pooled = mallocsFromTinyPool +
-                         mallocsFromSmallPool + 
+                         mallocsFromSmallPool +
                          mallocsFromMedPool;
 
             int total = totalMallocs;
@@ -507,23 +507,23 @@ public:
 };
 
 // Dynamically allocated because we need to ensure that
-// the buffer pool is still around when the last global variable 
+// the buffer pool is still around when the last global variable
 // is deallocated.
 static BufferPool* bufferpool = NULL;
 
-std::string System::mallocPerformance() {    
+std::string System::mallocPerformance() {
 #ifndef NO_BUFFERPOOL
     return bufferpool->performance();
 #else
-	return "NO_BUFFERPOOL";
+    return "NO_BUFFERPOOL";
 #endif
 }
 
-std::string System::mallocStatus() {    
+std::string System::mallocStatus() {
 #ifndef NO_BUFFERPOOL
     return bufferpool->status();
 #else
-	return "NO_BUFFERPOOL";
+    return "NO_BUFFERPOOL";
 #endif
 }
 
@@ -576,7 +576,7 @@ void* System::realloc(void* block, size_t bytes) {
     initMem();
     return bufferpool->realloc(block, bytes);
 #else
-	return ::realloc(block, bytes);
+    return ::realloc(block, bytes);
 #endif
 }
 
@@ -585,7 +585,7 @@ void System::free(void* p) {
 #ifndef NO_BUFFERPOOL
     bufferpool->free(p);
 #else
-	return ::free(p);
+    return ::free(p);
 #endif
 }
 
@@ -610,7 +610,7 @@ void* System::alignedMalloc(size_t bytes, size_t alignment) {
     debugAssert(isValidHeapPointer(truePtr));
     #ifdef G3D_WIN32
     // The blocks we return will not be valid Win32 debug heap
-    // pointers because they are offset 
+    // pointers because they are offset
     //  debugAssert(_CrtIsValidPointer(truePtr, totalBytes, TRUE) );
     #endif
 
@@ -668,3 +668,4 @@ void System::alignedFree(void* _ptr) {
 
 
 }  // namespace
+

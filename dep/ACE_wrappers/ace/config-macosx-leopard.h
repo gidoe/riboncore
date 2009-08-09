@@ -52,7 +52,7 @@
 #define ACE_LACKS_STROPTS_H
 
 // Platform provides <execinfo.h> header.
-#define ACE_HAS_EXECINFO_H               
+#define ACE_HAS_EXECINFO_H
 
 // Wcharness....
 #define ACE_HAS_WCHAR
@@ -225,3 +225,4 @@
 #endif /* __APPLE_CC__ */
 
 #endif /* ACE_CONFIG_MACOSX_TIGER_H */
+

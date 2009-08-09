@@ -84,7 +84,7 @@ ACE_Priority_Reactor::build_bucket (ACE_Handle_Set &dispatch_mask,
        (handle = handle_iter ()) != ACE_INVALID_HANDLE;
        )
     {
-      ACE_Event_Handler *event_handler = 
+      ACE_Event_Handler *event_handler =
         this->handler_rep_.find (handle);
       if (event_handler == 0)
         return -1;
@@ -186,3 +186,4 @@ ACE_Priority_Reactor::dump (void) const
 }
 
 ACE_END_VERSIONED_NAMESPACE_DECL
+

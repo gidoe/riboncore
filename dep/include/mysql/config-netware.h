@@ -105,7 +105,7 @@ extern "C" {
 #define FN_DEVCHAR ':'
 
 /* default directory information */
-#define	DEFAULT_MYSQL_HOME    "sys:/mysql"
+#define DEFAULT_MYSQL_HOME    "sys:/mysql"
 #define PACKAGE               "mysql"
 #define DEFAULT_BASEDIR       "sys:/"
 #define SHAREDIR              "share/"
@@ -139,3 +139,4 @@ extern "C" {
 #endif
 
 #endif /* _config_netware_h */
+

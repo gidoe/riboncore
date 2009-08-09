@@ -209,7 +209,7 @@ namespace ACE_Utils
     /// Obtain a UUID timestamp and clock sequence. Compensate for the
     /// fact that the time obtained from getSystem time has a
     /// resolution less than 100ns.
-    void get_timestamp_and_clocksequence (UUID_Time& timestamp, 
+    void get_timestamp_and_clocksequence (UUID_Time& timestamp,
                                           ACE_UINT16& clockSequence);
 
     /// Obtain the system time in UTC as a count of 100 nanosecond intervals
@@ -236,4 +236,5 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 #endif // ACE_UUID_H
+
 

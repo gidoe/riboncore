@@ -461,7 +461,7 @@ namespace ACE_Utils
     // sequence.
     if (timestamp <= time_last_)
       {
-        uuid_state_.clock_sequence = static_cast<ACE_UINT16> 
+        uuid_state_.clock_sequence = static_cast<ACE_UINT16>
           ((uuid_state_.clock_sequence + 1) & ACE_UUID_CLOCK_SEQ_MASK);
       }
     // If the system time ticked since the last UUID was
@@ -552,3 +552,4 @@ template ACE_Singleton<ACE_Utils::UUID_Generator, ACE_SYNCH_MUTEX> *
 #endif /* ACE_HAS_EXPLICIT_STATIC_TEMPLATE_MEMBER_INSTANTIATION */
 
 ACE_END_VERSIONED_NAMESPACE_DECL
+

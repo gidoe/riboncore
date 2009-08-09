@@ -851,7 +851,7 @@ ACE_OS::string_to_argv (ACE_TCHAR *buf,
                 {
                   delete [] argp;
                 }
-                
+
               errno = ENOMEM;
               return -1;
             }
@@ -898,3 +898,4 @@ ACE_OS::write_n (ACE_HANDLE handle,
 }
 
 ACE_END_VERSIONED_NAMESPACE_DECL
+

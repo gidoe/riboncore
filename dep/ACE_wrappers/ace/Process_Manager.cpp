@@ -686,7 +686,7 @@ ACE_Process_Manager::find_proc (pid_t pid)
 {
   ACE_TRACE ("ACE_Process_Manager::find_proc");
 
-  for (size_t i = 0; i < this->current_count_; ++i) 
+  for (size_t i = 0; i < this->current_count_; ++i)
     {
       if (pid == this->process_table_[i].process_->getpid ())
         {
@@ -1021,3 +1021,4 @@ ACE_Process_Manager::notify_proc_handler (size_t i,
 }
 
 ACE_END_VERSIONED_NAMESPACE_DECL
+
