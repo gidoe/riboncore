@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,42 +20,36 @@
 
 /// \addtogroup realmd Realm Daemon
 /// @{
-/// \file 
+/// \file
 
 #include "Common.h"
-
-#include <ace/Signal.h>
-#include <ace/Proactor.h>
-#include "AccountHandler.h"
-#if defined (ACE_WIN32)
-
-#  include <ace/WIN32_Proactor.h>
-
-#elif defined (ACE_HAS_AIO_CALLS)
-
-#  include <ace/POSIX_Proactor.h>
-#  include <ace/POSIX_CB_Proactor.h>
-#  include <ace/SUN_Proactor.h>
-
-#endif /* ACE_WIN32 */
-
 #include "Database/DatabaseEnv.h"
 #include "RealmList.h"
 
 #include "Config/ConfigEnv.h"
 #include "Log.h"
+#include "sockets/ListenSocket.h"
 #include "AuthSocket.h"
 #include "SystemConfig.h"
-#include "revision.h"
-#include "revision_nr.h"
 #include "Util.h"
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 
+#define _FULLVERSION (_REVISION)
+// Format is YYYYMMDDRR where RR is the change in the conf file
+// for that day.
+#ifndef _REALMDCONFVERSION
+# define _REALMDCONFVERSION 2007062001
+#endif
+
+#ifndef _RIBON_REALM_CONFIG
+# define _RIBON_REALM_CONFIG  "RibonLogon.conf"
+#endif //_RIBON_REALM_CONFIG
+
 #ifdef WIN32
 #include "ServiceWin32.h"
-char serviceName[] = "realmd";
-char serviceLongName[] = "MaNGOS realmd service";
+char serviceName[] = "RibonLogon";
+char serviceLongName[] = "Ribon logon service";
 char serviceDescription[] = "Massive Network Game Object Server";
 /*
  * -1 - not in service mode
@@ -64,21 +60,19 @@ char serviceDescription[] = "Massive Network Game Object Server";
 int m_ServiceStatus = -1;
 #endif
 
-bool StartDB(std::string &dbstring);
+bool StartDB();
 void UnhookSignals();
 void HookSignals();
 
-/// Holds the list of realms for this server
-RealmList m_realmList;                                     
+bool stopEvent = false;                                     ///< Setting it to true stops the server
+RealmList m_realmList;                                      ///< Holds the list of realms for this server
 
-/// Accessor to the realm server database
-DatabaseType dbRealmServer;                                 
+DatabaseType loginDatabase;                                 ///< Accessor to the realm server database
 
 /// Print out the usage string for this program on the console.
 void usage(const char *prog)
 {
     sLog.outString("Usage: \n %s [<options>]\n"
-        "    --version                print version and exist\n\r"
         "    -c config_file           use config_file as configuration file\n\r"
         #ifdef WIN32
         "    Running as service functions:\n\r"
@@ -92,8 +86,9 @@ void usage(const char *prog)
 /// Launch the realm server
 extern int main(int argc, char **argv)
 {
+    sLog.SetLogDB(false);
     ///- Command line parsing to get the configuration file name
-    char const* cfg_file = _REALMD_CONFIG;
+    char const* cfg_file = _RIBON_REALM_CONFIG;
     int c=1;
     while( c < argc )
     {
@@ -107,12 +102,6 @@ extern int main(int argc, char **argv)
             }
             else
                 cfg_file = argv[c];
-        }
-
-        if( strcmp(argv[c],"--version") == 0)
-        {
-            printf("%s\n", _FULLVERSION(REVISION_DATE,REVISION_TIME,REVISION_NR,REVISION_ID));
-            return 0;
         }
 
         #ifdef WIN32
@@ -161,8 +150,21 @@ extern int main(int argc, char **argv)
         return 1;
     }
 
-    sLog.outString( "%s [realm-daemon]", _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR,REVISION_ID) );
-    sLog.outString( "[UECore-Revision]: 284\n\n");
+    sLog.outString( "(logon-daemon) Revision: %s ", _FULLVERSION );
+    sLog.outString( "Build Date: %s", __DATE__ );
+    sLog.outString( "Build Time: %s", __TIME__ );
+    sLog.outString( "<Ctrl-C> to stop.\n" );
+
+    sLog.outString( "'########::'####:'########:::'#######::'##::: ##:");
+    sLog.outString( " ##.... ##:. ##:: ##.... ##:'##.... ##: ###:: ##:");
+    sLog.outString( " ##:::: ##:: ##:: ##:::: ##: ##:::: ##: ####: ##:");
+    sLog.outString( " ########::: ##:: ########:: ##:::: ##: ## ## ##:");
+    sLog.outString( " ##.. ##:::: ##:: ##.... ##: ##:::: ##: ##. ####:");
+    sLog.outString( " ##::. ##::: ##:: ##:::: ##: ##:::: ##: ##:. ###:");
+    sLog.outString( " ##:::. ##:'####: ########::. #######:: ##::. ##:");
+    sLog.outString( "..:::::..::....::........::::.......:::..::::..::");
+    sLog.outString( "                                        L O G O N");
+    sLog.outString( "http://www.dark-resurrection.de/wowsp/         \n");
 
     sLog.outString("Using configuration file %s.", cfg_file);
 
@@ -171,7 +173,7 @@ extern int main(int argc, char **argv)
     if (confVersion < _REALMDCONFVERSION)
     {
         sLog.outError("*****************************************************************************");
-        sLog.outError(" WARNING: Your realmd.conf version indicates your conf file is out of date!");
+        sLog.outError(" WARNING: Your RibonLogon.conf version indicates your conf file is out of date!");
         sLog.outError("          Please check for updates, as your current default values may cause");
         sLog.outError("          strange behavior.");
         sLog.outError("*****************************************************************************");
@@ -202,9 +204,24 @@ extern int main(int argc, char **argv)
     }
 
     ///- Initialize the database connection
-    std::string dbstring;
-    if(!StartDB(dbstring))
+    if(!StartDB())
         return 1;
+
+    ///- Initialize the log database
+    if(sConfig.GetBoolDefault("EnableLogDB", false))
+    {
+        // everything successful - set var to enable DB logging once startup finished.
+        sLog.SetLogDBLater(true);
+        sLog.SetLogDB(false);
+        // ensure we've set realm to 0 (realmd realmid)
+        sLog.SetRealmID(0);
+    }
+    else
+    {
+        sLog.SetLogDBLater(false);
+        sLog.SetLogDB(false);
+        sLog.SetRealmID(0);
+    }
 
     ///- Get the list of realms for the server
     m_realmList.Initialize(sConfig.GetIntDefault("RealmsStateUpdateDelay", 20));
@@ -213,44 +230,23 @@ extern int main(int argc, char **argv)
         sLog.outError("No valid realms specified.");
         return 1;
     }
-    // Activate or not account caching system, precache them before launching connection port
-    if(sConfig.GetIntDefault("AccountCaching", 0) == 1)
-    {
-        AcctMgr.Initialize(sConfig.GetIntDefault("AccountReloadingDelay", 300));
-        AcctMgr.ReloadEverythingIfNeed();
-        sLog.outString();
-        sLog.outString("Accounts will be reloaded in %u seconds", sConfig.GetIntDefault("AccountReloadingDelay", 300));
-    }
-    
-    ///- Catch termination signals
-    HookSignals();
-
-    // Setup apropriate proactor, if needed.
-    ACE_Proactor_Impl* proactor_impl = 0;
-    ACE_Proactor* proactor = 0;
-
-#ifdef __FreeBSD__
-
-    ACE_NEW_RETURN(proactor_impl, ACE_POSIX_AIOCB_Proactor(), -1);
-    ACE_NEW_RETURN(proactor, ACE_Proactor (proactor_impl, 1 ), -1);
-
-#warning "Please ensure aio module is loaded into kernel when starting this program"
-#endif // __FreeBSD__
-
-    if(proactor)
-        ACE_Proactor::instance (proactor, 1);
 
     ///- Launch the listening network socket
-    u_short rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
+    port_t rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
     std::string bind_ip = sConfig.GetStringDefault("BindIP", "0.0.0.0");
-    
-    ACE_INET_Addr listen_addr (rmport, bind_ip.c_str ());
-    AuthSocketAcceptor acc;
-    
-    PatchCache::instance ();
 
-    if (acc.open (listen_addr, 0, 1, 64, 1) == -1)
-      return 1;
+    SocketHandler h;
+    ListenSocket<AuthSocket> authListenSocket(h);
+    if ( authListenSocket.Bind(bind_ip.c_str(),rmport))
+    {
+        sLog.outError( "RibonLogon can not bind to %s:%d",bind_ip.c_str(), rmport );
+        return 1;
+    }
+
+    h.Add(&authListenSocket);
+
+    ///- Catch termination signals
+    HookSignals();
 
     ///- Handle affinity for multiple processors and process priority on Windows
     #ifdef WIN32
@@ -287,64 +283,97 @@ extern int main(int argc, char **argv)
         if(Prio)
         {
             if(SetPriorityClass(hProcess,HIGH_PRIORITY_CLASS))
-                sLog.outString("realmd process priority class set to HIGH");
+                sLog.outString("RibonLogon process priority class set to HIGH");
             else
                 sLog.outError("ERROR: Can't set realmd process priority class.");
             sLog.outString();
         }
     }
     #endif
-    sLog.outBasic ("Server is running.");
 
-    // TODO Database PING
-    ACE_Proactor::instance ()->run_event_loop ();
+    // maximum counter for next ping
+    uint32 numLoops = (sConfig.GetIntDefault( "MaxPingTime", 30 ) * (MINUTE * 1000000 / 100000));
+    uint32 loopCounter = 0;
+
+    // possibly enable db logging; avoid massive startup spam by doing it here.
+    if (sLog.GetLogDBLater())
+    {
+        sLog.outString("Enabling database logging...");
+        sLog.SetLogDBLater(false);
+        // login db needs thread for logging
+        sLog.SetLogDB(true);
+    }
+    else
+    {
+        sLog.SetLogDB(false);
+        sLog.SetLogDBLater(false);
+    }
+
+    ///- Wait for termination signal
+    while (!stopEvent)
+    {
+
+        h.Select(0, 100000);
+
+        if( (++loopCounter) == numLoops )
+        {
+            loopCounter = 0;
+            sLog.outDetail("Ping MySQL to keep connection alive");
+            delete loginDatabase.Query("SELECT 1 FROM realmlist LIMIT 1");
+        }
+#ifdef WIN32
+        if (m_ServiceStatus == 0) stopEvent = true;
+        while (m_ServiceStatus == 2) Sleep(1000);
+#endif
+    }
 
     ///- Wait for the delay thread to exit
-    dbRealmServer.HaltDelayThread();
+    loginDatabase.ThreadEnd();
+    loginDatabase.HaltDelayThread();
 
     ///- Remove signal handling before leaving
     UnhookSignals();
-
-    ACE_Proactor::close_singleton();
 
     sLog.outString( "Halting process..." );
     return 0;
 }
 
 /// Handle termination signals
+/** Put the global variable stopEvent to 'true' if a termination signal is caught **/
 void OnSignal(int s)
 {
     switch (s)
     {
         case SIGINT:
         case SIGTERM:
+            stopEvent = true;
+            break;
         #ifdef _WIN32
         case SIGBREAK:
+            stopEvent = true;
+            break;
         #endif
-        {
-          ACE_Proactor::instance ()->end_event_loop ();
-        }
-        break;
     }
 
     signal(s, OnSignal);
 }
 
 /// Initialize connection to the database
-bool StartDB(std::string &dbstring)
+bool StartDB()
 {
-    if(!sConfig.GetString("LoginDatabaseInfo", &dbstring))
+    std::string dbstring = sConfig.GetStringDefault("loginDatabaseInfo", "");
+    if(dbstring.empty())
     {
         sLog.outError("Database not specified");
         return false;
     }
 
-    sLog.outString("Database: %s", dbstring.c_str() );
-    if(!dbRealmServer.Initialize(dbstring.c_str()))
+    if(!loginDatabase.Initialize(dbstring.c_str()))
     {
         sLog.outError("Cannot connect to database");
         return false;
     }
+    loginDatabase.ThreadStart();
 
     return true;
 }
