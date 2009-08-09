@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "ThreatManager.h"
@@ -102,7 +104,7 @@ void HostilReference::addThreat(float pMod)
 
     if(isValid() && pMod >= 0)
     {
-        Unit* victim_owner = getTarget()->GetOwner();
+        Unit* victim_owner = getTarget()->GetCharmerOrOwner();
         if(victim_owner && victim_owner->isAlive())
             getSource()->addThreat(victim_owner, 0.0f);     // create a threat to the owner of a pet, if the pet attacks
     }
@@ -131,11 +133,11 @@ void HostilReference::updateOnlineStatus()
         !getTarget()->hasUnitState(UNIT_STAT_IN_FLIGHT)))
     {
         Creature* creature = (Creature* ) getSourceUnit();
-        online = getTarget()->isInAccessablePlaceFor(creature);
+        online = getTarget()->isInAccessiblePlaceFor(creature);
         if(!online)
         {
             if(creature->AI()->canReachByRangeAttack(getTarget()))
-                online = true;                              // not accessable but stays online
+                online = true;                              // not accessible but stays online
         }
         else
             accessible = true;
@@ -285,7 +287,7 @@ HostilReference* ThreatContainer::selectNextVictim(Creature* pAttacker, HostilRe
         assert(target);                                     // if the ref has status online the target must be there !
 
         // some units are prefered in comparison to others
-        if(!noPriorityTargetFound && (target->IsImmunedToDamage(pAttacker->GetMeleeDamageSchoolMask()) || target->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_DAMAGE)) )
+        if(!noPriorityTargetFound && (target->IsImmunedToDamage(pAttacker->GetMeleeDamageSchoolMask()) || target->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_TAKE_DAMAGE)) )
         {
             if(iter != lastRef)
             {
@@ -317,8 +319,8 @@ HostilReference* ThreatContainer::selectNextVictim(Creature* pAttacker, HostilRe
                 }
 
                 if (currentRef->getThreat() > 1.3f * pCurrentVictim->getThreat() ||
-                     (currentRef->getThreat() > 1.1f * pCurrentVictim->getThreat() &&
-                     pAttacker->IsWithinDistInMap(target, ATTACK_DISTANCE)) )
+                    currentRef->getThreat() > 1.1f * pCurrentVictim->getThreat() &&
+                    pAttacker->IsWithinMeleeRange(target))
                 {                                           //implement 110% threat rule for targets in melee range
                     found = true;                           //and 130% rule for targets in ranged distances
                     break;                                  //for selecting alive targets
@@ -381,6 +383,20 @@ void ThreatManager::addThreat(Unit* pVictim, float pThreat, SpellSchoolMask scho
 
     float threat = ThreatCalcHelper::calcThreat(pVictim, iOwner, pThreat, schoolMask, pThreatSpell);
 
+    // must check > 0.0f, otherwise dead loop
+    if(threat > 0.0f && pVictim->GetReducedThreatPercent())
+    {
+        float reducedThreat = threat * pVictim->GetReducedThreatPercent() / 100;
+        threat -= reducedThreat;
+        if(Unit *unit = pVictim->GetMisdirectionTarget())
+            _addThreat(unit, reducedThreat);
+    }
+
+    _addThreat(pVictim, threat);
+}
+
+void ThreatManager::_addThreat(Unit *pVictim, float threat)
+{
     HostilReference* ref = iThreatContainer.addThreat(pVictim, threat);
     // Ref is not in the online refs, search the offline refs next
     if(!ref)
@@ -523,3 +539,4 @@ bool ThreatManager::isNeedUpdateToClient(uint32 time)
     iUpdateTimer -= time;
     return false;
 }
+

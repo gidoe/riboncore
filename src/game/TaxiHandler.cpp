@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #include "Common.h"
@@ -87,7 +89,7 @@ void WorldSession::HandleTaxiQueryAvailableNodes( WorldPacket & recv_data )
 
     // remove fake death
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
     // unknown taxi node case
     if( SendLearnNewTaxiNode(unit) )
@@ -100,7 +102,7 @@ void WorldSession::HandleTaxiQueryAvailableNodes( WorldPacket & recv_data )
 void WorldSession::SendTaxiMenu( Creature* unit )
 {
     // find current node
-    uint32 curloc = objmgr.GetNearestTaxiNode(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),unit->GetMapId(),GetPlayer( )->GetTeam(), 0);
+    uint32 curloc = objmgr.GetNearestTaxiNode(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),unit->GetMapId(),GetPlayer( )->GetTeam(),0);
 
     if ( curloc == 0 )
         return;
@@ -121,7 +123,7 @@ void WorldSession::SendDoFlight( uint32 mountDisplayId, uint32 path, uint32 path
 {
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+        GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
     while(GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType()==FLIGHT_MOTION_TYPE)
         GetPlayer()->GetMotionMaster()->MovementExpired(false);
@@ -135,7 +137,7 @@ void WorldSession::SendDoFlight( uint32 mountDisplayId, uint32 path, uint32 path
 bool WorldSession::SendLearnNewTaxiNode( Creature* unit )
 {
     // find current node
-    uint32 curloc = objmgr.GetNearestTaxiNode(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),unit->GetMapId(),GetPlayer( )->GetTeam(), 0);
+    uint32 curloc = objmgr.GetNearestTaxiNode(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),unit->GetMapId(),GetPlayer( )->GetTeam(),0);
 
     if ( curloc == 0 )
         return true;                                        // `true` send to avoid WorldSession::SendTaxiMenu call with one more curlock seartch with same false result.
@@ -193,7 +195,6 @@ void WorldSession::HandleActivateTaxiExpressOpcode ( WorldPacket & recv_data )
     GetPlayer()->ActivateTaxiPathTo(nodes, npc);
 }
 
-
 void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
 {
     sLog.outDebug( "WORLD: Received CMSG_MOVE_SPLINE_DONE" );
@@ -201,7 +202,7 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
     // in taxi flight packet received in 2 case:
     // 1) end taxi path in far (multi-node) flight
     // 2) switch from one map to other in case multim-map taxi path
-    // we need proccess only (1)
+    // we need process only (1)
 
     //movement anticheat code
     /* extract packet */
@@ -215,13 +216,12 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
     //<<< end movement anticheat
     
     uint32 curDest = GetPlayer()->m_taxi.GetTaxiDestination();
-
     if(!curDest)
     {
         //movement anticheat code
         GetPlayer()->SetPosition(movementInfo.x, movementInfo.y, movementInfo.z, movementInfo.o);
         GetPlayer()->m_movementInfo = movementInfo;
-        GetPlayer()->m_movementInfo.SetMovementFlags(MovementFlags(movementInfo.flags));
+        GetPlayer()->SetUnitMovementFlags(movementInfo.flags);
 
         //calc time deltas
         int32 cClientTimeDelta = 0;
@@ -252,7 +252,7 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
     uint32 curloc = objmgr.GetNearestTaxiNode(movementInfo.x,movementInfo.y,movementInfo.z,GetPlayer()->GetMapId(),GetPlayer( )->GetTeam(), curDest);
     //end movement anticheat
 
-    //sLog.outBasic("MA-%s > | xyzo: %f,%f,%fo(%f) flags[%X] | curloc: %d | destloc: %d ",
+    //sLog.outBasic("AC2-%s > | xyzo: %f,%f,%fo(%f) flags[%X] | curloc: %d | destloc: %d ",
     //                GetPlayer()->GetName(),movementInfo.x,movementInfo.y,movementInfo.z,movementInfo.o,
     //                movementInfo.flags, curloc,curDest);
 
@@ -267,7 +267,7 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
     //movement anticheat code
     GetPlayer()->SetPosition(movementInfo.x, movementInfo.y, movementInfo.z, movementInfo.o);
     GetPlayer()->m_movementInfo = movementInfo;
-    GetPlayer()->m_movementInfo.SetMovementFlags(MovementFlags(movementInfo.flags));
+    GetPlayer()->SetUnitMovementFlags(movementInfo.flags);
     //calc time deltas
     int32 cClientTimeDelta = 0;
     if (GetPlayer()->m_anti_LastClientTime !=0){
@@ -351,9 +351,13 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
             SendDoFlight( mountDisplayId, path, 1 );        // skip start fly node
         else
             GetPlayer()->m_taxi.ClearTaxiDestinations();    // clear problematic path and next
+        return;
     }
-    else
-        GetPlayer()->m_taxi.ClearTaxiDestinations();        // not destinations, clear source node
+
+    GetPlayer()->CleanupAfterTaxiFlight();
+    GetPlayer()->SetFallInformation(0, GetPlayer()->GetPositionZ());
+    if(GetPlayer()->pvpInfo.inHostileArea)
+        GetPlayer()->CastSpell(GetPlayer(), 2479, true);
 }
 
 void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
@@ -377,3 +381,4 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 
     GetPlayer()->ActivateTaxiPathTo(nodes, npc);
 }
+

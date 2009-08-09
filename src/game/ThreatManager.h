@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -8,12 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 #ifndef _THREATMANAGER
@@ -45,24 +47,7 @@ class ThreatCalcHelper
 };
 
 //==============================================================
-// Data structures to handle threat redirection cases
-
-struct RedirectThreatEntry
-{
-    RedirectThreatEntry() : m_redirectTo(0), m_redirectPct(0)
-    {}
-    RedirectThreatEntry(Unit* redirectTo, float redirectPct)
-        : m_redirectTo(redirectTo), m_redirectPct(redirectPct)
-    {}
-
-    Unit* m_redirectTo;
-    float m_redirectPct;
-};
-typedef std::map<uint32,RedirectThreatEntry*> RedirectThreatMap;
-
-//==============================================================
-
-class MANGOS_DLL_SPEC HostilReference : public Reference<Unit, ThreatManager>
+class RIBON_DLL_SPEC HostilReference : public Reference<Unit, ThreatManager>
 {
     public:
         HostilReference(Unit* pUnit, ThreatManager *pThreatManager, float pThreat);
@@ -79,8 +64,8 @@ class MANGOS_DLL_SPEC HostilReference : public Reference<Unit, ThreatManager>
         bool isOnline() const { return iOnline; }
 
         // The Unit might be in water and the creature can not enter the water, but has range attack
-        // in this case online = true, but accessable = false
-        bool isAccessable() const { return iAccessible; }
+        // in this case online = true, but accessible = false
+        bool isAccessible() const { return iAccessible; }
 
         // used for temporary setting a threat and reducting it later again.
         // the threat modification is stored
@@ -146,7 +131,7 @@ class MANGOS_DLL_SPEC HostilReference : public Reference<Unit, ThreatManager>
 //==============================================================
 class ThreatManager;
 
-class MANGOS_DLL_SPEC ThreatContainer
+class RIBON_DLL_SPEC ThreatContainer
 {
     private:
         std::list<HostilReference*> iThreatList;
@@ -184,7 +169,7 @@ class MANGOS_DLL_SPEC ThreatContainer
 
 //=================================================
 
-class MANGOS_DLL_SPEC ThreatManager
+class RIBON_DLL_SPEC ThreatManager
 {
     public:
         friend class HostilReference;
@@ -226,6 +211,8 @@ class MANGOS_DLL_SPEC ThreatManager
         ThreatContainer& getOnlineContainer() { return iThreatContainer; }
         ThreatContainer& getOfflineContainer() { return iThreatOfflineContainer; }
     private:
+        void _addThreat(Unit *pVictim, float threat);
+
         HostilReference* iCurrentVictim;
         Unit* iOwner;
         uint32 iUpdateTimer;
@@ -235,3 +222,4 @@ class MANGOS_DLL_SPEC ThreatManager
 
 //=================================================
 #endif
+
