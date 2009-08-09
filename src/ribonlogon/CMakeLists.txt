@@ -9,21 +9,21 @@ RealmList.cpp
 RealmList.h
 )
 
-SET(trinity-realm_LINK_FLAGS "")
+SET(ribon-logon_LINK_FLAGS "")
 
 add_executable(ribon-logon ${ribon-logon_SRCS})
 add_definitions(
 -D_RIBON_REALM_CONFIG='"${CONF_DIR}/RibonLogon.conf"'
 )
 IF (DO_MYSQL)
-   SET(trinity-realm_LINK_FLAGS "-pthread ${ribon-logon_LINK_FLAGS}")
+   SET(ribon-logon_LINK_FLAGS "-pthread ${ribon-logon_LINK_FLAGS}")
 ENDIF(DO_MYSQL)
 IF (DO_POSTGRESQL)
    SET(ribon-logon_LINK_FLAGS "-pthread ${ribon-logon_LINK_FLAGS}")
 ENDIF(DO_POSTGRESQL)
 
 IF (CMAKE_SYSTEM_NAME MATCHES "Darwin")
-   SET(trinity-realm_LINK_FLAGS "-framework Carbon ${ribon-logon_LINK_FLAGS}")
+   SET(ribon-logon_LINK_FLAGS "-framework Carbon ${ribon-logon_LINK_FLAGS}")
 ENDIF (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 
 SET_TARGET_PROPERTIES(ribon-logon PROPERTIES LINK_FLAGS "${ribon-logon_LINK_FLAGS}")
@@ -45,7 +45,7 @@ ${POSTGRESQL_LIBRARIES}
 ${OSX_LIBS}
 )
 
-install(TARGETS ribon-realm DESTINATION bin)
+install(TARGETS ribon-logon DESTINATION bin)
 
 
 ########### install files ###############
