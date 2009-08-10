@@ -650,6 +650,7 @@ extern void AddSC_zuldrak();
 
 //Northrend
 //Dungeon
+
 //Vault of Archavon
 extern void AddSC_boss_archavon();
 extern void AddSC_boss_emalon();
@@ -657,11 +658,15 @@ extern void AddSC_instance_archavon();
 
 //Ulduar
 extern void AddSC_boss_flame_leviathan();
+extern void AddSC_boss_ignis();
 extern void AddSC_boss_razorscale();
+extern void AddSC_boss_xt002();
+//extern void AddSC_instance_ulduar();
 
-//Halls of lightning
+//Halls of Lightning
 extern void AddSC_boss_bjarngrim();
 extern void AddSC_boss_loken();
+extern void AddSC_instance_halls_of_lightning();
 
 //Region
 extern void AddSC_wintergrasp();
@@ -1573,6 +1578,7 @@ void ScriptsInit(char const* cfg_file = "RibonCore.conf")
 
     //Northrend
     //Dungeon
+
     //Vault of Archavon
     AddSC_boss_archavon();
     AddSC_boss_emalon();
@@ -1580,11 +1586,15 @@ void ScriptsInit(char const* cfg_file = "RibonCore.conf")
 
     //Ulduar
     AddSC_boss_flame_leviathan();
+    AddSC_boss_ignis();
     AddSC_boss_razorscale();
+    AddSC_boss_xt002();
+    //AddSC_instance_ulduar();
 
-    //Halls of lightning
+    //Halls of Lightning
     AddSC_boss_bjarngrim();
     AddSC_boss_loken();
+    AddSC_instance_halls_of_lightning();
 
     //Region
     AddSC_wintergrasp();

@@ -70,7 +70,7 @@ void npc_escortAI::EnterEvadeMode()
     {
         m_bIsReturning = true;
         ReturnToLastPoint();
-        debug_log("TSCR: EscortAI has left combat and is now returning to last point");
+        debug_log("RSCR: EscortAI has left combat and is now returning to last point");
     }
     else
         m_creature->GetMotionMaster()->MoveTargetedHome();
@@ -90,7 +90,7 @@ void npc_escortAI::UpdateAI(const uint32 diff)
             {
                 if(DespawnAtEnd)
                 {
-                    debug_log("TSCR: EscortAI reached end of waypoints");
+                    debug_log("RSCR: EscortAI reached end of waypoints");
 
                     m_creature->setDeathState(JUST_DIED);
 
@@ -101,7 +101,7 @@ void npc_escortAI::UpdateAI(const uint32 diff)
                 }
                 else
                 {
-                    debug_log("TSCR: EscortAI reached end of waypoints with Despawn off");
+                    debug_log("RSCR: EscortAI reached end of waypoints with Despawn off");
 
                     return;
                 }
@@ -110,7 +110,7 @@ void npc_escortAI::UpdateAI(const uint32 diff)
             if( !IsOnHold )
             {
                 m_creature->GetMotionMaster()->MovePoint(CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z );
-                debug_log("TSCR: EscortAI Next WP is: %u, %f, %f, %f", CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
+                debug_log("RSCR: EscortAI Next WP is: %u, %f, %f, %f", CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
                 m_uiWPWaitTimer = 0;
             }
         }else m_uiWPWaitTimer -= diff;
@@ -147,7 +147,7 @@ void npc_escortAI::UpdateAI(const uint32 diff)
 
             if (DespawnAtFar && bIsMaxRangeExceeded)
             {
-                debug_log("TSCR: EscortAI Evaded back to spawn point because player/group was to far away or not found");
+                debug_log("RSCR: EscortAI Evaded back to spawn point because player/group was to far away or not found");
 
                 JustDied(m_creature);
                 m_creature->setDeathState(JUST_DIED);
@@ -174,7 +174,7 @@ void npc_escortAI::MovementInform(uint32 type, uint32 id)
     //Combat start position reached, continue waypoint movement
     if (id == WP_LAST_POINT)
     {
-        debug_log("TSCR: EscortAI has returned to original position before combat");
+        debug_log("RSCR: EscortAI has returned to original position before combat");
 
         if (m_bIsRunning && m_creature->HasUnitMovementFlag(MOVEMENTFLAG_WALK_MODE))
             m_creature->RemoveUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
@@ -191,11 +191,11 @@ void npc_escortAI::MovementInform(uint32 type, uint32 id)
         //Make sure that we are still on the right waypoint
         if (CurrentWP->id != id)
         {
-            debug_log("TSCR ERROR: EscortAI reached waypoint out of order %d, expected %d", id, CurrentWP->id);
+            debug_log("RSCR ERROR: EscortAI reached waypoint out of order %d, expected %d", id, CurrentWP->id);
             return;
         }
 
-        debug_log("TSCR: EscortAI Waypoint %d reached", CurrentWP->id);
+        debug_log("RSCR: EscortAI Waypoint %d reached", CurrentWP->id);
 
         //Call WP function
         WaypointReached(CurrentWP->id);
@@ -255,14 +255,14 @@ void npc_escortAI::SetRun(bool bRun)
         if (!m_bIsRunning)
             m_creature->RemoveUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
         else
-            debug_log("TSCR: EscortAI attempt to set run mode, but is already running.");
+            debug_log("RSCR: EscortAI attempt to set run mode, but is already running.");
     }
     else
     {
         if (m_bIsRunning)
             m_creature->AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
         else
-            debug_log("TSCR: EscortAI attempt to set walk mode, but is already walking.");
+            debug_log("RSCR: EscortAI attempt to set walk mode, but is already walking.");
     }
     m_bIsRunning = bRun;
 }
@@ -271,19 +271,19 @@ void npc_escortAI::Start(bool bIsActiveAttacker, bool bCanDefendSelf, bool bRun,
 {
     if (m_creature->getVictim())
     {
-        debug_log("TSCR ERROR: EscortAI attempt to Start while in combat");
+        debug_log("RSCR ERROR: EscortAI attempt to Start while in combat");
         return;
     }
 
     if (IsBeingEscorted)
     {
-        error_log("TSCR: EscortAI attempt to Start while already escorting");
+        error_log("RSCR: EscortAI attempt to Start while already escorting");
         return;
     }
 
     if (WaypointList.empty())
     {
-        error_db_log("TSCR: EscortAI Start with 0 waypoints (possible missing entry in script_waypoint)");
+        error_db_log("RSCR: EscortAI Start with 0 waypoints (possible missing entry in script_waypoint)");
         return;
     }
 
@@ -291,7 +291,7 @@ void npc_escortAI::Start(bool bIsActiveAttacker, bool bCanDefendSelf, bool bRun,
     {
         m_creature->GetMotionMaster()->MovementExpired();
         m_creature->GetMotionMaster()->MoveIdle();
-        debug_log("TSCR: EscortAI start with WAYPOINT_MOTION_TYPE, changed to MoveIdle.");
+        debug_log("RSCR: EscortAI start with WAYPOINT_MOTION_TYPE, changed to MoveIdle.");
     }
 
     m_bIsActiveAttacker = bIsActiveAttacker;
@@ -302,7 +302,7 @@ void npc_escortAI::Start(bool bIsActiveAttacker, bool bCanDefendSelf, bool bRun,
     //disable npcflags
     m_creature->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
-    debug_log("TSCR: EscortAI started with %d waypoints. ActiveAttacker = %d, Defend = %d, Run = %d, PlayerGUID = %d", WaypointList.size(), m_bIsActiveAttacker, m_bCanDefendSelf, m_bIsRunning, PlayerGUID);
+    debug_log("RSCR: EscortAI started with %d waypoints. ActiveAttacker = %d, Defend = %d, Run = %d, PlayerGUID = %d", WaypointList.size(), m_bIsActiveAttacker, m_bCanDefendSelf, m_bIsRunning, PlayerGUID);
 
     CurrentWP = WaypointList.begin();
 
@@ -314,6 +314,6 @@ void npc_escortAI::Start(bool bIsActiveAttacker, bool bCanDefendSelf, bool bRun,
 
     //Start WP
     m_creature->GetMotionMaster()->MovePoint(CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z );
-    debug_log("TSCR: EscortAI Next WP is: %d, %f, %f, %f", CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
+    debug_log("RSCR: EscortAI Next WP is: %d, %f, %f, %f", CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
     IsBeingEscorted = true;
 }
