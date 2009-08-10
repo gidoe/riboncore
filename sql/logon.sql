@@ -1,6 +1,6 @@
 -- MySQL dump 10.11
 --
--- Host: localhost    Database: realmd
+-- Host: localhost    Database: logon
 -- ------------------------------------------------------
 -- Server version	5.0.45-Debian_1ubuntu3.1-log
 
@@ -14,6 +14,26 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `realmd_db_version`
+--
+
+DROP TABLE IF EXISTS `realmd_db_version`;
+CREATE TABLE `realmd_db_version` (
+  `required_8332_01_realmd_realmcharacters` bit(1) default NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
+
+--
+-- Dumping data for table `realmd_db_version`
+--
+
+LOCK TABLES `realmd_db_version` WRITE;
+/*!40000 ALTER TABLE `realmd_db_version` DISABLE KEYS */;
+INSERT INTO `realmd_db_version` VALUES
+(NULL);
+/*!40000 ALTER TABLE `realmd_db_version` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `account`
@@ -49,11 +69,11 @@ CREATE TABLE `account` (
 
 LOCK TABLES `account` WRITE;
 /*!40000 ALTER TABLE `account` DISABLE KEYS */;
-INSERT INTO `account` VALUES
+/*INSERT INTO `account` VALUES
 (1,'ADMINISTRATOR','a34b29541b87b7e4823683ce6c7bf6ae68beaaac',3,'','0','0','','2006-04-25 10:18:56','127.0.0.1',0,0,'0000-00-00 00:00:00',0,0,0,0),
 (2,'GAMEMASTER','7841e21831d7c6bc0b57fbe7151eb82bd65ea1f9',2,'','0','0','','2006-04-25 10:18:56','127.0.0.1',0,0,'0000-00-00 00:00:00',0,0,0,0),
 (3,'MODERATOR','a7f5fbff0b4eec2d6b6e78e38e8312e64d700008',1,'','0','0','','2006-04-25 10:19:35','127.0.0.1',0,0,'0000-00-00 00:00:00',0,0,0,0),
-(4,'PLAYER','3ce8a96d17c5ae88a30681024e86279f1a38c041',0,'','0','0','','2006-04-25 10:19:35','127.0.0.1',0,0,'0000-00-00 00:00:00',0,0,0,0);
+(4,'PLAYER','3ce8a96d17c5ae88a30681024e86279f1a38c041',0,'','0','0','','2006-04-25 10:19:35','127.0.0.1',0,0,'0000-00-00 00:00:00',0,0,0,0);*/
 /*!40000 ALTER TABLE `account` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -134,7 +154,8 @@ CREATE TABLE `realmcharacters` (
   `realmid` int(11) unsigned NOT NULL default '0',
   `acctid` bigint(20) unsigned NOT NULL,
   `numchars` tinyint(3) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`realmid`,`acctid`)
+  PRIMARY KEY  (`realmid`,`acctid`),
+  KEY (acctid)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Realm Character Tracker';
 
 --
