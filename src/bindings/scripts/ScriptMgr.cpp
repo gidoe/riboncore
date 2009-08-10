@@ -657,6 +657,9 @@ extern void AddSC_instance_archavon();
 extern void AddSC_boss_flame_leviathan();
 extern void AddSC_boss_razorscale();
 
+//Halls of lightning
+extern void AddSC_boss_bjarngrim();
+
 //Region
 extern void AddSC_wintergrasp();
 
@@ -1573,6 +1576,9 @@ void ScriptsInit(char const* cfg_file = "RibonCore.conf")
     //Ulduar
     AddSC_boss_flame_leviathan();
     AddSC_boss_razorscale();
+
+    //Halls of lightning
+    AddSC_boss_bjarngrim();
 
     //Region
     AddSC_wintergrasp();
