@@ -171,7 +171,7 @@ CreatureAI* GetAI_mob_infested_root_walker(Creature *_Creature)
 /*######
 ## mob_skywing
 ######*/
-struct TRINITY_DLL_DECL npc_skywingAI : public npc_escortAI
+struct RIBON_DLL_DECL npc_skywingAI : public npc_escortAI
 {
 public:
     npc_skywingAI(Creature *c) : npc_escortAI(c) {}
