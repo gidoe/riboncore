@@ -158,7 +158,7 @@ struct RIBON_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
         {
             SetReturning(true);
             ReturnToLastPoint();
-            debug_log("TSCR: EscortAI (EnterEvadeMode() Override) has left combat and is now returning to last point");
+            debug_log("RSCR: EscortAI (EnterEvadeMode() Override) has left combat and is now returning to last point");
         }
         else
             m_creature->GetMotionMaster()->MoveTargetedHome();        
