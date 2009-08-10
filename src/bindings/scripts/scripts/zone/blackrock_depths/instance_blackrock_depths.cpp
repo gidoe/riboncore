@@ -191,7 +191,7 @@ struct RIBON_DLL_DECL instance_blackrock_depths : public ScriptedInstance
 
     void SetData64(uint32 type, uint64 data)
     {
-        debug_log("TSCR: Instance Blackrock Depths: SetData64 update (Type: %u Data %u)", type, data);
+        debug_log("RSCR: Instance Blackrock Depths: SetData64 update (Type: %u Data %u)", type, data);
 
         switch(type)
         {
