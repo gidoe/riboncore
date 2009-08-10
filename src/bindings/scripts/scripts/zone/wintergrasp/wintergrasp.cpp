@@ -29,6 +29,9 @@ bool GossipHello_npc_demolisher_engineerer(Player *player, Creature *_creature)
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build catapult.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build demolisher.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF+1);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build siege engine.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF+2);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build bomber.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF+3);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build sheddder.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF+4);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build fighter jet.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF+3);
     }
 
     player->SEND_GOSSIP_MENU(_creature->GetNpcTextId(), _creature->GetGUID());
@@ -43,6 +46,9 @@ bool GossipSelect_npc_demolisher_engineerer(Player* player, Creature* me, uint32
         case 0: player->CastSpell(player, 56663, false, NULL, NULL, me->GetGUID()); break;
         case 1: player->CastSpell(player, 56575, false, NULL, NULL, me->GetGUID()); break;
         case 2: player->CastSpell(player, player->GetTeamId() ? 61408 : 56661, false, NULL, NULL, me->GetGUID()); break;
+        case 3: player->CastSpell(player, 56667, false, NULL, NULL, me->GetGUID()); break;
+        case 4: player->CastSpell(player, 56669, false, NULL, NULL, me->GetGUID()); break;
+        case 5: player->CastSpell(player, 56665, false, NULL, NULL, me->GetGUID()); break;
     }
 
     return true;
