@@ -1,4 +1,4 @@
--- Up to RC 321
+-- Up to RC 332
 
 /* WORLD BOSS */
 UPDATE `creature_template` SET `ScriptName`='boss_ysondre' WHERE `entry`=14887;
