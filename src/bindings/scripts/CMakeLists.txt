@@ -368,7 +368,9 @@ SET(ribonscript_LIB_SRCS
    scripts/zone/uldaman/uldaman.cpp
    scripts/zone/undercity/undercity.cpp
    scripts/zone/ungoro_crater/ungoro_crater.cpp
+   scripts/zone/wailing_caverns/def_wailing_caverns.h
    scripts/zone/wailing_caverns/instance_wailing_caverns.cpp
+   scripts/zone/wailing_caverns/wailing_caverns.cpp
    scripts/zone/western_plaguelands/western_plaguelands.cpp
    scripts/zone/westfall/westfall.cpp
    scripts/zone/winterspring/winterspring.cpp
@@ -508,7 +510,7 @@ SET(ribonscript_LIB_SRCS
 
 add_library(ribonscript SHARED ${ribonscript_LIB_SRCS})
 
-add_definitions(-D_RIBON_SCRIPT_CONFIG='"${CONF_DIR}/RibonCore.conf"')
+add_definitions(-D_RIBON_SCRIPT_CONFIG='"${CONF_DIR}/riboncore.conf"')
 
 IF (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     SET_TARGET_PROPERTIES(ribonscript PROPERTIES LINK_FLAGS "-flat_namespace -undefined suppress")
