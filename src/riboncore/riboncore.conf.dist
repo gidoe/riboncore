@@ -1894,7 +1894,7 @@ Anticheat.Movement.MistimingAlarms = 20
 #                 2 - both
 #
 #    AutoBroadcast.Timer
-#        Timer for auto broadcast
+#        Timer for auto broadcast (in milliseconds)
 #
 ###################################################################################################################
 
