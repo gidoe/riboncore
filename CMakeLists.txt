@@ -43,7 +43,7 @@ EXECUTE_PROCESS(
         OUTPUT_VARIABLE HG_REVISION
 )
 
-message("* RibonCore revision: ${HG_REVISION}")
+message("* RibonCore revision: ${_REVISION}")
 
 IF (PREFIX)
     SET(CMAKE_INSTALL_PREFIX ${PREFIX})

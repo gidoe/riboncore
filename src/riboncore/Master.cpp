@@ -41,6 +41,7 @@
 #include "ScriptCalls.h"
 #include "Timer.h"
 #include "Util.h"
+#include "revision.h"
 
 #include "sockets/TcpSocket.h"
 #include "sockets/Utility.h"
@@ -50,6 +51,7 @@
 #include "sockets/ListenSocket.h"
 
 #define _FULLVERSION (_REVISION)
+
 #ifdef WIN32
 #include "ServiceWin32.h"
 extern int m_ServiceStatus;
