@@ -3810,10 +3810,11 @@ bool Player::resetTalents(bool no_cost)
                 else
                     ++itr;
 
-                if ((*m_talents[m_activeSpec])[itr->first]->state == PLAYERSPELL_NEW)
+                //Temp Crashfix.
+                /*if ((*m_talents[m_activeSpec])[itr->first]->state == PLAYERSPELL_NEW)
                     m_talents[m_activeSpec]->erase(itr->first);
                 else
-                    (*m_talents[m_activeSpec])[itr->first]->state = PLAYERSPELL_REMOVED;
+                    (*m_talents[m_activeSpec])[itr->first]->state = PLAYERSPELL_REMOVED;*/
             }
         }
     }

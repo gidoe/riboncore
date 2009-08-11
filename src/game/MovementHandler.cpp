@@ -513,7 +513,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 #endif
                 check_passed = false;
             }
-            //Water-Walk checks
+            /*//Water-Walk checks, Disable Ghost Check.
             if ( ((movementInfo.flags & MOVEMENTFLAG_WATERWALKING) != 0)
                   && !(plMover->HasAuraType(SPELL_AURA_WATER_WALK) | plMover->HasAuraType(SPELL_AURA_GHOST)) )
             {
@@ -522,7 +522,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                                 plMover->GetName(), movementInfo.flags, plMover->HasAuraType(SPELL_AURA_WATER_WALK));
                 #endif
                 check_passed = false;
-            }
+            }*/
             //Teleport To Plane checks
             if ( movementInfo.z < 0.0001f && movementInfo.z > -0.0001f
                 && ((movementInfo.flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING | MOVEMENTFLAG_FLY_MODE)) == 0) )
