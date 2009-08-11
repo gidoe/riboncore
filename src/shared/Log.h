@@ -98,6 +98,7 @@ class Log : public Ribon::Singleton<Log, Ribon::ClassLevelLockable<Log, ACE_Thre
         void outDB( LogTypes type, const char * str );
         void outString( const char * str, ... )                 ATTR_PRINTF(2,3);
         void outString( );
+        void outStringInLine( const char * str, ... )           ATTR_PRINTF(2,3);
         void outError( const char * err, ... )                  ATTR_PRINTF(2,3);
         void outCrash( const char * err, ... )                  ATTR_PRINTF(2,3);
         void outBasic( const char * str, ... )                  ATTR_PRINTF(2,3);
