@@ -22,9 +22,9 @@
 ## SUBDIRS = sql
 
 # build shared library
-lib_LTLIBRARIES = libtrinityscript.la
+lib_LTLIBRARIES = libribonscript.la
 
-libtrinityscript_la_CPPFLAGS = \
+libribonscript_la_CPPFLAGS = \
 $(MYSQL_INCLUDES) \
 $(POSTGRE_INCLUDES) \
 -I$(top_srcdir)/dep/include \
@@ -33,9 +33,9 @@ $(POSTGRE_INCLUDES) \
 -I$(top_srcdir)/src/game \
 -I$(srcdir)/include \
 $(TRINI_INCLUDES) \
--D_TRINITY_SCRIPT_CONFIG='"$(sysconfdir)/trinitycore.conf"'
+-D_RIBON_SCRIPT_CONFIG='"$(sysconfdir)/riboncore.conf"'
 
-libtrinityscript_la_SOURCES = \
+libribonscript_la_SOURCES = \
 ScriptMgr.cpp \
 ScriptMgr.h \
 include/precompiled.cpp \
@@ -432,8 +432,8 @@ system.cpp
 # Increase the last number, if you do bug fixes only, no interface change.
 # Increase the middle number when you augmented the interface ( aka add new exported functions ).
 # Increase the first number when you break old interface. ( aka remove/change previously exported functions ).
-libtrinityscript_la_LIBFLAGS = -version-info 0:0:1
-libtrinityscript_la_LIBADD =  $(MYSQL_LIBS) $(POSTGRE_LIBS)
+libribonscript_la_LIBFLAGS = -version-info 0:0:1
+libribonscript_la_LIBADD =  $(MYSQL_LIBS) $(POSTGRE_LIBS)
 
 ## Additional files to install
 ## sysconf_DATA =
