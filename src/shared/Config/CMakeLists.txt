@@ -1,7 +1,7 @@
 
 ########### next target ###############
 
-SET(trinityconfig_STAT_SRCS
+SET(ribonconfig_STAT_SRCS
    dotconfpp/dotconfpp.cpp
    dotconfpp/dotconfpp.h
    dotconfpp/mempool.cpp
