@@ -35,7 +35,11 @@
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 
+#ifndef _REVISION
+#else _FULLVERSION
 #define _FULLVERSION (_REVISION)
+#endif
+
 // Format is YYYYMMDDRR where RR is the change in the conf file
 // for that day.
 #ifndef _REALMDCONFVERSION
