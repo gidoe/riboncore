@@ -49,6 +49,7 @@
 #include "sockets/Socket.h"
 #include "sockets/SocketHandler.h"
 #include "sockets/ListenSocket.h"
+#include "revision.h"
 
 #define _FULLVERSION (_REVISION)
 

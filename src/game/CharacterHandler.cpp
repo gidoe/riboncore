@@ -42,6 +42,7 @@
 #include "SocialMgr.h"
 #include "UpdateMask.h"
 #include "Util.h"
+#include "revision.h"
 
 #define _FULLVERSION (_REVISION)
 

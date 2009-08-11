@@ -32,7 +32,7 @@ target_link_libraries(
 ribon-logon
 shared
 ribonframework
-ribonsockets
+trinitysockets
 ribondatabase
 ribonauth
 ribonconfig

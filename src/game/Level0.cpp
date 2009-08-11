@@ -30,6 +30,8 @@
 #include "SystemConfig.h"
 #include "revision.h"
 #include "Util.h"
+#include "revision.h"
+
 #define _FULLVERSION (_REVISION)
 
 bool ChatHandler::HandleHelpCommand(const char* args)

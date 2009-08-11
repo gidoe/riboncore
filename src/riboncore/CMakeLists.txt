@@ -40,7 +40,7 @@ game
 shared
 zlib
 ribonframework
-ribonsockets
+trinitysockets
 ribondatabase
 ribonauth
 ribonconfig
