@@ -35,6 +35,8 @@
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 
+int _FULLVERSION;
+
 #ifndef _REVISION
 #else _FULLVERSION
 #define _FULLVERSION
