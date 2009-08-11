@@ -37,6 +37,7 @@
 
 #ifndef _REVISION
 #else _FULLVERSION
+#define _FULLVERSION
 #define _FULLVERSION (_REVISION)
 #endif
 
