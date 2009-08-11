@@ -13,7 +13,7 @@ SET(ribon-logon_LINK_FLAGS "")
 
 add_executable(ribon-logon ${ribon-logon_SRCS})
 add_definitions(
--D_RIBON_REALM_CONFIG='"${CONF_DIR}/RibonLogon.conf"'
+-D_RIBON_REALM_CONFIG='"${CONF_DIR}/ribonlogon.conf"'
 )
 IF (DO_MYSQL)
    SET(ribon-logon_LINK_FLAGS "-pthread ${ribon-logon_LINK_FLAGS}")
@@ -50,5 +50,5 @@ install(TARGETS ribon-logon DESTINATION bin)
 
 ########### install files ###############
 
-install(FILES  RibonLogon.conf.dist DESTINATION etc)
+install(FILES  ribonlogon.conf.dist DESTINATION etc)
 
