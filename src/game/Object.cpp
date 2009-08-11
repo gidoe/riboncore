@@ -80,6 +80,18 @@ Object::Object( ) : m_PackGUID(sizeof(uint64)+1)
     m_PackGUID.appendPackGUID(0);
 }
 
+/*
+WorldObject::~WorldObject()
+{
+    if(m_currMap)
+    {
+        sLog.outCrash("Object::~Object - guid="UI64FMTD", typeid=%d, entry=%u deleted but still in map!!", GetGUID(), GetTypeId(), GetEntry());
+        assert(false);
+        ResetMap();
+    }
+}
+*/
+
 Object::~Object( )
 {
     if(IsInWorld())
@@ -1069,7 +1081,7 @@ WorldObject::WorldObject()
     : m_phaseMask(PHASEMASK_NORMAL),
     m_positionX(0.0f), m_positionY(0.0f), m_positionZ(0.0f), m_orientation(0.0f), m_currMap(NULL)
     , m_zoneScript(NULL)
-    , m_isActive(false), IsTempWorldObject(false)
+    , m_isActive(false), m_isWorldObject(false)
     , m_name("")
 {
 }
@@ -1692,14 +1704,19 @@ void WorldObject::SendObjectDeSpawnAnim(uint64 guid)
 void WorldObject::SetMap(Map * map)
 {
     ASSERT(map);
-    ASSERT(!IsInWorld());
+    //ASSERT(!IsInWorld());
+    ASSERT(!m_currMap);
     m_currMap = map;
+    if(m_isWorldObject)
+        m_currMap->AddWorldObject(this);
 }
 
 void WorldObject::ResetMap()
 {
     ASSERT(m_currMap);
-    ASSERT(!IsInWorld());
+    //ASSERT(!IsInWorld() || GetTypeId() == TYPEID_CORPSE);
+    if(m_isWorldObject)
+        m_currMap->RemoveWorldObject(this);
     m_currMap = NULL;
 }
 

@@ -657,6 +657,7 @@ extern void AddSC_boss_emalon();
 extern void AddSC_instance_archavon();
 
 //Ulduar
+extern void AddSC_boss_auriaya();
 extern void AddSC_boss_flame_leviathan();
 extern void AddSC_boss_ignis();
 extern void AddSC_boss_razorscale();
@@ -1585,6 +1586,7 @@ void ScriptsInit(char const* cfg_file = "RibonCore.conf")
     AddSC_instance_archavon();
 
     //Ulduar
+    AddSC_boss_auriaya();
     AddSC_boss_flame_leviathan();
     AddSC_boss_ignis();
     AddSC_boss_razorscale();
