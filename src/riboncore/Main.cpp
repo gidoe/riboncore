@@ -26,6 +26,7 @@
 #include <openssl/crypto.h>
 
 #include "Common.h"
+#include "SystemConfig.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/ConfigEnv.h"
 
@@ -36,12 +37,6 @@
 #ifndef _RIBON_CORE_CONFIG
 # define _RIBON_CORE_CONFIG  "RibonCore.conf"
 #endif //_RIBON_CORE_CONFIG
-
-// Format is YYYYMMDDRR where RR is the change in the conf file
-// for that day.
-#ifndef _RIBON_CORE_CONFVER
-# define _RIBON_CORE_CONFVER 2009032201
-#endif //_RIBON_CORE_CONFVER
 
 #ifdef WIN32
 #include "ServiceWin32.h"
@@ -145,7 +140,7 @@ extern int main(int argc, char **argv)
     sLog.outString("Using configuration file %s.", cfg_file);
 
     uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
-    if (confVersion < _RIBON_CORE_CONFVER)
+    if (confVersion < _RIBONDCONFVERSION)
     {
         sLog.outError("*****************************************************************************");
         sLog.outError(" WARNING: Your RibonCore.conf version indicates your conf file is out of date!");
