@@ -19,11 +19,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef TRINITY_SYSTEMCONFIG_H
-#define TRINITY_SYSTEMCONFIG_H
+#ifndef RIBON_SYSTEMCONFIG_H
+#define RIBON_SYSTEMCONFIG_H
 
 #ifndef _PACKAGENAME
-#define _PACKAGENAME "TrinityCore2 "
+#define _PACKAGENAME "RibonCore"
 #endif
 
 #include "Platform/Define.h"
@@ -39,11 +39,11 @@
 
 // Format is YYYYMMDDRR where RR is the change in the conf file
 // for that day.
-#ifndef _MANGOSDCONFVERSION
-# define _MANGOSDCONFVERSION 2008022901
+#ifndef _RIBONDCONFVERSION
+# define _RIBONDCONFVERSION 2009081201
 #endif
 #ifndef _REALMDCONFVERSION
-# define _REALMDCONFVERSION 2007062001
+# define _REALMDCONFVERSION 2009081201
 #endif
 
 #if MANGOS_ENDIAN == MANGOS_BIGENDIAN
@@ -73,8 +73,8 @@
 # else
 #  define _ENDIAN_PLATFORM "Win32 (" _ENDIAN_STRING ")"
 # endif
-# define _MANGOSD_CONFIG  SYSCONFDIR"mangosd.conf"
-# define _REALMD_CONFIG   SYSCONFDIR"realmd.conf"
+# define _MANGOSD_CONFIG  SYSCONFDIR"RibonCore.conf"
+# define _REALMD_CONFIG   SYSCONFDIR"RibonLogon.conf"
 #else
 # if defined  (__FreeBSD__)
 #  define _ENDIAN_PLATFORM "FreeBSD_"ARCHITECTURE" (" _ENDIAN_STRING ")"
@@ -91,8 +91,8 @@
 # else
 #  define _ENDIAN_PLATFORM "Unix_"ARCHITECTURE" (" _ENDIAN_STRING ")"
 # endif
-# define _MANGOSD_CONFIG  SYSCONFDIR"mangosd.conf"
-# define _REALMD_CONFIG  SYSCONFDIR"realmd.conf"
+# define _MANGOSD_CONFIG  SYSCONFDIR"RibonCore.conf"
+# define _REALMD_CONFIG  SYSCONFDIR"RibonLogon.conf"
 #endif
 
 

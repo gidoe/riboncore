@@ -38,12 +38,6 @@
 
 #define _FULLVERSION (_REVISION)
 
-// Format is YYYYMMDDRR where RR is the change in the conf file
-// for that day.
-#ifndef _REALMDCONFVERSION
-# define _REALMDCONFVERSION 2007062001
-#endif
-
 #ifndef _RIBON_REALM_CONFIG
 # define _RIBON_REALM_CONFIG  "RibonLogon.conf"
 #endif //_RIBON_REALM_CONFIG
