@@ -1435,11 +1435,11 @@ class RIBON_DLL_SPEC Player : public Unit
         void BuildPetTalentsInfoData(WorldPacket *data);
         void SendTalentsInfoData(bool pet);
 
-        bool AddTalent(uint32 spell, uint32 spec, bool learning);
-        bool HasTalent(uint32 spell_id, uint32 spec) const;
-
         void LearnTalent(uint32 talentId, uint32 talentRank);
         void LearnPetTalent(uint64 petGuid, uint32 talentId, uint32 talentRank);
+
+        bool AddTalent(uint32 spell, uint32 spec, bool learning);
+        bool HasTalent(uint32 spell_id, uint32 spec) const;
 
         uint32 CalculateTalentsPoints() const;
 

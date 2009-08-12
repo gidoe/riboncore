@@ -460,9 +460,9 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
         m_talents[i] = new PlayerTalentMap();
     }
 
-    for (uint8 i = 0; i < BASEMOD_END; ++i)
-    {
-        m_auraBaseMod[i][FLAT_MOD] = 0.0f;
+
+    for (int i = 0; i < BASEMOD_END; ++i)
+    {        m_auraBaseMod[i][FLAT_MOD] = 0.0f;
         m_auraBaseMod[i][PCT_MOD] = 1.0f;
     }
 
@@ -2910,8 +2910,6 @@ bool Player::AddTalent(uint32 spell_id, uint32 spec, bool learning)
         return false;
     }
 
-    sLog.outDebug("Talents: %u", m_talents[spec]);
-
     PlayerTalentMap::iterator itr = m_talents[spec]->find(spell_id);
     if (itr != m_talents[spec]->end())
     {
@@ -3765,59 +3763,11 @@ bool Player::resetTalents(bool no_cost)
         }
     }
 
-    for (uint32 i = 0; i < sTalentStore.GetNumRows(); i++)
+    PlayerTalentMap::iterator itr2 = m_talents[m_activeSpec]->begin();
+    for (; itr2 != m_talents[m_activeSpec]->end(); ++itr2)
     {
-        TalentEntry const *talentInfo = sTalentStore.LookupEntry(i);
-
-        if (!talentInfo) continue;
-
-        TalentTabEntry const *talentTabInfo = sTalentTabStore.LookupEntry( talentInfo->TalentTab );
-
-        if(!talentTabInfo)
-            continue;
-
-        // unlearn only talents for character class
-        // some spell learned by one class as normal spells or know at creation but another class learn it as talent,
-        // to prevent unexpected lost normal learned spell skip another class talents
-        if( (getClassMask() & talentTabInfo->ClassMask) == 0 )
-            continue;
-
-        for (int j = 0; j < MAX_TALENT_RANK; j++)
-        {
-            for(PlayerSpellMap::iterator itr = GetSpellMap().begin(); itr != GetSpellMap().end();)
-            {
-                if(itr->second->state == PLAYERSPELL_REMOVED || itr->second->disabled)
-                {
-                    ++itr;
-                    continue;
-                }
-
-                // remove learned spells (all ranks)
-                uint32 itrFirstId = spellmgr.GetFirstSpellInChain(itr->first);
-
-                // unlearn if first rank is talent or learned by talent
-                if (itrFirstId == talentInfo->RankID[j])
-                {
-                    removeSpell(itr->first,!IsPassiveSpell(itr->first),false);
-                    itr = GetSpellMap().begin();
-                    continue;
-                }
-                else if (spellmgr.IsSpellLearnToSpell(talentInfo->RankID[j],itrFirstId))
-                {
-                    removeSpell(itr->first,!IsPassiveSpell(itr->first));
-                    itr = GetSpellMap().begin();
-                    continue;
-                }
-                else
-                    ++itr;
-
-                //Temp Crashfix.
-                /*if ((*m_talents[m_activeSpec])[itr->first]->state == PLAYERSPELL_NEW)
-                    m_talents[m_activeSpec]->erase(itr->first);
-                else
-                    (*m_talents[m_activeSpec])[itr->first]->state = PLAYERSPELL_REMOVED;*/
-            }
-        }
+        removeSpell(itr2->first, !IsPassiveSpell(itr2->first),false);
+        itr2->second->state = PLAYERSPELL_REMOVED;
     }
 
     SetFreeTalentPoints(talentPointsForLevel);
@@ -21677,7 +21627,7 @@ void Player::ActivateSpec(uint32 spec)
             {
                 if(talentInfo->RankID[k] && HasTalent(talentInfo->RankID[k], m_activeSpec))
                 {
-                    removeSpell(talentInfo->RankID[k], true);
+                    removeSpell(talentInfo->RankID[k],true);
                 }
             }
         }
@@ -21696,9 +21646,7 @@ void Player::ActivateSpec(uint32 spec)
         }
     }
 
-    uint32 oldSpec = m_activeSpec;
     SetActiveSpec(spec);
-    m_usedTalentCount = 0;
 
     for(uint32 i = 0; i < 3; ++i)
     {
@@ -21721,8 +21669,6 @@ void Player::ActivateSpec(uint32 spec)
                 if(talentInfo->RankID[k] && HasTalent(talentInfo->RankID[k], m_activeSpec))
                 {
                     learnSpell(talentInfo->RankID[k], false);
-
-                    m_usedTalentCount += GetTalentSpellCost(talentInfo->RankID[k]);
                 }
             }
         }
@@ -21737,7 +21683,7 @@ void Player::ActivateSpec(uint32 spec)
         {
             if (GlyphPropertiesEntry const *gp = sGlyphPropertiesStore.LookupEntry(glyph))
             {
-               CastSpell(this, gp->SpellId, true);
+                CastSpell(this, gp->SpellId, true);
             }
         }
         SetGlyph(slot, glyph);
