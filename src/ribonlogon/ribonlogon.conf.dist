@@ -102,7 +102,7 @@ ConfVersion=2007062001
 ###################################################################################################################
 
 LoginDatabaseInfo = "127.0.0.1;3306;root;ribon;logon"
-LogsDir = "Data"
+LogsDir = "Logs"
 MaxPingTime = 30
 RealmServerPort = 3724
 BindIP = "0.0.0.0"
@@ -117,6 +117,6 @@ RealmsStateUpdateDelay = 20
 WrongPass.MaxCount = 0
 WrongPass.BanTime = 600
 WrongPass.BanType = 0
-LogColors = ""
-EnableLogDB = 0
+LogColors = "13 11 9 5"
+EnableLogDB = 1
 DBLogLevel = 1
