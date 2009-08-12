@@ -90,6 +90,7 @@ enum RibonStrings
     LANG_SYSTEMMESSAGE_GAMEMASTER       = 62,
     LANG_SYSTEMMESSAGE_ADMINISTRATOR    = 63,
     LANG_SYSANNOUNCE_COLOR              = 64,
+    LANG_SYSTEMMESSAGE_CONSOLE          = 65,
 
 
     // level 1 chat

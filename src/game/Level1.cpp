@@ -158,26 +158,33 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
     if(!*args)
         return false;
 
-    switch(m_session->GetSecurity())
-	{
-      case SEC_MODERATOR:
-        strid = LANG_SYSTEMMESSAGE_MODERATOR;
-        break;
-      case SEC_GAMEMASTER:
-        strid = LANG_SYSTEMMESSAGE_GAMEMASTER;
-        break;
-      case SEC_ADMINISTRATOR:
-        strid = LANG_SYSTEMMESSAGE_ADMINISTRATOR;
-        break;
-      default:
-        return false;
-    }
+	if(m_session)	
+		switch(m_session->GetSecurity())
+		{
+			case SEC_MODERATOR:
+				strid = LANG_SYSTEMMESSAGE_MODERATOR;
+				break;
+			case SEC_GAMEMASTER:
+				strid = LANG_SYSTEMMESSAGE_GAMEMASTER;
+				break;
+			case SEC_ADMINISTRATOR:
+				strid = LANG_SYSTEMMESSAGE_ADMINISTRATOR;
+                break;
+			case SEC_CONSOLE:
+				strid = LANG_SYSTEMMESSAGE_CONSOLE;
+				break;
+			default:
+		        return false;
+		}
+	else
+		strid = LANG_SYSTEMMESSAGE_ADMINISTRATOR;
 
-    if(m_session)
-    sWorld.SendWorldText(strid, m_session->GetPlayerName(), args);
+	if(m_session)
+		sWorld.SendWorldText(strid, m_session->GetPlayerName(), args);
     else
-        sWorld.SendWorldText(strid, m_session->GetPlayerName(), "console", args);
-    return true;
+        sWorld.SendWorldText(strid, "console", args);
+
+	return true;
 }
 
 // announce to logged in GMs

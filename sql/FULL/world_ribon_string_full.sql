@@ -66,6 +66,7 @@ INSERT INTO `ribon_string` (`entry`, `content_default`, `content_loc1`, `content
 (62, '|c1f40af20 <GM>|cffff0000[%s]|c1f40af20:|cffffff00 %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (63, '|c1f40af20 <Admin>|cffff0000[%s]|c1f40af20:|cffffff00 %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (64, '|cffff0000[System]:|cffffff00 %s|r', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(65, '|cffff0000[Console]:|cffff0f00 %s|r', null, null, null, null, null, null, null, null),
 (100, 'Global notify: ', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (101, 'Map: %u (%s) Zone: %u (%s) Area: %u (%s) Phase: %u\nX: %f Y: %f Z: %f Orientation: %f\ngrid[%u,%u]cell[%u,%u] InstanceID: %u\n ZoneX: %f ZoneY: %f\nGroundZ: %f FloorZ: %f Have height data (Map: %u VMap: %u)', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (102, '%s is already being teleported.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),

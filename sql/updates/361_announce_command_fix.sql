@@ -1,0 +1,1 @@
+INSERT INTO `ribon_string` VALUES ('65', '|cffff0000[Console]:|cffff0f00 %s|r', null, null, null, null, null, null, null, null);
