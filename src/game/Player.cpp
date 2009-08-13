@@ -17240,7 +17240,7 @@ void Player::VehicleSpellInitialize()
     if(!charm)
         return;
 
-    // Commented out, not working properly: SetPosition(m_Vehicle->GetPositionX(), m_Vehicle->GetPositionY(), m_Vehicle->GetPositionZ(), m_Vehicle->GetOrientation());
+    SetPosition(m_Vehicle->GetPositionX(), m_Vehicle->GetPositionY(), m_Vehicle->GetPositionZ(), m_Vehicle->GetOrientation());
 
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*10+1+1);
     data << uint64(charm->GetGUID());

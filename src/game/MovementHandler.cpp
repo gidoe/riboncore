@@ -391,7 +391,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
             if (plMover->m_anti_MistimingCount > World::GetMistimingAlarms())
             {
-				sWorld.SendWorldText(3,"Kicking cheater: %s",GetPlayer()->GetName());
+				sWorld.SendWorldText(3,"Kicking cheater: " + (std::string)plMover->GetName());
                 plMover->GetSession()->KickPlayer();
                 return;
             }
@@ -413,7 +413,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             //hmm... in first time after login player has MOVE_SWIMBACK instead MOVE_WALKBACK
             else move_type = movementInfo.flags & MOVEMENTFLAG_BACKWARD ? MOVE_SWIM_BACK : MOVE_RUN;
 
-            float current_speed = plMover->GetSpeed(move_type);
+            float current_speed = plMover->m_Vehicle ? plMover->m_Vehicle->GetSpeed(move_type) : plMover->GetSpeed(move_type);
             // end current speed
 
             // movement distance
@@ -551,7 +551,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                         {
                             sLog.outError("AC2-%s, teleport to plan exception. Exception count: %d ",
                                             plMover->GetName(), plMover->m_anti_TeleToPlane_Count);
-							sWorld.SendWorldText(3,"Kicking cheater: %s",GetPlayer()->GetName());
+							sWorld.SendWorldText(3,"Kicking cheater: " + (std::string)plMover->GetName());
                             plMover->GetSession()->KickPlayer();
                             return;
                         }
