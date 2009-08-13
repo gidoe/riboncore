@@ -85,7 +85,7 @@ extern void AddSC_npc_taxi();
 //------ ZONE --------
 
 //Alterac Mountains
-extern void AddSC_alterac_mountains();
+//extern void AddSC_alterac_mountains();
 
 //Arathi Highlands
 extern void AddSC_arathi_highlands();
@@ -1015,7 +1015,7 @@ void ScriptsInit(char const* cfg_file = "RibonCore.conf")
     //------ ZONE --------
 
     //Alterac Mountains
-    AddSC_alterac_mountains();
+    //AddSC_alterac_mountains();
 
     //Arathi Highlands
     AddSC_arathi_highlands();
