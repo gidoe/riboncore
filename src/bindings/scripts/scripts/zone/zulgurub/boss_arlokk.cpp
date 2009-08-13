@@ -165,7 +165,7 @@ struct RIBON_DLL_DECL boss_arlokkAI : public ScriptedAI
                 if (m_pMarkedTarget)
                     DoCast(m_pMarkedTarget, SPELL_MARK);
                 else
-                    error_log("TSCR: boss_arlokk could not accuire m_pMarkedTarget.");
+                    error_log("RSCR: boss_arlokk could not accuire m_pMarkedTarget.");
 
                 m_uiMark_Timer = 15000;
             }
