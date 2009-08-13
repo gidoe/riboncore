@@ -23,17 +23,6 @@ OPTION(DO_WARN "Enable all compile warnings" 0)
 OPTION(LARGE_CELL "Large cell size" 0)
 OPTION(SHORT_SLEEP "Short sleep" 0)
 
-SET(GENREV_SRC
-src/tools/genrevision/genrevision.cpp
-)
-
-EXECUTE_PROCESS(
-        COMMAND hg tip --template {rev}
-        OUTPUT_VARIABLE _REVISION
-)
-
-message("* RibonCore revision: ${_REVISION}")
-
 IF (PREFIX)
     SET(CMAKE_INSTALL_PREFIX ${PREFIX})
 ENDIF (PREFIX)
