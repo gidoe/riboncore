@@ -261,7 +261,7 @@ struct RIBON_DLL_DECL boss_malchezaarAI : public ScriptedAI
 
     void AxesCleanup()
     {
-        for(uint8 i=0; i<2;++i)
+        for(uint8 i=0; i<2; ++i)
         {
             Unit *axe = Unit::GetUnit(*m_creature, axes[i]);
             if(axe && axe->isAlive())
