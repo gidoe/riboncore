@@ -796,16 +796,19 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADACHIEVEMENTS         = 18,
     PLAYER_LOGIN_QUERY_LOADCRITERIAPROGRESS     = 19,
     PLAYER_LOGIN_QUERY_LOADEQUIPMENTSETS        = 20,
-    PLAYER_LOGIN_QUERY_LOADGLYPHS               = 21,
-    PLAYER_LOGIN_QUERY_LOADTALENTS              = 22,
-    MAX_PLAYER_LOGIN_QUERY                      = 23
+    PLAYER_LOGIN_QUERY_LOADBGDATA               = 21,
+    PLAYER_LOGIN_QUERY_LOADGLYPHS               = 22,
+    PLAYER_LOGIN_QUERY_LOADTALENTS              = 23,
+    MAX_PLAYER_LOGIN_QUERY                      = 24
 };
 
 enum PlayerDelayedOperations
 {
-    DELAYED_SAVE_PLAYER = 1,
-    DELAYED_RESURRECT_PLAYER = 2,
-    DELAYED_SPELL_CAST_DESERTER = 4,
+    DELAYED_SAVE_PLAYER         = 0x01,
+    DELAYED_RESURRECT_PLAYER    = 0x02,
+    DELAYED_SPELL_CAST_DESERTER = 0x04,
+    DELAYED_BG_MOUNT_RESTORE    = 0x08, ///< Flag to restore mount state after teleport from BG
+    DELAYED_BG_TAXI_RESTORE     = 0x10, ///< Flag to restore taxi state after teleport from BG
     DELAYED_END
 };
 
@@ -891,6 +894,35 @@ class RIBON_DLL_SPEC PlayerTaxi
 
 std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi);
 
+class Player;
+
+/// Holder for BattleGround data
+struct BGData
+{
+    BGData() : bgInstanceID(0), bgTypeID(BATTLEGROUND_TYPE_NONE), bgAfkReportedCount(0), bgAfkReportedTimer(0),
+        bgTeam(0), mountSpell(0) { ClearTaxiPath(); }
+
+
+    uint32 bgInstanceID;                    ///< This variable is set to bg->m_InstanceID,
+                                            ///  when player is teleported to BG - (it is battleground's GUID)
+    BattleGroundTypeId bgTypeID;
+
+    std::set<uint32>   bgAfkReporter;
+    uint8              bgAfkReportedCount;
+    time_t             bgAfkReportedTimer;
+
+    uint32 bgTeam;                          ///< What side the player will be added to
+
+
+    uint32 mountSpell;
+    uint32 taxiPath[2];
+
+    WorldLocation joinPos;                  ///< From where player entered BG
+
+    void ClearTaxiPath()     { taxiPath[0] = taxiPath[1] = 0; }
+    bool HasTaxiPath() const { return taxiPath[0] && taxiPath[1]; }
+};
+
 class RIBON_DLL_SPEC Player : public Unit
 {
     friend class WorldSession;
@@ -915,6 +947,8 @@ class RIBON_DLL_SPEC Player : public Unit
         {
             return TeleportTo(loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation, options);
         }
+
+        bool TeleportToBGEntryPoint();
 
         void SetSummonPoint(uint32 mapid, float x, float y, float z)
         {
@@ -963,6 +997,7 @@ class RIBON_DLL_SPEC Player : public Unit
         bool ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc = NULL, uint32 spellid = 0);
         bool ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid = 0);
         void CleanupAfterTaxiFlight();
+        void ContinueTaxiFlight();
                                                             // mount_id can be used in scripting calls
         bool isAcceptWhispers() const { return m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS; }
         void SetAcceptWhispers(bool on) { if(on) m_ExtraFlags |= PLAYER_EXTRA_ACCEPT_WHISPERS; else m_ExtraFlags &= ~PLAYER_EXTRA_ACCEPT_WHISPERS; }
@@ -1873,10 +1908,10 @@ class RIBON_DLL_SPEC Player : public Unit
         /***               BATTLEGROUND SYSTEM                 ***/
         /*********************************************************/
 
-        bool InBattleGround()       const                { return m_bgBattleGroundID != 0; }
+        bool InBattleGround()       const                { return m_bgData.bgInstanceID != 0; }
         bool InArena()              const;
-        uint32 GetBattleGroundId()  const                { return m_bgBattleGroundID; }
-        BattleGroundTypeId GetBattleGroundTypeId() const { return m_bgTypeID; }
+        uint32 GetBattleGroundId()  const                { return m_bgData.bgInstanceID; }
+        BattleGroundTypeId GetBattleGroundTypeId() const { return m_bgData.bgTypeID; }
         BattleGround* GetBattleGround() const;
 
 
@@ -1912,8 +1947,8 @@ class RIBON_DLL_SPEC Player : public Unit
 
         void SetBattleGroundId(uint32 val, BattleGroundTypeId bgTypeId)
         {
-            m_bgBattleGroundID = val;
-            m_bgTypeID = bgTypeId;
+            m_bgData.bgInstanceID = val;
+            m_bgData.bgTypeID = bgTypeId;
         }
         uint32 AddBattleGroundQueueId(BattleGroundQueueTypeId val)
         {
@@ -1960,20 +1995,17 @@ class RIBON_DLL_SPEC Player : public Unit
                     return true;
             return false;
         }
-        WorldLocation const& GetBattleGroundEntryPoint() const { return m_bgEntryPoint; }
-        void SetBattleGroundEntryPoint(uint32 Map, float PosX, float PosY, float PosZ, float PosO )
-        {
-            m_bgEntryPoint = WorldLocation(Map,PosX,PosY,PosZ,PosO);
-        }
+        WorldLocation const& GetBattleGroundEntryPoint() const { return m_bgData.joinPos; }
+        void SetBattleGroundEntryPoint();
 
-        void SetBGTeam(uint32 team) { m_bgTeam = team; }
-        uint32 GetBGTeam() const { return m_bgTeam ? m_bgTeam : GetTeam(); }
+        void SetBGTeam(uint32 team) { m_bgData.bgTeam = team; }
+        uint32 GetBGTeam() const { return m_bgData.bgTeam ? m_bgData.bgTeam : GetTeam(); }
 
         void LeaveBattleground(bool teleportToEntryPoint = true);
         bool CanJoinToBattleground() const;
         bool CanReportAfkDueToLimit();
         void ReportedAfkBy(Player* reporter);
-        void ClearAfkReports() { m_bgAfkReporter.clear(); }
+        void ClearAfkReports() { m_bgData.bgAfkReporter.clear(); }
 
         bool GetBGAccessByLevel(BattleGroundTypeId bgTypeId) const;
         bool isTotalImmunity();
@@ -2176,13 +2208,11 @@ class RIBON_DLL_SPEC Player : public Unit
         bool canSeeSpellClickOn(Creature const* creature) const;
     protected:
 
+        uint32 m_contestedPvPTimer;
+
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
         /*********************************************************/
-
-        /* this variable is set to bg->m_InstanceID, when player is teleported to BG - (it is battleground's GUID)*/
-        uint32 m_bgBattleGroundID;
-        BattleGroundTypeId m_bgTypeID;
         /*
         this is an array of BG queues (BgTypeIDs) in which is player
         */
@@ -2191,15 +2221,9 @@ class RIBON_DLL_SPEC Player : public Unit
             BattleGroundQueueTypeId bgQueueTypeId;
             uint32 invitedToInstance;
         };
+
         BgBattleGroundQueueID_Rec m_bgBattleGroundQueueID[PLAYER_MAX_BATTLEGROUND_QUEUES];
-        WorldLocation m_bgEntryPoint;
-
-        std::set<uint32> m_bgAfkReporter;
-        uint8 m_bgAfkReportedCount;
-        time_t m_bgAfkReportedTimer;
-        uint32 m_contestedPvPTimer;
-
-        uint32 m_bgTeam;    // what side the player will be added to
+        BGData                    m_bgData;
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
@@ -2232,6 +2256,7 @@ class RIBON_DLL_SPEC Player : public Unit
         void _LoadDeclinedNames(QueryResult *result);
         void _LoadArenaTeamInfo(QueryResult *result);
         void _LoadEquipmentSets(QueryResult *result);
+        void _LoadBGData(QueryResult* result);
         void _LoadGlyphs(QueryResult *result);
         void _LoadTalents(QueryResult *result);
 
@@ -2247,6 +2272,7 @@ class RIBON_DLL_SPEC Player : public Unit
         void _SaveDailyQuestStatus();
         void _SaveSpells();
         void _SaveEquipmentSets();
+        void _SaveBGData();
         void _SaveGlyphs();
         void _SaveTalents();
 
@@ -2437,7 +2463,11 @@ class RIBON_DLL_SPEC Player : public Unit
         bool IsHasDelayedTeleport() const { return m_bHasDelayedTeleport; }
         void SetDelayedTeleportFlag(bool setting) { m_bHasDelayedTeleport = setting; }
 
-        void ScheduleDelayedOperation(uint32 operation);
+        void ScheduleDelayedOperation(uint32 operation)
+        {
+            if(operation < DELAYED_END)
+                m_DelayedOperations |= operation;
+        }
 
         GridReference<Player> m_gridRef;
         MapReference m_mapRef;
