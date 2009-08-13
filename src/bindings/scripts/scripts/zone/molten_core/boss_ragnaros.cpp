@@ -87,7 +87,7 @@ struct RIBON_DLL_DECL boss_ragnarosAI : public ScriptedAI
 {
     boss_ragnarosAI(Creature *c) : ScriptedAI(c)
     {
-         SetCombatMovement(false);
+        SetCombatMovement(false);
     }
 
     uint32 WrathOfRagnaros_Timer;
