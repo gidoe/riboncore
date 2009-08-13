@@ -40,7 +40,7 @@ ADD_CUSTOM_TARGET("revision.h" ALL
 
 EXECUTE_PROCESS(
         COMMAND hg tip --template {rev}
-        OUTPUT_VARIABLE HG_REVISION
+        OUTPUT_VARIABLE _REVISION
 )
 
 message("* RibonCore revision: ${_REVISION}")
