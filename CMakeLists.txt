@@ -27,17 +27,6 @@ SET(GENREV_SRC
 src/tools/genrevision/genrevision.cpp
 )
 
-ADD_EXECUTABLE(genrev
-${GENREV_SRC}
-)
-ADD_CUSTOM_TARGET("revision.h" ALL
-    COMMAND "${Ribon_BINARY_DIR}/genrev"
-    ${Ribon_SOURCE_DIR}
-    WORKING_DIRECTORY "${Ribon_SOURCE_DIR}/src/shared"
-    DEPENDS genrev
-)
-
-
 EXECUTE_PROCESS(
         COMMAND hg tip --template {rev}
         OUTPUT_VARIABLE _REVISION
