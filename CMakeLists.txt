@@ -23,6 +23,8 @@ OPTION(DO_WARN "Enable all compile warnings" 0)
 OPTION(LARGE_CELL "Large cell size" 0)
 OPTION(SHORT_SLEEP "Short sleep" 0)
 
+message("* RibonCore revision: ${_REVISION}")
+
 IF (PREFIX)
     SET(CMAKE_INSTALL_PREFIX ${PREFIX})
 ENDIF (PREFIX)
