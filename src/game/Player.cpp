@@ -21650,7 +21650,7 @@ void Player::SetMap(Map * map)
     m_mapRef.link(map, this);
 }
 
-void Player::_LoadGlyphs(QueryResult *result) 
+void Player::_LoadGlyphs(QueryResult *result)
 {
     // SetPQuery(PLAYER_LOGIN_QUERY_LOADGLYPHS, "SELECT spec, glyph1, glyph2, glyph3, glyph4, glyph5, glyph6 from character_glyphs WHERE guid = '%u'", GUID_LOPART(m_guid));
     if (!result)
@@ -21766,12 +21766,12 @@ void Player::ActivateSpec(uint32 spec)
     if(GetActiveSpec() == spec)
         return;
 
-    if(GetSpecsCount() < 2)
+    if(GetSpecsCount() != MAX_TALENT_SPECS)
         return;
 
     uint32 const* talentTabIds = GetTalentTabPages(getClass());
     
-    for(uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
+    for(uint8 i = 0; i < MAX_TALENT_SPECS + 1; ++i)
     {
         uint32 talentTabId = talentTabIds[i];
 
@@ -21812,7 +21812,7 @@ void Player::ActivateSpec(uint32 spec)
 
     SetActiveSpec(spec);
 
-    for(uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
+    for(uint8 i = 0; i < MAX_TALENT_SPECS + 1; ++i)
     {
         uint32 talentTabId = talentTabIds[i];
 
