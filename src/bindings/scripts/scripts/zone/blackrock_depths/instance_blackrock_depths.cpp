@@ -36,7 +36,7 @@ update `instance_template` set `script`='instance_blackrock_depths' where `map`=
 
 enum
 {
-    ENCOUNTERS              = 6,
+    MAX_ENCOUNTER           = 6,
 
     NPC_EMPEROR             = 9019,
     NPC_PHALANX             = 9502,
@@ -72,9 +72,9 @@ enum
 
 struct RIBON_DLL_DECL instance_blackrock_depths : public ScriptedInstance
 {
-    instance_blackrock_depths(Map *map) : ScriptedInstance(map) {Initialize();};
+    instance_blackrock_depths(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 
-    uint32 Encounter[ENCOUNTERS];
+    uint32 m_auiEncounter[MAX_ENCOUNTER];
     std::string str_data;
 
     uint64 EmperorGUID;
@@ -108,6 +108,8 @@ struct RIBON_DLL_DECL instance_blackrock_depths : public ScriptedInstance
 
     void Initialize()
     {
+        memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+
         EmperorGUID = 0;
         PhalanxGUID = 0;
 
@@ -136,8 +138,6 @@ struct RIBON_DLL_DECL instance_blackrock_depths : public ScriptedInstance
         TombTimer = TIMER_TOMBOFTHESEVEN;
         TombEventCounter = 0;
 
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
-            Encounter[i] = NOT_STARTED;
         for(uint8 i = 0; i < 7; ++i)
             TombBossGUIDs[i] = 0;
     }
@@ -176,7 +176,7 @@ struct RIBON_DLL_DECL instance_blackrock_depths : public ScriptedInstance
         case GO_TOMB_ENTER: GoTombEnterGUID = go->GetGUID(); break;
         case GO_TOMB_EXIT: 
             GoTombExitGUID = go->GetGUID();
-            if(GhostKillCount >= 7)
+            if (GhostKillCount >= 7)
                 HandleGameObject(0, true, go);
             else
                 HandleGameObject(0, false, go);
@@ -197,7 +197,7 @@ struct RIBON_DLL_DECL instance_blackrock_depths : public ScriptedInstance
         {
         case DATA_EVENSTARTER:
             TombEventStarterGUID = data;
-            if(!TombEventStarterGUID)
+            if (!TombEventStarterGUID)
                 TombOfSevenReset();//reset
             else
                 TombOfSevenStart();//start
@@ -212,25 +212,25 @@ struct RIBON_DLL_DECL instance_blackrock_depths : public ScriptedInstance
         switch(type)
         {
         case TYPE_RING_OF_LAW:
-            Encounter[0] = data;
+            m_auiEncounter[0] = data;
             break;
         case TYPE_VAULT:
-            Encounter[1] = data;
+            m_auiEncounter[1] = data;
             break;
         case TYPE_BAR:
             if (data == SPECIAL)
                 ++BarAleCount;
             else
-                Encounter[2] = data;
+                m_auiEncounter[2] = data;
             break;
         case TYPE_TOMB_OF_SEVEN:
-            Encounter[3] = data;
+            m_auiEncounter[3] = data;
             break;
         case TYPE_LYCEUM:
-            Encounter[4] = data;
+            m_auiEncounter[4] = data;
             break;
         case TYPE_IRON_HALL:
-            Encounter[5] = data;
+            m_auiEncounter[5] = data;
             break;
         case DATA_GHOSTKILL:
             GhostKillCount += data;
@@ -242,8 +242,8 @@ struct RIBON_DLL_DECL instance_blackrock_depths : public ScriptedInstance
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << Encounter[0] << " " << Encounter[1] << " " << Encounter[2] << " "
-                << Encounter[3] << " " << Encounter[4] << " " << Encounter[5] << " " << GhostKillCount;
+            saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
+                << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " " << GhostKillCount;
 
             str_data = saveStream.str();
 
@@ -257,20 +257,20 @@ struct RIBON_DLL_DECL instance_blackrock_depths : public ScriptedInstance
         switch(type)
         {
         case TYPE_RING_OF_LAW:
-            return Encounter[0];
+            return m_auiEncounter[0];
         case TYPE_VAULT:
-            return Encounter[1];
+            return m_auiEncounter[1];
         case TYPE_BAR:
-            if (Encounter[2] == IN_PROGRESS && BarAleCount == 3)
+            if (m_auiEncounter[2] == IN_PROGRESS && BarAleCount == 3)
                 return SPECIAL;
             else
-                return Encounter[2];
+                return m_auiEncounter[2];
         case TYPE_TOMB_OF_SEVEN:
-            return Encounter[3];
+            return m_auiEncounter[3];
         case TYPE_LYCEUM:
-            return Encounter[4];
+            return m_auiEncounter[4];
         case TYPE_IRON_HALL:
-            return Encounter[5];
+            return m_auiEncounter[5];
         case DATA_GHOSTKILL:
             return GhostKillCount;
         }
@@ -321,15 +321,15 @@ struct RIBON_DLL_DECL instance_blackrock_depths : public ScriptedInstance
         OUT_LOAD_INST_DATA(in);
 
         std::istringstream loadStream(in);
-        loadStream >> Encounter[0] >> Encounter[1] >> Encounter[2] >> Encounter[3]
-        >> Encounter[4] >> Encounter[5] >> GhostKillCount;
+        loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
+        >> m_auiEncounter[4] >> m_auiEncounter[5] >> GhostKillCount;
 
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
-            if (Encounter[i] == IN_PROGRESS)
-                Encounter[i] = NOT_STARTED;
-        if(GhostKillCount > 0 && GhostKillCount < 7)
+        for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            if (m_auiEncounter[i] == IN_PROGRESS)
+                m_auiEncounter[i] = NOT_STARTED;
+        if (GhostKillCount > 0 && GhostKillCount < 7)
             GhostKillCount = 0;//reset tomb of seven event
-        if(GhostKillCount > 7)
+        if (GhostKillCount > 7)
             GhostKillCount = 7;
 
         OUT_LOAD_INST_DATA_COMPLETE;
@@ -337,13 +337,13 @@ struct RIBON_DLL_DECL instance_blackrock_depths : public ScriptedInstance
 
     void TombOfSevenEvent()
     {
-        if(GhostKillCount < 7 && TombBossGUIDs[TombEventCounter])
+        if (GhostKillCount < 7 && TombBossGUIDs[TombEventCounter])
         {
-            if(Creature* boss = instance->GetCreature(TombBossGUIDs[TombEventCounter]))
+            if (Creature* boss = instance->GetCreature(TombBossGUIDs[TombEventCounter]))
             {
                 boss->setFaction(FACTION_HOSTILE);
                 boss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_2);
-                if(Unit* target = boss->SelectNearestTarget(500))
+                if (Unit* target = boss->SelectNearestTarget(500))
                     boss->AI()->AttackStart(target);
             }
         }        
@@ -355,9 +355,9 @@ struct RIBON_DLL_DECL instance_blackrock_depths : public ScriptedInstance
         HandleGameObject(GoTombEnterGUID,true);//event reseted, open entrance door
         for(uint8 i = 0; i < 7; ++i)
         {
-            if(Creature* boss = instance->GetCreature(TombBossGUIDs[i]))
+            if (Creature* boss = instance->GetCreature(TombBossGUIDs[i]))
             {
-                if(!boss->isAlive())
+                if (!boss->isAlive())
                 {//do not call EnterEvadeMode(), it will create infinit loops
                     boss->Respawn();
                     boss->RemoveAllAuras();
@@ -394,23 +394,23 @@ struct RIBON_DLL_DECL instance_blackrock_depths : public ScriptedInstance
     }
     void Update(uint32 diff)
     {
-        if(TombEventStarterGUID && GhostKillCount < 7)
+        if (TombEventStarterGUID && GhostKillCount < 7)
         {
-            if(TombTimer <= diff)
+            if (TombTimer <= diff)
             {
                 TombTimer = TIMER_TOMBOFTHESEVEN;
                 TombEventCounter++;
                 TombOfSevenEvent();
             }else TombTimer -= diff;
         }
-        if(GhostKillCount >= 7 && TombEventStarterGUID)
+        if (GhostKillCount >= 7 && TombEventStarterGUID)
             TombOfSevenEnd();
     }
 };
 
-InstanceData* GetInstanceData_instance_blackrock_depths(Map* map)
+InstanceData* GetInstanceData_instance_blackrock_depths(Map* pMap)
 {
-    return new instance_blackrock_depths(map);
+    return new instance_blackrock_depths(pMap);
 }
 
    void AddSC_instance_blackrock_depths()

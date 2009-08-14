@@ -12,7 +12,7 @@ EndScriptData */
 #include "precompiled.h"
 #include "def_sunwell_plateau.h"
 
-#define ENCOUNTERS 6
+#define MAX_ENCOUNTER 6
 
 /* Sunwell Plateau:
 0 - Kalecgos and Sathrovarr
@@ -25,9 +25,9 @@ EndScriptData */
 
 struct RIBON_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
 {
-    instance_sunwell_plateau(Map *map) : ScriptedInstance(map) {Initialize();};
+    instance_sunwell_plateau(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 
-    uint32 Encounters[ENCOUNTERS];
+    uint32 m_auiEncounter[MAX_ENCOUNTER];
 
     /** Creatures **/
     uint64 Kalecgos_Dragon;
@@ -55,6 +55,8 @@ struct RIBON_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
 
     void Initialize()
     {
+        memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+
         /*** Creatures ***/
         Kalecgos_Dragon         = 0;
         Kalecgos_Human          = 0;
@@ -76,18 +78,14 @@ struct RIBON_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
         MurusGate[0] = 0;
         MurusGate[1] = 0;
 
-        /*** Encounters ***/
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
-            Encounters[i] = NOT_STARTED;
-
         /*** Misc ***/
         SpectralRealmTimer = 5000;
     }
 
     bool IsEncounterInProgress() const
     {
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
-            if(Encounters[i] == IN_PROGRESS)
+        for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            if (m_auiEncounter[i] == IN_PROGRESS)
                 return true;
 
         return false;
@@ -137,13 +135,13 @@ struct RIBON_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
         {
             case 188421: ForceField     = go->GetGUID(); break;
             case 188075:
-                if(Encounters[2] == DONE)
+                if (m_auiEncounter[2] == DONE)
                     HandleGameObject(NULL, true, go);
                 FireBarrier = go->GetGUID();
                 break;
             case 187990: MurusGate[0]   = go->GetGUID(); break;
             case 188118:
-                if(Encounters[4] == DONE)
+                if (m_auiEncounter[4] == DONE)
                     HandleGameObject(NULL, true, go);
                 MurusGate[1]= go->GetGUID();
                 break;
@@ -154,12 +152,12 @@ struct RIBON_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
     {
         switch(id)
         {
-            case DATA_KALECGOS_EVENT:     return Encounters[0];
-            case DATA_BRUTALLUS_EVENT:    return Encounters[1];
-            case DATA_FELMYST_EVENT:      return Encounters[2];
-            case DATA_EREDAR_TWINS_EVENT: return Encounters[3];
-            case DATA_MURU_EVENT:         return Encounters[4];
-            case DATA_KILJAEDEN_EVENT:    return Encounters[5];
+            case DATA_KALECGOS_EVENT:     return m_auiEncounter[0];
+            case DATA_BRUTALLUS_EVENT:    return m_auiEncounter[1];
+            case DATA_FELMYST_EVENT:      return m_auiEncounter[2];
+            case DATA_EREDAR_TWINS_EVENT: return m_auiEncounter[3];
+            case DATA_MURU_EVENT:         return m_auiEncounter[4];
+            case DATA_KILJAEDEN_EVENT:    return m_auiEncounter[5];
         }
         return 0;
     }
@@ -193,13 +191,13 @@ struct RIBON_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
     {
         switch(id)
         {
-            case DATA_KALECGOS_EVENT:      Encounters[0] = data; break;
-            case DATA_BRUTALLUS_EVENT:     Encounters[1] = data; break;
+            case DATA_KALECGOS_EVENT:      m_auiEncounter[0] = data; break;
+            case DATA_BRUTALLUS_EVENT:     m_auiEncounter[1] = data; break;
             case DATA_FELMYST_EVENT:
-                if(data == DONE)
+                if (data == DONE)
                     HandleGameObject(FireBarrier, true);
-                Encounters[2] = data; break;
-            case DATA_EREDAR_TWINS_EVENT:  Encounters[3] = data; break;
+                m_auiEncounter[2] = data; break;
+            case DATA_EREDAR_TWINS_EVENT:  m_auiEncounter[3] = data; break;
             case DATA_MURU_EVENT:
                 switch(data)
                 {
@@ -216,11 +214,11 @@ struct RIBON_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
                         HandleGameObject(MurusGate[1], false);
                         break;
                 }
-                Encounters[4] = data; break;
-            case DATA_KILJAEDEN_EVENT:     Encounters[5] = data; break;
+                m_auiEncounter[4] = data; break;
+            case DATA_KILJAEDEN_EVENT:     m_auiEncounter[5] = data; break;
         }
 
-        if(data == DONE)
+        if (data == DONE)
             SaveToDB();
     }
 
@@ -228,11 +226,11 @@ struct RIBON_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
     {
         OUT_SAVE_INST_DATA;
         std::ostringstream stream;
-        stream << Encounters[0] << " "  << Encounters[1] << " "  << Encounters[2] << " "  << Encounters[3] << " "
-            << Encounters[4] << " "  << Encounters[5];
+        stream << m_auiEncounter[0] << " "  << m_auiEncounter[1] << " "  << m_auiEncounter[2] << " "  << m_auiEncounter[3] << " "
+            << m_auiEncounter[4] << " "  << m_auiEncounter[5];
         char* out = new char[stream.str().length() + 1];
         strcpy(out, stream.str().c_str());
-        if(out)
+        if (out)
         {
             OUT_SAVE_INST_DATA_COMPLETE;
             return out;
@@ -242,7 +240,7 @@ struct RIBON_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
 
     void Load(const char* in)
     {
-        if(!in)
+        if (!in)
         {
             OUT_LOAD_INST_DATA_FAIL;
             return;
@@ -250,18 +248,18 @@ struct RIBON_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
 
         OUT_LOAD_INST_DATA(in);
         std::istringstream stream(in);
-        stream >> Encounters[0] >> Encounters[1] >> Encounters[2] >> Encounters[3]
-            >> Encounters[4] >> Encounters[5];
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
-            if(Encounters[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
-                Encounters[i] = NOT_STARTED;
+        stream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
+            >> m_auiEncounter[4] >> m_auiEncounter[5];
+        for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
+                m_auiEncounter[i] = NOT_STARTED;
         OUT_LOAD_INST_DATA_COMPLETE;
     }
 };
 
-InstanceData* GetInstanceData_instance_sunwell_plateau(Map* map)
+InstanceData* GetInstanceData_instance_sunwell_plateau(Map* pMap)
 {
-    return new instance_sunwell_plateau(map);
+    return new instance_sunwell_plateau(pMap);
 }
 
 void AddSC_instance_sunwell_plateau()

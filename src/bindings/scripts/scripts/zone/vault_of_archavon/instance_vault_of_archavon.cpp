@@ -5,26 +5,25 @@
 
 struct RIBON_DLL_DECL instance_archavon : public ScriptedInstance
 {
-    instance_archavon(Map *Map) : ScriptedInstance(Map) {Initialize();};
+    instance_archavon(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 
     std::string strInstData;
     uint64 Archavon;
     uint64 Emalon;
-    uint32 Encounters[NUMBER_OF_ENCOUNTERS];
+    uint32 m_auiEncounter[NUMBER_OF_ENCOUNTERS];
 
     void Initialize()
     {
+        memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+
         Archavon = 0;
         Emalon = 0;
-
-        for(uint8 i = 0; i < NUMBER_OF_ENCOUNTERS; i++)
-            Encounters[i] = NOT_STARTED;
     }
 
     bool IsEncounterInProgress() const
     {
         for(uint8 i = 0; i < NUMBER_OF_ENCOUNTERS; ++i)
-            if(Encounters[i] == IN_PROGRESS)
+            if (m_auiEncounter[i] == IN_PROGRESS)
                 return true;
 
         return false;
@@ -53,8 +52,8 @@ struct RIBON_DLL_DECL instance_archavon : public ScriptedInstance
     {
         switch(identifier)
         {
-            case DATA_ARCHAVON_EVENT:    return Encounters[0];
-            case DATA_EMALON_EVENT:    return Encounters[1];
+            case DATA_ARCHAVON_EVENT:    return m_auiEncounter[0];
+            case DATA_EMALON_EVENT:    return m_auiEncounter[1];
         }
         return 0;
     }
@@ -63,8 +62,8 @@ struct RIBON_DLL_DECL instance_archavon : public ScriptedInstance
     {
         switch(identifier)
         {
-            case DATA_ARCHAVON_EVENT:    Encounters[0] = data;  break;
-            case DATA_EMALON_EVENT:    Encounters[1] = data;  break;
+            case DATA_ARCHAVON_EVENT:    m_auiEncounter[0] = data;  break;
+            case DATA_EMALON_EVENT:    m_auiEncounter[1] = data;  break;
         }
 
         if (data == DONE)
@@ -72,7 +71,7 @@ struct RIBON_DLL_DECL instance_archavon : public ScriptedInstance
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << Encounters[0] << " " << Encounters[1];
+            saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1];
 
             strInstData = saveStream.str();
 
@@ -97,21 +96,21 @@ struct RIBON_DLL_DECL instance_archavon : public ScriptedInstance
         OUT_LOAD_INST_DATA(chrIn);
 
         std::istringstream loadStream(chrIn);
-        loadStream >> Encounters[0] >> Encounters[1];
+        loadStream >> m_auiEncounter[0] >> m_auiEncounter[1];
 
         for(uint8 i = 1; i < NUMBER_OF_ENCOUNTERS; ++i)
         {
-            if (Encounters[i] == IN_PROGRESS)
-                Encounters[i] = NOT_STARTED;
+            if (m_auiEncounter[i] == IN_PROGRESS)
+                m_auiEncounter[i] = NOT_STARTED;
         }
 
         OUT_LOAD_INST_DATA_COMPLETE;
     }
 };
 
-InstanceData* GetInstanceData_instance_archavon(Map* map)
+InstanceData* GetInstanceData_instance_archavon(Map* pMap)
 {
-    return new instance_archavon(map);
+    return new instance_archavon(pMap);
 }
 
 void AddSC_instance_archavon()

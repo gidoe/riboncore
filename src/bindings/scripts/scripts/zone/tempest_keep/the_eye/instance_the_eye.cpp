@@ -24,7 +24,7 @@ EndScriptData */
 #include "precompiled.h"
 #include "def_the_eye.h"
 
-#define ENCOUNTERS 5
+#define MAX_ENCOUNTER 5
 
 /* The Eye encounters:
 0 - Kael'thas event
@@ -35,7 +35,7 @@ EndScriptData */
 
 struct RIBON_DLL_DECL instance_the_eye : public ScriptedInstance
 {
-    instance_the_eye(Map *map) : ScriptedInstance(map) {Initialize();};
+    instance_the_eye(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 
     uint64 ThaladredTheDarkener;
     uint64 LordSanguinar;
@@ -48,10 +48,12 @@ struct RIBON_DLL_DECL instance_the_eye : public ScriptedInstance
     uint8 KaelthasEventPhase;
     uint8 AlarEventPhase;
 
-    uint32 Encounters[ENCOUNTERS];
+    uint32 m_auiEncounter[MAX_ENCOUNTER];
 
     void Initialize()
     {
+        memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+
         ThaladredTheDarkener = 0;
         LordSanguinar = 0;
         GrandAstromancerCapernian = 0;
@@ -62,15 +64,12 @@ struct RIBON_DLL_DECL instance_the_eye : public ScriptedInstance
 
         KaelthasEventPhase = 0;
         AlarEventPhase = 0;
-
-        for(uint8 i = 0; i < ENCOUNTERS; i++)
-            Encounters[i] = NOT_STARTED;
     }
 
     bool IsEncounterInProgress() const
     {
-        for(uint8 i = 0; i < ENCOUNTERS; i++)
-            if(Encounters[i] == IN_PROGRESS) return true;
+        for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            if (m_auiEncounter[i] == IN_PROGRESS) return true;
 
         return false;
     }
@@ -108,12 +107,12 @@ struct RIBON_DLL_DECL instance_the_eye : public ScriptedInstance
     {
         switch(type)
         {
-            case DATA_ALAREVENT:    AlarEventPhase = data;  Encounters[0] = data;           break;
-            case DATA_HIGHASTROMANCERSOLARIANEVENT: Encounters[1] = data;                   break;
-            case DATA_VOIDREAVEREVENT:  Encounters[2] = data;                               break;
-            case DATA_KAELTHASEVENT:    KaelthasEventPhase = data;  Encounters[3] = data;   break;
+            case DATA_ALAREVENT:    AlarEventPhase = data;  m_auiEncounter[0] = data;           break;
+            case DATA_HIGHASTROMANCERSOLARIANEVENT: m_auiEncounter[1] = data;                   break;
+            case DATA_VOIDREAVEREVENT:  m_auiEncounter[2] = data;                               break;
+            case DATA_KAELTHASEVENT:    KaelthasEventPhase = data;  m_auiEncounter[3] = data;   break;
         }
-        if(data == DONE)
+        if (data == DONE)
             SaveToDB();
     }
 
@@ -122,8 +121,8 @@ struct RIBON_DLL_DECL instance_the_eye : public ScriptedInstance
         switch(type)
         {
             case DATA_ALAREVENT:    return AlarEventPhase;
-            case DATA_HIGHASTROMANCERSOLARIANEVENT: return Encounters[1];
-            case DATA_VOIDREAVEREVENT:  return Encounters[2];
+            case DATA_HIGHASTROMANCERSOLARIANEVENT: return m_auiEncounter[1];
+            case DATA_VOIDREAVEREVENT:  return m_auiEncounter[2];
             case DATA_KAELTHASEVENT:    return KaelthasEventPhase;
         }
         return 0;
@@ -133,10 +132,10 @@ struct RIBON_DLL_DECL instance_the_eye : public ScriptedInstance
     {
         OUT_SAVE_INST_DATA;
         std::ostringstream stream;
-        stream << Encounters[0] << " " << Encounters[1] << " " << Encounters[2] << " " << Encounters[3];
+        stream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " " << m_auiEncounter[3];
         char* out = new char[stream.str().length() + 1];
         strcpy(out, stream.str().c_str());
-        if(out)
+        if (out)
         {
             OUT_SAVE_INST_DATA_COMPLETE;
             return out;
@@ -146,24 +145,24 @@ struct RIBON_DLL_DECL instance_the_eye : public ScriptedInstance
 
     void Load(const char* in)
     {
-        if(!in)
+        if (!in)
         {
             OUT_LOAD_INST_DATA_FAIL;
             return;
         }
         OUT_LOAD_INST_DATA(in);
         std::istringstream stream(in);
-        stream >> Encounters[0] >> Encounters[1] >> Encounters[2] >> Encounters[3];
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
-            if(Encounters[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
-                Encounters[i] = NOT_STARTED;
+        stream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
+        for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
+                m_auiEncounter[i] = NOT_STARTED;
         OUT_LOAD_INST_DATA_COMPLETE;
     }
 };
 
-InstanceData* GetInstanceData_instance_the_eye(Map* map)
+InstanceData* GetInstanceData_instance_the_eye(Map* pMap)
 {
-    return new instance_the_eye(map);
+    return new instance_the_eye(pMap);
 }
 
 void AddSC_instance_the_eye()

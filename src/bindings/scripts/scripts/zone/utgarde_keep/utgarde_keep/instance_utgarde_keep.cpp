@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ * Copyright (C) 2009 Trinity <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ EndScriptData */
 #include "precompiled.h"
 #include "def_utgarde_keep.h"
 
-#define ENCOUNTERS     3
+#define MAX_ENCOUNTER     3
 
 #define ENTRY_BELLOW_1          186688
 #define ENTRY_BELLOW_2          186689
@@ -48,7 +48,7 @@ EndScriptData */
 
 struct RIBON_DLL_DECL instance_utgarde_keep : public ScriptedInstance
 {
-    instance_utgarde_keep(Map *Map) : ScriptedInstance(Map) {Initialize();};
+    instance_utgarde_keep(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 
     uint64 Keleseth;
     uint64 Skarvald;
@@ -59,31 +59,30 @@ struct RIBON_DLL_DECL instance_utgarde_keep : public ScriptedInstance
     uint64 forge_fire[3];
     uint64 forge_anvil[3];
 
-    uint32 Encounters[ENCOUNTERS];
+    uint32 m_auiEncounter[MAX_ENCOUNTER];
     std::string str_data;
 
    void Initialize()
    {
+        memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+
         Keleseth = 0;
         Skarvald = 0;
         Dalronn =0;
         Ingvar =0;
 
-        for(uint8 i= 0; i < 3; i++)
+        for(uint8 i= 0; i < 3; ++i)
         {
             forge_bellow[i] = 0;
             forge_fire[i] = 0;
             forge_anvil[i] = 0;
         }
-
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
-            Encounters[i] = NOT_STARTED;
     }
 
     bool IsEncounterInProgress() const
     {
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
-            if(Encounters[i] == IN_PROGRESS) return true;
+        for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            if (m_auiEncounter[i] == IN_PROGRESS) return true;
 
         return false;
     }
@@ -151,28 +150,28 @@ struct RIBON_DLL_DECL instance_utgarde_keep : public ScriptedInstance
         switch(type)
         {
         case DATA_PRINCEKELESETH_EVENT:
-            if(data == DONE)
+            if (data == DONE)
             {
                 //HandleGameObject(doorname, 0);
             }
-            Encounters[0] = data;
+            m_auiEncounter[0] = data;
             break;
         case DATA_SKARVALD_DALRONN_EVENT:
-            if(data == DONE)
+            if (data == DONE)
             {
                 //HandleGameObject(doorname, 0);
             }
-            Encounters[1] = data;
+            m_auiEncounter[1] = data;
             break;
         case DATA_INGVAR_EVENT:
-            if(data == DONE)
+            if (data == DONE)
             {
                 //HandleGameObject(doorname, 0);
             }
-            Encounters[2] = data;
+            m_auiEncounter[2] = data;
             break;
         case EVENT_FORGE_1:
-            if(data == NOT_STARTED)
+            if (data == NOT_STARTED)
             {
                 HandleGameObject(forge_bellow[0],false);
                 HandleGameObject(forge_fire[0],false);
@@ -185,7 +184,7 @@ struct RIBON_DLL_DECL instance_utgarde_keep : public ScriptedInstance
             }
             break;
         case EVENT_FORGE_2:
-            if(data == NOT_STARTED)
+            if (data == NOT_STARTED)
             {
                 HandleGameObject(forge_bellow[1],false);
                 HandleGameObject(forge_fire[1],false);
@@ -198,7 +197,7 @@ struct RIBON_DLL_DECL instance_utgarde_keep : public ScriptedInstance
             }
             break;
         case EVENT_FORGE_3:
-            if(data == NOT_STARTED)
+            if (data == NOT_STARTED)
             {
                 HandleGameObject(forge_bellow[2],false);
                 HandleGameObject(forge_fire[2],false);
@@ -223,9 +222,9 @@ struct RIBON_DLL_DECL instance_utgarde_keep : public ScriptedInstance
     {
         switch(type)
         {
-            case DATA_PRINCEKELESETH_EVENT:     return Encounters[0];
-            case DATA_SKARVALD_DALRONN_EVENT:   return Encounters[1];
-            case DATA_INGVAR_EVENT:             return Encounters[2];
+            case DATA_PRINCEKELESETH_EVENT:     return m_auiEncounter[0];
+            case DATA_SKARVALD_DALRONN_EVENT:   return m_auiEncounter[1];
+            case DATA_INGVAR_EVENT:             return m_auiEncounter[2];
         }
 
         return 0;
@@ -236,8 +235,8 @@ struct RIBON_DLL_DECL instance_utgarde_keep : public ScriptedInstance
         OUT_SAVE_INST_DATA;
 
         std::ostringstream saveStream;
-        saveStream << "U K " << Encounters[0] << " " << Encounters[1] << " "
-            << Encounters[2];
+        saveStream << "U K " << m_auiEncounter[0] << " " << m_auiEncounter[1] << " "
+            << m_auiEncounter[2];
 
         str_data = saveStream.str();
 
@@ -261,15 +260,15 @@ struct RIBON_DLL_DECL instance_utgarde_keep : public ScriptedInstance
         std::istringstream loadStream(in);
         loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2;
 
-        if( dataHead1 == 'U' && dataHead2 == 'K')
+        if (dataHead1 == 'U' && dataHead2 == 'K')
         {
-            Encounters[0] = data0;
-            Encounters[1] = data1;
-            Encounters[2] = data2;
+            m_auiEncounter[0] = data0;
+            m_auiEncounter[1] = data1;
+            m_auiEncounter[2] = data2;
 
-            for(uint8 i = 0; i < ENCOUNTERS; ++i)
-                if (Encounters[i] == IN_PROGRESS)
-                    Encounters[i] = NOT_STARTED;
+            for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                if (m_auiEncounter[i] == IN_PROGRESS)
+                    m_auiEncounter[i] = NOT_STARTED;
 
         }else OUT_LOAD_INST_DATA_FAIL;
 
@@ -277,9 +276,9 @@ struct RIBON_DLL_DECL instance_utgarde_keep : public ScriptedInstance
     }
 };
 
-InstanceData* GetInstanceData_instance_utgarde_keep(Map* map)
+InstanceData* GetInstanceData_instance_utgarde_keep(Map* pMap)
 {
-   return new instance_utgarde_keep(map);
+   return new instance_utgarde_keep(pMap);
 }
 
 void AddSC_instance_utgarde_keep()

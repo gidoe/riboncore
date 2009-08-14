@@ -45,13 +45,13 @@ EndScriptData */
 #define C_BLACK_GUARD           10394
 #define C_YSIDA                 16031
 
-#define ENCOUNTERS              6
+#define MAX_ENCOUNTER              6
 
 struct RIBON_DLL_DECL instance_stratholme : public ScriptedInstance
 {
-    instance_stratholme(Map *map) : ScriptedInstance(map) {Initialize();};
+    instance_stratholme(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 
-    uint32 Encounter[ENCOUNTERS];
+    uint32 Encounter[MAX_ENCOUNTER];
 
     bool IsSilverHandDead[5];
 
@@ -76,7 +76,7 @@ struct RIBON_DLL_DECL instance_stratholme : public ScriptedInstance
 
     void Initialize()
     {
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
+        for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             Encounter[i] = NOT_STARTED;
 
         for(uint8 i = 0; i < 5; ++i)
@@ -158,12 +158,12 @@ struct RIBON_DLL_DECL instance_stratholme : public ScriptedInstance
         case GO_ZIGGURAT3:          ziggurat3GUID = go->GetGUID(); break;
         case GO_ZIGGURAT4:          
             ziggurat4GUID = go->GetGUID(); 
-            if(TYPE_BARON == DONE || TYPE_RAMSTEIN == DONE)
+            if (TYPE_BARON == DONE || TYPE_RAMSTEIN == DONE)
                 HandleGameObject(0, true, go);
             break;
         case GO_ZIGGURAT5:          
             ziggurat5GUID = go->GetGUID(); 
-            if(TYPE_BARON == DONE || TYPE_RAMSTEIN == DONE)
+            if (TYPE_BARON == DONE || TYPE_RAMSTEIN == DONE)
                 HandleGameObject(0, true, go);
             break;
         case GO_PORT_GAUNTLET:      portGauntletGUID = go->GetGUID(); break;
@@ -303,7 +303,7 @@ struct RIBON_DLL_DECL instance_stratholme : public ScriptedInstance
             IsSilverHandDead[4] = (data) ? true : false;
             break;
         }
-        if(data == DONE)SaveToDB();
+        if (data == DONE)SaveToDB();
     }
 
     std::string GetSaveData()
@@ -332,7 +332,7 @@ struct RIBON_DLL_DECL instance_stratholme : public ScriptedInstance
         loadStream >> Encounter[0] >> Encounter[1] >> Encounter[2] >> Encounter[3]
         >> Encounter[4] >> Encounter[5];
 
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
+        for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             if (Encounter[i] == IN_PROGRESS)
                 Encounter[i] = NOT_STARTED;
 
@@ -344,7 +344,7 @@ struct RIBON_DLL_DECL instance_stratholme : public ScriptedInstance
           switch(type)
           {
           case TYPE_SH_QUEST:
-              if(IsSilverHandDead[0] && IsSilverHandDead[1] && IsSilverHandDead[2] && IsSilverHandDead[3] && IsSilverHandDead[4])
+              if (IsSilverHandDead[0] && IsSilverHandDead[1] && IsSilverHandDead[2] && IsSilverHandDead[3] && IsSilverHandDead[4])
                   return 1;
               return 0;
           case TYPE_BARON_RUN:
@@ -407,9 +407,9 @@ struct RIBON_DLL_DECL instance_stratholme : public ScriptedInstance
     }
 };
 
-InstanceData* GetInstanceData_instance_stratholme(Map* map)
+InstanceData* GetInstanceData_instance_stratholme(Map* pMap)
 {
-    return new instance_stratholme(map);
+    return new instance_stratholme(pMap);
 }
 
 void AddSC_instance_stratholme()

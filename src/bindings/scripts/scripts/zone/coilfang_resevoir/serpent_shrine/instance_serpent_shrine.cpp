@@ -24,7 +24,7 @@ EndScriptData */
 #include "precompiled.h"
 #include "def_serpent_shrine.h"
 
-#define ENCOUNTERS 6
+#define MAX_ENCOUNTER 6
 
 /* Serpentshrine cavern encounters:
 0 - Hydross The Unstable event
@@ -35,11 +35,11 @@ EndScriptData */
 5 - Lady Vashj Event
 */
 
-bool GOHello_go_bridge_console(Player *player, GameObject* go)
+bool GOHello_go_bridge_console(Player* pPlayer, GameObject* go)
 {
     ScriptedInstance* pInstance = go->GetInstanceData();
 
-    if(!pInstance)
+    if (!pInstance)
         return false;
 
     if (pInstance)
@@ -50,7 +50,7 @@ bool GOHello_go_bridge_console(Player *player, GameObject* go)
 
 struct RIBON_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
 {
-    instance_serpentshrine_cavern(Map *map) : ScriptedInstance(map) {Initialize();};
+    instance_serpentshrine_cavern(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 
     uint64 LurkerBelow;
     uint64 Sharkkis;
@@ -67,10 +67,12 @@ struct RIBON_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
     uint64 StrangePool;
 
     bool ShieldGeneratorDeactivated[4];
-    uint32 Encounters[ENCOUNTERS];
+    uint32 m_auiEncounter[MAX_ENCOUNTER];
 
     void Initialize()
     {
+        memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+
         LurkerBelow = 0;
         Sharkkis = 0;
         Tidalvess = 0;
@@ -91,15 +93,12 @@ struct RIBON_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
         ShieldGeneratorDeactivated[1] = false;
         ShieldGeneratorDeactivated[2] = false;
         ShieldGeneratorDeactivated[3] = false;
-
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
-            Encounters[i] = NOT_STARTED;
     }
 
     bool IsEncounterInProgress() const
     {
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
-            if(Encounters[i] == IN_PROGRESS) return true;
+        for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            if (m_auiEncounter[i] == IN_PROGRESS) return true;
 
         return false;
     }
@@ -129,7 +128,7 @@ struct RIBON_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
             break;
             case 184956:
                 StrangePool = go->GetGUID();
-                if(go->isActiveObject())
+                if (go->isActiveObject())
                     SetData(DATA_STRANGE_POOL, DONE);
         }
     }
@@ -149,9 +148,9 @@ struct RIBON_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
 
     void SetData64(uint32 type, uint64 data)
     {
-        if(type == DATA_KARATHRESSEVENT_STARTER)
+        if (type == DATA_KARATHRESSEVENT_STARTER)
             KarathressEvent_Starter = data;
-        if(type == DATA_LEOTHERAS_EVENT_STARTER)
+        if (type == DATA_LEOTHERAS_EVENT_STARTER)
             LeotherasEventStarter = data;
     }
 
@@ -178,35 +177,35 @@ struct RIBON_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
         {
         case DATA_STRANGE_POOL: StrangePool = data;
         case DATA_CONTROL_CONSOLE:
-            if(data == DONE)
+            if (data == DONE)
             {
                 HandleGameObject(BridgePart[0], true);
                 HandleGameObject(BridgePart[0], true);
                 HandleGameObject(BridgePart[0], true);
             }
             ControlConsole = data;
-        case DATA_HYDROSSTHEUNSTABLEEVENT:  Encounters[0] = data;   break;
-        case DATA_LEOTHERASTHEBLINDEVENT:   Encounters[1] = data;   break;
-        case DATA_THELURKERBELOWEVENT:      Encounters[2] = data;   break;
-        case DATA_KARATHRESSEVENT:          Encounters[3] = data;   break;
-        case DATA_MOROGRIMTIDEWALKEREVENT:  Encounters[4] = data;   break;
+        case DATA_HYDROSSTHEUNSTABLEEVENT:  m_auiEncounter[0] = data;   break;
+        case DATA_LEOTHERASTHEBLINDEVENT:   m_auiEncounter[1] = data;   break;
+        case DATA_THELURKERBELOWEVENT:      m_auiEncounter[2] = data;   break;
+        case DATA_KARATHRESSEVENT:          m_auiEncounter[3] = data;   break;
+        case DATA_MOROGRIMTIDEWALKEREVENT:  m_auiEncounter[4] = data;   break;
             //Lady Vashj
         case DATA_LADYVASHJEVENT:
-            if(data == NOT_STARTED)
+            if (data == NOT_STARTED)
             {
                 ShieldGeneratorDeactivated[0] = false;
                 ShieldGeneratorDeactivated[1] = false;
                 ShieldGeneratorDeactivated[2] = false;
                 ShieldGeneratorDeactivated[3] = false;
             }
-            Encounters[5] = data;   break;
+            m_auiEncounter[5] = data;   break;
         case DATA_SHIELDGENERATOR1:ShieldGeneratorDeactivated[0] = (data) ? true : false;   break;
         case DATA_SHIELDGENERATOR2:ShieldGeneratorDeactivated[1] = (data) ? true : false;   break;
         case DATA_SHIELDGENERATOR3:ShieldGeneratorDeactivated[2] = (data) ? true : false;   break;
         case DATA_SHIELDGENERATOR4:ShieldGeneratorDeactivated[3] = (data) ? true : false;   break;
         }
 
-        if(data == DONE)
+        if (data == DONE)
             SaveToDB();
     }
 
@@ -214,19 +213,19 @@ struct RIBON_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
     {
         switch(type)
         {
-            case DATA_HYDROSSTHEUNSTABLEEVENT:  return Encounters[0];
-            case DATA_LEOTHERASTHEBLINDEVENT:   return Encounters[1];
-            case DATA_THELURKERBELOWEVENT:      return Encounters[2];
-            case DATA_KARATHRESSEVENT:          return Encounters[3];
-            case DATA_MOROGRIMTIDEWALKEREVENT:  return Encounters[4];
+            case DATA_HYDROSSTHEUNSTABLEEVENT:  return m_auiEncounter[0];
+            case DATA_LEOTHERASTHEBLINDEVENT:   return m_auiEncounter[1];
+            case DATA_THELURKERBELOWEVENT:      return m_auiEncounter[2];
+            case DATA_KARATHRESSEVENT:          return m_auiEncounter[3];
+            case DATA_MOROGRIMTIDEWALKEREVENT:  return m_auiEncounter[4];
                 //Lady Vashj
-            case DATA_LADYVASHJEVENT:           return Encounters[5];
+            case DATA_LADYVASHJEVENT:           return m_auiEncounter[5];
             case DATA_SHIELDGENERATOR1:         return ShieldGeneratorDeactivated[0];
             case DATA_SHIELDGENERATOR2:         return ShieldGeneratorDeactivated[1];
             case DATA_SHIELDGENERATOR3:         return ShieldGeneratorDeactivated[2];
             case DATA_SHIELDGENERATOR4:         return ShieldGeneratorDeactivated[3];
             case DATA_CANSTARTPHASE3:
-                if(ShieldGeneratorDeactivated[0] && ShieldGeneratorDeactivated[1] && ShieldGeneratorDeactivated[2] && ShieldGeneratorDeactivated[3])return 1;break;
+                if (ShieldGeneratorDeactivated[0] && ShieldGeneratorDeactivated[1] && ShieldGeneratorDeactivated[2] && ShieldGeneratorDeactivated[3])return 1;break;
         }
         return 0;
     }
@@ -234,11 +233,11 @@ struct RIBON_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
     {
         OUT_SAVE_INST_DATA;
         std::ostringstream stream;
-        stream << Encounters[0] << " " << Encounters[1] << " " << Encounters[2] << " "
-            << Encounters[3] << " " << Encounters[4] << " " << Encounters[5];
+        stream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
+            << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5];
         char* out = new char[stream.str().length() + 1];
         strcpy(out, stream.str().c_str());
-        if(out)
+        if (out)
         {
             OUT_SAVE_INST_DATA_COMPLETE;
             return out;
@@ -248,25 +247,25 @@ struct RIBON_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
 
     void Load(const char* in)
     {
-        if(!in)
+        if (!in)
         {
             OUT_LOAD_INST_DATA_FAIL;
             return;
         }
         OUT_LOAD_INST_DATA(in);
         std::istringstream stream(in);
-        stream >> Encounters[0] >> Encounters[1] >> Encounters[2] >> Encounters[3]
-        >> Encounters[4] >> Encounters[5];
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
-            if(Encounters[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
-                Encounters[i] = NOT_STARTED;
+        stream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
+        >> m_auiEncounter[4] >> m_auiEncounter[5];
+        for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
+                m_auiEncounter[i] = NOT_STARTED;
         OUT_LOAD_INST_DATA_COMPLETE;
     }
 };
 
-InstanceData* GetInstanceData_instance_serpentshrine_cavern(Map* map)
+InstanceData* GetInstanceData_instance_serpentshrine_cavern(Map* pMap)
 {
-    return new instance_serpentshrine_cavern(map);
+    return new instance_serpentshrine_cavern(pMap);
 }
 
 void AddSC_instance_serpentshrine_cavern()

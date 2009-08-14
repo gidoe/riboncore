@@ -27,7 +27,7 @@ EndScriptData */
 
 enum
 {
-    ENCOUNTERS          = 5,
+    MAX_ENCOUNTER       = 5,
 
     GO_ANCIENT_GEM      = 185557
 };
@@ -41,9 +41,9 @@ enum
 
 struct RIBON_DLL_DECL instance_mount_hyjal : public ScriptedInstance
 {
-    instance_mount_hyjal(Map *map) : ScriptedInstance(map) {Initialize();};
+    instance_mount_hyjal(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 
-    uint32 Encounters[ENCOUNTERS];
+    uint32 m_auiEncounter[MAX_ENCOUNTER];
     std::string str_data;
 
     std::list<uint64> m_uiAncientGemGUID;
@@ -70,6 +70,8 @@ struct RIBON_DLL_DECL instance_mount_hyjal : public ScriptedInstance
 
     void Initialize()
     {
+        memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+
         m_uiAncientGemGUID.clear();
 
         RageWinterchill = 0;
@@ -86,8 +88,6 @@ struct RIBON_DLL_DECL instance_mount_hyjal : public ScriptedInstance
         RaidDamage = 0;
 
         Trash = 0;
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
-            Encounters[i] = NOT_STARTED;
 
         hordeRetreat = 0;
         allianceRetreat = 0;
@@ -95,8 +95,8 @@ struct RIBON_DLL_DECL instance_mount_hyjal : public ScriptedInstance
 
     bool IsEncounterInProgress() const
     {
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
-            if(Encounters[i] == IN_PROGRESS) return true;
+        for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            if (m_auiEncounter[i] == IN_PROGRESS) return true;
 
         return false;
     }
@@ -107,14 +107,14 @@ struct RIBON_DLL_DECL instance_mount_hyjal : public ScriptedInstance
         {
             case 182060:
                 HordeGate = go->GetGUID();
-                if(allianceRetreat)
+                if (allianceRetreat)
                     HandleGameObject(0, true, go);
                 else
                     HandleGameObject(0, false, go);
                 break;
             case 182061:
                 ElfGate = go->GetGUID();
-                if(hordeRetreat)
+                if (hordeRetreat)
                     HandleGameObject(0, true, go);
                 else
                     HandleGameObject(0, false, go);
@@ -161,29 +161,29 @@ struct RIBON_DLL_DECL instance_mount_hyjal : public ScriptedInstance
     {
         switch(type)
         {
-            case DATA_RAGEWINTERCHILLEVENT: Encounters[0] = data; break;
+            case DATA_RAGEWINTERCHILLEVENT: m_auiEncounter[0] = data; break;
             case DATA_ANETHERONEVENT:
-                Encounters[1] = data;
+                m_auiEncounter[1] = data;
                 break;
-            case DATA_KAZROGALEVENT:        Encounters[2] = data; break;
+            case DATA_KAZROGALEVENT:        m_auiEncounter[2] = data; break;
             case DATA_AZGALOREVENT:
                 {
-                    Encounters[3] = data;
-                    if(data==DONE)
+                    m_auiEncounter[3] = data;
+                    if (data==DONE)
                     {
-                        if(ArchiYell)break;
+                        if (ArchiYell)break;
                         ArchiYell = true;
 
                         Creature* pCreature = instance->GetCreature(Azgalor);
-                        if(pCreature)
+                        if (pCreature)
                         {
                             Creature* pUnit = pCreature->SummonCreature(21987,pCreature->GetPositionX(),pCreature->GetPositionY(),pCreature->GetPositionZ(),0,TEMPSUMMON_TIMED_DESPAWN,10000);
 
-                            Map *map = pCreature->GetMap();
-                            if (map->IsDungeon() && pUnit)
+                            Map* pMap = pCreature->GetMap();
+                            if (pMap->IsDungeon() && pUnit)
                             {
                                 pUnit->SetVisibility(VISIBILITY_OFF);
-                                Map::PlayerList const &PlayerList = map->GetPlayers();
+                                Map::PlayerList const &PlayerList = pMap->GetPlayers();
                                 if (PlayerList.isEmpty())
                                      return;
 
@@ -205,11 +205,11 @@ struct RIBON_DLL_DECL instance_mount_hyjal : public ScriptedInstance
                     }
                 }
                 break;
-            case DATA_ARCHIMONDEEVENT:      Encounters[4] = data; break;
+            case DATA_ARCHIMONDEEVENT:      m_auiEncounter[4] = data; break;
             case DATA_RESET_TRASH_COUNT:    Trash = 0;            break;
 
             case DATA_TRASH:
-                if(data) Trash = data;
+                if (data) Trash = data;
                 else     Trash--;
                 UpdateWorldState(WORLD_STATE_ENEMYCOUNT, Trash);
                 break;
@@ -238,7 +238,7 @@ struct RIBON_DLL_DECL instance_mount_hyjal : public ScriptedInstance
                 break;
             case DATA_RAIDDAMAGE:
                 RaidDamage += data;
-                if(RaidDamage >= MINRAIDDAMAGE)
+                if (RaidDamage >= MINRAIDDAMAGE)
                     RaidDamage = MINRAIDDAMAGE;
                 break;
             case DATA_RESET_RAIDDAMAGE:
@@ -248,13 +248,13 @@ struct RIBON_DLL_DECL instance_mount_hyjal : public ScriptedInstance
 
          debug_log("RSCR: Instance Hyjal: Instance data updated for event %u (Data=%u)",type,data);
 
-        if(data == DONE)
+        if (data == DONE)
         {
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << Encounters[0] << " " << Encounters[1] << " " << Encounters[2] << " "
-                << Encounters[3] << " " << Encounters[4]
+            saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
+                << m_auiEncounter[3] << " " << m_auiEncounter[4]
                 << " " << allianceRetreat << " " << hordeRetreat
                 << " " << RaidDamage;
 
@@ -270,11 +270,11 @@ struct RIBON_DLL_DECL instance_mount_hyjal : public ScriptedInstance
     {
         switch(type)
         {
-            case DATA_RAGEWINTERCHILLEVENT: return Encounters[0];
-            case DATA_ANETHERONEVENT:      return Encounters[1];
-            case DATA_KAZROGALEVENT:       return Encounters[2];
-            case DATA_AZGALOREVENT:        return Encounters[3];
-            case DATA_ARCHIMONDEEVENT:     return Encounters[4];
+            case DATA_RAGEWINTERCHILLEVENT: return m_auiEncounter[0];
+            case DATA_ANETHERONEVENT:      return m_auiEncounter[1];
+            case DATA_KAZROGALEVENT:       return m_auiEncounter[2];
+            case DATA_AZGALOREVENT:        return m_auiEncounter[3];
+            case DATA_ARCHIMONDEEVENT:     return m_auiEncounter[4];
             case DATA_TRASH:               return Trash;
             case DATA_ALLIANCE_RETREAT:    return allianceRetreat;
             case DATA_HORDE_RETREAT:       return hordeRetreat;
@@ -291,8 +291,8 @@ struct RIBON_DLL_DECL instance_mount_hyjal : public ScriptedInstance
         {
                 for(Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
-                    if (Player* player = itr->getSource())
-                        player->SendUpdateWorldState(id,state);
+                    if (Player* pPlayer = itr->getSource())
+                        pPlayer->SendUpdateWorldState(id,state);
                 }
         }else debug_log("RSCR: Instance Hyjal: UpdateWorldState, but PlayerList is empty!");
     }
@@ -312,17 +312,17 @@ struct RIBON_DLL_DECL instance_mount_hyjal : public ScriptedInstance
 
         OUT_LOAD_INST_DATA(in);
         std::istringstream loadStream(in);
-        loadStream >> Encounters[0] >> Encounters[1] >> Encounters[2] >> Encounters[3] >> Encounters[4] >> allianceRetreat >> hordeRetreat >> RaidDamage;
-        for(uint8 i = 0; i < ENCOUNTERS; ++i)
-            if(Encounters[i] == IN_PROGRESS)                // Do not load an encounter as IN_PROGRESS - reset it instead.
-                Encounters[i] = NOT_STARTED;
+        loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3] >> m_auiEncounter[4] >> allianceRetreat >> hordeRetreat >> RaidDamage;
+        for(uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as IN_PROGRESS - reset it instead.
+                m_auiEncounter[i] = NOT_STARTED;
         OUT_LOAD_INST_DATA_COMPLETE;
     }
 };
 
-InstanceData* GetInstanceData_instance_mount_hyjal(Map* map)
+InstanceData* GetInstanceData_instance_mount_hyjal(Map* pMap)
 {
-    return new instance_mount_hyjal(map);
+    return new instance_mount_hyjal(pMap);
 }
 
 void AddSC_instance_mount_hyjal()
