@@ -326,6 +326,8 @@ extern void AddSC_hellfire_peninsula();
 
 //Hillsbrad Foothills
 //Hinterlands
+extern void AddSC_hinterlands();
+
 //Ironforge
 extern void AddSC_ironforge();
 
@@ -1255,6 +1257,8 @@ void ScriptsInit(char const* cfg_file = "RibonCore.conf")
 
     //Hillsbrad Foothills
     //Hinterlands
+    AddSC_hinterlands();
+
     //Ironforge
     AddSC_ironforge();
 

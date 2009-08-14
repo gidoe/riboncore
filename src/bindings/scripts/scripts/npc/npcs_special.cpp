@@ -1701,8 +1701,8 @@ struct RIBON_DLL_DECL npc_ebon_gargoyleAI : SpellCasterAI
         despawnTimer = 0;
         // Find victim of Summon Gargoyle spell
         std::list<Unit*> targets;
-        Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(m_creature, m_creature, 30);
-        Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(m_creature, targets, u_check);
+        Ribon::AnyUnfriendlyUnitInObjectRangeCheck u_check(m_creature, m_creature, 30);
+        Ribon::UnitListSearcher<Ribon::AnyUnfriendlyUnitInObjectRangeCheck> searcher(m_creature, targets, u_check);
         m_creature->VisitNearbyObject(30, searcher);
         for(std::list<Unit*>::iterator iter = targets.begin(); iter != targets.end(); ++iter)
             if((*iter)->GetAura(49206,owner->GetGUID()))
