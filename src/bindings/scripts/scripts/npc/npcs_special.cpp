@@ -1685,7 +1685,7 @@ CreatureAI* GetAI_npc_mirror_image(Creature* pCreature)
     return new npc_mirror_image (pCreature);
 }
 
-struct TRINITY_DLL_DECL npc_ebon_gargoyleAI : SpellCasterAI
+struct RIBON_DLL_DECL npc_ebon_gargoyleAI : SpellCasterAI
 {
     npc_ebon_gargoyleAI(Creature *c) : SpellCasterAI(c) {}
 
