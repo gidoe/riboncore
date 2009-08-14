@@ -54,34 +54,34 @@ struct RIBON_DLL_DECL npc_astor_hadrenAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_astor_hadren(Creature *_creature)
+CreatureAI* GetAI_npc_astor_hadren(Creature* pCreature)
 {
-    return new npc_astor_hadrenAI(_creature);
+    return new npc_astor_hadrenAI(pCreature);
 }
 
-bool GossipHello_npc_astor_hadren(Player *player, Creature *_Creature)
+bool GossipHello_npc_astor_hadren(Player* pPlayer, Creature* pCreature)
 {
-    if (player->GetQuestStatus(1886) == QUEST_STATUS_INCOMPLETE)
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HAH, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    if (pPlayer->GetQuestStatus(1886) == QUEST_STATUS_INCOMPLETE)
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HAH, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
-    player->SEND_GOSSIP_MENU(623, _Creature->GetGUID());
+    pPlayer->SEND_GOSSIP_MENU(623, pCreature->GetGUID());
 
     return true;
 }
 
-bool GossipSelect_npc_astor_hadren(Player *player, Creature *_Creature, uint32 sender, uint32 action)
+bool GossipSelect_npc_astor_hadren(Player* pPlayer, Creature* pCreature, uint32 sender, uint32 action)
 {
     switch (action)
     {
         case GOSSIP_ACTION_INFO_DEF + 1:
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SAH, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-            player->SEND_GOSSIP_MENU(624, _Creature->GetGUID());
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SAH, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            pPlayer->SEND_GOSSIP_MENU(624, pCreature->GetGUID());
             break;
         case GOSSIP_ACTION_INFO_DEF + 2:
-            player->CLOSE_GOSSIP_MENU();
-            _Creature->setFaction(21);
-            if(player)
-                CAST_AI(npc_astor_hadrenAI, _Creature->AI())->AttackStart(player);
+            pPlayer->CLOSE_GOSSIP_MENU();
+            pCreature->setFaction(21);
+            if (pPlayer)
+                CAST_AI(npc_astor_hadrenAI, pCreature->AI())->AttackStart(pPlayer);
             break;
     }
     return true;
@@ -119,21 +119,21 @@ struct RIBON_DLL_DECL npc_deathstalker_erlandAI : public npc_escortAI
 
     void WaypointReached(uint32 i)
     {
-        Player* player = Unit::GetPlayer(PlayerGUID);
+        Player* pPlayer = Unit::GetPlayer(PlayerGUID);
 
-        if (!player)
+        if (!pPlayer)
             return;
 
         switch(i)
         {
-        case 1: DoScriptText(SAY_START, m_creature, player);break;
+        case 1: DoScriptText(SAY_START, m_creature, pPlayer);break;
         case 13:
-            DoScriptText(SAY_LAST, m_creature, player);
-            player->GroupEventHappens(QUEST_ESCORTING, m_creature);break;
-        case 14: DoScriptText(SAY_THANKS, m_creature, player);break;
+            DoScriptText(SAY_LAST, m_creature, pPlayer);
+            pPlayer->GroupEventHappens(QUEST_ESCORTING, m_creature);break;
+        case 14: DoScriptText(SAY_THANKS, m_creature, pPlayer);break;
         case 15: {
                 Unit* Rane = me->FindNearestCreature(NPC_RANE, 20);
-                if(Rane)
+                if (Rane)
                     DoScriptText(SAY_RANE, Rane);
                 break;}
         case 16: DoScriptText(SAY_ANSWER, m_creature);break;
@@ -141,7 +141,7 @@ struct RIBON_DLL_DECL npc_deathstalker_erlandAI : public npc_escortAI
         case 24: DoScriptText(SAY_GREETINGS, m_creature);break;
         case 25: {
                 Unit* Quinn = me->FindNearestCreature(NPC_QUINN, 20);
-                if(Quinn)
+                if (Quinn)
                     DoScriptText(SAY_QUINN, Quinn);
                 break;}
         case 26: DoScriptText(SAY_ON_BYE, m_creature, NULL);break;
@@ -166,20 +166,22 @@ struct RIBON_DLL_DECL npc_deathstalker_erlandAI : public npc_escortAI
     }
 };
 
-bool QuestAccept_npc_deathstalker_erland(Player* player, Creature* creature, Quest const* quest)
+bool QuestAccept_npc_deathstalker_erland(Player* pPlayer, Creature* pCreature, Quest const* quest)
 {
     if (quest->GetQuestId() == QUEST_ESCORTING)
     {
-        DoScriptText(SAY_QUESTACCEPT, creature, player);
-        CAST_AI(npc_escortAI, (creature->AI()))->Start(true, false, player->GetGUID());
+        DoScriptText(SAY_QUESTACCEPT, pCreature, pPlayer);
+
+        if (npc_escortAI* pEscortAI = CAST_AI(npc_deathstalker_erlandAI, pCreature->AI()))
+            pEscortAI->Start(true, false, pPlayer->GetGUID());
     }
 
     return true;
 }
 
-CreatureAI* GetAI_npc_deathstalker_erlandAI(Creature *_Creature)
+CreatureAI* GetAI_npc_deathstalker_erlandAI(Creature* pCreature)
 {
-    npc_deathstalker_erlandAI* deathstalker_erlandAI = new npc_deathstalker_erlandAI(_Creature);
+    npc_deathstalker_erlandAI* deathstalker_erlandAI = new npc_deathstalker_erlandAI(pCreature);
 
     deathstalker_erlandAI->AddWaypoint(0, 1406.32, 1083.10, 52.55);
     deathstalker_erlandAI->AddWaypoint(1, 1400.49, 1080.42, 52.50); //first say
