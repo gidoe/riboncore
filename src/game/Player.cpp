@@ -21764,7 +21764,7 @@ void Player::UpdateSpecCount(uint8 count)
     SendTalentsInfoData(false);
 }
 
-void Player::ActivateSpec(uint32 spec)
+void Player::ActivateSpec(uint8 spec)
 {
     if(GetActiveSpec() == spec)
         return;
@@ -21774,7 +21774,7 @@ void Player::ActivateSpec(uint32 spec)
 
     uint32 const* talentTabIds = GetTalentTabPages(getClass());
     
-    for(uint8 i = 0; i < MAX_TALENT_SPECS + 1; ++i)
+    for(uint8 i = 0; i < 3; ++i)
     {
         uint32 talentTabId = talentTabIds[i];
 
@@ -21815,7 +21815,7 @@ void Player::ActivateSpec(uint32 spec)
 
     SetActiveSpec(spec);
 
-    for(uint8 i = 0; i < MAX_TALENT_SPECS + 1; ++i)
+    for(uint8 i = 0; i < 3; ++i)
     {
         uint32 talentTabId = talentTabIds[i];
 
@@ -21842,7 +21842,7 @@ void Player::ActivateSpec(uint32 spec)
     }
 
     // set glyphs
-    for (int slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot) 
+    for (uint8 slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot) 
     {
         uint32 glyph = m_Glyphs[m_activeSpec][slot];
         // apply primary glyph

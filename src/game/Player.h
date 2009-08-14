@@ -97,7 +97,7 @@ struct PlayerSpell
 struct PlayerTalent
 {
     PlayerSpellState state : 8;
-    uint32 spec            : 8;
+    uint8 spec             : 8;
 };
 
 // Spell modifier (used for modify other spells)
@@ -1473,23 +1473,24 @@ class RIBON_DLL_SPEC Player : public Unit
         void LearnTalent(uint32 talentId, uint32 talentRank);
         void LearnPetTalent(uint64 petGuid, uint32 talentId, uint32 talentRank);
 
-        bool AddTalent(uint32 spell, uint32 spec, bool learning);
-        bool HasTalent(uint32 spell_id, uint32 spec) const;
+        bool AddTalent(uint32 spell, uint8 spec, bool learning); 
+        bool HasTalent(uint32 spell_id, uint8 spec) const; 
 
         uint32 CalculateTalentsPoints() const;
 
         // Dual Spec
-        uint32 GetActiveSpec() { return m_activeSpec; }
-        void SetActiveSpec(uint32 spec) { m_activeSpec = spec; }
-        uint32 GetSpecsCount() { return m_specsCount; }
-        void SetSpecsCount(uint32 count) { m_specsCount = count; }
         void UpdateSpecCount(uint8 count);
-        void ActivateSpec(uint32 spec);
+        uint32 GetActiveSpec() { return m_activeSpec; }
+        void SetActiveSpec(uint8 spec) { m_activeSpec = spec; }
+        uint8 GetSpecsCount() { return m_specsCount; }
+        void SetSpecsCount(uint8 count) { m_specsCount = count; }
+        void ActivateSpec(uint8 spec);
 
         void InitGlyphsForLevel();
         void SetGlyphSlot(uint8 slot, uint32 slottype) { SetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_1 + slot, slottype); }
         uint32 GetGlyphSlot(uint8 slot) { return GetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_1 + slot); }
-        void SetGlyph(uint8 slot, uint32 glyph) { 
+        void SetGlyph(uint8 slot, uint32 glyph)
+        { 
             m_Glyphs[m_activeSpec][slot] = glyph;
             SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, glyph); 
         }
