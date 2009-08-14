@@ -1053,7 +1053,10 @@ void World::LoadConfigSettings(bool reload)
     {
         // overwrite DB/old value
         if(clientCacheId > 0)
+        {
             m_configs[CONFIG_CLIENTCACHE_VERSION] = clientCacheId;
+            sLog.outString("Client cache version set to: %u", clientCacheId);
+        }
         else
             sLog.outError("ClientCacheVersion can't be negative %d, ignored.", clientCacheId);
     }
