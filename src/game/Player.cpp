@@ -14410,7 +14410,7 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
     m_activeSpec = fields[42].GetUInt32();
 
     // sanity check
-    if (m_specsCount < 2)
+    if (m_specsCount < 2)// Maybe better to check MAX_TALENT_SPECS?
         m_activeSpec = 0;
 
     // overwrite possible wrong/corrupted guid
@@ -21679,7 +21679,7 @@ void Player::_LoadGlyphs(QueryResult *result)
 void Player::_SaveGlyphs()
 {
     CharacterDatabase.PExecute("DELETE FROM character_glyphs WHERE guid='%u'",GetGUIDLow());
-    for (int spec = 0; spec < m_specsCount; ++spec) 
+    for (uint8 spec = 0; spec < m_specsCount; ++spec)
     {
         CharacterDatabase.PExecute("INSERT INTO character_glyphs VALUES('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
             GetGUIDLow(), spec, m_Glyphs[spec][0], m_Glyphs[spec][1], m_Glyphs[spec][2], m_Glyphs[spec][3], m_Glyphs[spec][4], m_Glyphs[spec][5]);
@@ -21798,7 +21798,7 @@ void Player::ActivateSpec(uint32 spec)
     }
 
     // set glyphs
-    for (int slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot) 
+    for (uint8 slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot)
     {
         // remove secondary glyph
         if(uint32 oldglyph = m_Glyphs[m_activeSpec][slot])
