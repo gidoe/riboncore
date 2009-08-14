@@ -2897,7 +2897,7 @@ void Player::AddNewMailDeliverTime(time_t deliver_time)
     }
 }
 
-bool Player::AddTalent(uint32 spell_id, uint32 spec, bool learning)
+bool Player::AddTalent(uint32 spell_id, uint8 spec, bool learning)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
@@ -4068,7 +4068,7 @@ bool Player::HasSpell(uint32 spell) const
         !itr->second->disabled);
 }
 
-bool Player::HasTalent(uint32 spell, uint32 spec) const
+bool Player::HasTalent(uint32 spell, uint8 spec) const
 {
     PlayerTalentMap::const_iterator itr = m_talents[spec]->find(spell);
     return (itr != m_talents[spec]->end() && itr->second->state != PLAYERSPELL_REMOVED);
