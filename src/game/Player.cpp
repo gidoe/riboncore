@@ -14680,6 +14680,13 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         return false;
     }
 
+    m_specsCount = fields[41].GetUInt32();
+    m_activeSpec = fields[42].GetUInt32();
+
+    // sanity check
+    if (m_specsCount < 2) // Maybe better to check MAX_TALENT_SPECS?
+        m_activeSpec = 0;
+
     Object::_Create( guid, 0, HIGHGUID_PLAYER );
 
     m_name = fields[3].GetCppString();
