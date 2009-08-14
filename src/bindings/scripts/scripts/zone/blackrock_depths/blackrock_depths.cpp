@@ -177,7 +177,7 @@ struct RIBON_DLL_DECL npc_grimstoneAI : public npc_escortAI
             if (pInstance)
             {
                 pInstance->SetData(TYPE_RING_OF_LAW,DONE);
-                debug_log("TSCR: npc_grimstone: event reached end and set complete.");
+                debug_log("RSCR: npc_grimstone: event reached end and set complete.");
             }
             break;
         }

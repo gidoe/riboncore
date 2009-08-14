@@ -30,27 +30,27 @@ EndScriptData */
 
 #define GOSSIP_HELLO "Buy somethin', will ya?"
 
-bool GossipHello_npc_gregan_brewspewer(Player *player, Creature *_Creature)
+bool GossipHello_npc_gregan_brewspewer(Player* pPlayer, Creature* pCreature)
 {
-    if( _Creature->isQuestGiver() )
-        player->PrepareQuestMenu( _Creature->GetGUID() );
+    if (pCreature->isQuestGiver())
+        pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
-    if( _Creature->isVendor() && player->GetQuestStatus(3909) == QUEST_STATUS_INCOMPLETE )
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+    if (pCreature->isVendor() && pPlayer->GetQuestStatus(3909) == QUEST_STATUS_INCOMPLETE)
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
-    player->SEND_GOSSIP_MENU(2433,_Creature->GetGUID());
+    pPlayer->SEND_GOSSIP_MENU(2433, pCreature->GetGUID());
     return true;
 }
 
-bool GossipSelect_npc_gregan_brewspewer(Player *player, Creature *_Creature, uint32 sender, uint32 action )
+bool GossipSelect_npc_gregan_brewspewer(Player* pPlayer, Creature* pCreature, uint32 sender, uint32 action)
 {
-    if( action == GOSSIP_ACTION_INFO_DEF+1 )
+    if (action == GOSSIP_ACTION_INFO_DEF+1)
     {
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
-        player->SEND_GOSSIP_MENU(2434,_Creature->GetGUID());
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
+        pPlayer->SEND_GOSSIP_MENU(2434, pCreature->GetGUID());
     }
-    if( action == GOSSIP_ACTION_TRADE )
-        player->SEND_VENDORLIST( _Creature->GetGUID() );
+    if (action == GOSSIP_ACTION_TRADE)
+        pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
     return true;
 }
 
@@ -80,12 +80,7 @@ enum
 
 struct RIBON_DLL_DECL npc_oox22feAI : public npc_escortAI
 {
-    npc_oox22feAI(Creature* pCreature) : npc_escortAI(pCreature)
-    {
-        normFaction = pCreature->getFaction();
-    }
-
-    uint32 normFaction;
+    npc_oox22feAI(Creature* pCreature) : npc_escortAI(pCreature) { }
 
     void WaypointReached(uint32 i)
     {
@@ -116,7 +111,7 @@ struct RIBON_DLL_DECL npc_oox22feAI : public npc_escortAI
             case 37:
                 DoScriptText(SAY_END,m_creature);
                 // Award quest credit
-                if(Player* pPlayer = Unit::GetPlayer( PlayerGUID))
+                if (Player* pPlayer = Unit::GetPlayer(PlayerGUID))
                 {
                         pPlayer->GroupEventHappens(QUEST_RESCUE_OOX22FE, m_creature);
                 }
@@ -127,10 +122,7 @@ struct RIBON_DLL_DECL npc_oox22feAI : public npc_escortAI
     void Reset()
     {
         if (!IsBeingEscorted)
-        {
-            m_creature->setFaction(normFaction);
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
-        }
     }
 
     void EnterCombat(Unit* who)
@@ -146,24 +138,6 @@ struct RIBON_DLL_DECL npc_oox22feAI : public npc_escortAI
     void JustSummoned(Creature* summoned)
     {
         summoned->AI()->AttackStart(m_creature);
-    }
-
-    void JustDied(Unit* killer)
-    {
-        if (!IsBeingEscorted)
-            return;
-
-        if(Player* pPlayer = Unit::GetPlayer(PlayerGUID))
-        {
-            // If NPC dies, player fails the quest
-            if(pPlayer->GetQuestStatus(QUEST_RESCUE_OOX22FE) != QUEST_STATUS_COMPLETE)
-                pPlayer->FailQuest(QUEST_RESCUE_OOX22FE);
-        }
-    }
-
-    void UpdateAI(const uint32 diff)
-    {
-        npc_escortAI::UpdateAI(diff);
     }
 };
 
@@ -201,11 +175,11 @@ bool QuestAccept_npc_oox22fe(Player* pPlayer, Creature* pCreature, const Quest* 
 ## npc_screecher_spirit
 ######*/
 
-bool GossipHello_npc_screecher_spirit(Player *player, Creature *_Creature)
+bool GossipHello_npc_screecher_spirit(Player* pPlayer, Creature* pCreature)
 {
-    player->SEND_GOSSIP_MENU(2039, _Creature->GetGUID() );
-    player->TalkedToCreature(_Creature->GetEntry(), _Creature->GetGUID());
-    _Creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    pPlayer->SEND_GOSSIP_MENU(2039, pCreature->GetGUID());
+    pPlayer->TalkedToCreature(pCreature->GetEntry(), pCreature->GetGUID());
+    pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
     return true;
 }
