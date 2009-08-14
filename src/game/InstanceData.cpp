@@ -294,5 +294,5 @@ void InstanceData::DoUpdateWorldState(uint32 uiStateId, uint32 uiStateData)
         }
     }
     else
-        debug_log("TSCR: DoUpdateWorldState attempt send data but no players in map.");
+        debug_log("RSCR: DoUpdateWorldState attempt send data but no players in map.");
 }
