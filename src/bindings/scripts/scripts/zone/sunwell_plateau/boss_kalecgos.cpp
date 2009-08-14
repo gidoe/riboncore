@@ -394,7 +394,7 @@ struct RIBON_DLL_DECL boss_sathrovarrAI : public ScriptedAI
                 }
                 else
                 {
-                    DoTextEmote("is unable to find Kalecgos", NULL);
+                    m_creature->MonsterTextEmote("is unable to find Kalecgos", NULL);
                     EnterEvadeMode();
                     return;
                 }

@@ -44,7 +44,7 @@ struct RIBON_DLL_DECL boss_timmy_the_cruelAI : public ScriptedAI
     {
         if (!HasYelled)
         {
-            DoYell(SAY_SPAWN,LANG_UNIVERSAL,NULL);
+            m_creature->MonsterYell(SAY_SPAWN,LANG_UNIVERSAL,NULL);
             HasYelled = true;
         }
     }

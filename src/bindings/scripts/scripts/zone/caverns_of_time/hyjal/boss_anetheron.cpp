@@ -44,7 +44,7 @@ struct RIBON_DLL_DECL boss_anetheronAI : public hyjal_trashAI
         go = false;
         pos = 0;
         SpellEntry *TempSpell = GET_SPELL(SPELL_SLEEP);
-        if(TempSpell && TempSpell->EffectImplicitTargetA[0] != 1)
+        if (TempSpell && TempSpell->EffectImplicitTargetA[0] != 1)
         {
             TempSpell->EffectImplicitTargetA[0] = 1;
             TempSpell->EffectImplicitTargetB[0] = 0;
@@ -66,16 +66,16 @@ struct RIBON_DLL_DECL boss_anetheronAI : public hyjal_trashAI
         AuraTimer = 5000;
         InfernoTimer = 45000;
 
-        if(pInstance && IsEvent)
+        if (pInstance && IsEvent)
             pInstance->SetData(DATA_ANETHERONEVENT, NOT_STARTED);
     }
 
     void EnterCombat(Unit *who)
     {
-        if(pInstance && IsEvent)
+        if (pInstance && IsEvent)
             pInstance->SetData(DATA_ANETHERONEVENT, IN_PROGRESS);
         DoPlaySoundToSet(m_creature, SOUND_ONAGGRO);
-        DoYell(SAY_ONAGGRO, LANG_UNIVERSAL, NULL);
+        m_creature->MonsterYell(SAY_ONAGGRO, LANG_UNIVERSAL, 0);
     }
 
     void KilledUnit(Unit *victim)
@@ -84,15 +84,15 @@ struct RIBON_DLL_DECL boss_anetheronAI : public hyjal_trashAI
         {
             case 0:
                 DoPlaySoundToSet(m_creature, SOUND_ONSLAY1);
-                DoYell(SAY_ONSLAY1, LANG_UNIVERSAL, NULL);
+                m_creature->MonsterYell(SAY_ONSLAY1, LANG_UNIVERSAL, 0);
                 break;
             case 1:
                 DoPlaySoundToSet(m_creature, SOUND_ONSLAY2);
-                DoYell(SAY_ONSLAY2, LANG_UNIVERSAL, NULL);
+                m_creature->MonsterYell(SAY_ONSLAY2, LANG_UNIVERSAL, 0);
                 break;
             case 2:
                 DoPlaySoundToSet(m_creature, SOUND_ONSLAY3);
-                DoYell(SAY_ONSLAY3, LANG_UNIVERSAL, NULL);
+                m_creature->MonsterYell(SAY_ONSLAY3, LANG_UNIVERSAL, 0);
                 break;
         }
     }
@@ -111,10 +111,10 @@ struct RIBON_DLL_DECL boss_anetheronAI : public hyjal_trashAI
     void JustDied(Unit *victim)
     {
         hyjal_trashAI::JustDied(victim);
-        if(pInstance && IsEvent)
+        if (pInstance && IsEvent)
             pInstance->SetData(DATA_ANETHERONEVENT, DONE);
         DoPlaySoundToSet(m_creature, SOUND_ONDEATH);
-        DoYell(SAY_ONDEATH, LANG_UNIVERSAL, NULL);
+        m_creature->MonsterYell(SAY_ONDEATH, LANG_UNIVERSAL, 0);
     }
 
     void UpdateAI(const uint32 diff)
@@ -123,10 +123,10 @@ struct RIBON_DLL_DECL boss_anetheronAI : public hyjal_trashAI
         {
             //Must update npc_escortAI
             npc_escortAI::UpdateAI(diff);
-            if(!go)
+            if (!go)
             {
                 go = true;
-                if(pInstance)
+                if (pInstance)
                 {
                     AddWaypoint(0, 4896.08,    -1576.35,    1333.65);
                     AddWaypoint(1, 4898.68,    -1615.02,    1329.48);
@@ -143,13 +143,13 @@ struct RIBON_DLL_DECL boss_anetheronAI : public hyjal_trashAI
         }
 
         //Return since we have no target
-        if (!UpdateVictim() )
+        if (!UpdateVictim())
             return;
 
-        if(SwarmTimer < diff)
+        if (SwarmTimer < diff)
         {
             Unit* target = SelectTarget(SELECT_TARGET_RANDOM,0,100,true);
-            if(target)
+            if (target)
                 DoCast(target,SPELL_CARRION_SWARM);
 
             SwarmTimer = 45000+rand()%15000;
@@ -157,21 +157,20 @@ struct RIBON_DLL_DECL boss_anetheronAI : public hyjal_trashAI
             {
                 case 0:
                     DoPlaySoundToSet(m_creature, SOUND_SWARM1);
-                    DoYell(SAY_SWARM1, LANG_UNIVERSAL, NULL);
+                    m_creature->MonsterYell(SAY_SWARM1, LANG_UNIVERSAL, 0);
                     break;
                 case 1:
                     DoPlaySoundToSet(m_creature, SOUND_SWARM2);
-                    DoYell(SAY_SWARM2, LANG_UNIVERSAL, NULL);
+                    m_creature->MonsterYell(SAY_SWARM2, LANG_UNIVERSAL, 0);
                     break;
             }
         }else SwarmTimer -= diff;
 
-        if(SleepTimer < diff)
+        if (SleepTimer < diff)
         {
             for(uint8 i=0;i<3; ++i)
             {
-                Unit* target = SelectTarget(SELECT_TARGET_RANDOM,0,100,true);
-                if(target)
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM,0,100,true))
                     target->CastSpell(target,SPELL_SLEEP,true);
             }
             SleepTimer = 60000;
@@ -179,20 +178,20 @@ struct RIBON_DLL_DECL boss_anetheronAI : public hyjal_trashAI
             {
                 case 0:
                     DoPlaySoundToSet(m_creature, SOUND_SLEEP1);
-                    DoYell(SAY_SLEEP1, LANG_UNIVERSAL, NULL);
+                    m_creature->MonsterYell(SAY_SLEEP1, LANG_UNIVERSAL, 0);
                     break;
                 case 1:
                     DoPlaySoundToSet(m_creature, SOUND_SLEEP2);
-                    DoYell(SAY_SLEEP2, LANG_UNIVERSAL, NULL);
+                    m_creature->MonsterYell(SAY_SLEEP2, LANG_UNIVERSAL, 0);
                     break;
             }
         }else SleepTimer -= diff;
-        if(AuraTimer < diff)
+        if (AuraTimer < diff)
         {
             DoCast(m_creature, SPELL_VAMPIRIC_AURA,true);
             AuraTimer = 10000+rand()%10000;
         }else AuraTimer -= diff;
-        if(InfernoTimer < diff)
+        if (InfernoTimer < diff)
         {
             DoCast(SelectTarget(SELECT_TARGET_RANDOM,0,100,true), SPELL_INFERNO);
             InfernoTimer = 45000;
@@ -200,11 +199,11 @@ struct RIBON_DLL_DECL boss_anetheronAI : public hyjal_trashAI
             {
                 case 0:
                     DoPlaySoundToSet(m_creature, SOUND_INFERNO1);
-                    DoYell(SAY_INFERNO1, LANG_UNIVERSAL, NULL);
+                    m_creature->MonsterYell(SAY_INFERNO1, LANG_UNIVERSAL, 0);
                     break;
                 case 1:
                     DoPlaySoundToSet(m_creature, SOUND_INFERNO2);
-                    DoYell(SAY_INFERNO2, LANG_UNIVERSAL, NULL);
+                    m_creature->MonsterYell(SAY_INFERNO2, LANG_UNIVERSAL, 0);
                     break;
             }
         }else InfernoTimer -= diff;
@@ -213,9 +212,9 @@ struct RIBON_DLL_DECL boss_anetheronAI : public hyjal_trashAI
     }
 };
 
-CreatureAI* GetAI_boss_anetheron(Creature *_Creature)
+CreatureAI* GetAI_boss_anetheron(Creature* pCreature)
 {
-    return new boss_anetheronAI (_Creature);
+    return new boss_anetheronAI (pCreature);
 }
 
 #define SPELL_IMMOLATION 31303
@@ -226,7 +225,7 @@ struct RIBON_DLL_DECL mob_towering_infernalAI : public ScriptedAI
     mob_towering_infernalAI(Creature *c) : ScriptedAI(c)
     {
         pInstance = c->GetInstanceData();
-        if(pInstance)
+        if (pInstance)
             AnetheronGUID = pInstance->GetData64(DATA_ANETHERON);
     }
 
@@ -265,12 +264,12 @@ struct RIBON_DLL_DECL mob_towering_infernalAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     {
-        if(CheckTimer < diff)
+        if (CheckTimer < diff)
         {
-            if(AnetheronGUID)
+            if (AnetheronGUID)
             {
                 Creature* boss = Unit::GetCreature((*m_creature),AnetheronGUID);
-                if(!boss || (boss && boss->isDead()))
+                if (!boss || (boss && boss->isDead()))
                 {
                     m_creature->setDeathState(JUST_DIED);
                     m_creature->RemoveCorpse();
@@ -284,7 +283,7 @@ struct RIBON_DLL_DECL mob_towering_infernalAI : public ScriptedAI
         if (!UpdateVictim())
             return;
 
-        if(ImmolationTimer < diff)
+        if (ImmolationTimer < diff)
         {
             DoCast(m_creature, SPELL_IMMOLATION);
             ImmolationTimer = 5000;
@@ -294,9 +293,9 @@ struct RIBON_DLL_DECL mob_towering_infernalAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_towering_infernal(Creature *_Creature)
+CreatureAI* GetAI_mob_towering_infernal(Creature* pCreature)
 {
-    return new mob_towering_infernalAI (_Creature);
+    return new mob_towering_infernalAI (pCreature);
 }
 
 void AddSC_boss_anetheron()
