@@ -16404,19 +16404,19 @@ void Player::_SaveActions()
         switch (itr->second.uState)
         {
             case ACTIONBUTTON_NEW:
-                CharacterDatabase.PExecute("INSERT INTO character_action (guid,button,action,type) VALUES ('%u', '%u', '%u', '%u')",
-                    GetGUIDLow(), (uint32)itr->first, (uint32)itr->second.GetAction(), (uint32)itr->second.GetType() );
+                CharacterDatabase.PExecute("INSERT INTO character_action (guid,spec,button,action,type) VALUES ('%u', '%u', '%u', '%u', '%u')",
+                    GetGUIDLow(), (uint32)m_activeSpec, (uint32)itr->first, (uint32)itr->second.GetAction(), (uint32)itr->second.GetType() );
                 itr->second.uState = ACTIONBUTTON_UNCHANGED;
                 ++itr;
                 break;
             case ACTIONBUTTON_CHANGED:
-                CharacterDatabase.PExecute("UPDATE character_action  SET action = '%u', type = '%u' WHERE guid= '%u' AND button= '%u' ",
-                    (uint32)itr->second.GetAction(), (uint32)itr->second.GetType(), GetGUIDLow(), (uint32)itr->first );
+                CharacterDatabase.PExecute("UPDATE character_action SET action='%u', type='%u' WHERE guid='%u' AND button='%u' AND spec='%u'",
+                    (uint32)itr->second.GetAction(), (uint32)itr->second.GetType(), GetGUIDLow(), (uint32)itr->first, (uint32)m_activeSpec);
                 itr->second.uState = ACTIONBUTTON_UNCHANGED;
                 ++itr;
                 break;
             case ACTIONBUTTON_DELETED:
-                CharacterDatabase.PExecute("DELETE FROM character_action WHERE guid = '%u' and button = '%u'", GetGUIDLow(), (uint32)itr->first );
+                CharacterDatabase.PExecute("DELETE FROM character_action WHERE guid='%u' AND button='%u' AND spec<>'%u'", GetGUIDLow(), (uint32)itr->first, (uint32)m_activeSpec );
                 m_actionButtons.erase(itr++);
                 break;
             default:
@@ -21734,7 +21734,7 @@ void Player::_SaveTalents()
     }
 }
 
-void Player::UpdateSpecCount(uint32 count)
+void Player::UpdateSpecCount(uint8 count)
 {
     if(GetSpecsCount() == count)
         return;
@@ -21743,16 +21743,15 @@ void Player::UpdateSpecCount(uint32 count)
     {
         _SaveActions(); // make sure the button list is cleaned up
         // active spec becomes only spec?
-        int toDelete = m_activeSpec == 1 ? 2 : 1;
-        CharacterDatabase.PExecute("DELETE FROM character_action WHERE guid = '%u' AND spec = '%u'",GetGUIDLow(), toDelete);
-        CharacterDatabase.PExecute("UPDATE character_action SET spec = '%u' WHERE guid = '%u'", m_activeSpec, GetGUIDLow());
+        CharacterDatabase.PExecute("DELETE FROM character_action WHERE spec<>'%u' AND guid='%u'",m_activeSpec, GetGUIDLow());
+        CharacterDatabase.PExecute("UPDATE character_action SET spec='%u' WHERE guid='%u'", m_activeSpec, GetGUIDLow());
     }
     else if (count == 2)
     {
         _SaveActions(); // make sure the button list is cleaned up
         for(ActionButtonList::iterator itr = m_actionButtons.begin(); itr != m_actionButtons.end(); ++itr)
         {
-            CharacterDatabase.PExecute("REPLACE INTO character_action (guid,spec,button,action,type) VALUES ('%u', '%u', '%u', '%u', '%u')",
+            CharacterDatabase.PExecute("INSERT INTO character_action (guid,button,action,type,spec) VALUES ('%u', '%u', '%u', '%u', '%u')",
                 GetGUIDLow(), (uint32)itr->first, (uint32)itr->second.GetAction(), (uint32)itr->second.GetType(), count );
         }
     }

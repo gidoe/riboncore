@@ -1483,7 +1483,7 @@ class RIBON_DLL_SPEC Player : public Unit
         void SetActiveSpec(uint32 spec) { m_activeSpec = spec; }
         uint32 GetSpecsCount() { return m_specsCount; }
         void SetSpecsCount(uint32 count) { m_specsCount = count; }
-        void UpdateSpecCount(uint32 count);
+        void UpdateSpecCount(uint8 count);
         void ActivateSpec(uint32 spec);
 
         void InitGlyphsForLevel();
