@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2009 Ribon <http://getmangos.com/>
  *
  * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
  *
@@ -392,6 +392,14 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_oldpetspell = 0;
 
     ////////////////////Rest System/////////////////////
+    time_inn_enter=0;
+    inn_pos_mapid=0;
+    inn_pos_x=0;
+    inn_pos_y=0;
+    inn_pos_z=0;
+    m_rest_bonus=0;
+    rest_type=REST_TYPE_NO;
+    ////////////////////Rest System/////////////////////
     //movement anticheat
     m_anti_LastClientTime  = 0;   //last movement client time
     m_anti_LastServerTime  = 0;   //last movement server time
@@ -416,14 +424,6 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_anti_JumpBaseZ = 0;          //Z coord before jump (AntiGrav)
     // << movement anticheat
     /////////////////////////////////
-    time_inn_enter=0;
-    inn_pos_mapid=0;
-    inn_pos_x=0;
-    inn_pos_y=0;
-    inn_pos_z=0;
-    m_rest_bonus=0;
-    rest_type=REST_TYPE_NO;
-    ////////////////////Rest System/////////////////////
 
     m_mailsLoaded = false;
     m_mailsUpdated = false;
@@ -2576,7 +2576,7 @@ void Player::InitTalentForLevel()
     }
     else
     {
-        if (level < 40 || m_specsCount == 0) 
+        if (level < 40 || m_specsCount == 0)
         {
             m_specsCount = 1;
             m_activeSpec = 0;
@@ -14388,8 +14388,8 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
     bool delete_result = true;
     if (!result)
     {
-        //                                        0     1     2     3           4           5           6    7          8          9         10    11     12         13
-        result = CharacterDatabase.PQuery("SELECT guid, data, name, position_x, position_y, position_z, map, totaltime, leveltime, at_login, zone, level, speccount, activespec FROM characters WHERE guid = '%u'",guid);
+        //                                        0     1     2     3           4           5           6    7          8          9         10    11
+        result = CharacterDatabase.PQuery("SELECT guid, data, name, position_x, position_y, position_z, map, totaltime, leveltime, at_login, zone, level FROM characters WHERE guid = '%u'",guid);
         if (!result)
             return false;
     }
@@ -14405,13 +14405,6 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
             delete result;
         return false;
     }
-
-    m_specsCount = fields[12].GetUInt32();
-    m_activeSpec = fields[13].GetUInt32();
-
-    // sanity check
-    if (m_specsCount < 2) // Maybe better to check MAX_TALENT_SPECS?
-        m_activeSpec = 0;
 
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
@@ -14680,8 +14673,8 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         return false;
     }
 
-    m_specsCount = fields[41].GetUInt32();
-    m_activeSpec = fields[42].GetUInt32();
+    m_specsCount = fields[42].GetUInt32();
+    m_activeSpec = fields[43].GetUInt32();
 
     // sanity check
     if (m_specsCount < 2) // Maybe better to check MAX_TALENT_SPECS?
@@ -15109,6 +15102,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     _LoadTalents(holder->GetResult(PLAYER_LOGIN_QUERY_LOADTALENTS));
     _LoadSpells(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSPELLS));
+
     _LoadGlyphs(holder->GetResult(PLAYER_LOGIN_QUERY_LOADGLYPHS));
     _LoadAuras(holder->GetResult(PLAYER_LOGIN_QUERY_LOADAURAS), time_diff);
     _LoadGlyphAuras();
@@ -19800,7 +19794,7 @@ void Player::AutoUnequipOffhandIfNeed()
         offItem->SaveToDB();                                // recursive and not have transaction guard into self, item not in inventory and can be save standalone
         CharacterDatabase.CommitTransaction();
 
-        std::string subject = GetSession()->GetMangosString(LANG_NOT_EQUIPPED_ITEM);
+        std::string subject = GetSession()->GetRibonString(LANG_NOT_EQUIPPED_ITEM);
         WorldSession::SendMailTo(this, MAIL_NORMAL, MAIL_STATIONERY_GM, GetGUIDLow(), GetGUIDLow(), subject, 0, &mi, 0, 0, MAIL_CHECK_MASK_NONE);
     }
 }
@@ -21863,8 +21857,8 @@ void Player::ActivateSpec(uint8 spec)
     {
         _LoadActions(result);
     }
-
+    UnsummonPetTemporaryIfAny();
     SendActionButtons(m_activeSpec);
-
     SetPower(getPowerType(), 0);
+    SaveToDB(); assert(spec == m_activeSpec); assert(spec <= m_specsCount);
 }

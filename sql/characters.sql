@@ -259,7 +259,6 @@ CREATE TABLE `character_action` (
   `button` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `action` int(11) unsigned NOT NULL DEFAULT '0',
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`guid`,`button`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 -- ----------------------------
@@ -703,9 +702,9 @@ CREATE TABLE `characters` (
   `death_expire_time` bigint(20) unsigned NOT NULL DEFAULT '0',
   `taxi_path` text,
   `arena_pending_points` int(10) unsigned NOT NULL DEFAULT '0',
+  `latency` int(11) unsigned NOT NULL DEFAULT '0',
   `speccount` tinyint(3) NOT NULL DEFAULT '1',
   `activespec` tinyint(3) NOT NULL DEFAULT '0',
-  `latency` int(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`),
