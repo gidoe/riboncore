@@ -1,6 +1,6 @@
--- Up to RC 420
+﻿-- Up to RC 450
 -- 
--- eibonscript_script_texts.sql Contains data for table `script_texts` mainly used in C++ parts.
+-- ribonscript_script_texts.sql Contains data for table `script_texts` mainly used in C++ parts.
 -- valid entries for table are between -1000000 and -1999999
 -- 
 

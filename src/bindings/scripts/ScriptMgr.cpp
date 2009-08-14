@@ -292,6 +292,10 @@ extern void AddSC_feralas();
 extern void AddSC_ghostlands();
 
 //Gnomeregan
+
+//Grizzly Hills 
+extern void AddSC_grizzly_hills(); 
+
 //Gruul's Lair
 extern void AddSC_boss_gruul();
 extern void AddSC_boss_high_king_maulgar();
@@ -327,6 +331,9 @@ extern void AddSC_hellfire_peninsula();
 //Hillsbrad Foothills
 //Hinterlands
 extern void AddSC_hinterlands();
+
+//Icecrown 
+extern void AddSC_icecrown(); 
 
 //Ironforge
 extern void AddSC_ironforge();
@@ -1223,6 +1230,10 @@ void ScriptsInit(char const* cfg_file = "RibonCore.conf")
     AddSC_ghostlands();
 
     //Gnomeregan
+
+    //Grizzly Hills 
+    AddSC_grizzly_hills(); 
+
     //Gruul's Lair
     AddSC_boss_gruul();
     AddSC_boss_high_king_maulgar();
@@ -1258,6 +1269,9 @@ void ScriptsInit(char const* cfg_file = "RibonCore.conf")
     //Hillsbrad Foothills
     //Hinterlands
     AddSC_hinterlands();
+
+    //Icecrown 
+    AddSC_icecrown(); 
 
     //Ironforge
     AddSC_ironforge();

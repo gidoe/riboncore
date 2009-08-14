@@ -1,6 +1,4 @@
--- Up to RC 438
-
--- This file contains all waypoints used by escortAI scripts
+-- Up to RC 450-- This file contains all waypoints used by escortAI scripts
 DROP TABLE IF EXISTS script_waypoint;
 CREATE TABLE script_waypoint (
   entry mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'creature_template entry',

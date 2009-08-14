@@ -17,36 +17,92 @@
 /* ScriptData
 SDName: Borean_Tundra
 SD%Complete: 100
-SDComment:
+SDComment: Quest support: 11708. Taxi vendors.
 SDCategory: Borean Tundra
 EndScriptData */
 
 /* ContentData
-npc_tiare
+npc_fizzcrank_fullthrottle
 npc_surristrasz
+npc_tiare
 EndContentData */
 
 #include "precompiled.h"
 
 /*######
-## npc_tiare
+## npc_fizzcrank_fullthrottle
 ######*/
 
-#define GOSSIP_ITEM_TELEPORT    "Teleport me to Amber Ledge, please."
+#define GOSSIP_ITEM_GO_ON   "Go on."
+#define GOSSIP_ITEM_TELL_ME "Tell me what's going on out here, Fizzcrank."
 
-bool GossipHello_npc_tiare(Player *player, Creature *_Creature)
+enum
 {
-    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELEPORT, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_GOSSIP);
-    player->SEND_GOSSIP_MENU(_Creature->GetNpcTextId(), _Creature->GetGUID());
+    GOSSIP_TEXTID_FIZZCRANK1    = 12456,
+    GOSSIP_TEXTID_FIZZCRANK2    = 12457,
+    GOSSIP_TEXTID_FIZZCRANK3    = 12458,
+    GOSSIP_TEXTID_FIZZCRANK4    = 12459,
+    GOSSIP_TEXTID_FIZZCRANK5    = 12460,
+    GOSSIP_TEXTID_FIZZCRANK6    = 12461,
+    GOSSIP_TEXTID_FIZZCRANK7    = 12462,
+    GOSSIP_TEXTID_FIZZCRANK8    = 12463,
+    GOSSIP_TEXTID_FIZZCRANK9    = 12464,
+
+    QUEST_THE_MECHAGNOMES       = 11708
+};
+
+bool GossipHello_npc_fizzcrank_fullthrottle(Player* pPlayer, Creature* pCreature)
+{
+    if (pCreature->isQuestGiver())
+        pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+
+    if (pPlayer->GetQuestStatus(QUEST_THE_MECHAGNOMES) == QUEST_STATUS_INCOMPLETE)
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELL_ME, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+
+    pPlayer->SEND_GOSSIP_MENU(pCreature->GetNpcTextId(), pCreature->GetGUID());
     return true;
 }
 
-bool GossipSelect_npc_tiare(Player *player, Creature *_Creature, uint32 sender, uint32 action)
+bool GossipSelect_npc_fizzcrank_fullthrottle(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
-    if (action == GOSSIP_OPTION_GOSSIP)
+    switch(uiAction)
     {
-        player->CLOSE_GOSSIP_MENU();
-        player->CastSpell(player,50135,true);
+        case GOSSIP_ACTION_INFO_DEF+1:
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_GO_ON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_FIZZCRANK1, pCreature->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF+2:
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_GO_ON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_FIZZCRANK2, pCreature->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF+3:
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_GO_ON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_FIZZCRANK3, pCreature->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF+4:
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_GO_ON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_FIZZCRANK4, pCreature->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF+5:
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_GO_ON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
+            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_FIZZCRANK5, pCreature->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF+6:
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_GO_ON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
+            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_FIZZCRANK6, pCreature->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF+7:
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_GO_ON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8);
+            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_FIZZCRANK7, pCreature->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF+8:
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_GO_ON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 9);
+            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_FIZZCRANK8, pCreature->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF+9:
+            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_FIZZCRANK9, pCreature->GetGUID());
+            pPlayer->AreaExploredOrEventHappens(QUEST_THE_MECHAGNOMES);
+            break;
     }
     return true;
 }
@@ -58,31 +114,66 @@ bool GossipSelect_npc_tiare(Player *player, Creature *_Creature, uint32 sender, 
 #define GOSSIP_ITEM_FREE_FLIGHT "I'd like passage to the Transitus Shield."
 #define GOSSIP_ITEM_FLIGHT      "May I use a drake to fly elsewhere?"
 
-bool GossipHello_npc_surristrasz(Player *player, Creature *_Creature)
+enum
 {
-    if (_Creature->isQuestGiver())
-        player->PrepareQuestMenu(_Creature->GetGUID());
+    SPELL_ABMER_TO_COLDARRA     = 46064
+};
 
-    if (_Creature->isTaxi())
+bool GossipHello_npc_surristrasz(Player* pPlayer, Creature* pCreature)
+{
+    if (pCreature->isQuestGiver())
+        pPlayer->PrepareQuestMenu(pCreature->GetGUID());
+
+    if (pCreature->isTaxi())
     {
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_FREE_FLIGHT, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_GOSSIP);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_ITEM_FLIGHT, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_TAXIVENDOR);
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_FREE_FLIGHT, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_GOSSIP);
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_ITEM_FLIGHT, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_TAXIVENDOR);
     }
 
-    player->SEND_GOSSIP_MENU(_Creature->GetNpcTextId(), _Creature->GetGUID());
+    pPlayer->SEND_GOSSIP_MENU(pCreature->GetNpcTextId(), pCreature->GetGUID());
     return true;
 }
 
-bool GossipSelect_npc_surristrasz(Player *player, Creature *_Creature, uint32 sender, uint32 action)
+bool GossipSelect_npc_surristrasz(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
-    if (action == GOSSIP_OPTION_GOSSIP)
+    if (uiAction == GOSSIP_OPTION_GOSSIP)
     {
-        player->CLOSE_GOSSIP_MENU();
-        player->CastSpell(player,46064,true);               //TaxiPath 795 (amber to coldarra)
+        pPlayer->CLOSE_GOSSIP_MENU();
+
+        //TaxiPath 795 (amber to coldarra)
+        pPlayer->CastSpell(pPlayer, SPELL_ABMER_TO_COLDARRA, true);
     }
-    if (action == GOSSIP_OPTION_TAXIVENDOR)
+
+    if (uiAction == GOSSIP_OPTION_TAXIVENDOR)
+        pPlayer->GetSession()->SendTaxiMenu(pCreature);
+
+    return true;
+}
+
+/*######
+## npc_tiare
+######*/
+
+#define GOSSIP_ITEM_TELEPORT    "Teleport me to Amber Ledge, please."
+
+enum
+{
+    SPELL_TELEPORT_COLDARRA     = 50135
+};
+
+bool GossipHello_npc_tiare(Player* pPlayer, Creature* pCreature)
+{
+    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELEPORT, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_GOSSIP);
+    pPlayer->SEND_GOSSIP_MENU(pCreature->GetNpcTextId(), pCreature->GetGUID());
+    return true;
+}
+
+bool GossipSelect_npc_tiare(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
+{
+    if (uiAction == GOSSIP_OPTION_GOSSIP)
     {
-        player->GetSession()->SendTaxiMenu(_Creature);
+        pPlayer->CLOSE_GOSSIP_MENU();
+        pPlayer->CastSpell(pPlayer, SPELL_TELEPORT_COLDARRA, true);
     }
     return true;
 }
@@ -209,14 +300,14 @@ struct RIBON_DLL_DECL npc_khunok_the_behemothAI : public ScriptedAI
     {
         ScriptedAI::MoveInLineOfSight(who);
 
-        if(who->GetTypeId() != TYPEID_UNIT)
+        if (who->GetTypeId() != TYPEID_UNIT)
             return;
 
-        if(who->GetEntry() == 25861 && me->IsWithinDistInMap(who, 10.0f))
+        if (who->GetEntry() == 25861 && me->IsWithinDistInMap(who, 10.0f))
         {
-            if(Unit *owner = who->GetOwner())
+            if (Unit *owner = who->GetOwner())
             {
-                if(owner->GetTypeId() == TYPEID_PLAYER)
+                if (owner->GetTypeId() == TYPEID_PLAYER)
                 {
                     DoCast(owner, 46231, true);
                     CAST_CRE(who)->ForcedDespawn();
@@ -226,9 +317,9 @@ struct RIBON_DLL_DECL npc_khunok_the_behemothAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_khunok_the_behemoth(Creature *_Creature)
+CreatureAI* GetAI_npc_khunok_the_behemoth(Creature* pCreature)
 {
-    return new npc_khunok_the_behemothAI(_Creature);
+    return new npc_khunok_the_behemothAI(pCreature);
 }
 
 void AddSC_borean_tundra()
@@ -236,15 +327,21 @@ void AddSC_borean_tundra()
     Script *newscript;
 
     newscript = new Script;
-    newscript->Name = "npc_tiare";
-    newscript->pGossipHello =  &GossipHello_npc_tiare;
-    newscript->pGossipSelect = &GossipSelect_npc_tiare;
+    newscript->Name = "npc_fizzcrank_fullthrottle";
+    newscript->pGossipHello = &GossipHello_npc_fizzcrank_fullthrottle;
+    newscript->pGossipSelect = &GossipSelect_npc_fizzcrank_fullthrottle;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_surristrasz";
-    newscript->pGossipHello =  &GossipHello_npc_surristrasz;
+    newscript->pGossipHello = &GossipHello_npc_surristrasz;
     newscript->pGossipSelect = &GossipSelect_npc_surristrasz;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_tiare";
+    newscript->pGossipHello = &GossipHello_npc_tiare;
+    newscript->pGossipSelect = &GossipSelect_npc_tiare;
     newscript->RegisterSelf();
 
     newscript = new Script;
