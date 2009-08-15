@@ -55,7 +55,7 @@
 				PrecompiledHeaderThrough="precompiled.h"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -75,91 +75,6 @@
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/RibonScript.pdb"
 				SubSystem="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)/RibonScript.lib"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\bin\$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\ScriptDev2__$(PlatformName)_$(ConfigurationName)"
-			ConfigurationType="2"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-				CommandLine=""
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
-				AdditionalIncludeDirectories="..\..\..\..\dep\include\;..\..\..\shared\;..\..\..\framework\;..\..\..\game\;..\include\;..\..\..\..\dep\ACE_wrappers"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT;_SECURE_SCL=0"
-				MinimalRebuild="false"
-				RuntimeLibrary="2"
-				EnableEnhancedInstructionSet="1"
-				FloatingPointModel="2"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="precompiled.h"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="riboncore.lib ace.lib"
-				OutputFile="$(OutDir)/RibonScript.dll"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\win\VC90\riboncore__$(PlatformName)_$(ConfigurationName);..\..\..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
-				GenerateDebugInformation="false"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				ImportLibrary="$(OutDir)/RibonScript.lib"
@@ -248,6 +163,89 @@
 				DataExecutionPrevention="0"
 				ImportLibrary="$(OutDir)/RibonScript.lib"
 				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="..\..\..\..\bin\$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\ScriptDev2__$(PlatformName)_$(ConfigurationName)"
+			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine=""
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				AdditionalIncludeDirectories="..\..\..\..\dep\include\;..\..\..\shared\;..\..\..\framework\;..\..\..\game\;..\include\;..\..\..\..\dep\ACE_wrappers"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT;_SECURE_SCL=0"
+				MinimalRebuild="false"
+				RuntimeLibrary="2"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="precompiled.h"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="riboncore.lib ace.lib"
+				OutputFile="$(OutDir)/RibonScript.dll"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\..\..\..\win\VC90\riboncore__$(PlatformName)_$(ConfigurationName);..\..\..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
+				GenerateDebugInformation="false"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				ImportLibrary="$(OutDir)/RibonScript.lib"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -363,40 +361,8 @@
             Name="scripts"
             >
             <Filter
-                Name="areatrigger"
-                >
-                <File
-                    RelativePath="..\scripts\areatrigger\areatrigger_scripts.cpp"
-                    >
-                </File>
-            </Filter>
-            <Filter
-                Name="boss"
-                >
-                <File
-                    RelativePath="..\scripts\boss\boss_emeriss.cpp"
-                    >
-                </File>
-                <File
-                    RelativePath="..\scripts\boss\boss_lethon.cpp"
-                    >
-                </File>
-                <File
-                    RelativePath="..\scripts\boss\boss_taerar.cpp"
-                    >
-                </File>
-                <File
-                    RelativePath="..\scripts\boss\boss_ysondre.cpp"
-                    >
-                </File>
-            </Filter>
-            <Filter
                 Name="creature"
                 >
-                <File
-                    RelativePath="..\scripts\creature\mob_generic_creature.cpp"
-                    >
-                </File>
                 <File
                     RelativePath="..\scripts\creature\simple_ai.cpp"
                     >
@@ -519,14 +485,6 @@
                 </File>
             </Filter>
             <Filter
-                Name="go"
-                >
-                <File
-                    RelativePath="..\scripts\go\go_scripts.cpp"
-                    >
-                </File>
-            </Filter>
-            <Filter
                 Name="guard"
                 >
                 <File
@@ -539,14 +497,6 @@
                 </File>
                 <File
                     RelativePath="..\scripts\guard\guards.cpp"
-                    >
-                </File>
-            </Filter>
-            <Filter
-                Name="item"
-                >
-                <File
-                    RelativePath="..\scripts\item\item_scripts.cpp"
                     >
                 </File>
             </Filter>
@@ -674,22 +624,6 @@
                 </File>
                 <File
                     RelativePath="..\scripts\npc\npc_escortAI.h"
-                    >
-                </File>
-                <File
-                    RelativePath="..\scripts\npc\npc_innkeeper.cpp"
-                    >
-                </File>
-                <File
-                    RelativePath="..\scripts\npc\npc_professions.cpp"
-                    >
-                </File>
-                <File
-                    RelativePath="..\scripts\npc\npc_taxi.cpp"
-                    >
-                </File>
-                <File
-                    RelativePath="..\scripts\npc\npcs_special.cpp"
                     >
                 </File>
             </Filter>
@@ -2775,14 +2709,6 @@
                 </Filter>
             </Filter>
             <Filter
-                Name="honor"
-                >
-            </Filter>
-            <Filter
-                Name="servers"
-                >
-            </Filter>
-            <Filter
                 Name="custom"
                 >
                 <File
@@ -2794,6 +2720,58 @@
                     >
                 </File>
             </Filter>
+        </Filter>
+        <Filter
+            Name="world"
+            >
+            <File
+                RelativePath="..\scripts\world\areatrigger_scripts.cpp"
+                >
+            </File>
+            <File
+                RelativePath="..\scripts\world\boss_emeriss.cpp"
+                >
+            </File>
+            <File
+                RelativePath="..\scripts\world\boss_lethon.cpp"
+                >
+            </File>
+            <File
+                RelativePath="..\scripts\world\boss_taerar.cpp"
+                >
+            </File>
+            <File
+                RelativePath="..\scripts\world\boss_ysondre.cpp"
+                >
+            </File>
+            <File
+                RelativePath="..\scripts\world\go_scripts.cpp"
+                >
+            </File>
+            <File
+                RelativePath="..\scripts\world\item_scripts.cpp"
+                >
+            </File>
+            <File
+                RelativePath="..\scripts\world\mob_generic_creature.cpp"
+                >
+            </File>
+            <File
+                RelativePath="..\scripts\world\npc_innkeeper.cpp"
+                >
+            </File>
+            <File
+                RelativePath="..\scripts\world\npc_professions.cpp"
+                >
+            </File>
+            <File
+                RelativePath="..\scripts\world\npc_taxi.cpp"
+                >
+            </File>
+            <File
+                RelativePath="..\scripts\world\npcs_special.cpp"
+                >
+            </File>
         </Filter>
 		<Filter
 			Name="Include"
