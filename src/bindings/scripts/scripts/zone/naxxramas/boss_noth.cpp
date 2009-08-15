@@ -1,4 +1,4 @@
-/* Copyright (C) 2008 - 2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+/* Copyright (C) 2008 - 2009 Ribon <http://www.trinitycore.org/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -87,21 +87,21 @@ struct RIBON_DLL_DECL boss_nothAI : public BossAI
         me->SetReactState(REACT_AGGRESSIVE);
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         DoZoneInCombat();
-        if(me->getThreatManager().isThreatListEmpty())
+        if (me->getThreatManager().isThreatListEmpty())
             EnterEvadeMode();
         else
         {
             events.ScheduleEvent(EVENT_BALCONY, 110000);
             events.ScheduleEvent(EVENT_CURSE, 20000+rand()%10000);
             events.ScheduleEvent(EVENT_WARRIOR, 30000);
-            if(HeroicMode)
+            if (HeroicMode)
                 events.ScheduleEvent(EVENT_BLINK, 20000+rand()%10000);
         }
     }
 
     void KilledUnit(Unit* victim)
     {
-        if(!(rand()%5))
+        if (!(rand()%5))
             DoScriptText(SAY_SLAY, me);
     }
 
@@ -130,7 +130,7 @@ struct RIBON_DLL_DECL boss_nothAI : public BossAI
 
     void UpdateAI(const uint32 diff)
     {
-        if(!UpdateCombatState() || !CheckInRoom())
+        if (!UpdateCombatState() || !CheckInRoom())
             return;
 
         events.Update(diff);
@@ -190,14 +190,14 @@ struct RIBON_DLL_DECL boss_nothAI : public BossAI
             }
         }
 
-        if(me->HasReactState(REACT_AGGRESSIVE))
+        if (me->HasReactState(REACT_AGGRESSIVE))
             DoMeleeAttackIfReady();
     }
 };
 
-CreatureAI* GetAI_boss_noth(Creature *_Creature)
+CreatureAI* GetAI_boss_noth(Creature* pCreature)
 {
-    return new boss_nothAI (_Creature);
+    return new boss_nothAI (pCreature);
 }
 
 void AddSC_boss_noth()

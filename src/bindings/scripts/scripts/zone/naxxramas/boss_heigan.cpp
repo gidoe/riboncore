@@ -1,4 +1,4 @@
-/* Copyright (C) 2008 - 2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+/* Copyright (C) 2008 - 2009 Ribon <http://www.trinitycore.org/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -53,7 +53,7 @@ struct RIBON_DLL_DECL boss_heiganAI : public BossAI
 
     void KilledUnit(Unit* Victim)
     {
-        if(!(rand()%5))
+        if (!(rand()%5))
             DoScriptText(SAY_SLAY, me);
     }
 
@@ -75,7 +75,7 @@ struct RIBON_DLL_DECL boss_heiganAI : public BossAI
         phase = newPhase;
         events.Reset();
         eruptSection = 3;
-        if(phase == PHASE_FIGHT)
+        if (phase == PHASE_FIGHT)
         {
             events.ScheduleEvent(EVENT_DISRUPT, 0);
             events.ScheduleEvent(EVENT_FEVER, 20000);
@@ -95,7 +95,7 @@ struct RIBON_DLL_DECL boss_heiganAI : public BossAI
 
     void UpdateAI(const uint32 diff)
     {
-        if(!UpdateVictim() || !CheckInRoom())
+        if (!UpdateVictim() || !CheckInRoom())
             return;
 
         events.Update(diff);
@@ -119,9 +119,9 @@ struct RIBON_DLL_DECL boss_heiganAI : public BossAI
                     instance->SetData(DATA_HEIGAN_ERUPT, eruptSection);
                     TeleportCheaters();
 
-                    if(eruptSection == 0)
+                    if (eruptSection == 0)
                         eruptDirection = true;
-                    else if(eruptSection == 3)
+                    else if (eruptSection == 3)
                         eruptDirection = false;
 
                     eruptDirection ? ++eruptSection : --eruptSection;
@@ -135,9 +135,9 @@ struct RIBON_DLL_DECL boss_heiganAI : public BossAI
     }
 };
 
-CreatureAI* GetAI_boss_heigan(Creature *_Creature)
+CreatureAI* GetAI_boss_heigan(Creature* pCreature)
 {
-    return new boss_heiganAI (_Creature);
+    return new boss_heiganAI (pCreature);
 }
 
 void AddSC_boss_heigan()

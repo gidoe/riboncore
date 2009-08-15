@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 - 2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ * Copyright (C) 2008 - 2009 Ribon <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,17 +55,17 @@ struct RIBON_DLL_DECL boss_xt002_AI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     {
-        if(!UpdateVictim())
+        if (!UpdateVictim())
             return;
 
-        if( SEARING_LIGHT_Timer < diff )
+        if (SEARING_LIGHT_Timer < diff)
         {
             DoCast(m_creature,SPELL_SEARING_LIGHT);
             DoScriptText(SAY_SLAY, m_creature);
             SEARING_LIGHT_Timer = 50000;
         } else SEARING_LIGHT_Timer -= diff;
 
-        if( SONIC_BOOM_Timer < diff )
+        if (SONIC_BOOM_Timer < diff)
         {
             DoCast(m_creature->getVictim(),SPELL_SONIC_BOOM);
             SONIC_BOOM_Timer = 20000;
@@ -75,9 +75,9 @@ struct RIBON_DLL_DECL boss_xt002_AI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_xt002(Creature *_Creature)
+CreatureAI* GetAI_boss_xt002(Creature* pCreature)
 {
-    return new boss_xt002_AI (_Creature);
+    return new boss_xt002_AI (pCreature);
 }
 void AddSC_boss_xt002()
 {

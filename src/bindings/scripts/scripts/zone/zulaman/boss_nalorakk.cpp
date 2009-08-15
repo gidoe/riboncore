@@ -119,7 +119,7 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
 
     void Reset()
     {
-        if(MoveEvent)
+        if (MoveEvent)
         {
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -132,7 +132,7 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
             (*m_creature).GetMotionMaster()->MovePoint(0,NalorakkWay[7][0],NalorakkWay[7][1],NalorakkWay[7][2]);
         }
 
-        if(pInstance)
+        if (pInstance)
             pInstance->SetData(DATA_NALORAKKEVENT, NOT_STARTED);
 
         Surge_Timer = 15000 + rand()%5000;
@@ -166,12 +166,12 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
             cell_lock->Visit(cell_lock, cSearcher, *(m_creature->GetMap()));
         }
 
-        if(!templist.size())
+        if (!templist.size())
             return;
 
         for(std::list<Creature*>::iterator i = templist.begin(); i != templist.end(); ++i)
         {
-            if((*i) && m_creature->IsWithinDistInMap((*i),25))
+            if ((*i) && m_creature->IsWithinDistInMap((*i),25))
             {
                 (*i)->SetNoCallAssistance(true);
                 (*i)->AI()->AttackStart(target);
@@ -181,26 +181,26 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
 
     void AttackStart(Unit* who)
     {
-        if(!MoveEvent)
+        if (!MoveEvent)
             ScriptedAI::AttackStart(who);
     }
 
     void MoveInLineOfSight(Unit *who)
     {
-        if(!MoveEvent)
+        if (!MoveEvent)
         {
             ScriptedAI::MoveInLineOfSight(who);
         }
         else
         {
-            if(m_creature->IsHostileTo( who ))
+            if (m_creature->IsHostileTo(who))
             {
-                if(!inMove)
+                if (!inMove)
                 {
                     switch(MovePhase)
                     {
                         case 0:
-                            if(m_creature->IsWithinDistInMap(who, 50))
+                            if (m_creature->IsWithinDistInMap(who, 50))
                             {
                                 m_creature->MonsterYell(YELL_NALORAKK_WAVE1, LANG_UNIVERSAL, NULL);
                                 DoPlaySoundToSet(m_creature, SOUND_NALORAKK_WAVE1);
@@ -213,7 +213,7 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
                             }
                             break;
                         case 2:
-                            if(m_creature->IsWithinDistInMap(who, 40))
+                            if (m_creature->IsWithinDistInMap(who, 40))
                             {
                                 m_creature->MonsterYell(YELL_NALORAKK_WAVE2, LANG_UNIVERSAL, NULL);
                                 DoPlaySoundToSet(m_creature, SOUND_NALORAKK_WAVE2);
@@ -226,7 +226,7 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
                             }
                             break;
                         case 5:
-                            if(m_creature->IsWithinDistInMap(who, 40))
+                            if (m_creature->IsWithinDistInMap(who, 40))
                             {
                                 m_creature->MonsterYell(YELL_NALORAKK_WAVE3, LANG_UNIVERSAL, NULL);
                                 DoPlaySoundToSet(m_creature, SOUND_NALORAKK_WAVE3);
@@ -239,7 +239,7 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
                             }
                             break;
                         case 7:
-                            if(m_creature->IsWithinDistInMap(who, 50))
+                            if (m_creature->IsWithinDistInMap(who, 50))
                             {
                                 SendAttacker(who);
 
@@ -260,7 +260,7 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
 
     void EnterCombat(Unit *who)
     {
-        if(pInstance)
+        if (pInstance)
             pInstance->SetData(DATA_NALORAKKEVENT, IN_PROGRESS);
 
         m_creature->MonsterYell(YELL_AGGRO, LANG_UNIVERSAL, NULL);
@@ -270,7 +270,7 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
 
     void JustDied(Unit* Killer)
     {
-        if(pInstance)
+        if (pInstance)
             pInstance->SetData(DATA_NALORAKKEVENT, DONE);
 
         m_creature->MonsterYell(YELL_DEATH,LANG_UNIVERSAL,NULL);
@@ -294,15 +294,15 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
 
     void MovementInform(uint32 type, uint32 id)
     {
-        if(MoveEvent)
+        if (MoveEvent)
         {
-            if(type != POINT_MOTION_TYPE)
+            if (type != POINT_MOTION_TYPE)
                 return;
 
-            if(!inMove)
+            if (!inMove)
                 return;
 
-            if(MovePhase != id)
+            if (MovePhase != id)
                 return;
 
             switch(MovePhase)
@@ -334,10 +334,10 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     {
-        if(waitTimer)
+        if (waitTimer)
         {
-            if(inMove)
-                if(waitTimer < diff)
+            if (inMove)
+                if (waitTimer < diff)
                 {
                     (*m_creature).GetMotionMaster()->MovementExpired();
                     (*m_creature).GetMotionMaster()->MovePoint(MovePhase,NalorakkWay[MovePhase][0],NalorakkWay[MovePhase][1],NalorakkWay[MovePhase][2]);
@@ -345,10 +345,10 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
                 }else waitTimer -= diff;
         }
 
-        if(!UpdateVictim())
+        if (!UpdateVictim())
             return;
 
-        if(Berserk_Timer < diff)
+        if (Berserk_Timer < diff)
         {
             DoCast(m_creature, SPELL_BERSERK, true);
             m_creature->MonsterYell(YELL_BERSERK, LANG_UNIVERSAL, NULL);
@@ -356,9 +356,9 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
             Berserk_Timer = 600000;
         }else Berserk_Timer -= diff;
 
-        if(ShapeShift_Timer < diff)
+        if (ShapeShift_Timer < diff)
         {
-            if(inBearForm)
+            if (inBearForm)
             {
                 m_creature->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, 5122);
                 m_creature->MonsterYell(YELL_SHIFTEDTOTROLL, LANG_UNIVERSAL, NULL);
@@ -384,17 +384,17 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
             }
         }else ShapeShift_Timer -= diff;
 
-        if(!inBearForm)
+        if (!inBearForm)
         {
-            if(BrutalSwipe_Timer < diff)
+            if (BrutalSwipe_Timer < diff)
             {
                 DoCast(m_creature->getVictim(), SPELL_BRUTALSWIPE);
                 BrutalSwipe_Timer = 7000 + rand()%5000;
             }else BrutalSwipe_Timer -= diff;
 
-            if(Mangle_Timer < diff)
+            if (Mangle_Timer < diff)
             {
-                if(m_creature->getVictim() && !m_creature->getVictim()->HasAura(SPELL_MANGLEEFFECT))
+                if (m_creature->getVictim() && !m_creature->getVictim()->HasAura(SPELL_MANGLEEFFECT))
                 {
                     DoCast(m_creature->getVictim(), SPELL_MANGLE);
                     Mangle_Timer = 1000;
@@ -402,31 +402,31 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
                 else Mangle_Timer = 10000 + rand()%5000;
             }else Mangle_Timer -= diff;
 
-            if(Surge_Timer < diff)
+            if (Surge_Timer < diff)
             {
                 m_creature->MonsterYell(YELL_SURGE, LANG_UNIVERSAL, NULL);
                 DoPlaySoundToSet(m_creature, SOUND_YELL_SURGE);
                 Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 1, 45, true);
-                if(target)
+                if (target)
                     DoCast(target, SPELL_SURGE);
                 Surge_Timer = 15000 + rand()%5000;
             }else Surge_Timer -= diff;
         }
         else
         {
-            if(LaceratingSlash_Timer < diff)
+            if (LaceratingSlash_Timer < diff)
             {
                 DoCast(m_creature->getVictim(), SPELL_LACERATINGSLASH);
                 LaceratingSlash_Timer = 18000 + rand()%5000;
             }else LaceratingSlash_Timer -= diff;
 
-            if(RendFlesh_Timer < diff)
+            if (RendFlesh_Timer < diff)
             {
                 DoCast(m_creature->getVictim(), SPELL_RENDFLESH);
                 RendFlesh_Timer = 5000 + rand()%5000;
             }else RendFlesh_Timer -= diff;
 
-            if(DeafeningRoar_Timer < diff)
+            if (DeafeningRoar_Timer < diff)
             {
                 DoCast(m_creature->getVictim(), SPELL_DEAFENINGROAR);
                 DeafeningRoar_Timer = 15000 + rand()%5000;
@@ -437,9 +437,9 @@ struct RIBON_DLL_DECL boss_nalorakkAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_nalorakk(Creature *_Creature)
+CreatureAI* GetAI_boss_nalorakk(Creature* pCreature)
 {
-    return new boss_nalorakkAI (_Creature);
+    return new boss_nalorakkAI (pCreature);
 }
 
 void AddSC_boss_nalorakk()

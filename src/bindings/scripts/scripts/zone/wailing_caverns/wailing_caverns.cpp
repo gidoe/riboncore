@@ -95,7 +95,7 @@ struct RIBON_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
         if (!pInstance)
             return;
 
-        switch ( i )
+        switch (i)
         {
             case 4:
                 eventProgress = 1;
@@ -166,7 +166,7 @@ struct RIBON_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
 
     void UpdateAI(const uint32 diff)
     {
-        if(currentEvent != TYPE_NARALEX_PART3)
+        if (currentEvent != TYPE_NARALEX_PART3)
             npc_escortAI::UpdateAI(diff);
 
         if (!pInstance)
@@ -271,12 +271,12 @@ struct RIBON_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
                             if (Creature* naralex = pInstance->instance->GetCreature(pInstance->GetData64(DATA_NARALEX)))
                             {
                                 AchievementEntry const *AchievWC = GetAchievementStore()->LookupEntry(ACHIEVEMENT_WAILING_CAVERNS);
-                                if(AchievWC)
+                                if (AchievWC)
                                 {
-                                    Map *map = m_creature->GetMap();
-                                    if(map && map->IsDungeon())
+                                    Map* pMap = m_creature->GetMap();
+                                    if (pMap && pMap->IsDungeon())
                                     {
-                                        Map::PlayerList const &players = map->GetPlayers();
+                                        Map::PlayerList const &players = pMap->GetPlayers();
                                         for(Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                                             itr->getSource()->CompletedAchievement(AchievWC);
                                     }            
@@ -346,58 +346,58 @@ struct RIBON_DLL_DECL npc_disciple_of_naralexAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_disciple_of_naralex(Creature *_Creature)
+CreatureAI* GetAI_npc_disciple_of_naralex(Creature* pCreature)
 {
-    npc_disciple_of_naralexAI *disciple_of_naralexAI = new npc_disciple_of_naralexAI(_Creature);
+    npc_disciple_of_naralexAI *disciple_of_naralexAI = new npc_disciple_of_naralexAI(pCreature);
 
     disciple_of_naralexAI->FillPointMovementListForCreature();
 
     return disciple_of_naralexAI;
 }
 
-bool GossipHello_npc_disciple_of_naralex(Player *player, Creature *_Creature)
+bool GossipHello_npc_disciple_of_naralex(Player* pPlayer, Creature* pCreature)
 {
-    ScriptedInstance *pInstance = (_Creature->GetInstanceData());
+    ScriptedInstance *pInstance = (pCreature->GetInstanceData());
 
     if (pInstance)
     {
-        _Creature->CastSpell(player, SPELL_MARK_OF_THE_WILD_RANK_2, true);
+        pCreature->CastSpell(pPlayer, SPELL_MARK_OF_THE_WILD_RANK_2, true);
         if ((pInstance->GetData(TYPE_LORD_COBRAHN) == DONE) && (pInstance->GetData(TYPE_LORD_PYTHAS) == DONE) &&
             (pInstance->GetData(TYPE_LADY_ANACONDRA) == DONE) && (pInstance->GetData(TYPE_LORD_SERPENTIS) == DONE))
         {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NARALEX, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            player->SEND_GOSSIP_MENU(GOSSIP_ID_START_2, _Creature->GetGUID());
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NARALEX, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            pPlayer->SEND_GOSSIP_MENU(GOSSIP_ID_START_2, pCreature->GetGUID());
 
             if (!pInstance->GetData(TYPE_NARALEX_YELLED))
             {
-                DoScriptText(SAY_AT_LAST, _Creature);
+                DoScriptText(SAY_AT_LAST, pCreature);
                 pInstance->SetData(TYPE_NARALEX_YELLED, 1);
             }
         }
         else
         {
-            player->SEND_GOSSIP_MENU(GOSSIP_ID_START_1, _Creature->GetGUID());
+            pPlayer->SEND_GOSSIP_MENU(GOSSIP_ID_START_1, pCreature->GetGUID());
         }
     }
     return true;
 }
 
-bool GossipSelect_npc_disciple_of_naralex(Player *player, Creature *_Creature, uint32 sender, uint32 action)
+bool GossipSelect_npc_disciple_of_naralex(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
-    ScriptedInstance *pInstance = (_Creature->GetInstanceData());
-    if (action == GOSSIP_ACTION_INFO_DEF + 1)
+    ScriptedInstance *pInstance = (pCreature->GetInstanceData());
+    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
     {
-        player->CLOSE_GOSSIP_MENU();
+        pPlayer->CLOSE_GOSSIP_MENU();
         if (pInstance)pInstance->SetData(TYPE_NARALEX_EVENT, IN_PROGRESS);
 
-        DoScriptText(SAY_MAKE_PREPARATIONS, _Creature);
+        DoScriptText(SAY_MAKE_PREPARATIONS, pCreature);
 
-        _Creature->setFaction(250);
-        _Creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_2);
+        pCreature->setFaction(250);
+        pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_2);
 
-        CAST_AI(npc_escortAI, (_Creature->AI()))->Start(false, false, player->GetGUID());
-        CAST_AI(npc_escortAI, (_Creature->AI()))->SetDespawnAtFar(false);
-        CAST_AI(npc_escortAI, (_Creature->AI()))->SetDespawnAtEnd(false);
+        CAST_AI(npc_escortAI, (pCreature->AI()))->Start(false, false, pPlayer->GetGUID());
+        CAST_AI(npc_escortAI, (pCreature->AI()))->SetDespawnAtFar(false);
+        CAST_AI(npc_escortAI, (pCreature->AI()))->SetDespawnAtEnd(false);
     }
     return true;
 }

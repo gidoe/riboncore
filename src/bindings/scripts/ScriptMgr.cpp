@@ -293,8 +293,8 @@ extern void AddSC_ghostlands();
 
 //Gnomeregan
 
-//Grizzly Hills 
-extern void AddSC_grizzly_hills(); 
+//Grizzly Hills
+extern void AddSC_grizzly_hills();
 
 //Gruul's Lair
 extern void AddSC_boss_gruul();
@@ -332,8 +332,8 @@ extern void AddSC_hellfire_peninsula();
 //Hinterlands
 extern void AddSC_hinterlands();
 
-//Icecrown 
-extern void AddSC_icecrown(); 
+//Icecrown
+extern void AddSC_icecrown();
 
 //Ironforge
 extern void AddSC_ironforge();
@@ -609,8 +609,8 @@ extern void AddSC_instance_utgarde_keep();
 extern void AddSC_utgarde_keep();
 
 //Wailing caverns
-extern void AddSC_wailing_caverns(); 
-extern void AddSC_instance_wailing_caverns(); 
+extern void AddSC_wailing_caverns();
+extern void AddSC_instance_wailing_caverns();
 
 //Western plaguelands
 extern void AddSC_western_plaguelands();
@@ -687,14 +687,14 @@ void LoadDatabase()
     //Get db string from file
     std::string dbstring = RScriptConfig.GetStringDefault("WorldDatabaseInfo", "");
 
-    if (dbstring.empty() )
+    if (dbstring.empty())
     {
         error_log("RSCR: Missing world database info from configuration file. Load database aborted.");
         return;
     }
 
     //Initialize connection to DB
-    if (!dbstring.empty() && RScriptDB.Initialize(dbstring.c_str()) )
+    if (!dbstring.empty() && RScriptDB.Initialize(dbstring.c_str()))
         outstring_log("RSCR: RibonScript database: %s",dbstring.c_str());
     else
     {
@@ -764,14 +764,14 @@ void LoadDatabase()
             if (temp.SoundId)
             {
                 if (!GetSoundEntriesStore()->LookupEntry(temp.SoundId))
-                    error_db_log("RSCR: Entry %i in table `script_texts` has soundId %u but sound does not exist.",i,temp.SoundId);
+                    error_db_log("RSCR: Entry %i in table `script_texts` has soundId %u but sound does not exist.",i, temp.SoundId);
             }
 
             if (!GetLanguageDescByID(temp.Language))
-                error_db_log("RSCR: Entry %i in table `script_texts` using Language %u but Language does not exist.",i,temp.Language);
+                error_db_log("RSCR: Entry %i in table `script_texts` using Language %u but Language does not exist.",i, temp.Language);
 
             if (temp.Type > CHAT_TYPE_ZONE_YELL)
-                error_db_log("RSCR: Entry %i in table `script_texts` has Type %u but this Chat Type does not exist.",i,temp.Type);
+                error_db_log("RSCR: Entry %i in table `script_texts` has Type %u but this Chat Type does not exist.",i, temp.Type);
 
             TextMap[i] = temp;
             ++count;
@@ -829,14 +829,14 @@ void LoadDatabase()
             if (temp.SoundId)
             {
                 if (!GetSoundEntriesStore()->LookupEntry(temp.SoundId))
-                    error_db_log("RSCR: Entry %i in table `custom_texts` has soundId %u but sound does not exist.",i,temp.SoundId);
+                    error_db_log("RSCR: Entry %i in table `custom_texts` has soundId %u but sound does not exist.",i, temp.SoundId);
             }
 
             if (!GetLanguageDescByID(temp.Language))
-                error_db_log("RSCR: Entry %i in table `custom_texts` using Language %u but Language does not exist.",i,temp.Language);
+                error_db_log("RSCR: Entry %i in table `custom_texts` using Language %u but Language does not exist.",i, temp.Language);
 
             if (temp.Type > CHAT_TYPE_ZONE_YELL)
-                error_db_log("RSCR: Entry %i in table `custom_texts` has Type %u but this Chat Type does not exist.",i,temp.Type);
+                error_db_log("RSCR: Entry %i in table `custom_texts` has Type %u but this Chat Type does not exist.",i, temp.Type);
 
             TextMap[i] = temp;
             ++count;
@@ -940,7 +940,7 @@ void ScriptsFree()
 }
 
 RIBON_DLL_EXPORT
-void ScriptsInit(char const* cfg_file = "RibonCore.conf")
+void ScriptsInit(char const* cfg_file = "riboncore.conf")
 {
     bool CanLoadDB = true;
 
@@ -955,7 +955,6 @@ void ScriptsInit(char const* cfg_file = "RibonCore.conf")
     outstring_log( "..:::::..::....::........::::.......:::..::::..::");
     outstring_log( "                                      S C R I P T");
     outstring_log("Ribon Scripts initializing %s", _FULLVERSION);
-    outstring_log("");
 
     //Get configuration file
     if (!RScriptConfig.SetSource(cfg_file))
@@ -967,7 +966,7 @@ void ScriptsInit(char const* cfg_file = "RibonCore.conf")
 
     outstring_log("");
 
-    //Load database (must be called after TScriptConfig.SetSource). In case it failed, no need to even try load.
+    //Load database (must be called after RScriptConfig.SetSource). In case it failed, no need to even try load.
     if (CanLoadDB)
         LoadDatabase();
 
@@ -1231,8 +1230,8 @@ void ScriptsInit(char const* cfg_file = "RibonCore.conf")
 
     //Gnomeregan
 
-    //Grizzly Hills 
-    AddSC_grizzly_hills(); 
+    //Grizzly Hills
+    AddSC_grizzly_hills();
 
     //Gruul's Lair
     AddSC_boss_gruul();
@@ -1270,8 +1269,8 @@ void ScriptsInit(char const* cfg_file = "RibonCore.conf")
     //Hinterlands
     AddSC_hinterlands();
 
-    //Icecrown 
-    AddSC_icecrown(); 
+    //Icecrown
+    AddSC_icecrown();
 
     //Ironforge
     AddSC_ironforge();
@@ -1547,8 +1546,8 @@ void ScriptsInit(char const* cfg_file = "RibonCore.conf")
     AddSC_utgarde_keep();
 
     //Wailing caverns
-    AddSC_wailing_caverns(); 
-    AddSC_instance_wailing_caverns(); 
+    AddSC_wailing_caverns();
+    AddSC_instance_wailing_caverns();
 
     //Western plaguelands
     AddSC_western_plaguelands();
@@ -1658,7 +1657,7 @@ void DoScriptText(int32 textEntry, WorldObject* pSource, Unit* target)
 
     if((*i).second.SoundId)
     {
-        if( GetSoundEntriesStore()->LookupEntry((*i).second.SoundId) )
+        if(GetSoundEntriesStore()->LookupEntry((*i).second.SoundId))
         {
             pSource->SendPlaySound((*i).second.SoundId, false);
         }
@@ -1673,7 +1672,7 @@ void DoScriptText(int32 textEntry, WorldObject* pSource, Unit* target)
             ((Unit*)pSource)->HandleEmoteCommand((*i).second.Emote);
         }
         else
-            error_log("RSCR: DoScriptText entry %i tried to process emote for invalid TypeId (%u).",textEntry,pSource->GetTypeId());
+            error_log("RSCR: DoScriptText entry %i tried to process emote for invalid TypeId (%u).",textEntry, pSource->GetTypeId());
     }
 
     switch((*i).second.Type)
@@ -1735,242 +1734,242 @@ char const* ScriptsVersion()
     return "Default Ribon scripting library";
 }
 RIBON_DLL_EXPORT
-bool GossipHello ( Player * player, Creature *_Creature )
+bool GossipHello (Player * pPlayer, Creature* pCreature)
 {
-    Script *tmpscript = m_scripts[_Creature->GetScriptId()];
+    Script *tmpscript = m_scripts[pCreature->GetScriptId()];
     if (!tmpscript || !tmpscript->pGossipHello) return false;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pGossipHello(player,_Creature);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pGossipHello(pPlayer, pCreature);
 }
 
 RIBON_DLL_EXPORT
-bool GossipSelect( Player *player, Creature *_Creature, uint32 sender, uint32 action )
+bool GossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
-    debug_log("RSCR: Gossip selection, sender: %d, action: %d",sender, action);
+    debug_log("RSCR: Gossip selection, sender: %d, action: %d", uiSender, uiAction);
 
-    Script *tmpscript = m_scripts[_Creature->GetScriptId()];
+    Script *tmpscript = m_scripts[pCreature->GetScriptId()];
     if (!tmpscript || !tmpscript->pGossipSelect) return false;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pGossipSelect(player,_Creature,sender,action);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pGossipSelect(pPlayer, pCreature, uiSender, uiAction);
 }
 
 RIBON_DLL_EXPORT
-bool GossipSelectWithCode( Player *player, Creature *_Creature, uint32 sender, uint32 action, const char* sCode )
+bool GossipSelectWithCode(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction, const char* sCode)
 {
-    debug_log("RSCR: Gossip selection with code, sender: %d, action: %d",sender, action);
+    debug_log("RSCR: Gossip selection with code, sender: %d, action: %d", uiSender, uiAction);
 
-    Script *tmpscript = m_scripts[_Creature->GetScriptId()];
+    Script *tmpscript = m_scripts[pCreature->GetScriptId()];
     if (!tmpscript || !tmpscript->pGossipSelectWithCode) return false;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pGossipSelectWithCode(player,_Creature,sender,action,sCode);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pGossipSelectWithCode(pPlayer, pCreature, uiSender, uiAction, sCode);
 }
 
 RIBON_DLL_EXPORT
-bool GOSelect( Player *player, GameObject *_GO, uint32 sender, uint32 action )
+bool GOSelect(Player* pPlayer, GameObject* pGO, uint32 uiSender, uint32 uiAction)
 {
-    if(!_GO)
+    if(!pGO)
     return false;
-    debug_log("RSCR: Gossip selection, sender: %d, action: %d",sender, action);
+    debug_log("RSCR: Gossip selection, sender: %d, action: %d", uiSender, uiAction);
 
-    Script *tmpscript = m_scripts[_GO->GetGOInfo()->ScriptId];
+    Script *tmpscript = m_scripts[pGO->GetGOInfo()->ScriptId];
     if(!tmpscript || !tmpscript->pGOSelect) return false;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pGOSelect(player,_GO,sender,action);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pGOSelect(pPlayer, pGO, uiSender, uiAction);
 }
 
 RIBON_DLL_EXPORT
-bool GOSelectWithCode( Player *player, GameObject *_GO, uint32 sender, uint32 action, const char* sCode )
+bool GOSelectWithCode(Player* pPlayer, GameObject* pGO, uint32 uiSender, uint32 uiAction, const char* sCode)
 {
-    if(!_GO)
+    if(!pGO)
     return false;
-    debug_log("RSCR: Gossip selection, sender: %d, action: %d",sender, action);
+    debug_log("RSCR: Gossip selection, sender: %d, action: %d",uiSender, uiAction);
 
-    Script *tmpscript = m_scripts[_GO->GetGOInfo()->ScriptId];
+    Script *tmpscript = m_scripts[pGO->GetGOInfo()->ScriptId];
     if(!tmpscript || !tmpscript->pGOSelectWithCode) return false;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pGOSelectWithCode(player,_GO,sender,action,sCode);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pGOSelectWithCode(pPlayer, pGO, uiSender ,uiAction, sCode);
 }
 
 RIBON_DLL_EXPORT
-bool QuestAccept( Player *player, Creature *_Creature, Quest const *_Quest )
+bool QuestAccept(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
-    Script *tmpscript = m_scripts[_Creature->GetScriptId()];
+    Script *tmpscript = m_scripts[pCreature->GetScriptId()];
     if (!tmpscript || !tmpscript->pQuestAccept) return false;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pQuestAccept(player,_Creature,_Quest);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pQuestAccept(pPlayer, pCreature, pQuest);
 }
 
 RIBON_DLL_EXPORT
-bool QuestSelect( Player *player, Creature *_Creature, Quest const *_Quest )
+bool QuestSelect(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
-    Script *tmpscript = m_scripts[_Creature->GetScriptId()];
+    Script *tmpscript = m_scripts[pCreature->GetScriptId()];
     if (!tmpscript || !tmpscript->pQuestSelect) return false;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pQuestSelect(player,_Creature,_Quest);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pQuestSelect(pPlayer, pCreature, pQuest);
 }
 
 RIBON_DLL_EXPORT
-bool QuestComplete( Player *player, Creature *_Creature, Quest const *_Quest )
+bool QuestComplete(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
-    Script *tmpscript = m_scripts[_Creature->GetScriptId()];
+    Script *tmpscript = m_scripts[pCreature->GetScriptId()];
     if (!tmpscript || !tmpscript->pQuestComplete) return false;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pQuestComplete(player,_Creature,_Quest);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pQuestComplete(pPlayer, pCreature, pQuest);
 }
 
 RIBON_DLL_EXPORT
-bool ChooseReward( Player *player, Creature *_Creature, Quest const *_Quest, uint32 opt )
+bool ChooseReward(Player* pPlayer, Creature* pCreature, Quest const* pQuest, uint32 opt)
 {
-    Script *tmpscript = m_scripts[_Creature->GetScriptId()];
+    Script *tmpscript = m_scripts[pCreature->GetScriptId()];
     if (!tmpscript || !tmpscript->pChooseReward) return false;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pChooseReward(player,_Creature,_Quest,opt);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pChooseReward(pPlayer, pCreature, pQuest, opt);
 }
 
 RIBON_DLL_EXPORT
-uint32 NPCDialogStatus( Player *player, Creature *_Creature )
+uint32 NPCDialogStatus(Player* pPlayer, Creature* pCreature)
 {
-    Script *tmpscript = m_scripts[_Creature->GetScriptId()];
+    Script *tmpscript = m_scripts[pCreature->GetScriptId()];
     if (!tmpscript || !tmpscript->pNPCDialogStatus) return 100;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pNPCDialogStatus(player,_Creature);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pNPCDialogStatus(pPlayer, pCreature);
 }
 
 RIBON_DLL_EXPORT
-uint32 GODialogStatus( Player *player, GameObject *_GO )
+uint32 GODialogStatus(Player* pPlayer, GameObject* pGO)
 {
-    Script *tmpscript = m_scripts[_GO->GetGOInfo()->ScriptId];
+    Script *tmpscript = m_scripts[pGO->GetGOInfo()->ScriptId];
     if (!tmpscript || !tmpscript->pGODialogStatus) return 100;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pGODialogStatus(player,_GO);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pGODialogStatus(pPlayer, pGO);
 }
 
 RIBON_DLL_EXPORT
-bool ItemHello( Player *player, Item *_Item, Quest const *_Quest )
+bool ItemHello(Player* pPlayer, Item* pItem, Quest const* pQuest)
 {
-    Script *tmpscript = m_scripts[_Item->GetProto()->ScriptId];
+    Script *tmpscript = m_scripts[pItem->GetProto()->ScriptId];
     if (!tmpscript || !tmpscript->pItemHello) return false;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pItemHello(player,_Item,_Quest);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pItemHello(pPlayer, pItem, pQuest);
 }
 
 RIBON_DLL_EXPORT
-bool ItemQuestAccept( Player *player, Item *_Item, Quest const *_Quest )
+bool ItemQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
 {
-    Script *tmpscript = m_scripts[_Item->GetProto()->ScriptId];
+    Script *tmpscript = m_scripts[pItem->GetProto()->ScriptId];
     if (!tmpscript || !tmpscript->pItemQuestAccept) return false;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pItemQuestAccept(player,_Item,_Quest);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pItemQuestAccept(pPlayer, pItem, pQuest);
 }
 
 RIBON_DLL_EXPORT
-bool GOHello( Player *player, GameObject *_GO )
+bool GOHello(Player* pPlayer, GameObject* pGO)
 {
-    Script *tmpscript = m_scripts[_GO->GetGOInfo()->ScriptId];
+    Script *tmpscript = m_scripts[pGO->GetGOInfo()->ScriptId];
     if (!tmpscript || !tmpscript->pGOHello) return false;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pGOHello(player,_GO);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pGOHello(pPlayer, pGO);
 }
 
 RIBON_DLL_EXPORT
-bool GOQuestAccept( Player *player, GameObject *_GO, Quest const *_Quest )
+bool GOQuestAccept(Player* pPlayer, GameObject* pGO, Quest const* pQuest)
 {
-    Script *tmpscript = m_scripts[_GO->GetGOInfo()->ScriptId];
+    Script *tmpscript = m_scripts[pGO->GetGOInfo()->ScriptId];
     if (!tmpscript || !tmpscript->pGOQuestAccept) return false;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pGOQuestAccept(player,_GO,_Quest);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pGOQuestAccept(pPlayer, pGO, pQuest);
 }
 
 RIBON_DLL_EXPORT
-bool GOChooseReward( Player *player, GameObject *_GO, Quest const *_Quest, uint32 opt )
+bool GOChooseReward(Player* pPlayer, GameObject* pGO, Quest const* pQuest, uint32 opt)
 {
-    Script *tmpscript = m_scripts[_GO->GetGOInfo()->ScriptId];
+    Script *tmpscript = m_scripts[pGO->GetGOInfo()->ScriptId];
     if (!tmpscript || !tmpscript->pGOChooseReward) return false;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pGOChooseReward(player,_GO,_Quest,opt);
+    pPlayer->PlayerTalkClass->ClearMenus();
+    return tmpscript->pGOChooseReward(pPlayer, pGO, pQuest, opt);
 }
 
 RIBON_DLL_EXPORT
-bool AreaTrigger( Player *player, AreaTriggerEntry * atEntry)
+bool AreaTrigger(Player* pPlayer, AreaTriggerEntry * atEntry)
 {
     Script *tmpscript = m_scripts[GetAreaTriggerScriptId(atEntry->id)];
     if (!tmpscript || !tmpscript->pAreaTrigger) return false;
 
-    return tmpscript->pAreaTrigger(player, atEntry);
+    return tmpscript->pAreaTrigger(pPlayer, atEntry);
 }
 
 RIBON_DLL_EXPORT
-CreatureAI* GetAI(Creature *_Creature)
+CreatureAI* GetAI(Creature* pCreature)
 {
-    Script *tmpscript = m_scripts[_Creature->GetScriptId()];
+    Script *tmpscript = m_scripts[pCreature->GetScriptId()];
     if (!tmpscript || !tmpscript->GetAI) return NULL;
 
-    return tmpscript->GetAI(_Creature);
+    return tmpscript->GetAI(pCreature);
 }
 
 RIBON_DLL_EXPORT
-bool ItemUse( Player *player, Item* _Item, SpellCastTargets const& targets)
+bool ItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
 {
-    Script *tmpscript = m_scripts[_Item->GetProto()->ScriptId];
+    Script *tmpscript = m_scripts[pItem->GetProto()->ScriptId];
     if (!tmpscript || !tmpscript->pItemUse) return false;
 
-    return tmpscript->pItemUse(player,_Item,targets);
+    return tmpscript->pItemUse(pPlayer, pItem, targets);
 }
 
 RIBON_DLL_EXPORT
-bool ItemExpire( Player *player, ItemPrototype const * _ItemProto)
+bool ItemExpire(Player* pPlayer, ItemPrototype const * pItemProto)
 {
-    Script *tmpscript = m_scripts[_ItemProto->ScriptId];
+    Script *tmpscript = m_scripts[pItemProto->ScriptId];
     if (!tmpscript || !tmpscript->pItemExpire) return true;
 
-    return tmpscript->pItemExpire(player,_ItemProto);
+    return tmpscript->pItemExpire(pPlayer, pItemProto);
 }
 
 RIBON_DLL_EXPORT
-bool EffectDummyCreature(Unit *caster, uint32 spellId, uint32 effIndex, Creature *crTarget )
+bool EffectDummyCreature(Unit *caster, uint32 spellId, uint32 effIndex, Creature *crTarget)
 {
     Script *tmpscript = m_scripts[crTarget->GetScriptId()];
 
     if (!tmpscript || !tmpscript->pEffectDummyCreature) return false;
 
-    return tmpscript->pEffectDummyCreature(caster, spellId,effIndex,crTarget);
+    return tmpscript->pEffectDummyCreature(caster, spellId, effIndex, crTarget);
 }
 
 RIBON_DLL_EXPORT
-bool EffectDummyGameObj(Unit *caster, uint32 spellId, uint32 effIndex, GameObject *gameObjTarget )
+bool EffectDummyGameObj(Unit *caster, uint32 spellId, uint32 effIndex, GameObject *gameObjTarget)
 {
     Script *tmpscript = m_scripts[gameObjTarget->GetGOInfo()->ScriptId];
 
     if (!tmpscript || !tmpscript->pEffectDummyGameObj) return false;
 
-    return tmpscript->pEffectDummyGameObj(caster, spellId,effIndex,gameObjTarget);
+    return tmpscript->pEffectDummyGameObj(caster, spellId, effIndex, gameObjTarget);
 }
 
 
 RIBON_DLL_EXPORT
-bool EffectDummyItem(Unit *caster, uint32 spellId, uint32 effIndex, Item *itemTarget )
+bool EffectDummyItem(Unit *caster, uint32 spellId, uint32 effIndex, Item *itemTarget)
 {
     Script *tmpscript = m_scripts[itemTarget->GetProto()->ScriptId];
 
     if (!tmpscript || !tmpscript->pEffectDummyItem) return false;
 
-    return tmpscript->pEffectDummyItem(caster, spellId,effIndex,itemTarget);
+    return tmpscript->pEffectDummyItem(caster, spellId, effIndex, itemTarget);
 }
 
 RIBON_DLL_EXPORT

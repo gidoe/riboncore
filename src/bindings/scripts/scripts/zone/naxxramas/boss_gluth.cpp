@@ -1,4 +1,4 @@
-/* Copyright (C) 2008 - 2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+/* Copyright (C) 2008 - 2009 Ribon <http://www.trinitycore.org/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -59,7 +59,7 @@ struct RIBON_DLL_DECL boss_gluthAI : public BossAI
 
     void MoveInLineOfSight(Unit *who)
     {
-        if(who->GetEntry() == MOB_ZOMBIE && me->IsWithinDistInMap(who, 20))
+        if (who->GetEntry() == MOB_ZOMBIE && me->IsWithinDistInMap(who, 20))
         {
             SetGazeOn(who);
             me->MonsterTextEmote(" spots a nearby zombie to devour!", 0, true);
@@ -71,9 +71,9 @@ struct RIBON_DLL_DECL boss_gluthAI : public BossAI
     void EnterCombat(Unit *who)
     {
         for(uint32 i = 0; i < 3; ++i)
-            if(Creature *trigger = DoSummon(WORLD_TRIGGER, PosSummon[i]))
+            if (Creature *trigger = DoSummon(WORLD_TRIGGER, PosSummon[i]))
                 triggers.push_back(trigger);
-        if(triggers.size() < 3)
+        if (triggers.size() < 3)
         {
             error_log("Script Gluth: cannot summon triggers!");
             EnterEvadeMode();
@@ -90,16 +90,16 @@ struct RIBON_DLL_DECL boss_gluthAI : public BossAI
 
     void JustSummoned(Creature *summon)
     {
-        if(summon->GetEntry() == WORLD_TRIGGER)
+        if (summon->GetEntry() == WORLD_TRIGGER)
             summon->setActive(true);
-        else if(summon->GetEntry() == MOB_ZOMBIE)
+        else if (summon->GetEntry() == MOB_ZOMBIE)
             summon->AI()->AttackStart(me);
         summons.Summon(summon);
     }
 
     void UpdateAI(const uint32 diff)
     {
-        if(!UpdateVictimWithGaze() || !CheckInRoom())
+        if (!UpdateVictimWithGaze() || !CheckInRoom())
             return;
 
         events.Update(diff);
@@ -131,9 +131,9 @@ struct RIBON_DLL_DECL boss_gluthAI : public BossAI
             }
         }
 
-        if(me->getVictim()->GetEntry() == MOB_ZOMBIE)
+        if (me->getVictim()->GetEntry() == MOB_ZOMBIE)
         {
-            if(me->IsWithinMeleeRange(me->getVictim()))
+            if (me->IsWithinMeleeRange(me->getVictim()))
             {
                 me->Kill(me->getVictim());
                 me->ModifyHealth(me->GetMaxHealth() * 0.05f);
@@ -144,9 +144,9 @@ struct RIBON_DLL_DECL boss_gluthAI : public BossAI
     }
 };
 
-CreatureAI* GetAI_boss_gluth(Creature *_Creature)
+CreatureAI* GetAI_boss_gluth(Creature* pCreature)
 {
-    return new boss_gluthAI (_Creature);
+    return new boss_gluthAI (pCreature);
 }
 
 void AddSC_boss_gluth()

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008 - 2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+/* Copyright (C) 2008 - 2009 Ribon <http://www.trinitycore.org/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,38 +17,32 @@
 #include "precompiled.h"
 #include "Wintergrasp.h"
 
-bool GossipHello_npc_demolisher_engineerer(Player *player, Creature *_creature)
+bool GossipHello_npc_demolisher_engineerer(Player* pPlayer, Creature* pCreature)
 {
-    if(_creature->isQuestGiver())
-        player->PrepareQuestMenu(_creature->GetGUID());
+    if (pCreature->isQuestGiver())
+        pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
-    if(player->HasAura(SPELL_CORPORAL))
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build catapult.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF);
-    else if(player->HasAura(SPELL_LIEUTENANT))
+    if (pPlayer->HasAura(SPELL_CORPORAL))
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build catapult.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF);
+    else if (pPlayer->HasAura(SPELL_LIEUTENANT))
     {
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build catapult.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build demolisher.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF+1);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build siege engine.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF+2);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build bomber.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF+3);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build sheddder.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF+4);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build fighter jet.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF+3);
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build catapult.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF);
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build demolisher.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF+1);
+        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Build siege engine.", GOSSIP_SENDER_MAIN,   GOSSIP_ACTION_INFO_DEF+2);
     }
 
-    player->SEND_GOSSIP_MENU(_creature->GetNpcTextId(), _creature->GetGUID());
+    pPlayer->SEND_GOSSIP_MENU(pCreature->GetNpcTextId(), pCreature->GetGUID());
     return true;
 }
 
-bool GossipSelect_npc_demolisher_engineerer(Player* player, Creature* me, uint32 uiSender, uint32 uiAction)
+bool GossipSelect_npc_demolisher_engineerer(Player* pPlayer, Creature* me, uint32 uiSender, uint32 uiAction)
 {
-    player->CLOSE_GOSSIP_MENU();
+    pPlayer->CLOSE_GOSSIP_MENU();
     switch(uiAction - GOSSIP_ACTION_INFO_DEF)
     {
-        case 0: player->CastSpell(player, 56663, false, NULL, NULL, me->GetGUID()); break;
-        case 1: player->CastSpell(player, 56575, false, NULL, NULL, me->GetGUID()); break;
-        case 2: player->CastSpell(player, player->GetTeamId() ? 61408 : 56661, false, NULL, NULL, me->GetGUID()); break;
-        case 3: player->CastSpell(player, 56667, false, NULL, NULL, me->GetGUID()); break;
-        case 4: player->CastSpell(player, 56669, false, NULL, NULL, me->GetGUID()); break;
-        case 5: player->CastSpell(player, 56665, false, NULL, NULL, me->GetGUID()); break;
+        case 0: pPlayer->CastSpell(pPlayer, 56663, false, NULL, NULL, me->GetGUID()); break;
+        case 1: pPlayer->CastSpell(pPlayer, 56575, false, NULL, NULL, me->GetGUID()); break;
+        case 2: pPlayer->CastSpell(pPlayer, pPlayer->GetTeamId() ? 61408 : 56661, false, NULL, NULL, me->GetGUID()); break;
     }
 
     return true;

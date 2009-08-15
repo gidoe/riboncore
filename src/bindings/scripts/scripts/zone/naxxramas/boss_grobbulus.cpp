@@ -1,4 +1,4 @@
-/* Copyright (C) 2008 - 2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+/* Copyright (C) 2008 - 2009 Ribon <http://www.trinitycore.org/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -46,16 +46,16 @@ struct RIBON_DLL_DECL boss_grobbulusAI : public BossAI
 
     void SpellHitTarget(Unit *target, const SpellEntry *spell)
     {
-        if(spell->Id == SPELL_SLIME_SPRAY)
+        if (spell->Id == SPELL_SLIME_SPRAY)
         {
-            if(TempSummon *slime = me->SummonCreature(MOB_FALLOUT_SLIME, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 0))
+            if (TempSummon *slime = me->SummonCreature(MOB_FALLOUT_SLIME, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 0))
                 DoZoneInCombat(slime);
         }
     }
 
     void UpdateAI(const uint32 diff)
     {
-        if(!UpdateVictim())
+        if (!UpdateVictim())
             return;
 
         events.Update(diff);
@@ -76,8 +76,8 @@ struct RIBON_DLL_DECL boss_grobbulusAI : public BossAI
                     events.ScheduleEvent(EVENT_SPRAY, 15000+rand()%15000);
                     return;
                 case EVENT_INJECT:
-                    if(Unit *target = SelectUnit(SELECT_TARGET_RANDOM, 0))
-                        if(!target->HasAura(SPELL_MUTATING_INJECTION))
+                    if (Unit *target = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                        if (!target->HasAura(SPELL_MUTATING_INJECTION))
                             DoCast(target, SPELL_MUTATING_INJECTION);
                     events.ScheduleEvent(EVENT_INJECT, 8000 + 12000 * ((float)me->GetHealth() / me->GetMaxHealth()));
                     return;
@@ -88,9 +88,9 @@ struct RIBON_DLL_DECL boss_grobbulusAI : public BossAI
     }
 };
 
-CreatureAI* GetAI_boss_grobbulus(Creature *_Creature)
+CreatureAI* GetAI_boss_grobbulus(Creature* pCreature)
 {
-    return new boss_grobbulusAI (_Creature);
+    return new boss_grobbulusAI (pCreature);
 }
 
 void AddSC_boss_grobbulus()

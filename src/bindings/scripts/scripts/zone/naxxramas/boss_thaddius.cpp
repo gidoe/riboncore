@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 - 2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ * Copyright (C) 2008 - 2009 Ribon <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ struct RIBON_DLL_DECL boss_thaddiusAI : public BossAI
 
     void KilledUnit(Unit* victim)
     {
-        if(!(rand()%5))
+        if (!(rand()%5))
             DoScriptText(SAY_SLAY, me);
     }
 
@@ -95,12 +95,12 @@ struct RIBON_DLL_DECL boss_thaddiusAI : public BossAI
 
     void UpdateAI(const uint32 diff)
     {
-        if(!UpdateVictim())
+        if (!UpdateVictim())
             return;
 
         events.Update(diff);
 
-        if(me->hasUnitState(UNIT_STAT_CASTING))
+        if (me->hasUnitState(UNIT_STAT_CASTING))
             return;
 
         while(uint32 eventId = events.ExecuteEvent())
@@ -121,16 +121,16 @@ struct RIBON_DLL_DECL boss_thaddiusAI : public BossAI
             }
         }
 
-        if(events.GetTimer() > 15000 && !me->IsWithinMeleeRange(me->getVictim()))
+        if (events.GetTimer() > 15000 && !me->IsWithinMeleeRange(me->getVictim()))
             DoCast(me->getVictim(), SPELL_BALL_LIGHTNING);
         else
             DoMeleeAttackIfReady();
     }
 };
 
-CreatureAI* GetAI_boss_thaddius(Creature *_Creature)
+CreatureAI* GetAI_boss_thaddius(Creature* pCreature)
 {
-    return new boss_thaddiusAI (_Creature);
+    return new boss_thaddiusAI (pCreature);
 }
 
 void AddSC_boss_thaddius()

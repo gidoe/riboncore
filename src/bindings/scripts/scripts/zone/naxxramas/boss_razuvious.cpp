@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 - 2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ * Copyright (C) 2008 - 2009 Ribon <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ struct RIBON_DLL_DECL boss_razuviousAI : public BossAI
 
     void KilledUnit(Unit* victim)
     {
-        if(!(rand()%3))
+        if (!(rand()%3))
             DoPlaySoundToSet(me, SOUND_SLAY);
     }
 
@@ -80,7 +80,7 @@ struct RIBON_DLL_DECL boss_razuviousAI : public BossAI
 
     void UpdateAI(const uint32 diff)
     {
-        if(!UpdateVictim())
+        if (!UpdateVictim())
             return;
 
         events.Update(diff);
@@ -98,7 +98,7 @@ struct RIBON_DLL_DECL boss_razuviousAI : public BossAI
                     events.ScheduleEvent(EVENT_SHOUT, 25000);
                     return;
                 case EVENT_KNIFE:
-                    if(Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0, 45))
+                    if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 0, 45))
                         DoCast(target, SPELL_JAGGED_KNIFE);
                     events.ScheduleEvent(EVENT_KNIFE, 25000);
                     return;
@@ -113,9 +113,9 @@ struct RIBON_DLL_DECL boss_razuviousAI : public BossAI
     }
 };
 
-CreatureAI* GetAI_boss_razuvious(Creature *_Creature)
+CreatureAI* GetAI_boss_razuvious(Creature* pCreature)
 {
-    return new boss_razuviousAI (_Creature);
+    return new boss_razuviousAI (pCreature);
 }
 
 void AddSC_boss_razuvious()

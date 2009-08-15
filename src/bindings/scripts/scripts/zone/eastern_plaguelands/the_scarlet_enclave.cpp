@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ * Copyright (C) 2009 Ribon <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -738,9 +738,9 @@ struct RIBON_DLL_DECL npc_unworthy_initiateAI : public ScriptedAI
     npc_unworthy_initiateAI(Creature *c) : ScriptedAI(c)
     {
         me->SetReactState(REACT_PASSIVE);
-        if(!me->GetEquipmentId())
-            if(const CreatureInfo *info = GetCreatureInfo(28406))
-                if(info->equipmentId)
+        if (!me->GetEquipmentId())
+            if (const CreatureInfo *info = GetCreatureInfo(28406))
+                if (info->equipmentId)
                     const_cast<CreatureInfo*>(me->GetCreatureInfo())->equipmentId = info->equipmentId;
     }
 
@@ -775,15 +775,15 @@ struct RIBON_DLL_DECL npc_unworthy_initiateAI : public ScriptedAI
 
     void MovementInform(uint32 type, uint32 id)
     {
-        if(type != POINT_MOTION_TYPE)
+        if (type != POINT_MOTION_TYPE)
             return;
 
-        if(id == 1)
+        if (id == 1)
         {
             wait_timer = 5000;
             m_creature->CastSpell(m_creature,SPELL_DK_INITIATE_VISUAL,true);
 
-            if(Unit* starter = Unit::GetUnit((*m_creature),event_starter))
+            if (Unit* starter = Unit::GetUnit((*m_creature),event_starter))
                 DoScriptText(say_event_attack[rand()%9],m_creature,starter);
 
             phase = PHASE_TO_ATTACK;
@@ -809,9 +809,9 @@ struct RIBON_DLL_DECL npc_unworthy_initiateAI : public ScriptedAI
     void UpdateAI(const uint32 diff);
 };
 
-CreatureAI* GetAI_npc_unworthy_initiate(Creature *_Creature)
+CreatureAI* GetAI_npc_unworthy_initiate(Creature* pCreature)
 {
-    return new npc_unworthy_initiateAI(_Creature);
+    return new npc_unworthy_initiateAI(pCreature);
 }
 
 struct RIBON_DLL_DECL npc_unworthy_initiate_anchorAI : public PassiveAI
@@ -822,7 +822,7 @@ struct RIBON_DLL_DECL npc_unworthy_initiate_anchorAI : public PassiveAI
 
     void SetGUID(const uint64 &guid, int32 id)
     {
-        if(!prisonerGUID)
+        if (!prisonerGUID)
             prisonerGUID = guid;
     }
 
@@ -834,7 +834,7 @@ void npc_unworthy_initiateAI::UpdateAI(const uint32 diff)
     switch(phase)
     {
     case PHASE_CHAINED:
-        if(!anchorGUID)
+        if (!anchorGUID)
         {
             float x, y, z;
             float dist = 99.0f;
@@ -842,9 +842,9 @@ void npc_unworthy_initiateAI::UpdateAI(const uint32 diff)
 
             for(uint8 i = 0; i < 12; ++i)
             {
-                if(GameObject* temp_prison = m_creature->FindNearestGameObject(acherus_soul_prison[i],30))
+                if (GameObject* temp_prison = m_creature->FindNearestGameObject(acherus_soul_prison[i],30))
                 {
-                    if(dist == 99.0f || m_creature->IsWithinDist(temp_prison, dist, false))
+                    if (dist == 99.0f || m_creature->IsWithinDist(temp_prison, dist, false))
                     {
                         temp_prison->GetPosition(x, y, z);
                         dist = m_creature->GetDistance2d(temp_prison);
@@ -853,10 +853,10 @@ void npc_unworthy_initiateAI::UpdateAI(const uint32 diff)
                 }
             }
 
-            if(!prison)
+            if (!prison)
                 return;
 
-            if(Creature* trigger = me->FindNearestCreature(29521, 30))
+            if (Creature* trigger = me->FindNearestCreature(29521, 30))
             {
                 prison->ResetDoorOrButton();
                 trigger->AI()->SetGUID(m_creature->GetGUID());
@@ -866,9 +866,9 @@ void npc_unworthy_initiateAI::UpdateAI(const uint32 diff)
         }
         return;
     case PHASE_TO_EQUIP:
-        if(wait_timer)
+        if (wait_timer)
         {
-            if(wait_timer < diff)
+            if (wait_timer < diff)
             {
                 m_creature->GetMotionMaster()->MovePoint(1,targ_x,targ_y,m_creature->GetPositionZ());
                 phase = PHASE_EQUIPING;
@@ -877,22 +877,22 @@ void npc_unworthy_initiateAI::UpdateAI(const uint32 diff)
         }
         return;
     case PHASE_TO_ATTACK:
-        if(wait_timer)
+        if (wait_timer)
         {
-            if(wait_timer < diff)
+            if (wait_timer < diff)
             {
                 m_creature->setFaction(14);
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_2);
                 phase = PHASE_ATTACKING;
 
-                if(Unit* target = Unit::GetUnit((*m_creature),event_starter))
+                if (Unit* target = Unit::GetUnit((*m_creature),event_starter))
                     m_creature->AI()->AttackStart(target);
                 wait_timer = 0;
             }else wait_timer -= diff;
         }
         return;
     case PHASE_ATTACKING:
-        if(!UpdateVictim())
+        if (!UpdateVictim())
             return;
 
         events.Update(diff);
@@ -929,17 +929,17 @@ void npc_unworthy_initiateAI::UpdateAI(const uint32 diff)
     }
 }
 
-CreatureAI* GetAI_npc_unworthy_initiate_anchor(Creature *_Creature)
+CreatureAI* GetAI_npc_unworthy_initiate_anchor(Creature* pCreature)
 {
-    return new npc_unworthy_initiate_anchorAI(_Creature);
+    return new npc_unworthy_initiate_anchorAI(pCreature);
 }
 
-bool GOHello_go_acherus_soul_prison(Player *player, GameObject* go)
+bool GOHello_go_acherus_soul_prison(Player* pPlayer, GameObject* pGo)
 {
-    if(Creature *anchor = go->FindNearestCreature(29521, 15))
-        if(uint64 prisonerGUID = anchor->AI()->GetGUID())
-            if(Creature* prisoner = Creature::GetCreature(*player, prisonerGUID))
-                CAST_AI(npc_unworthy_initiateAI, (prisoner->AI()))->EventStart(anchor, player);
+    if (Creature *anchor = pGo->FindNearestCreature(29521, 15))
+        if (uint64 prisonerGUID = anchor->AI()->GetGUID())
+            if (Creature* prisoner = Creature::GetCreature(*pPlayer, prisonerGUID))
+                CAST_AI(npc_unworthy_initiateAI, (prisoner->AI()))->EventStart(anchor, pPlayer);
 
     return false;
 }
@@ -1014,13 +1014,13 @@ struct RIBON_DLL_DECL npc_death_knight_initiateAI : public SpellAI
     {
         if (m_bIsDuelInProgress && pDoneBy->IsControlledByPlayer())
         {
-            if(pDoneBy->GetGUID() != m_uiDuelerGUID && pDoneBy->GetOwnerGUID() != m_uiDuelerGUID) // other players cannot help
+            if (pDoneBy->GetGUID() != m_uiDuelerGUID && pDoneBy->GetOwnerGUID() != m_uiDuelerGUID) // other players cannot help
                 uiDamage = 0;
-            else if(uiDamage >= m_creature->GetHealth()) 
+            else if (uiDamage >= m_creature->GetHealth()) 
             {
                 uiDamage = 0;
 
-                if(!lose)
+                if (!lose)
                 {
                     pDoneBy->RemoveGameObject(SPELL_DUEL_FLAG, true);
                     pDoneBy->AttackStop();
@@ -1054,13 +1054,13 @@ struct RIBON_DLL_DECL npc_death_knight_initiateAI : public SpellAI
 
         if (m_bIsDuelInProgress)
         {
-            if(lose)
+            if (lose)
             {
-                if(!me->HasAura(7267))
+                if (!me->HasAura(7267))
                     EnterEvadeMode();
                 return;
             }
-            else if(me->getVictim()->GetTypeId() == TYPEID_PLAYER
+            else if (me->getVictim()->GetTypeId() == TYPEID_PLAYER
                 && me->getVictim()->GetHealth() * 10 < me->getVictim()->GetMaxHealth())
             {
                 me->getVictim()->CastSpell(me->getVictim(), 7267, true); // beg
@@ -1085,10 +1085,10 @@ bool GossipHello_npc_death_knight_initiate(Player* pPlayer, Creature* pCreature)
 {
     if (pPlayer->GetQuestStatus(QUEST_DEATH_CHALLENGE) == QUEST_STATUS_INCOMPLETE && pCreature->GetHealth() == pCreature->GetMaxHealth())
     {
-        if(pPlayer->GetHealth() * 10 < pPlayer->GetMaxHealth())
+        if (pPlayer->GetHealth() * 10 < pPlayer->GetMaxHealth())
             return true;
 
-        if(pPlayer->isInCombat() || pCreature->isInCombat())
+        if (pPlayer->isInCombat() || pCreature->isInCombat())
             return true;
 
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ACCEPT_DUEL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
@@ -1099,16 +1099,16 @@ bool GossipHello_npc_death_knight_initiate(Player* pPlayer, Creature* pCreature)
 
 bool GossipSelect_npc_death_knight_initiate(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
-    if( uiAction == GOSSIP_ACTION_INFO_DEF )
+    if (uiAction == GOSSIP_ACTION_INFO_DEF)
     {
         pPlayer->CLOSE_GOSSIP_MENU();
 
-        if(pPlayer->isInCombat() || pCreature->isInCombat())
+        if (pPlayer->isInCombat() || pCreature->isInCombat())
             return true;
 
         if (npc_death_knight_initiateAI* pInitiateAI = CAST_AI(npc_death_knight_initiateAI, pCreature->AI()))
         {
-            if(pInitiateAI->m_bIsDuelInProgress)
+            if (pInitiateAI->m_bIsDuelInProgress)
                 return true;
         }
 
@@ -1195,9 +1195,9 @@ struct RIBON_DLL_DECL npc_dark_rider_of_acherusAI : public ScriptedAI
 
 };
 
-CreatureAI* GetAI_npc_dark_rider_of_acherus(Creature *_Creature)
+CreatureAI* GetAI_npc_dark_rider_of_acherus(Creature* pCreature)
 {
-    return new npc_dark_rider_of_acherusAI(_Creature);
+    return new npc_dark_rider_of_acherusAI(pCreature);
 }
 
 /*######
@@ -1219,15 +1219,15 @@ struct RIBON_DLL_DECL npc_salanar_the_horsemanAI : public ScriptedAI
     {
         if (spell->Id == DELIVER_STOLEN_HORSE)
         {
-            if(caster->GetTypeId() == TYPEID_UNIT && CAST_CRE(caster)->isVehicle())
+            if (caster->GetTypeId() == TYPEID_UNIT && CAST_CRE(caster)->isVehicle())
             {
-                if( Unit *charmer = caster->GetCharmer() )
+                if (Unit *charmer = caster->GetCharmer())
                 {
                     charmer->ExitVehicle();
                     caster->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                     caster->setFaction(35);
                     DoCast(caster, CALL_DARK_RIDER, true);
-                    if(Creature* Dark_Rider = m_creature->FindNearestCreature(28654, 15))
+                    if (Creature* Dark_Rider = m_creature->FindNearestCreature(28654, 15))
                         CAST_AI(npc_dark_rider_of_acherusAI, Dark_Rider->AI())->InitDespawnHorse(caster);
                 }
             }
@@ -1238,19 +1238,19 @@ struct RIBON_DLL_DECL npc_salanar_the_horsemanAI : public ScriptedAI
     {
         ScriptedAI::MoveInLineOfSight(who);
 
-        if(who->GetTypeId() == TYPEID_UNIT && CAST_CRE(who)->isVehicle() && me->IsWithinDistInMap(who, 10.0f))
+        if (who->GetTypeId() == TYPEID_UNIT && CAST_CRE(who)->isVehicle() && me->IsWithinDistInMap(who, 10.0f))
         {
-            if( Unit *charmer = who->GetCharmer() )
+            if (Unit *charmer = who->GetCharmer())
             {
-                if( charmer->GetTypeId() == TYPEID_PLAYER )
+                if (charmer->GetTypeId() == TYPEID_PLAYER)
                 {
                     switch(me->GetEntry())
                     {
                         // for quest Into the Realm of Shadows(12687)
                         case 28788:
-                            if( CAST_PLR(charmer)->GetQuestStatus(12687) == QUEST_STATUS_INCOMPLETE )
+                            if (CAST_PLR(charmer)->GetQuestStatus(12687) == QUEST_STATUS_INCOMPLETE)
                             {
-                                if(CAST_PLR(charmer)->HasAura(REALM_OF_SHADOWS))
+                                if (CAST_PLR(charmer)->HasAura(REALM_OF_SHADOWS))
                                     charmer->RemoveAurasDueToSpell(REALM_OF_SHADOWS);
                                 CAST_PLR(charmer)->GroupEventHappens(12687, me);
                             }
@@ -1266,9 +1266,9 @@ struct RIBON_DLL_DECL npc_salanar_the_horsemanAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_salanar_the_horseman(Creature *_Creature)
+CreatureAI* GetAI_npc_salanar_the_horseman(Creature* pCreature)
 {
-    return new npc_salanar_the_horsemanAI(_Creature);
+    return new npc_salanar_the_horsemanAI(pCreature);
 }
 
 /*######
@@ -1287,19 +1287,19 @@ struct RIBON_DLL_DECL npc_ros_dark_riderAI : public ScriptedAI
     void Reset()
     {
         Creature* deathcharger = me->FindNearestCreature(28782, 30);
-        if(!deathcharger) return;
+        if (!deathcharger) return;
         deathcharger->RestoreFaction();
         deathcharger->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
         deathcharger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        if(!me->m_Vehicle && deathcharger->isVehicle() && CAST_VEH(deathcharger)->HasEmptySeat(0))
+        if (!me->m_Vehicle && deathcharger->isVehicle() && CAST_VEH(deathcharger)->HasEmptySeat(0))
             me->EnterVehicle(CAST_VEH(deathcharger));
     }
 
     void JustDied(Unit *killer)
     {
         Creature* deathcharger = me->FindNearestCreature(28782, 30);
-        if(!deathcharger) return;
-        if( killer->GetTypeId() == TYPEID_PLAYER && deathcharger->GetTypeId() == TYPEID_UNIT && deathcharger->isVehicle() )
+        if (!deathcharger) return;
+        if (killer->GetTypeId() == TYPEID_PLAYER && deathcharger->GetTypeId() == TYPEID_UNIT && deathcharger->isVehicle())
         {
             deathcharger->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             deathcharger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -1308,9 +1308,9 @@ struct RIBON_DLL_DECL npc_ros_dark_riderAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_ros_dark_rider(Creature *_Creature)
+CreatureAI* GetAI_npc_ros_dark_rider(Creature* pCreature)
 {
-    return new npc_ros_dark_riderAI(_Creature);
+    return new npc_ros_dark_riderAI(pCreature);
 }
 
 // correct way: 52312 52314 52555 ...
@@ -1322,13 +1322,13 @@ struct RIBON_DLL_DECL npc_dkc1_gothikAI : public ScriptedAI
     {
         ScriptedAI::MoveInLineOfSight(who);
 
-        if(who->GetEntry() == 28845 && me->IsWithinDistInMap(who, 10.0f))
+        if (who->GetEntry() == 28845 && me->IsWithinDistInMap(who, 10.0f))
         {
-            if(Unit *owner = who->GetOwner())
+            if (Unit *owner = who->GetOwner())
             {
-                if(owner->GetTypeId() == TYPEID_PLAYER)
+                if (owner->GetTypeId() == TYPEID_PLAYER)
                 {
-                    if(CAST_PLR(owner)->GetQuestStatus(12698) == QUEST_STATUS_INCOMPLETE)
+                    if (CAST_PLR(owner)->GetQuestStatus(12698) == QUEST_STATUS_INCOMPLETE)
                     {
                         CAST_CRE(who)->CastSpell(owner, 52517, true);
                         CAST_CRE(who)->ForcedDespawn();
@@ -1339,9 +1339,9 @@ struct RIBON_DLL_DECL npc_dkc1_gothikAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_dkc1_gothik(Creature *_Creature)
+CreatureAI* GetAI_npc_dkc1_gothik(Creature* pCreature)
 {
-    return new npc_dkc1_gothikAI(_Creature);
+    return new npc_dkc1_gothikAI(pCreature);
 }
 
 // npc 28912 quest 17217 boss 29001 mob 29007 go 191092 
@@ -1413,7 +1413,7 @@ struct RIBON_DLL_DECL npc_valkyr_battle_maidenAI : public ScriptedAI
                     phase = 2;
                     break;
                 case 2:
-                    if(!Owner->isRessurectRequested())
+                    if (!Owner->isRessurectRequested())
                     {
                         m_creature->HandleEmoteCommand(EMOTE_ONESHOT_CUSTOMSPELL01);
                         DoCast(Owner, SPELL_REVIVE,true);
@@ -1442,9 +1442,9 @@ struct RIBON_DLL_DECL npc_valkyr_battle_maidenAI : public ScriptedAI
 
 };
 
-CreatureAI* GetAI_npc_valkyr_battle_maiden(Creature *_Creature)
+CreatureAI* GetAI_npc_valkyr_battle_maiden(Creature* pCreature)
 {
-    return new npc_valkyr_battle_maidenAI (_Creature);
+    return new npc_valkyr_battle_maidenAI (pCreature);
 }
 
 void AddSC_the_scarlet_enclave()

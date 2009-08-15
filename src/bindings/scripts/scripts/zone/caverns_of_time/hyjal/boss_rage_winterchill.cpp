@@ -35,7 +35,7 @@ struct RIBON_DLL_DECL boss_rage_winterchillAI : public hyjal_trashAI
     boss_rage_winterchillAI(Creature *c) : hyjal_trashAI(c)
     {
         pInstance = c->GetInstanceData();
-        go = false;
+        pGo = false;
         pos = 0;
     }
 
@@ -43,7 +43,7 @@ struct RIBON_DLL_DECL boss_rage_winterchillAI : public hyjal_trashAI
     uint32 DecayTimer;
     uint32 NovaTimer;
     uint32 IceboltTimer;
-    bool go;
+    bool pGo;
     uint32 pos;
 
     void Reset()
@@ -54,13 +54,13 @@ struct RIBON_DLL_DECL boss_rage_winterchillAI : public hyjal_trashAI
         NovaTimer = 15000;
         IceboltTimer = 10000;
 
-        if(pInstance && IsEvent)
+        if (pInstance && IsEvent)
             pInstance->SetData(DATA_RAGEWINTERCHILLEVENT, NOT_STARTED);
     }
 
     void EnterCombat(Unit *who)
     {
-        if(pInstance && IsEvent)
+        if (pInstance && IsEvent)
             pInstance->SetData(DATA_RAGEWINTERCHILLEVENT, IN_PROGRESS);
         DoPlaySoundToSet(m_creature, SOUND_ONAGGRO);
         m_creature->MonsterYell(SAY_ONAGGRO, LANG_UNIVERSAL, 0);
@@ -95,7 +95,7 @@ struct RIBON_DLL_DECL boss_rage_winterchillAI : public hyjal_trashAI
     void JustDied(Unit *victim)
     {
         hyjal_trashAI::JustDied(victim);
-        if(pInstance && IsEvent)
+        if (pInstance && IsEvent)
             pInstance->SetData(DATA_RAGEWINTERCHILLEVENT, DONE);
         DoPlaySoundToSet(m_creature, SOUND_ONDEATH);
         m_creature->MonsterYell(SAY_ONDEATH, LANG_UNIVERSAL, NULL);
@@ -107,10 +107,10 @@ struct RIBON_DLL_DECL boss_rage_winterchillAI : public hyjal_trashAI
         {
             //Must update npc_escortAI
             npc_escortAI::UpdateAI(diff);
-            if(!go)
+            if (!pGo)
             {
-                go = true;
-                if(pInstance)
+                pGo = true;
+                if (pInstance)
                 {
                     AddWaypoint(0, 4896.08,    -1576.35,    1333.65);
                     AddWaypoint(1, 4898.68,    -1615.02,    1329.48);
@@ -127,15 +127,15 @@ struct RIBON_DLL_DECL boss_rage_winterchillAI : public hyjal_trashAI
         }
 
         //Return since we have no target
-        if (!UpdateVictim() )
+        if (!UpdateVictim())
             return;
 
-        if(FrostArmorTimer < diff)
+        if (FrostArmorTimer < diff)
         {
             DoCast(m_creature, SPELL_FROST_ARMOR);
             FrostArmorTimer = 40000+rand()%20000;
         }else FrostArmorTimer -= diff;
-        if(DecayTimer < diff)
+        if (DecayTimer < diff)
         {
             DoCast(m_creature->getVictim(), SPELL_DEATH_AND_DECAY);
             DecayTimer = 60000+rand()%20000;
@@ -151,7 +151,7 @@ struct RIBON_DLL_DECL boss_rage_winterchillAI : public hyjal_trashAI
                     break;
             }
         }else DecayTimer -= diff;
-        if(NovaTimer < diff)
+        if (NovaTimer < diff)
         {
             DoCast(m_creature->getVictim(), SPELL_FROST_NOVA);
             NovaTimer = 30000+rand()%15000;
@@ -167,7 +167,7 @@ struct RIBON_DLL_DECL boss_rage_winterchillAI : public hyjal_trashAI
                     break;
             }
         }else NovaTimer -= diff;
-        if(IceboltTimer < diff)
+        if (IceboltTimer < diff)
         {
             DoCast(SelectTarget(SELECT_TARGET_RANDOM,0,40,true), SPELL_ICEBOLT);
             IceboltTimer = 11000+rand()%20000;
@@ -177,9 +177,9 @@ struct RIBON_DLL_DECL boss_rage_winterchillAI : public hyjal_trashAI
     }
 };
 
-CreatureAI* GetAI_boss_rage_winterchill(Creature *_Creature)
+CreatureAI* GetAI_boss_rage_winterchill(Creature* pCreature)
 {
-    return new boss_rage_winterchillAI (_Creature);
+    return new boss_rage_winterchillAI (pCreature);
 }
 
 void AddSC_boss_rage_winterchill()

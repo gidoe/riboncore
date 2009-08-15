@@ -1,4 +1,4 @@
-/* Copyright (C) 2008 - 2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+/* Copyright (C) 2008 - 2009 Ribon <http://www.trinitycore.org/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -41,7 +41,7 @@ struct RIBON_DLL_DECL boss_patchwerkAI : public BossAI
 
     void KilledUnit(Unit* Victim)
     {
-        if(!(rand()%5))
+        if (!(rand()%5))
             DoScriptText(SAY_SLAY, me);
     }
 
@@ -62,7 +62,7 @@ struct RIBON_DLL_DECL boss_patchwerkAI : public BossAI
 
     void UpdateAI(const uint32 diff)
     {
-        if(!UpdateVictim())
+        if (!UpdateVictim())
             return;
 
         events.Update(diff);
@@ -106,7 +106,7 @@ struct RIBON_DLL_DECL boss_patchwerkAI : public BossAI
             }
         }
 
-        if(!Enraged && HealthBelowPct(5))
+        if (!Enraged && HealthBelowPct(5))
         {
             DoCast(m_creature, SPELL_FRENZY);
             DoScriptText(EMOTE_ENRAGE, NULL);
@@ -118,9 +118,9 @@ struct RIBON_DLL_DECL boss_patchwerkAI : public BossAI
     }
 };
 
-CreatureAI* GetAI_boss_patchwerk(Creature *_Creature)
+CreatureAI* GetAI_boss_patchwerk(Creature* pCreature)
 {
-    return new boss_patchwerkAI (_Creature);
+    return new boss_patchwerkAI (pCreature);
 }
 
 void AddSC_boss_patchwerk()

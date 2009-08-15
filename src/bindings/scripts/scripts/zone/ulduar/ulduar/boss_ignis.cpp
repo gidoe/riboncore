@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 - 2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ * Copyright (C) 2008 - 2009 Ribon <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,23 +59,23 @@ struct RIBON_DLL_DECL boss_ignis_AI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     {
-        if(!UpdateVictim())
+        if (!UpdateVictim())
             return;
 
-        if( FLAME_JETS_Timer < diff )
+        if (FLAME_JETS_Timer < diff)
         {
             DoCast(m_creature,SPELL_FLAME_JETS);
             DoScriptText(SAY_SLAY, m_creature);
             FLAME_JETS_Timer = 25000;
         } else FLAME_JETS_Timer -= diff;
 
-        if( SCORCH_Timer < diff )
+        if (SCORCH_Timer < diff)
         {
             DoCast(m_creature->getVictim(),SPELL_SCORCH);
             SCORCH_Timer = 20000;
         } else SCORCH_Timer -= diff;
 
-        if( SLAG_POT_Timer < diff )
+        if (SLAG_POT_Timer < diff)
         {
             DoCast(m_creature,SPELL_SLAG_POT);
             DoScriptText(SAY_SLAY, m_creature);
@@ -87,9 +87,9 @@ struct RIBON_DLL_DECL boss_ignis_AI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_ignis(Creature *_Creature)
+CreatureAI* GetAI_boss_ignis(Creature* pCreature)
 {
-    return new boss_ignis_AI (_Creature);
+    return new boss_ignis_AI (pCreature);
 }
 void AddSC_boss_ignis()
 {
