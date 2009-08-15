@@ -47,7 +47,7 @@ ribonconfig
 vmaps
 ZThread
 g3dlite
-readline
+${READLINE_LIBRARY}
 gomp
 ${SCRIPT_LIB}
 ${MYSQL_LIBRARIES}
