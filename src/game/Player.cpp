@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2009 Ribon <http://getmangos.com/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
  *
@@ -3798,7 +3798,7 @@ bool Player::resetTalents(bool no_cost)
         if( (getClassMask() & talentTabInfo->ClassMask) == 0 )
             continue;
 
-        /* for (int j = 0; j < MAX_TALENT_RANK; j++)
+     /* for (int j = 0; j < MAX_TALENT_RANK; j++)
         {
             for(PlayerSpellMap::iterator itr = GetSpellMap().begin(); itr != GetSpellMap().end();)
             {
@@ -3831,8 +3831,8 @@ bool Player::resetTalents(bool no_cost)
         PlayerTalentMap::iterator itr2 = m_talents[m_activeSpec]->begin();
         for (; itr2 != m_talents[m_activeSpec]->end(); ++itr2)
         {
-            removeSpell(itr2->first, !IsPassiveSpell(itr2->first),false);
-            itr2->second->state = PLAYERSPELL_REMOVED;
+			removeSpell(itr2->first, !IsPassiveSpell(itr2->first),false);
+			itr2->second->state = PLAYERSPELL_REMOVED;
         }
     }
 
@@ -16403,13 +16403,13 @@ void Player::_SaveActions()
                 ++itr;
                 break;
             case ACTIONBUTTON_CHANGED:
-                CharacterDatabase.PExecute("UPDATE character_action SET action='%u', type='%u' WHERE guid='%u' AND button='%u' AND spec='%u'",
+                CharacterDatabase.PExecute("UPDATE character_action SET action = '%u', type = '%u' WHERE guid = '%u' AND button = '%u' AND spec = '%u'",
                     (uint32)itr->second.GetAction(), (uint32)itr->second.GetType(), GetGUIDLow(), (uint32)itr->first, (uint32)m_activeSpec);
                 itr->second.uState = ACTIONBUTTON_UNCHANGED;
                 ++itr;
                 break;
             case ACTIONBUTTON_DELETED:
-                CharacterDatabase.PExecute("DELETE FROM character_action WHERE guid='%u' AND button='%u' AND spec<>'%u'", GetGUIDLow(), (uint32)itr->first, (uint32)m_activeSpec );
+                CharacterDatabase.PExecute("DELETE FROM character_action WHERE guid = '%u' and button = '%u'", GetGUIDLow(), (uint32)itr->first );
                 m_actionButtons.erase(itr++);
                 break;
             default:
@@ -21359,7 +21359,7 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket *data)
             *data << uint8(MAX_GLYPH_SLOT_INDEX);           // glyphs count
 
             for(uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
-                *data << uint16(m_Glyphs[specIdx][i]);      // GlyphProperties.dbc
+                *data << uint16(m_Glyphs[specIdx][i]);               // GlyphProperties.dbc
         }
     }
 }
@@ -21850,6 +21850,7 @@ void Player::ActivateSpec(uint8 spec)
         SetGlyph(slot, glyph);
     }
 
+    m_usedTalentCount = (uint32)(sizeof(m_talents[spec]) / sizeof(m_talents[spec][0])); // This is not right, not factoring in talent ranks :(
     InitTalentForLevel();
 
     QueryResult *result = CharacterDatabase.PQuery("SELECT button,action,type FROM character_action WHERE guid = '%u' AND spec = '%u' ORDER BY button", GetGUIDLow(), m_activeSpec);
@@ -21860,5 +21861,4 @@ void Player::ActivateSpec(uint8 spec)
     UnsummonPetTemporaryIfAny();
     SendActionButtons(m_activeSpec);
     SetPower(getPowerType(), 0);
-    SaveToDB(); assert(spec == m_activeSpec); assert(spec <= m_specsCount);
 }

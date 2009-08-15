@@ -2907,6 +2907,7 @@ void Spell::EffectEnergize(uint32 i)
         case 31930:                                         // Judgements of the Wise
         case 63375:                                         // Improved Stormstrike
             damage = damage * unitTarget->GetCreateMana() / 100;
+            break;
         case 48542:                                         // Revitalize
             damage = damage * unitTarget->GetMaxPower(power) / 100;
             break;
@@ -4662,6 +4663,11 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                     ((Creature*)unitTarget)->ForcedDespawn();
                     return;
                 }
+                case 55693:                                 // Remove Collapsing Cave Aura
+                    if(unitTarget)
+                        return;
+                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(effIndex));
+                    break;
                 // PX-238 Winter Wondervolt TRAP
                 case 26275:
                 {
@@ -6944,3 +6950,4 @@ void Spell::EffectActivateSpec(uint32 /*eff_idx*/)
 
     ((Player*)unitTarget)->ActivateSpec(damage-1);  // damage is 1 or 2, spec is 0 or 1
 }
+
