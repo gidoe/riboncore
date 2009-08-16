@@ -21891,6 +21891,7 @@ void Player::ActivateSpec(uint8 spec)
         _LoadActions(result);
     }
     UnsummonPetTemporaryIfAny();
+	AutoUnequipOffhandIfNeed();
     SendActionButtons(1);
     SetPower(getPowerType(), 0);
 }
