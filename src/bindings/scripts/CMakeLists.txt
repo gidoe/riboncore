@@ -4,14 +4,19 @@
 SET(ribonscript_LIB_SRCS
    ScriptMgr.cpp
    ScriptMgr.h
+   base/escortAI.cpp
+   base/escortAI.h
+   base/guard_ai.cpp
+   base/guard_ai.h
+   base/simple_ai.cpp
+   base/simple_ai.h
    include/precompiled.cpp
    include/precompiled.h
    include/sc_creature.cpp
    include/sc_creature.h
    include/sc_gossip.h
    include/sc_instance.h
-   scripts/creature/simple_ai.cpp
-   scripts/creature/simple_ai.h
+   scripts/eastern_kingdoms/scarlet_enclave/the_scarlet_enclave.cpp
    scripts/eastern_kingdoms/alterac_mountains.cpp
    scripts/eastern_kingdoms/arathi_highlands.cpp
    scripts/eastern_kingdoms/blasted_lands.cpp
@@ -24,6 +29,7 @@ SET(ribonscript_LIB_SRCS
    scripts/eastern_kingdoms/ghostlands.cpp
    scripts/eastern_kingdoms/hinterlands.cpp
    scripts/eastern_kingdoms/ironforge.cpp
+   scripts/eastern_kingdoms/isle_of_queldanas.cpp
    scripts/eastern_kingdoms/loch_modan.cpp
    scripts/eastern_kingdoms/searing_gorge.cpp
    scripts/eastern_kingdoms/silvermoon_city.cpp
@@ -38,9 +44,6 @@ SET(ribonscript_LIB_SRCS
    scripts/examples/example_escort.cpp
    scripts/examples/example_gossip_codebox.cpp
    scripts/examples/example_misc.cpp
-   scripts/guard/guard_ai.cpp
-   scripts/guard/guard_ai.h
-   scripts/guard/guards.cpp
    scripts/kalimdor/ashenvale.cpp
    scripts/kalimdor/azshara.cpp
    scripts/kalimdor/azuremyst_isle.cpp
@@ -68,13 +71,10 @@ SET(ribonscript_LIB_SRCS
    scripts/northrend/icecrown.cpp
    scripts/northrend/sholazar_basin.cpp
    scripts/northrend/zuldrak.cpp
-   scripts/npc/npc_escortAI.cpp
-   scripts/npc/npc_escortAI.h
    scripts/outland/blades_edge_mountains.cpp
    scripts/outland/boss_doomlord_kazzak.cpp
    scripts/outland/boss_doomwalker.cpp
    scripts/outland/hellfire_peninsula.cpp
-   scripts/outland/isle_of_queldanas.cpp
    scripts/outland/nagrand.cpp
    scripts/outland/netherstorm.cpp
    scripts/outland/shadowmoon_valley.cpp
@@ -185,7 +185,6 @@ SET(ribonscript_LIB_SRCS
    scripts/zone/coilfang_resevoir/underbog/boss_the_black_stalker.cpp
    scripts/zone/deadmines/def_deadmines.h
    scripts/zone/deadmines/deadmines.cpp
-   scripts/zone/eastern_plaguelands/the_scarlet_enclave.cpp
    scripts/zone/gruuls_lair/boss_gruul.cpp
    scripts/zone/gruuls_lair/boss_high_king_maulgar.cpp
    scripts/zone/gruuls_lair/def_gruuls_lair.h
@@ -502,12 +501,15 @@ SET(ribonscript_LIB_SRCS
    scripts/world/boss_taerar.cpp
    scripts/world/boss_ysondre.cpp
    scripts/world/go_scripts.cpp
+   scripts/world/guards.cpp
    scripts/world/item_scripts.cpp
    scripts/world/mob_generic_creature.cpp
    scripts/world/npc_innkeeper.cpp
    scripts/world/npc_professions.cpp
    scripts/world/npcs_special.cpp
    scripts/world/npc_taxi.cpp
+   system/ScriptLoader.cpp
+   system/ScriptLoader.h
    system.cpp
 )
 

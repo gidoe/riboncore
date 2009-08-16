@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2009 Ribon <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #include "precompiled.h"
 #include "Vehicle.h"
 #include "ObjectMgr.h"
-#include "../../npc/npc_escortAI.h"
+#include "escortAI.h"
 
 #define GCD_CAST    1
 
@@ -647,11 +647,7 @@ struct RIBON_DLL_DECL npc_koltira_deathweaverAI : public npc_escortAI
 
 CreatureAI* GetAI_npc_koltira_deathweaver(Creature* pCreature)
 {
-    npc_koltira_deathweaverAI* pTempAI = new npc_koltira_deathweaverAI(pCreature);
-
-    pTempAI->FillPointMovementListForCreature();
-
-    return (CreatureAI*)pTempAI;
+    return new npc_koltira_deathweaverAI(pCreature);
 }
 
 bool QuestAccept_npc_koltira_deathweaver(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
