@@ -1523,7 +1523,7 @@ bool GOHello_go_inconspicuous_mine_car(Player* pPlayer, GameObject* pGO)
 {
     if (pPlayer->GetQuestStatus(12701) == QUEST_STATUS_INCOMPLETE)
     {
-        // Hack Why Trinity Dont Support Custom Summon Location
+        // Hack Why Ribon Dont Support Custom Summon Location
         if(Creature *miner = pPlayer->SummonCreature(28841, 2383.869629, -5900.312500, 107.996086, pPlayer->GetOrientation(),TEMPSUMMON_DEAD_DESPAWN, 1))
         {
             pPlayer->CastSpell(pPlayer, SPELL_CART_SUMM, true);
@@ -1533,9 +1533,9 @@ bool GOHello_go_inconspicuous_mine_car(Player* pPlayer, GameObject* pGO)
                 {
                     car->AI()->SetGUID(miner->GetGUID());
                     CAST_AI(npc_scarlet_minerAI, miner->AI())->InitCartQuest(pPlayer);
-                }else error_log("TSCR: GOHello_go_inconspicuous_mine_car vehicle entry is not correct.");
-            }else error_log("TSCR: GOHello_go_inconspicuous_mine_car player is not on the vehicle.");
-        }else error_log("TSCR: GOHello_go_inconspicuous_mine_car Scarlet Miner cant be found by script.");
+                }else error_log("RSCR: GOHello_go_inconspicuous_mine_car vehicle entry is not correct.");
+            }else error_log("RSCR: GOHello_go_inconspicuous_mine_car player is not on the vehicle.");
+        }else error_log("RSCR: GOHello_go_inconspicuous_mine_car Scarlet Miner cant be found by script.");
     }
     return true;
 }
