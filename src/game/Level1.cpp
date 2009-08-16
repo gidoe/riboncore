@@ -171,13 +171,13 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
 				strid = LANG_SYSTEMMESSAGE_ADMINISTRATOR;
                 break;
 			case SEC_CONSOLE:
-				strid = LANG_SYSTEMMESSAGE_CONSOLE;
+				strid = LANG_SYSTEMMESSAGE_ADMINISTRATOR;
 				break;
 			default:
 		        return false;
 		}
 	else
-		strid = LANG_SYSTEMMESSAGE_ADMINISTRATOR;
+		strid = LANG_SYSTEMMESSAGE_CONSOLE;
 
 	if(m_session)
 		sWorld.SendWorldText(strid, m_session->GetPlayerName(), args);
