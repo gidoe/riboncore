@@ -22,9 +22,9 @@ SDCategory: Script Examples
 EndScriptData */
 
 #include "precompiled.h"
-#include "escortAI.h"
+#include "escort_ai.h"
 
-struct TRINITY_DLL_DECL npc_testAI : public npc_escortAI
+struct RIBON_DLL_DECL npc_testAI : public npc_escortAI
 {
     public:
 
