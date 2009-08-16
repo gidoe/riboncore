@@ -177,7 +177,7 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
 		        return false;
 		}
 	else
-		strid = LANG_SYSTEMMESSAGE_CONSOLE;
+		strid = LANG_SYSTEMMESSAGE_ADMINISTRATOR;
 
 	if(m_session)
 		sWorld.SendWorldText(strid, m_session->GetPlayerName(), args);
