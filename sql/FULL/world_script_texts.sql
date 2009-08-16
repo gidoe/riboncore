@@ -1,4 +1,4 @@
-﻿-- Up to RC 455
+﻿-- Up to RC 505
 -- 
 -- ribonscript_script_texts.sql Contains data for table `script_texts` mainly used in C++ parts.
 -- valid entries for table are between -1000000 and -1999999
@@ -568,7 +568,7 @@ INSERT INTO `script_texts` (`entry`, `content_default`, `content_loc1`, `content
 INSERT INTO `script_texts` (`entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`, `sound`, `type`, `language`, `emote`, `comment`) VALUES
 (-1409000,'%s performs one last service for Ragnaros.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 2, 0, 0,'geddon EMOTE_SERVICE'),
 (-1409001,'%s goes into a killing frenzy!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 2, 0, 0,'magmadar EMOTE_FRENZY'),
-(-1409002,'%s refuses to die while its master is in trouble.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 2, 0, 0,'core rager EMOTE_AEGIS'),
+(-1409002,'%s refuses to die while its master is in trouble.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 2, 0, 0,'core rager EMOTE_LOWHP'),
 (-1409003,'Reckless mortals, none may challenge the sons of the living flame!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 8035, 1, 0, 0,'majordomo SAY_AGGRO'),
 (-1409004,'The runes of warding have been destroyed! Hunt down the infedels my bretheren.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 8039, 1, 0, 0,'majordomo SAY_SPAWN'),
 (-1409005,'Ashes to Ashes!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 8037, 1, 0, 0,'majordomo SAY_SLAY'),
@@ -2030,5 +2030,5 @@ INSERT INTO `npc_text` (`ID`, `text0_0`, `text0_1`, `lang0`, `prob0`, `em0_0`, `
 
 -- Dual Spec `npc_option` change
 UPDATE `npc_option` SET `id`=52,`action`=19 WHERE `id`=51 AND `action`=18 AND `option_text`='UNIT_NPC_FLAG_OUTDOORPVP';
-DELETE FROM `npc_option` WHERE (`id`='51');
+DELETE FROM `npc_option` WHERE `id`=51 AND `action`=16 AND `option_text`='Purchase a Dual Talent Specialization.';
 INSERT INTO `npc_option` (`id`, `gossip_id`, `npcflag`, `icon`, `action`, `box_money`, `coded`, `option_text`, `box_text`) values('51','0','16','2','18','10000000','0','Purchase a Dual Talent Specialization.','Are you sure you wish to purchase a Dual Talent Specialization?');
