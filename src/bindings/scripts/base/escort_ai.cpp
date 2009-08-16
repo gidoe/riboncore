@@ -19,6 +19,25 @@ enum
     POINT_HOME          = 0xFFFFFE
 };
 
+npc_escortAI::npc_escortAI(Creature* pCreature) : ScriptedAI(pCreature),
+    IsBeingEscorted(false),
+    IsOnHold(false),
+    PlayerGUID(0),
+    MaxPlayerDistance(DEFAULT_MAX_PLAYER_DISTANCE),
+    CanMelee(true),
+    m_uiPlayerCheckTimer(1000),
+    m_uiWPWaitTimer(2500),
+    m_bIsReturning(false),
+    m_bIsActiveAttacker(true),
+    m_bIsRunning(false),
+    DespawnAtEnd(true),
+    DespawnAtFar(true),
+    m_pQuestForEscort(NULL),
+    m_bCanInstantRespawn(false),
+    m_bCanReturnToStart(false),
+    ScriptWP(false)
+{}
+
 void npc_escortAI::AttackStart(Unit* pWho)
 {
     if (!pWho)
@@ -111,6 +130,32 @@ void npc_escortAI::EnterEvadeMode()
     Reset();
 }
 
+bool npc_escortAI::IsPlayerOrGroupInRange()
+{
+    if (Player* pPlayer = Unit::GetPlayer(PlayerGUID))
+    {
+        if (Group* pGroup = pPlayer->GetGroup())
+        {
+            for(GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
+            {
+                Player* pMember = pRef->getSource();
+
+                if (pMember && m_creature->IsWithinDistInMap(pMember, GetMaxPlayerDistance()))
+                {
+                    return true;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            if (m_creature->IsWithinDistInMap(pPlayer, GetMaxPlayerDistance()))
+                return true;
+        }
+    }
+    return false;
+}
+
 void npc_escortAI::UpdateAI(const uint32 uiDiff)
 {
     //Waypoint Updating
@@ -159,7 +204,10 @@ void npc_escortAI::UpdateAI(const uint32 uiDiff)
             if (!IsOnHold)
             {
                 m_creature->GetMotionMaster()->MovePoint(CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
-                debug_log("RSCR: EscortAI Next WP is: %u, %f, %f, %f", CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
+                debug_log("RSCR: EscortAI start waypoint %u (%f, %f, %f).", CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
+
+                WaypointStart(CurrentWP->id);
+
                 m_uiWPWaitTimer = 0;
             }
         }
@@ -172,31 +220,7 @@ void npc_escortAI::UpdateAI(const uint32 uiDiff)
     {
         if (m_uiPlayerCheckTimer < uiDiff)
         {
-            bool bIsMaxRangeExceeded = true;
-
-            if (Player* pPlayer = Unit::GetPlayer(PlayerGUID))
-            {
-                if (Group* pGroup = pPlayer->GetGroup())
-                {
-                    for(GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
-                    {
-                        Player* pMember = pRef->getSource();
-
-                        if (pMember && m_creature->IsWithinDistInMap(pMember, GetMaxPlayerDistance()))
-                        {
-                            bIsMaxRangeExceeded = false;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    if (m_creature->IsWithinDistInMap(pPlayer, GetMaxPlayerDistance()))
-                        bIsMaxRangeExceeded = false;
-                }
-            }
-
-            if (DespawnAtFar && bIsMaxRangeExceeded)
+            if (DespawnAtFar && !IsPlayerOrGroupInRange())
             {
                 debug_log("RSCR: EscortAI failed because player/group was to far away or not found");
 
