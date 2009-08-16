@@ -2204,6 +2204,9 @@ class RIBON_DLL_SPEC Player : public Unit
 
         //bool isActiveObject() const { return true; }
         bool canSeeSpellClickOn(Creature const* creature) const;
+
+        inline uint32 GetChampioningFaction() const { return m_ChampioningFaction; }
+        inline void SetChampioningFaction(uint32 faction) { m_ChampioningFaction = faction; }
     protected:
 
         uint32 m_contestedPvPTimer;
@@ -2502,6 +2505,8 @@ class RIBON_DLL_SPEC Player : public Unit
         ReputationMgr  m_reputationMgr;
 
         SpellCooldowns m_spellCooldowns;
+
+        uint32 m_ChampioningFaction;
 };
 
 void AddItemsSetItem(Player*player,Item *item);
