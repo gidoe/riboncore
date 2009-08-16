@@ -391,7 +391,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
             if (plMover->m_anti_MistimingCount > World::GetMistimingAlarms())
             {
-				sWorld.SendWorldText(3,"Kicking cheater: " + (std::string)plMover->GetName());
+				sWorld.SendWorldText(3,strcat("Kicking cheater: ", plMover->GetName()));
                 plMover->GetSession()->KickPlayer();
                 return;
             }
@@ -535,7 +535,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             if ( movementInfo.z < 0.0001f && movementInfo.z > -0.0001f
                 && ((movementInfo.flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING | MOVEMENTFLAG_FLY_MODE)) == 0) )
             {
-                // Prevent using TeleportToPlan.
+                // Prevent using TeleportToPlane.
                 Map *map = plMover->GetMap();
                 if (map){
                     float plane_z = map->GetHeight(movementInfo.x, movementInfo.y, MAX_HEIGHT) - movementInfo.z;
@@ -552,7 +552,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                         {
                             sLog.outError("AC2-%s, teleport to plan exception. Exception count: %d ",
                                             plMover->GetName(), plMover->m_anti_TeleToPlane_Count);
-							sWorld.SendWorldText(3,"Kicking cheater: " + (std::string)plMover->GetName());
+							sWorld.SendWorldText(3,strcat("Kicking cheater: ", plMover->GetName()));
                             plMover->GetSession()->KickPlayer();
                             return;
                         }
