@@ -33,7 +33,6 @@
 #include "Log.h"
 #include "Master.h"
 
-
 #ifndef _RIBON_CORE_CONFIG
 # define _RIBON_CORE_CONFIG  "RibonCore.conf"
 #endif //_RIBON_CORE_CONFIG

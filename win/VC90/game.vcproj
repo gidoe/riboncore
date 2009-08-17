@@ -1226,18 +1226,6 @@
 				RelativePath="..\..\src\game\ZoneScript.h"
 				>
 			</File>
-			<Filter
-				Name="AuctionHouseBot"
-				>
-				<File
-					RelativePath="..\..\src\game\AuctionHouseBot.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\game\AuctionHouseBot.h"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Server"
@@ -1514,6 +1502,18 @@
 				RelativePath="..\..\src\game\UnitAI.h"
 				>
 			</File>
+			<Filter
+				Name="AuctionHouseBot"
+				>
+				<File
+					RelativePath="..\..\src\game\AuctionHouseBot.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\game\AuctionHouseBot.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="OutdoorPvP"
