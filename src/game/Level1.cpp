@@ -182,7 +182,7 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
 	if(m_session)
 		sWorld.SendWorldText(strid, m_session->GetPlayerName(), args);
     else
-        sWorld.SendWorldText(strid, "console", args);
+        sWorld.SendWorldText(strid, args);
 
 	return true;
 }
