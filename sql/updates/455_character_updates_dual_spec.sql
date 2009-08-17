@@ -1,6 +1,7 @@
 
 START TRANSACTION; /* Transaction is used due to the destructive nature of these queries, if anything fails the transaction should abort, and the updates should be applied manually. */
 
+DROP TABLE IF EXISTS `character_glyphs`;
 CREATE TABLE `character_glyphs` (
   `guid` int(11) unsigned NOT NULL,
   `spec` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -13,6 +14,7 @@ CREATE TABLE `character_glyphs` (
   PRIMARY KEY (`guid`,`spec`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `character_talent`;
 CREATE TABLE `character_talent` (
   `guid` int(11) unsigned NOT NULL,
   `spell` int(11) unsigned NOT NULL,
