@@ -118,7 +118,7 @@ struct RIBON_DLL_DECL npc_air_force_botsAI : public ScriptedAI
         }
 
         if (!m_pSpawnAssoc)
-            error_db_log("TCSR: Creature template entry %u has ScriptName npc_air_force_bots, but it's not handled by that script", pCreature->GetEntry());
+            error_db_log("RCSR: Creature template entry %u has ScriptName npc_air_force_bots, but it's not handled by that script", pCreature->GetEntry());
         else
         {
             CreatureInfo const* spawnedTemplate = GetCreatureTemplateStore(m_pSpawnAssoc->m_uiSpawnedCreatureEntry);
@@ -126,7 +126,7 @@ struct RIBON_DLL_DECL npc_air_force_botsAI : public ScriptedAI
             if (!spawnedTemplate)
             {
                 m_pSpawnAssoc = NULL;
-                error_db_log("TCSR: Creature template entry %u does not exist in DB, which is required by npc_air_force_bots", m_pSpawnAssoc->m_uiSpawnedCreatureEntry);
+                error_db_log("RCSR: Creature template entry %u does not exist in DB, which is required by npc_air_force_bots", m_pSpawnAssoc->m_uiSpawnedCreatureEntry);
                 return;
             }
         }
@@ -145,7 +145,7 @@ struct RIBON_DLL_DECL npc_air_force_botsAI : public ScriptedAI
             m_uiSpawnedGUID = pSummoned->GetGUID();
         else
         {
-            error_db_log("TCSR: npc_air_force_bots: wasn't able to spawn Creature %u", m_pSpawnAssoc->m_uiSpawnedCreatureEntry);
+            error_db_log("RCSR: npc_air_force_bots: wasn't able to spawn Creature %u", m_pSpawnAssoc->m_uiSpawnedCreatureEntry);
             m_pSpawnAssoc = NULL;
         }
 
@@ -1766,33 +1766,14 @@ CreatureAI* GetAI_npc_ebon_gargoyle(Creature* pCreature)
     return new npc_ebon_gargoyleAI (pCreature);
 }
 
-//TODO: 30% Attackdamage check for Lightwell
 struct RIBON_DLL_DECL npc_lightwellAI : public PassiveAI
 {
     npc_lightwellAI(Creature *c) : PassiveAI(c) {}
 
-    //uint32 desummon_timer;
-
     void Reset()
     {
-        //desummon_timer = 180000;
         m_creature->CastSpell(m_creature, 59907, false); // Spell for Lightwell Charges
     }
-
-    /*
-    void UpdateAI(const uint32 diff)
-    {
-        if (desummon_timer < diff)
-        {
-            m_creature->Kill(m_creature);
-        }else desummon_timer -= diff;
-
-        if (!m_creature->HasAura(59907))
-        {
-            m_creature->Kill(m_creature);
-        }
-    }
-    */
 };
 
 CreatureAI* GetAI_npc_lightwellAI(Creature* pCreature)
