@@ -895,9 +895,9 @@ bool GOHello_go_inconspicuous_mine_car(Player* pPlayer, GameObject* pGO)
                 {
                     car->AI()->SetGUID(miner->GetGUID());
                     CAST_AI(npc_scarlet_minerAI, miner->AI())->InitCartQuest(pPlayer);
-                }else error_log("TSCR: GOHello_go_inconspicuous_mine_car vehicle entry is not correct.");
-            }else error_log("TSCR: GOHello_go_inconspicuous_mine_car player is not on the vehicle.");
-        }else error_log("TSCR: GOHello_go_inconspicuous_mine_car Scarlet Miner cant be found by script.");
+                }else error_log("RSCR: GOHello_go_inconspicuous_mine_car vehicle entry is not correct.");
+            }else error_log("RSCR: GOHello_go_inconspicuous_mine_car player is not on the vehicle.");
+        }else error_log("RSCR: GOHello_go_inconspicuous_mine_car Scarlet Miner cant be found by script.");
     }
     return true;
 }
