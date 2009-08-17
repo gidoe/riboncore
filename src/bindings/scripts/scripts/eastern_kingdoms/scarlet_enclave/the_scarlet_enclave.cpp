@@ -100,7 +100,6 @@ CreatureAI* GetAI_npc_valkyr_battle_maiden(Creature* pCreature)
     return new npc_valkyr_battle_maidenAI (pCreature);
 }
 
-
 void AddSC_the_scarlet_enclave()
 {
     Script *newscript;
