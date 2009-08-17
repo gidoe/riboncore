@@ -6792,7 +6792,7 @@ void ObjectMgr::LoadNPCSpellClickSpells()
         info.castFlags = castFlags;
         info.auraRequired = auraRequired;
         info.auraForbidden = auraForbidden;
-        info.userType = SpellClickUserTypes(castFlags);
+        info.userType = SpellClickUserTypes(userType);
         mSpellClickInfoMap.insert(SpellClickInfoMap::value_type(npc_entry, info));
 
         // mark creature template as spell clickable
