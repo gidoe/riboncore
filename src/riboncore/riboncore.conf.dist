@@ -1906,7 +1906,7 @@ CheckDB = 1
 
 Anticheat.Movement.Enable = 1
 Anticheat.Movement.TeleportToPlaneAlarms = 50
-Anticheat.Movement.MistimingDelta = 100000
+Anticheat.Movement.MistimingDelta = 15000
 Anticheat.Movement.MistimingAlarms = 20
 
 ###################################################################################################################
