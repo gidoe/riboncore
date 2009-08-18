@@ -102,7 +102,7 @@ class RIBON_DLL_SPEC Database
         virtual bool DirectExecute(const char* sql) = 0;
         bool DirectPExecute(const char *format,...) ATTR_PRINTF(2,3);
 
-        // Writes SQL commands to a LOG file (see Ribond.conf "LogSQL")
+        // Writes SQL commands to a LOG file (see RibonCore.conf "LogSQL")
         bool PExecuteLog(const char *format,...) ATTR_PRINTF(2,3);
 
         virtual bool BeginTransaction()                     // nothing do if DB not support transactions
