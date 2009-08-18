@@ -137,7 +137,7 @@ typedef uint32      DWORD;
 
 typedef uint64 OBJECT_HANDLE;
 
-//#define MULTI_THREAD_MAP
+#define MULTI_THREAD_MAP
 #ifdef MULTI_THREAD_MAP
 #define MAP_BASED_RAND_GEN
 #endif
