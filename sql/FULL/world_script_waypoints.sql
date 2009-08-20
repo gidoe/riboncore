@@ -1,4 +1,4 @@
--- Up to RC 568
+-- Up to RC 599
 
 -- This file contains all waypoints used by escortAI scripts
 DROP TABLE IF EXISTS script_waypoint;

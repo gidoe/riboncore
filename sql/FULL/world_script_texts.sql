@@ -1,4 +1,4 @@
--- Up to RC 568
+-- Up to RC 599
 -- 
 -- ribonscript_script_texts.sql Contains data for table `script_texts` mainly used in C++ parts.
 -- valid entries for table are between -1000000 and -1999999
@@ -303,7 +303,7 @@ INSERT INTO `script_texts` (`entry`, `content_default`, `content_loc1`, `content
 (-1000358,'Look out! We''re under attack!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0,'KAYA_AMBUSH'),
 (-1000359,'Thank you for helping me. I know my way back from here.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0,'KAYA_END'),
 (-1000360,'The strands of LIFE have been severed! The Dreamers must be avenged!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1, 0, 0,' ysondre SAY_AGGRO'),
-(-1000361,'Come forth, ye Dreamers   and claim your vengeance!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1, 0, 0,' ysondre SAY_SUMMONDRUIDS'),
+(-1000361,'Come forth, ye Dreamers � and claim your vengeance!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1, 0, 0,' ysondre SAY_SUMMONDRUIDS'),
 (-1000362,'Let''s go $N. I am ready to reach Whitereach Post.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 1, 0,'paoka SAY_START'),
 (-1000363,'Now this looks familiar. If we keep heading east, I think we can... Ahh, Wyvern on the attack!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 1, 0,'paoka SAY_WYVERN'),
 (-1000364,'Thanks a bunch... I can find my way back to Whitereach Post from here. Be sure to talk with Motega Firemane; perhaps you can keep him from sending me home.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 1, 0,'paoka SAY_COMPLETE'),
@@ -358,10 +358,35 @@ INSERT INTO `script_texts` (`entry`, `content_default`, `content_loc1`, `content
 (-1000413,'I apologize for taking so long to get here. I wanted Lady Proudmoore to be present also.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 7, 0,'hendel SAY_PROGRESS_3_TER'),
 (-1000414,'We can only stay a few moments before returning to the tower. If you wish to speak to us more you may find us there.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 7, 0,'hendel SAY_PROGRESS_4_TER'),
 (-1000415,'%s, too injured, gives up the chase.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 2, 0, 0,'hendel EMOTE_SURRENDER'),
-(-1000416,'REUSE', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'REUSE'),
-(-1000417,'REUSE', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'REUSE'),
-(-1000418,'REUSE', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'REUSE'),
-(-1000419,'REUSE', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'REUSE');
+(-1000416,'Well, I\'m not sure how far I\'ll make it in this state... I\'m feeling kind of faint...', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'ringo SAY_RIN_START_1'),
+(-1000417,'Remember, if I faint again, the water that Spraggle gave you will revive me.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'ringo SAY_RIN_START_2'),
+(-1000418,'The heat... I can\'t take it...', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'ringo SAY_FAINT_1'),
+(-1000419,'Maybe... you could carry me?', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'ringo SAY_FAINT_2'),
+(-1000420,'Uuuuuuggggghhhhh....', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'ringo SAY_FAINT_3'),
+(-1000421,'I\'m not feeling so well...', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'ringo SAY_FAINT_4'),
+(-1000422,'Where... Where am I?', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'ringo SAY_WAKE_1'),
+(-1000423,'I am feeling a little better now, thank you.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'ringo SAY_WAKE_2'),
+(-1000424,'Yes, I must go on.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'ringo SAY_WAKE_3'),
+(-1000425,'How am I feeling? Quite soaked, thank you.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'ringo SAY_WAKE_4'),
+(-1000426,'Spraggle! I didn\'t think I\'d make it back!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'ringo SAY_RIN_END_1'),
+(-1000427,'Ringo! You\'re okay!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'ringo SAY_SPR_END_2'),
+(-1000428,'Oh... I\'m feeling faint...', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'ringo SAY_RIN_END_3'),
+(-1000429,'%s collapses onto the ground.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,2,0,0,'ringo EMOTE_RIN_END_4'),
+(-1000430,'%s stands up after a short pause.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,2,0,0,'ringo EMOTE_RIN_END_5'),
+(-1000431,'Ugh.',0,0,0,0,'ringo SAY_RIN_END_6'),
+(-1000432,'Ringo? Wake up! Don\'t worry, I\'ll take care of you.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'ringo SAY_SPR_END_7'),
+(-1000433,'%s fades away after a long pause.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,2,0,0,'ringo EMOTE_RIN_END_8'),
+(-1000434,'Liladris has been waiting for me at Maestra\'s Post, so we should make haste, $N.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'kerlonian SAY_KER_START'),
+(-1000435,'%s looks very sleepy...', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,2,0,0,'kerlonian EMOTE_KER_SLEEP_1'),
+(-1000436,'%s suddenly falls asleep', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,2,0,0,'kerlonian EMOTE_KER_SLEEP_2'),
+(-1000437,'%s begins to drift off...', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,2,0,0,'kerlonian EMOTE_KER_SLEEP_3'),
+(-1000438,'This looks like the perfect place for a nap...', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'kerlonian SAY_KER_SLEEP_1'),
+(-1000439,'Yaaaaawwwwwnnnn...', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'kerlonian SAY_KER_SLEEP_2'),
+(-1000440,'Oh, I am so tired...', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'kerlonian SAY_KER_SLEEP_3'),
+(-1000441,'You don\'t mind if I stop here for a moment, do you?', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'kerlonian SAY_KER_SLEEP_4'),
+(-1000442,'Be on the alert! The Blackwood furbolgs are numerous in the area...', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'kerlonian SAY_KER_ALERT_1'),
+(-1000443,'It\'s quiet... Too quiet...', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'kerlonian SAY_KER_ALERT_2'),
+(-1000444,'Oh, I can see Liladris from here... Tell her I\'m here, won\'t you?', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,0,0,0,0,'kerlonian SAY_KER_END');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO `script_texts` (`entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`, `sound`, `type`, `language`, `emote`, `comment`) VALUES
@@ -2172,5 +2197,5 @@ INSERT INTO `script_texts` (`entry`,`content_default`,`sound`,`type`,`language`,
    (-1609283, 'collapses.',0,2,0,0,'Highlord Darion Mograine'),
    (-1609284, 'charges towards the Lich King, Ashbringer in hand and strikes the Lich King.',0,2,0,0,'Highlord Tirion Fordring'),
    (-1609285, 'disappears. Tirion walks over to where Darion lay',0,2,0,0,'The Lich King'),
-   (-1609286, 'Light washes over the chapel ? the Light of Dawn is uncovered.',0,2,0,0,'');
+   (-1609286, 'Light washes over the chapel  the Light of Dawn is uncovered.',0,2,0,0,'');
 
