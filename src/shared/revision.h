@@ -1,4 +1,4 @@
 #ifndef __REVISION_H__
 #define __REVISION_H__
- #define _REVISION "597"
+ #define _REVISION "598"
 #endif // __REVISION_H__
