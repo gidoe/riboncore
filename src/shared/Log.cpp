@@ -121,7 +121,7 @@ void Log::Initialize()
 
     /// Open specific log files
     logfile = openLogFile("LogFile","LogTimestamp","w");
-    InitColors(sConfig.GetStringDefault("LogColors", "13 11 9 5"));
+    InitColors(sConfig.GetStringDefault("LogColors", "13 8 14 10"));
 
     m_gmlog_per_account = sConfig.GetBoolDefault("GmLogPerAccount",false);
     if(!m_gmlog_per_account)
