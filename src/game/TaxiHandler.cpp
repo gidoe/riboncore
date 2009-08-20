@@ -203,7 +203,7 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
     MovementInfo movementInfo;
     ReadMovementInfo(recv_data, &movementInfo);
     //<<< end movement anticheat
-    
+   
     uint32 curDest = GetPlayer()->m_taxi.GetTaxiDestination();
     if(!curDest)
     {

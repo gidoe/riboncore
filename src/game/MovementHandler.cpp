@@ -235,7 +235,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     // ignore, waiting processing in WorldSession::HandleMoveWorldportAckOpcode and WorldSession::HandleMoveTeleportAck
     if(plMover && plMover->IsBeingTeleported())
-	{
+    {
         // movement anticheat
         plMover->m_anti_JustTeleported = 1;
         // end movement anticheat
@@ -278,7 +278,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             {
                 // elevators also cause the client to send MOVEMENTFLAG_ONTRANSPORT - just unmount if the guid can be found in the transport list
                 for (MapManager::TransportSet::const_iterator iter = MapManager::Instance().m_Transports.begin(); iter != MapManager::Instance().m_Transports.end(); ++iter)
-				{
+                {
                     if ((*iter)->GetGUID() == movementInfo.t_guid)
                     {
                         plMover->m_transport = (*iter);
@@ -287,8 +287,8 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                     }
                 }
             }
-			if(!mover->GetTransport() && !mover->m_Vehicle)
-				movementInfo.flags &= ~MOVEMENTFLAG_ONTRANSPORT;
+            if(!mover->GetTransport() && !mover->m_Vehicle)
+                movementInfo.flags &= ~MOVEMENTFLAG_ONTRANSPORT;
             //movement anticheat;
             //Correct finding GO guid in DB (thanks to GriffonHeart)
             GameObject *obj = HashMapHolder<GameObject>::Find(movementInfo.t_guid);
@@ -310,7 +310,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         movementInfo.t_o = 0.0f;
         movementInfo.t_time = 0;
         movementInfo.t_seat = -1;
-		plMover->m_anti_TransportGUID = 0;
+        plMover->m_anti_TransportGUID = 0;
     }
 
     // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
@@ -390,12 +390,13 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             sLog.outError("AC2-%s, mistiming exception. #:%d, mistiming: %dms ",
                             plMover->GetName(), plMover->m_anti_MistimingCount, sync_time);
 
+            /* Disabled, not passive at all, and apparently causing crashes:
             if (plMover->m_anti_MistimingCount > World::GetMistimingAlarms())
             {
-				sWorld.SendWorldText(3,strcat("Kicking cheater: ", plMover->GetName()));
+                sWorld.SendWorldText(3,strcat("Kicking cheater: ", plMover->GetName()));
                 plMover->GetSession()->KickPlayer();
                 return;
-            }
+            } */
             check_passed = false;
         }
         // end mistiming checks
@@ -424,6 +425,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             float delta_y = plMover->GetPositionY() - movementInfo.y;
             float delta_z = plMover->GetPositionZ() - movementInfo.z;
             float real_delta = delta_x * delta_x + delta_y * delta_y;
+            float real_delta_3d = delta_x * delta_x + delta_y * delta_y + delta_z * delta_z;
             float tg_z = -99999; //tangens
             // end movement distance
 
@@ -452,6 +454,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 plMover->m_anti_Last_VSpeed = -2.3f;
                 if (plMover->m_anti_LastSpeedChangeTime != 0) plMover->m_anti_LastSpeedChangeTime = 0;
             }
+            allowed_delta=( ((movementInfo.flags & (MOVEMENTFLAG_ONTRANSPORT)) != 0) && (allowed_delta<14900.0f) ) ? 14900.0f : allowed_delta;
             // end calculating section ---------------------
 
             //AntiGravitation (thanks to Meekro)
@@ -481,7 +484,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             }
 
             //speed hack checks
-            if ((real_delta > allowed_delta)) // && (delta_z < 0))
+            if ((real_delta > allowed_delta)) // && (delta_z < 0) && !(plMover->GetTransport()))
             {
                 #ifdef MOVEMENT_ANTICHEAT_DEBUG
                 sLog.outError("AC2-%s, speed exception | cDelta=%f aDelta=%f | cSpeed=%f lSpeed=%f deltaTime=%f",
@@ -490,7 +493,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 check_passed = false;
             }
             //teleport hack checks
-            if ((real_delta>4900.0f) && !(real_delta < allowed_delta))
+            if ((real_delta>4900.0f) && !(real_delta < allowed_delta) && !(plMover->GetTransport()))
             {
                 #ifdef MOVEMENT_ANTICHEAT_DEBUG
                 sLog.outError("AC2-%s, is teleport exception | cDelta=%f aDelta=%f | cSpeed=%f lSpeed=%f deltaToime=%f",
@@ -508,21 +511,21 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 check_passed = false;
             }
             //Fly hack checks
-            if ( !plMover->GetBaseMap()->IsUnderWater(movementInfo.x, movementInfo.y, movementInfo.z-7.0f) 
-                  && !(plMover->m_Vehicle && (delta_z < -7.0f))
+            if ( !plMover->GetBaseMap()->IsUnderWater(movementInfo.x, movementInfo.y, movementInfo.z-7.0f)
+                  && !(plMover->m_Vehicle && real_delta_3d < 196.0f)
                   && !(plMover->HasAuraType(SPELL_AURA_FLY) || plMover->HasAuraType(SPELL_AURA_MOD_INCREASE_VEHICLE_FLIGHT_SPEED) || plMover->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) || plMover->HasAuraType(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED) || plMover->HasAuraType(SPELL_AURA_MOD_MOUNTED_FLIGHT_SPEED_ALWAYS) || plMover->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK))
                   && ((movementInfo.flags & (MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLY_MODE | MOVEMENTFLAG_FLYING)) != 0) )
             {
                 #ifdef MOVEMENT_ANTICHEAT_DEBUG // Aura numbers: 201, 206, 207, 208, 209, 211
-                sLog.outError("AC2-%s, flight exception. {SPELL_AURA_FLY=[%X]} {SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED=[%X]} {SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED=[%X]} {SPELL_AURA_MOD_MOUNTED_FLIGHT_SPEED_ALWAYS=[%X]} {SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK=[%X]}",
+                sLog.outError("AC2-%s, flight exception. {SPELL_AURA_FLY=[%X]} {SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED=[%X]} {SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED=[%X]} {SPELL_AURA_MOD_MOUNTED_FLIGHT_SPEED_ALWAYS=[%X]} {SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK=[%X]} {plMover->m_Vehicle=[%X]}",
                    plMover->GetName(),
                    plMover->HasAuraType(SPELL_AURA_FLY), plMover->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED),
                    plMover->HasAuraType(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED), plMover->HasAuraType(SPELL_AURA_MOD_MOUNTED_FLIGHT_SPEED_ALWAYS),
-                   plMover->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK));
+                   plMover->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK), plMover->m_Vehicle);
                 #endif
                 check_passed = false;
             }
-            /*//Water-Walk checks, Disable Ghost Check.
+            //Water-Walk checks
             if ( ((movementInfo.flags & MOVEMENTFLAG_WATERWALKING) != 0)
                   && !(plMover->HasAuraType(SPELL_AURA_WATER_WALK) | plMover->HasAuraType(SPELL_AURA_GHOST)) )
             {
@@ -531,7 +534,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                                 plMover->GetName(), movementInfo.flags, plMover->HasAuraType(SPELL_AURA_WATER_WALK));
                 #endif
                 check_passed = false;
-            }*/
+            }
             //Teleport To Plane checks
             if ( movementInfo.z < 0.0001f && movementInfo.z > -0.0001f
                 && ((movementInfo.flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING | MOVEMENTFLAG_FLY_MODE)) == 0) )
@@ -553,8 +556,9 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                         {
                             sLog.outError("AC2-%s, teleport to plan exception. Exception count: %d ",
                                             plMover->GetName(), plMover->m_anti_TeleToPlane_Count);
-							sWorld.SendWorldText(3,strcat("Kicking cheater: ", plMover->GetName()));
-                            plMover->GetSession()->KickPlayer();
+                            /* Disabled, not passive at all, and apparently causing crashes:
+                            sWorld.SendWorldText(3,strcat("Kicking cheater: ", plMover->GetName()));
+                            plMover->GetSession()->KickPlayer(); */
                             return;
                         }
                     }
