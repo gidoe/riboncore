@@ -18,7 +18,7 @@
 #include "Wintergrasp.h"
 
 
-struct TRINITY_DLL_DECL npc_demolisher_engineererAI : public ScriptedAI
+struct RIBON_DLL_DECL npc_demolisher_engineererAI : public ScriptedAI
 {
     npc_demolisher_engineererAI(Creature* pCreature) : ScriptedAI(pCreature) {}
 
