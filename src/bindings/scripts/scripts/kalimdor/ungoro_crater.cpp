@@ -168,7 +168,7 @@ enum
     FACTION_ESCORTEE            = 113
 };
 
-struct TRINITY_DLL_DECL npc_ringoAI : public FollowerAI
+struct RIBON_DLL_DECL npc_ringoAI : public FollowerAI
 {
     npc_ringoAI(Creature* pCreature) : FollowerAI(pCreature) { }
 
