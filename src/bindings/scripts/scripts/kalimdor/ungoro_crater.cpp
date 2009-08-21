@@ -45,7 +45,7 @@ EndContentData */
 #define ENTRY_STOMPER 6513
 
 
-struct RIBON_DLL_DECL : public npc_escortAI
+struct RIBON_DLL_DECL npc_ameAI : public npc_escortAI
 {
     npc_ameAI(Creature *c) : npc_escortAI(c) {}
 
@@ -365,4 +365,3 @@ void AddSC_ungoro_crater()
     newscript->pQuestAccept = &QuestAccept_npc_ringo;
     newscript->RegisterSelf();
 }
-
