@@ -535,14 +535,13 @@ void Transport::Update(uint32 /*p_time*/)
             }
         }
 */
-        /*
         for(PlayerSet::const_iterator itr = m_passengers.begin(); itr != m_passengers.end();)
         {
             PlayerSet::const_iterator it2 = itr;
             ++itr;
+            ((Player&)it2).anti_JustTeleported();
             //(*it2)->SetPosition( m_curr->second.x + (*it2)->GetTransOffsetX(), m_curr->second.y + (*it2)->GetTransOffsetY(), m_curr->second.z + (*it2)->GetTransOffsetZ(), (*it2)->GetTransOffsetO() );
         }
-        */
 
         m_nextNodeTime = m_curr->first;
 

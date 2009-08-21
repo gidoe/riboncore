@@ -425,7 +425,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             float delta_y = plMover->GetPositionY() - movementInfo.y;
             float delta_z = plMover->GetPositionZ() - movementInfo.z;
             float real_delta = delta_x * delta_x + delta_y * delta_y;
-            float real_delta_3d = delta_x * delta_x + delta_y * delta_y + delta_z * delta_z;
+            // Disabled: float real_delta_3d = delta_x * delta_x + delta_y * delta_y + delta_z * delta_z;
             float tg_z = -99999; //tangens
             // end movement distance
 
@@ -484,7 +484,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             }
 
             //speed hack checks
-            if ((real_delta > allowed_delta)) // && (delta_z < 0) && !(plMover->GetTransport()))
+            if ((real_delta > allowed_delta)) // && (delta_z < 0)/* Doesn't work:  && !(plMover->GetTransport()) */)
             {
                 #ifdef MOVEMENT_ANTICHEAT_DEBUG
                 sLog.outError("AC2-%s, speed exception | cDelta=%f aDelta=%f | cSpeed=%f lSpeed=%f deltaTime=%f",
@@ -493,7 +493,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 check_passed = false;
             }
             //teleport hack checks
-            if ((real_delta>4900.0f) && !(real_delta < allowed_delta) && !(plMover->GetTransport()))
+            if ((real_delta>4900.0f) && !(real_delta < allowed_delta)/* Doesn't work: && !(plMover->GetTransport()) */)
             {
                 #ifdef MOVEMENT_ANTICHEAT_DEBUG
                 sLog.outError("AC2-%s, is teleport exception | cDelta=%f aDelta=%f | cSpeed=%f lSpeed=%f deltaToime=%f",
@@ -512,7 +512,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             }
             //Fly hack checks
             if ( !plMover->GetBaseMap()->IsUnderWater(movementInfo.x, movementInfo.y, movementInfo.z-7.0f)
-                  && !(plMover->m_Vehicle && real_delta_3d < 196.0f)
+                  // Doesn't work: && !(plMover->m_Vehicle && real_delta_3d < 196.0f)
                   && !(plMover->HasAuraType(SPELL_AURA_FLY) || plMover->HasAuraType(SPELL_AURA_MOD_INCREASE_VEHICLE_FLIGHT_SPEED) || plMover->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) || plMover->HasAuraType(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED) || plMover->HasAuraType(SPELL_AURA_MOD_MOUNTED_FLIGHT_SPEED_ALWAYS) || plMover->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK))
                   && ((movementInfo.flags & (MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLY_MODE | MOVEMENTFLAG_FLYING)) != 0) )
             {
