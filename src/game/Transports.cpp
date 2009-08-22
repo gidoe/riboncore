@@ -539,7 +539,7 @@ void Transport::Update(uint32 /*p_time*/)
         {
             PlayerSet::const_iterator it2 = itr;
             ++itr;
-            ((Player&)it2).anti_JustTeleported();
+            (*it2)->anti_AntiCheatOff(5);
             //(*it2)->SetPosition( m_curr->second.x + (*it2)->GetTransOffsetX(), m_curr->second.y + (*it2)->GetTransOffsetY(), m_curr->second.z + (*it2)->GetTransOffsetZ(), (*it2)->GetTransOffsetO() );
         }
 

@@ -347,7 +347,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     }
     #endif
 
-    if (plMover && World::GetEnableMvAnticheat() && !plMover->isGameMaster())
+    if (plMover && World::GetEnableMvAnticheat() && !plMover->isGameMaster() && GetPlayer()->m_anti_AntiCheatOffCount <= 0)
     {
         //calc time deltas
         int32 cClientTimeDelta = 1500;
@@ -425,7 +425,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             float delta_y = plMover->GetPositionY() - movementInfo.y;
             float delta_z = plMover->GetPositionZ() - movementInfo.z;
             float real_delta = delta_x * delta_x + delta_y * delta_y;
-            // Disabled: float real_delta_3d = delta_x * delta_x + delta_y * delta_y + delta_z * delta_z;
+            // Disabled: float real_delta_3d = real_delta + delta_z * delta_z;
             float tg_z = -99999; //tangens
             // end movement distance
 
@@ -567,6 +567,9 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 if (plMover->m_anti_TeleToPlane_Count != 0)
                     plMover->m_anti_TeleToPlane_Count = 0;
             }
+        --(GetPlayer()->m_anti_AntiCheatOffCount); 
+            check_passed = true; 
+            --(GetPlayer()->m_anti_AntiCheatOffCount);
         } else if (movementInfo.flags & MOVEMENTFLAG_ONTRANSPORT) {
             //antiwrap checks
             if (plMover->m_transport)

@@ -941,7 +941,7 @@ class RIBON_DLL_SPEC Player : public Unit
         void AddToWorld();
         void RemoveFromWorld();
 
-        void anti_JustTeleported(){ m_anti_JustTeleported = 1; }
+        void anti_AntiCheatOff(uint16 count){ m_anti_AntiCheatOffCount = count; }
 
         bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0);
         void TeleportOutOfMap(Map *oldMap);
@@ -2421,6 +2421,7 @@ class RIBON_DLL_SPEC Player : public Unit
         uint64 m_anti_TransportGUID;      //current transport GUID
 
         uint32 m_anti_JustTeleported;     //seted when player was teleported
+        uint32 m_anti_AntiCheatOffCount;
         uint32 m_anti_TeleToPlane_Count;  //Teleport To Plane alarm counter
 
         uint64 m_anti_AlarmCount;         //alarm counter
