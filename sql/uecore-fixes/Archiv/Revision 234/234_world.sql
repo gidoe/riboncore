@@ -1,1 +1,0 @@
-UPDATE creature_template SET scriptname='npc_khunok_the_behemoth' WHERE entry='25862';

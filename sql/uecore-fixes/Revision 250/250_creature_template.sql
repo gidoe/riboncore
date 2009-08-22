@@ -1,1 +1,0 @@
-UPDATE creature_template SET scriptname='npc_ame' WHERE entry='9623';

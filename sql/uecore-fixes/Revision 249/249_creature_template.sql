@@ -1,1 +1,0 @@
-UPDATE creature_template SET scriptname='npc_plains_vision' WHERE entry='2983';
