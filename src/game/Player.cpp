@@ -21847,7 +21847,6 @@ void Player::UpdateSpecCount(uint8 count)
         _SaveActions(); // make sure the button list is cleaned up
         // active spec becomes only spec?
         CharacterDatabase.PExecute("DELETE FROM character_action WHERE spec<>'%u' AND guid='%u'",m_activeSpec, GetGUIDLow());
-        CharacterDatabase.PExecute("UPDATE character_action SET spec='0' WHERE guid='%u'", GetGUIDLow());
         m_activeSpec = 0;
     }
     else if (count == MAX_TALENT_SPECS)
