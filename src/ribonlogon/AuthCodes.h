@@ -71,8 +71,9 @@ enum LoginResult
 // 1.12.2 build 6005
 // 2.4.3 build 8606
 // 3.1.3 build 9947
-// will support WoW, (1.12.1/2) WoW:TBC (2.4.3) and WoW:WotLK (3.1.3) client build 9947...
+// 3.2.0a build 10314
+// will support WoW, (1.12.1/2) WoW:TBC (2.4.3) and WoW:WotLK (3.1.3, 3.2.0a) client build 10314/9947/8606/5875/6005...
 
-#define EXPECTED_RIBON_CLIENT_BUILD        {9947, 8606, 5875, 6005, 0}
+#define EXPECTED_RIBON_CLIENT_BUILD        {10314, 9947, 8606, 5875, 6005, 0}
 
 #endif
