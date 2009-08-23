@@ -345,7 +345,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
     //    ((Player*)unit)->SendTeleportAckMsg();
     //unit->SendMovementFlagUpdate();
 
-    if(unit->GetTypeId() == TYPEID_PLAYER) GetPlayer(unit->GetGUID())->anti_AntiCheatOff(30);
+    if(unit->GetTypeId() == TYPEID_PLAYER) GetPlayer(unit->GetGUID())->AntiCheatOff(30);
 
     return true;
 }
@@ -386,7 +386,7 @@ void Vehicle::RemovePassenger(Unit *unit)
     // only for flyable vehicles?
     //CastSpell(this, 45472, true);                           // Parachute
 
-    if(unit->GetTypeId() == TYPEID_PLAYER) GetPlayer(unit->GetGUID())->anti_AntiCheatOff(30);
+    if(unit->GetTypeId() == TYPEID_PLAYER) GetPlayer(unit->GetGUID())->AntiCheatOff(30);
 }
 
 void Vehicle::Dismiss()

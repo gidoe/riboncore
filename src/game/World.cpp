@@ -85,7 +85,7 @@ float World::m_VisibleObjectGreyDistance      = 0;
 
 //movement anticheat
 bool World::m_EnableMvAnticheat = true;
-uint32  World::m_TeleportToPlaneAlarms = 50;
+uint32 World::m_TeleportToPlaneAlarms = 50;
 uint32 World::m_MistimingAlarms = 20;
 uint32 World::m_MistimingDelta = 2000;
 

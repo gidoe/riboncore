@@ -60,7 +60,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         return;
     }
     //movement anticheat
-    GetPlayer()->m_anti_JustTeleported = 1;
+    GetPlayer()->m_anti_JustTeleported = true;
     //end movement anticheat
 
     // get the destination map entry, not the current one, this will fix homebind and reset greeting
@@ -237,7 +237,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     if(plMover && plMover->IsBeingTeleported())
     {
         // movement anticheat
-        plMover->m_anti_JustTeleported = 1;
+        plMover->m_anti_JustTeleported = true;
         // end movement anticheat
         recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
         return;
@@ -317,7 +317,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     if (opcode == MSG_MOVE_FALL_LAND && plMover && !plMover->isInFlight())
     {
         //movement anticheat
-        plMover->m_anti_JustJumped = 0;
+        plMover->m_anti_JumpCount = 0;
         plMover->m_anti_JumpBaseZ = 0;
         plMover->HandleFall(movementInfo);
     }
@@ -473,14 +473,14 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             //multi jump checks
             if (opcode == MSG_MOVE_JUMP && !plMover->IsInWater())
             {
-                if (plMover->m_anti_JustJumped >= 1){
+                if (plMover->m_anti_JumpCount >= 1){
                     check_passed = false; //don't process new jump packet
                 } else {
-                    plMover->m_anti_JustJumped += 1;
+                    plMover->m_anti_JumpCount += 1;
                     plMover->m_anti_JumpBaseZ = movementInfo.z;
                 }
             } else if (plMover->IsInWater()) {
-                 plMover->m_anti_JustJumped = 0;
+                 plMover->m_anti_JumpCount = 0;
             }
 
             //speed hack checks
@@ -503,7 +503,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             }
 
             //mountian hack checks // 1.56f (delta_z < GetPlayer()->m_anti_Last_VSpeed))
-            if ((delta_z < plMover->m_anti_Last_VSpeed) && (plMover->m_anti_JustJumped == 0) && (tg_z > 2.37f))
+            if ((delta_z < plMover->m_anti_Last_VSpeed) && (plMover->m_anti_JumpCount == 0) && (tg_z > 2.37f))
             {
                 #ifdef MOVEMENT_ANTICHEAT_DEBUG
                 sLog.outError("AC2-%s, mountain exception | tg_z=%f", plMover->GetName(),tg_z);
@@ -567,7 +567,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 if (plMover->m_anti_TeleToPlane_Count != 0)
                     plMover->m_anti_TeleToPlane_Count = 0;
             }
-        --(GetPlayer()->m_anti_AntiCheatOffCount); 
+        } else if(GetPlayer()->m_anti_AntiCheatOffCount > 0){
             check_passed = true; 
             --(GetPlayer()->m_anti_AntiCheatOffCount);
         } else if (movementInfo.flags & MOVEMENTFLAG_ONTRANSPORT) {
