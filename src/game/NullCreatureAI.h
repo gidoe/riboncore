@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ * Copyright (C) 2008-2009 Trinity <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ class RIBON_DLL_SPEC PassiveAI : public CreatureAI
 class RIBON_DLL_DECL PossessedAI : public CreatureAI
 {
     public:
-        explicit PossessedAI(Creature *c) : CreatureAI(c) {}
+        explicit PossessedAI(Creature *c);
 
         void MoveInLineOfSight(Unit *) {}
         void AttackStart(Unit *target);
@@ -52,10 +52,10 @@ class RIBON_DLL_DECL PossessedAI : public CreatureAI
         static int Permissible(const Creature *) { return PERMIT_BASE_IDLE;  }
 };
 
-class RIBON_DLL_DECL NullCreatureAI : public CreatureAI
+class RIBON_DLL_SPEC NullCreatureAI : public CreatureAI
 {
     public:
-        explicit NullCreatureAI(Creature *c) : CreatureAI(c) {}
+        explicit NullCreatureAI(Creature *c);
 
         void MoveInLineOfSight(Unit *) {}
         void AttackStart(Unit *) {}
@@ -75,13 +75,11 @@ class RIBON_DLL_DECL CritterAI : public PassiveAI
         void EnterEvadeMode();
 };
 
-class RIBON_DLL_DECL TriggerAI : public NullCreatureAI
+class RIBON_DLL_SPEC TriggerAI : public NullCreatureAI
 {
     public:
-        explicit TriggerAI(Creature *c) : NullCreatureAI(c), casted(false) {}
-        void UpdateAI(const uint32);
-    private:
-        bool casted;
+        explicit TriggerAI(Creature *c) : NullCreatureAI(c) {}
+        void IsSummonedBy(Unit *summoner);
 };
 
 #endif
