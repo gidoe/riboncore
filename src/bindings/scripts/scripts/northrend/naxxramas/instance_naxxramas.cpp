@@ -160,7 +160,7 @@ struct RIBON_DLL_DECL instance_naxxramas : public InstanceData
     {
         if (!InstanceData::SetBossState(id, state))
             return false;
-        
+
         if (id == BOSS_HORSEMEN && state == DONE && HorsemenChest)
             HorsemenChest->SetRespawnTime(HorsemenChest->GetRespawnDelay());
 
