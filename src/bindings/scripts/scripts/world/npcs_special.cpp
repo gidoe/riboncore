@@ -756,7 +756,7 @@ void npc_doctorAI::UpdateAI(const uint32 diff)
                 case DOCTOR_ALLIANCE: patientEntry = AllianceSoldierId[rand()%3]; break;
                 case DOCTOR_HORDE:    patientEntry = HordeSoldierId[rand()%3]; break;
                 default:
-                    error_log("TSCR: Invalid entry for Triage doctor. Please check your database");
+                    error_log("RSCR: Invalid entry for Triage doctor. Please check your database");
                     return;
             }
 
@@ -1673,13 +1673,13 @@ CreatureAI* GetAI_mob_mojo(Creature* pCreature)
     return new mob_mojoAI (pCreature);
 }
 
-struct RIBON_DLL_DECL npc_mirror_image : SpellCasterAI
+struct RIBON_DLL_DECL npc_mirror_image : CasterAI
 {
-    npc_mirror_image(Creature *c) : SpellCasterAI(c) {}
+    npc_mirror_image(Creature *c) : CasterAI(c) {}
 
     void InitializeAI()
     {
-        SpellCasterAI::InitializeAI();
+        CasterAI::InitializeAI();
         Unit * owner = me->GetOwner();
         if (!owner)
             return;
@@ -1713,15 +1713,15 @@ CreatureAI* GetAI_npc_mirror_image(Creature* pCreature)
     return new npc_mirror_image (pCreature);
 }
 
-struct RIBON_DLL_DECL npc_ebon_gargoyleAI : SpellCasterAI
+struct RIBON_DLL_DECL npc_ebon_gargoyleAI : CasterAI
 {
-    npc_ebon_gargoyleAI(Creature *c) : SpellCasterAI(c) {}
+    npc_ebon_gargoyleAI(Creature *c) : CasterAI(c) {}
 
     int despawnTimer;
 
     void InitializeAI()
     {
-        SpellCasterAI::InitializeAI();
+        CasterAI::InitializeAI();
         Unit * owner = me->GetOwner();
         if (!owner)
             return;
@@ -1789,7 +1789,7 @@ struct RIBON_DLL_DECL npc_ebon_gargoyleAI : SpellCasterAI
             }
             return;
         }
-        SpellCasterAI::UpdateAI(diff);
+        CasterAI::UpdateAI(diff);
     }
 };
 

@@ -336,9 +336,9 @@ int32 m_auiRandomSay[] =
     SAY_DUEL_A, SAY_DUEL_B, SAY_DUEL_C, SAY_DUEL_D, SAY_DUEL_E, SAY_DUEL_F, SAY_DUEL_G, SAY_DUEL_H, SAY_DUEL_I
 };
 
-struct RIBON_DLL_DECL npc_death_knight_initiateAI : public SpellAI
+struct RIBON_DLL_DECL npc_death_knight_initiateAI : public CombatAI
 {
-    npc_death_knight_initiateAI(Creature* pCreature) : SpellAI(pCreature)
+    npc_death_knight_initiateAI(Creature* pCreature) : CombatAI(pCreature)
     {
         m_bIsDuelInProgress = false;
     }
@@ -352,7 +352,7 @@ struct RIBON_DLL_DECL npc_death_knight_initiateAI : public SpellAI
     {
         lose = false;
         me->RestoreFaction();
-        SpellAI::Reset();
+        CombatAI::Reset();
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
 
@@ -376,7 +376,7 @@ struct RIBON_DLL_DECL npc_death_knight_initiateAI : public SpellAI
         {
             if (pDoneBy->GetGUID() != m_uiDuelerGUID && pDoneBy->GetOwnerGUID() != m_uiDuelerGUID) // other players cannot help
                 uiDamage = 0;
-            else if (uiDamage >= m_creature->GetHealth()) 
+            else if (uiDamage >= m_creature->GetHealth())
             {
                 uiDamage = 0;
 
@@ -432,7 +432,7 @@ struct RIBON_DLL_DECL npc_death_knight_initiateAI : public SpellAI
 
         // TODO: spells
 
-        SpellAI::UpdateAI(uiDiff);
+        CombatAI::UpdateAI(uiDiff);
     }
 };
 
@@ -542,7 +542,7 @@ struct RIBON_DLL_DECL npc_dark_rider_of_acherusAI : public ScriptedAI
     }
 
     void InitDespawnHorse(Unit *who)
-    {   
+    {
         if (!who)
             return;
 
@@ -709,9 +709,6 @@ CreatureAI* GetAI_npc_dkc1_gothik(Creature* pCreature)
 ## npc_scarlet_miner_cart
 ####*/
 
-#define SAY_SCARLET_MINER1  "Where'd this come from? I better get this down to the ships before the foreman sees it!"
-#define SAY_SCARLET_MINER2  "Now I can have a rest!"
-
 #define SPELL_CART_CHECK     54173
 #define SPELL_CART_DRAG      52465
 
@@ -757,6 +754,9 @@ CreatureAI* GetAI_npc_scarlet_miner_cart(Creature *_Creature)
 /*####
 ## npc_scarlet_miner
 ####*/
+
+#define SAY_SCARLET_MINER1  "Where'd this come from? I better get this down to the ships before the foreman sees it!"
+#define SAY_SCARLET_MINER2  "Now I can have a rest!"
 
 struct RIBON_DLL_DECL npc_scarlet_minerAI : public npc_escortAI
 {
@@ -907,7 +907,7 @@ bool GOHello_go_inconspicuous_mine_car(Player* pPlayer, GameObject* pGO)
     return true;
 }
 
-// npc 28912 quest 17217 boss 29001 mob 29007 go 191092 
+// npc 28912 quest 17217 boss 29001 mob 29007 go 191092
 
 void AddSC_the_scarlet_enclave_c1()
 {
@@ -977,7 +977,7 @@ void AddSC_the_scarlet_enclave_c1()
     newscript->RegisterSelf();
 }
 
-/*   
+/*
 DELETE FROM `script_texts` WHERE `entry` IN(-1609301, -1609302);
 INSERT INTO `script_texts` (`entry`,`content_default`,`type`,`language`,`emote`,`comment`) VALUES
 (-1609301, 'Come, weakling! Strike me down!', 0, 0, 0, 'SAY_DEATH_RIDER_FINAL'),
