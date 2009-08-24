@@ -77,7 +77,7 @@ struct RIBON_DLL_SPEC ArchorAI : public CreatureAI
         float m_minRange;
 };
 
-struct TRINITY_DLL_SPEC TurretAI : public CreatureAI
+struct RIBON_DLL_SPEC TurretAI : public CreatureAI
 {
     public:
         explicit TurretAI(Creature *c);
