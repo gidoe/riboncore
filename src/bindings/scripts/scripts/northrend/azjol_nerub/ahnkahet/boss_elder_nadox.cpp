@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Ribon <http://www.trinitycore.org/>
+ * Copyright (C) 2009 Trinity <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,8 @@ bool DeadAhnkaharGuardian; // needed for achievement: Respect Your Elders(2038)
 #define MOB_AHNKAHAR_GUARDIAN_ENTRY         30176
 #define SPELL_SUMMON_SWARM_GUARD            56120//1x 30176  -- every 25secs
 #define SPELL_GUARDIAN_AURA                 56151
+
+#define EMOTE_HATCHES                       "An Ahn'kahar Guardian hatches!"
 
 struct RIBON_DLL_DECL boss_elder_nadoxAI : public ScriptedAI
 {
@@ -168,7 +170,7 @@ struct RIBON_DLL_DECL boss_elder_nadoxAI : public ScriptedAI
 
         if (guard_spawn_Timer < diff)
         {
-            m_creature->MonsterTextEmote("An Ahn'kahar Guardian hatches!",m_creature->GetGUID(),true);
+            m_creature->MonsterTextEmote(EMOTE_HATCHES,m_creature->GetGUID(),true);
             DoCast(m_creature,SPELL_SUMMON_SWARM_GUARD);
             guard_spawn_Timer = 25000;
         }else guard_spawn_Timer -= diff;
