@@ -1,6 +1,4 @@
--- Up to RC 599
-
--- --------
+-- Up to RC 718-- --------
 -- LINKED
 -- --------
 # spell1 / spell2 / type
