@@ -499,14 +499,13 @@ void LoadDBCStores(const std::string& dataPath)
         exit(1);
     }
 
-    // Check loaded DBC files proper version
-    if( !sSpellStore.LookupEntry(66530)            ||       // last added spell in 3.1.3
-        !sMapStore.LookupEntry(624)                ||       // last map added in 3.1.3
-        !sGemPropertiesStore.LookupEntry(1609)     ||       // last gem property added in 3.1.3
-        !sItemExtendedCostStore.LookupEntry(2671)  ||       // last item extended cost added in 3.1.3
-        !sCharTitlesStore.LookupEntry(166)         ||       // last char title added in 3.1.3
-        !sAreaStore.LookupEntry(2905)              ||       // last area (areaflag) added in 3.1.3
-        !sItemStore.LookupEntry(46894)             )        // last client known item added in 3.1.3
+    if( !sSpellStore.LookupEntry(69016)            ||       // last added spell in 3.2.0
+        !sMapStore.LookupEntry(650)                ||       // last map added in 3.2.0
+        !sGemPropertiesStore.LookupEntry(1629)     ||       // last gem property added in 3.2.0
+        !sItemExtendedCostStore.LookupEntry(2721)  ||       // last item extended cost added in 3.2.0
+        !sCharTitlesStore.LookupEntry(171)         ||       // last char title added in 3.2.0
+        !sAreaStore.LookupEntry(4769)              ||       // last area (areaflag) added in 3.2.0
+        !sItemStore.LookupEntry(49290)             )        // last client known item added in 3.2.0
     {
         sLog.outError("\nYou have _outdated_ DBC files. Please extract correct versions from current using client.");
         exit(1);
