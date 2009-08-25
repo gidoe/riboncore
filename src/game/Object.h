@@ -460,8 +460,9 @@ class RIBON_DLL_SPEC WorldObject : public Object
 
         float GetDistance( const WorldObject* obj ) const;
         float GetDistance(float x, float y, float z) const;
-        float GetDistanceSq(const float &x, const float &y, const float &z) const;
-        float GetDistanceSq(const WorldObject *obj) const;
+        float GetDistance2dSq(float x, float y) const;
+        float GetExactDistSq(float x, float y, float z) const;
+        float GetExactDistSq(const WorldObject *obj) const;
         float GetDistance2d(const WorldObject* obj) const;
         float GetDistance2d(float x, float y) const;
         float GetExactDistance2d(const float x, const float y) const;
@@ -491,6 +492,7 @@ class RIBON_DLL_SPEC WorldObject : public Object
 
         float GetAngle( const WorldObject* obj ) const;
         float GetAngle( const float x, const float y ) const;
+        float GetRelativeAngle(const WorldObject *obj) const { return GetAngle(obj) - GetOrientation(); }
         void GetSinCos(const float x, const float y, float &vsin, float &vcos);
         bool HasInArc( const float arcangle, const WorldObject* obj ) const;
         bool IsInBetween(const WorldObject *obj1, const WorldObject *obj2, float size = 0) const;
@@ -540,8 +542,11 @@ class RIBON_DLL_SPEC WorldObject : public Object
         void SetZoneScript();
         ZoneScript * GetZoneScript() const { return m_zoneScript; }
 
-        TempSummon* SummonCreature(uint32 id, float x, float y, float z, float ang = 0,TempSummonType spwtype = TEMPSUMMON_MANUAL_DESPAWN,uint32 despwtime = 0);
-        Vehicle*    SummonVehicle(uint32 entry, float x, float y, float z, float ang = 0);
+        TempSummon* SummonCreature(uint32 id, float x, float y, float z, float ang = 0, uint32 vehId = 0, TempSummonType spwtype = TEMPSUMMON_MANUAL_DESPAWN, uint32 despwtime = 0);
+        TempSummon* SummonCreature(uint32 id, float x, float y, float z, float ang = 0, TempSummonType spwtype = TEMPSUMMON_MANUAL_DESPAWN, uint32 despwtime = 0)
+        { 
+            return SummonCreature(id, x, y, z, ang, 0, spwtype, despwtime);
+        }
         GameObject* SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime);
         Creature*   SummonTrigger(float x, float y, float z, float ang, uint32 dur, CreatureAI* (*GetAI)(Creature*) = NULL);
 

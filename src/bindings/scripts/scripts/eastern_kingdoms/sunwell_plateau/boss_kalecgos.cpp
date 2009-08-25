@@ -85,6 +85,8 @@ enum Creatures
 
 #define GO_FAILED   "You are unable to use this currently."
 
+#define EMOTE_UNABLE_TO_FIND    "is unable to find Kalecgos"
+
 #define FLY_X   1679
 #define FLY_Y   900
 #define FLY_Z   82
@@ -131,7 +133,7 @@ struct RIBON_DLL_DECL boss_kalecgosAI : public ScriptedAI
         {
             SathGUID = pInstance->GetData64(DATA_SATHROVARR);
             DoorGUID = pInstance->GetData64(DATA_GO_FORCEFIELD);
-            
+
             if (GameObject *Door = pInstance->instance->GetGameObject(pInstance->GetData64(DoorGUID)))
                 Door->SetLootState(GO_JUST_DEACTIVATED);
         }
@@ -390,7 +392,7 @@ struct RIBON_DLL_DECL boss_sathrovarrAI : public ScriptedAI
                 }
                 else
                 {
-                    me->MonsterTextEmote("is unable to find Kalecgos", NULL);
+                    me->MonsterTextEmote(EMOTE_UNABLE_TO_FIND, NULL);
                     EnterEvadeMode();
                     return;
                 }

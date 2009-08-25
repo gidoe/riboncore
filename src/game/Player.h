@@ -941,7 +941,7 @@ class RIBON_DLL_SPEC Player : public Unit
         void AddToWorld();
         void RemoveFromWorld();
 
-        void anti_JustTeleported(){ m_anti_JustTeleported = 1; }
+        void AntiCheatOff(uint16 count){ m_anti_AntiCheatOffCount = count; }
 
         bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0);
         void TeleportOutOfMap(Map *oldMap);
@@ -2406,27 +2406,27 @@ class RIBON_DLL_SPEC Player : public Unit
         RestType rest_type;
         ////////////////////Rest System/////////////////////
         //movement anticheat
-        uint32 m_anti_LastClientTime;     //last movement client time
-        uint32 m_anti_LastServerTime;     //last movement server time
-        uint32 m_anti_DeltaClientTime;    //client side session time
-        uint32 m_anti_DeltaServerTime;    //server side session time
-        uint32 m_anti_MistimingCount;     //mistiming counts before kick
+        uint32 m_anti_LastClientTime;      // last movement client time
+        uint32 m_anti_LastServerTime;      // last movement server time
+        uint32 m_anti_DeltaClientTime;     // client side session time
+        uint32 m_anti_DeltaServerTime;     // server side session time
+        uint32 m_anti_MistimingCount;      // mistiming counts before kick
 
-        uint32 m_anti_LastSpeedChangeTime;//last speed change time
-        uint32 m_anti_BeginFallTime;      //alternative falling begin time (obsolete)
+        uint32 m_anti_LastSpeedChangeTime; // last speed change time
 
-        float  m_anti_Last_HSpeed;        //horizontal speed, default RUN speed
-        float  m_anti_Last_VSpeed;        //vertical speed, default max jump height
+        float  m_anti_Last_HSpeed;         // horizontal speed, default RUN speed
+        float  m_anti_Last_VSpeed;         // vertical speed, default max jump height
 
-        uint64 m_anti_TransportGUID;      //current transport GUID
+        uint64 m_anti_TransportGUID;       // current transport GUID
 
-        uint32 m_anti_JustTeleported;     //seted when player was teleported
-        uint32 m_anti_TeleToPlane_Count;  //Teleport To Plane alarm counter
+        bool   m_anti_JustTeleported;      // set when player was teleported
+        uint32 m_anti_AntiCheatOffCount;   // set to number of loops anticheat should be disabled for
+        uint32 m_anti_TeleToPlane_Count;   // Teleport To Plane alarm counter
 
-        uint64 m_anti_AlarmCount;         //alarm counter
+        uint64 m_anti_AlarmCount;          // alarm counter
 
-        uint32 m_anti_JustJumped;         //Jump already began, anti air jump check
-        float  m_anti_JumpBaseZ;           //Z coord before jump
+        uint16 m_anti_JumpCount;           // Jump already began, anti air jump check
+        float  m_anti_JumpBaseZ;           // Z coord before jump
         // << movement anticheat
 
         uint32 m_resetTalentsCost;

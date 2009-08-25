@@ -86,6 +86,15 @@ const uint32 VehNumWorldState[2] = {3680,3490};
 const uint32 MaxVehNumWorldState[2] = {3681,3491};
 const uint32 ClockWorldState[5] = {3785,3784,3782,3976,3975};
 
+enum WintergraspCreType
+{
+    CREATURE_OTHER,
+    CREATURE_SIEGE_VEHICLE,
+    CREATURE_TURRET,
+    CREATURE_ENGINEER,
+    CREATURE_GUARD,
+};
+
 enum BuildingType
 {
     BUILDING_WALL,
@@ -131,8 +140,6 @@ typedef std::map<uint32, uint32> TeamPairMap;
 
 class SiegeWorkshop;
 
-typedef std::set<Vehicle*> VehicleSet;
-
 class OPvPWintergrasp : public OutdoorPvP
 {
     protected:
@@ -170,7 +177,7 @@ class OPvPWintergrasp : public OutdoorPvP
         BuildingStateMap m_buildingStates;
 
         CreatureSet m_creatures;
-        VehicleSet m_vehicles[2];
+        CreatureSet m_vehicles[2];
         GameObjectSet m_gobjects;
 
         TeamPairMap m_creEntryPair, m_goDisplayPair;
@@ -197,6 +204,7 @@ class OPvPWintergrasp : public OutdoorPvP
         bool UpdateGameObjectInfo(GameObject *go) const;
 
         bool CanBuildVehicle(SiegeWorkshop *workshop) const;
+        WintergraspCreType GetCreatureType(uint32 entry) const;
 
         void RebuildAllBuildings();
 
@@ -221,7 +229,7 @@ class SiegeWorkshop : public OPvPCapturePoint
         uint32 m_engGuid;
         Creature *m_engineer;
         uint32 m_workshopGuid;
-        //VehicleSet m_vehicles;
+        //CreatureSet m_vehicles;
         BuildingState *m_buildingState;
     protected:
         OPvPWintergrasp *m_wintergrasp;

@@ -462,7 +462,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     // 0x80
     if(flags & UPDATEFLAG_VEHICLE)                          // unused for now
     {
-        *data << uint32(((Vehicle*)this)->GetVehicleInfo()->m_ID);  // vehicle id
+        *data << uint32(((Unit*)this)->GetVehicleKit()->GetVehicleInfo()->m_ID);  // vehicle id
         *data << float(0);                                  // facing adjustment
     }
 
@@ -1196,7 +1196,7 @@ float WorldObject::GetDistance(float x, float y, float z) const
     return ( dist > 0 ? dist : 0);
 }
 
-float WorldObject::GetDistanceSq(const float &x, const float &y, const float &z) const
+float WorldObject::GetExactDistSq(float x, float y, float z) const
 {
     float dx = GetPositionX() - x;
     float dy = GetPositionY() - y;
@@ -1204,7 +1204,14 @@ float WorldObject::GetDistanceSq(const float &x, const float &y, const float &z)
     return dx*dx + dy*dy + dz*dz;
 }
 
-float WorldObject::GetDistanceSq(const WorldObject *obj) const
+float WorldObject::GetDistance2dSq(float x, float y) const
+{
+    float dx = GetPositionX() - x;
+    float dy = GetPositionY() - y;
+    return dx*dx + dy*dy;
+}
+
+float WorldObject::GetExactDistSq(const WorldObject *obj) const
 {
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
@@ -1236,8 +1243,7 @@ bool WorldObject::IsWithinDist3d(float x, float y, float z, float dist2compare) 
     float dz = GetPositionZ() - z;
     float distsq = dx*dx + dy*dy + dz*dz;
 
-    float sizefactor = GetObjectSize();
-    float maxdist = dist2compare + sizefactor;
+    float maxdist = dist2compare + GetObjectSize();
 
     return distsq < maxdist * maxdist;
 }
@@ -1248,8 +1254,7 @@ bool WorldObject::IsWithinDist2d(float x, float y, float dist2compare) const
     float dy = GetPositionY() - y;
     float distsq = dx*dx + dy*dy;
 
-    float sizefactor = GetObjectSize();
-    float maxdist = dist2compare + sizefactor;
+    float maxdist = dist2compare + GetObjectSize();
 
     return distsq < maxdist * maxdist;
 }
@@ -1741,27 +1746,28 @@ void WorldObject::AddObjectToRemoveList()
     map->AddObjectToRemoveList(this);
 }
 
-TempSummon *Map::SummonCreature(uint32 entry, float x, float y, float z, float angle, SummonPropertiesEntry const *properties, uint32 duration, Unit *summoner)
+TempSummon *Map::SummonCreature(uint32 entry, float x, float y, float z, float angle, uint32 vehId, SummonPropertiesEntry const *properties, uint32 duration, Unit *summoner)
 {
-    uint32 mask = SUMMON_MASK_SUMMON;
+    uint32 mask = UNIT_MASK_SUMMON;
     if(properties)
     {
         if(properties->Category == SUMMON_CATEGORY_PET
             || properties->Type == SUMMON_TYPE_GUARDIAN
             || properties->Type == SUMMON_TYPE_MINION)
-            mask = SUMMON_MASK_GUARDIAN;
+            mask = UNIT_MASK_GUARDIAN;
         else if(properties->Type == SUMMON_TYPE_TOTEM)
-            mask = SUMMON_MASK_TOTEM;
-        else if(properties->Category == SUMMON_CATEGORY_VEHICLE
-            || properties->Type == SUMMON_TYPE_VEHICLE
+            mask = UNIT_MASK_TOTEM;
+        else if(properties->Category == SUMMON_CATEGORY_VEHICLE)
+            mask = UNIT_MASK_MINION;
+        else if(properties->Type == SUMMON_TYPE_VEHICLE
             || properties->Type == SUMMON_TYPE_VEHICLE2)
-            mask = SUMMON_MASK_VEHICLE;
+            mask = UNIT_MASK_SUMMON;
         else if(properties->Category == SUMMON_CATEGORY_PUPPET)
-            mask = SUMMON_MASK_PUPPET;
+            mask = UNIT_MASK_PUPPET;
         else if(properties->Type == SUMMON_TYPE_MINIPET)
-            mask = SUMMON_MASK_MINION;
+            mask = UNIT_MASK_MINION;
         else if (properties->Flags & 512) // Mirror Image, Summon Gargoyle
-            mask = SUMMON_MASK_GUARDIAN;
+            mask = UNIT_MASK_GUARDIAN;
     }
 
     uint32 phase = PHASEMASK_NORMAL, team = 0;
@@ -1775,15 +1781,15 @@ TempSummon *Map::SummonCreature(uint32 entry, float x, float y, float z, float a
     TempSummon *summon = NULL;
     switch(mask)
     {
-        case SUMMON_MASK_SUMMON:    summon = new TempSummon (properties, summoner);  break;
-        case SUMMON_MASK_GUARDIAN:  summon = new Guardian   (properties, summoner);  break;
-        case SUMMON_MASK_PUPPET:    summon = new Puppet     (properties, summoner);  break;
-        case SUMMON_MASK_TOTEM:     summon = new Totem      (properties, summoner);  break;
-        case SUMMON_MASK_MINION:    summon = new Minion     (properties, summoner);  break;
+        case UNIT_MASK_SUMMON:    summon = new TempSummon (properties, summoner);  break;
+        case UNIT_MASK_GUARDIAN:  summon = new Guardian   (properties, summoner);  break;
+        case UNIT_MASK_PUPPET:    summon = new Puppet     (properties, summoner);  break;
+        case UNIT_MASK_TOTEM:     summon = new Totem      (properties, summoner);  break;
+        case UNIT_MASK_MINION:    summon = new Minion     (properties, summoner);  break;
         default:    return NULL;
     }
 
-    if(!summon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), this, phase, entry, team, x, y, z, angle))
+    if(!summon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), this, phase, entry, vehId, team, x, y, z, angle))
     {
         delete summon;
         return NULL;
@@ -1811,7 +1817,7 @@ void WorldObject::SetZoneScript()
     }
 }
 
-TempSummon* WorldObject::SummonCreature(uint32 entry, float x, float y, float z, float ang, TempSummonType spwtype, uint32 duration)
+TempSummon* WorldObject::SummonCreature(uint32 entry, float x, float y, float z, float ang, uint32 vehId, TempSummonType spwtype, uint32 duration)
 {
     Map *map = FindMap();
     if(!map)
@@ -1820,48 +1826,13 @@ TempSummon* WorldObject::SummonCreature(uint32 entry, float x, float y, float z,
     if (x == 0.0f && y == 0.0f && z == 0.0f)
         GetClosePoint(x, y, z, GetObjectSize());
 
-    TempSummon *pCreature = map->SummonCreature(entry, x, y, z, ang, NULL, duration, isType(TYPEMASK_UNIT) ? (Unit*)this : NULL);
+    TempSummon *pCreature = map->SummonCreature(entry, x, y, z, ang, vehId, NULL, duration, isType(TYPEMASK_UNIT) ? (Unit*)this : NULL);
     if(!pCreature)
         return NULL;
 
     pCreature->SetTempSummonType(spwtype);
 
     return pCreature;
-}
-
-Vehicle* WorldObject::SummonVehicle(uint32 entry, float x, float y, float z, float ang)
-{
-    CreatureInfo const *ci = objmgr.GetCreatureTemplate(entry);
-    if(!ci)
-        return NULL;
-
-    uint32 id = ci->VehicleId; //temp store id here
-    if(!id) id = 156;
-    VehicleEntry const *ve = sVehicleStore.LookupEntry(id);
-    if(!ve)
-        return NULL;
-
-    Vehicle *v = new Vehicle;
-    Map *map = GetMap();
-    uint32 team = 0;
-    if (GetTypeId()==TYPEID_PLAYER)
-        team = ((Player*)this)->GetTeam();
-    if(!v->Create(objmgr.GenerateLowGuid(HIGHGUID_VEHICLE), map, GetPhaseMask(), entry, id, team, x, y, z, ang))
-    {
-        delete v;
-        return NULL;
-    }
-
-    if(isType(TYPEMASK_UNIT))
-    {
-        v->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, GetGUID());
-        v->setFaction(((Unit*)this)->getFaction());
-    }
-    map->Add((Creature*)v);
-
-    //ObjectAccessor::UpdateObjectVisibility(v);
-
-    return v;
 }
 
 Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetType petType, uint32 duration)

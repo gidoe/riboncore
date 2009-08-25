@@ -23,6 +23,7 @@
 #include "Creature.h"
 #include "World.h"
 #include "SpellMgr.h"
+#include "Vehicle.h"
 
 //Disable CreatureAI when charmed
 void CreatureAI::OnCharmed(bool apply)
@@ -111,7 +112,8 @@ void CreatureAI::MoveInLineOfSight(Unit *who)
         AttackStart(who);
     else if(who->getVictim() && me->IsFriendlyTo(who)
         && me->IsWithinDistInMap(who, sWorld.getConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS))
-        && me->canStartAttack(who->getVictim(), true))
+        //&& me->canStartAttack(who->getVictim(), true))
+        && me->canStartAttack(who->getVictim(), false)) // TODO: if we use true, it will not attack it when it arrives
         me->GetMotionMaster()->MoveChase(who->getVictim());
 }
 
@@ -200,7 +202,7 @@ void CreatureAI::EnterEvadeMode()
     if(!_EnterEvadeMode())
         return;
 
-    if(!me->m_Vehicle) // otherwise me will be in evade mode forever
+    if(!me->GetVehicle()) // otherwise me will be in evade mode forever
     {
         if(Unit *owner = me->GetCharmerOrOwner())
         {
@@ -210,6 +212,9 @@ void CreatureAI::EnterEvadeMode()
         else
             me->GetMotionMaster()->MoveTargetedHome();
     }
+
+    if(me->IsVehicle())
+        me->GetVehicleKit()->InstallAllAccessories();
 
     Reset();
 }

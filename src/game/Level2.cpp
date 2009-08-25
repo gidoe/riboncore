@@ -1046,7 +1046,7 @@ bool ChatHandler::HandleNpcAddCommand(const char* args)
     Map *map = chr->GetMap();
 
     Creature* pCreature = new Creature;
-    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMaskForSpawn(), id, (uint32)teamval, x, y, z, o))
+    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMaskForSpawn(), id, 0, (uint32)teamval, x, y, z, o))
     {
         delete pCreature;
         return false;
@@ -1299,7 +1299,7 @@ bool ChatHandler::HandleNpcDeleteCommand(const char* args)
     else
         unit = getSelectedCreature();
 
-    if(!unit || unit->isPet() || unit->isTotem() || unit->isVehicle())
+    if(!unit || unit->isPet() || unit->isTotem())
     {
         SendSysMessage(LANG_SELECT_CREATURE);
         SetSentErrorMessage(true);
@@ -2291,176 +2291,6 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
     return true;
 }
 
-/*//show tickets
-void ChatHandler::ShowTicket(uint64 guid, char const* text, char const* time)
-{
-    std::string name;
-    if(!objmgr.GetPlayerNameByGUID(guid,name))
-        name = GetRibonString(LANG_UNKNOWN);
-
-    std::string nameLink = playerLink(name);
-
-    PSendSysMessage(LANG_COMMAND_TICKETVIEW, nameLink.c_str(),time,text);
-}
-
-//ticket commands
-bool ChatHandler::HandleTicketCommand(const char* args)
-{
-    char* px = strtok((char*)args, " ");
-
-    // ticket<end>
-    if (!px)
-    {
-        if(!m_session)
-        {
-            SendSysMessage(LANG_PLAYER_NOT_FOUND);
-            SetSentErrorMessage(true);
-            return false;
-        }
-
-        size_t count = objmgr.GetTicketCount();
-
-        bool accept = m_session->GetPlayer()->isAcceptTickets();
-
-        PSendSysMessage(LANG_COMMAND_TICKETCOUNT, count, accept ?  GetRibonString(LANG_ON) : GetRibonString(LANG_OFF));
-        return true;
-    }
-
-    // ticket on
-    if(strncmp(px,"on",3) == 0)
-    {
-        if(!m_session)
-        {
-            SendSysMessage(LANG_PLAYER_NOT_FOUND);
-            SetSentErrorMessage(true);
-            return false;
-        }
-
-        m_session->GetPlayer()->SetAcceptTicket(true);
-        SendSysMessage(LANG_COMMAND_TICKETON);
-        return true;
-    }
-
-    // ticket off
-    if(strncmp(px,"off",4) == 0)
-    {
-        if(!m_session)
-        {
-            SendSysMessage(LANG_PLAYER_NOT_FOUND);
-            SetSentErrorMessage(true);
-            return false;
-        }
-
-        m_session->GetPlayer()->SetAcceptTicket(false);
-        SendSysMessage(LANG_COMMAND_TICKETOFF);
-        return true;
-    }
-
-    // ticket #num
-    int num = atoi(px);
-    if(num > 0)
-    {
-        QueryResult *result = CharacterDatabase.PQuery("SELECT guid,ticket_text,ticket_lastchange FROM character_ticket ORDER BY ticket_id ASC "_OFFSET_, num-1);
-
-        if(!result)
-        {
-            PSendSysMessage(LANG_COMMAND_TICKENOTEXIST, num);
-            SetSentErrorMessage(true);
-            return false;
-        }
-
-        Field* fields = result->Fetch();
-
-        uint32 guid = fields[0].GetUInt32();
-        char const* text = fields[1].GetString();
-        char const* time = fields[2].GetString();
-
-        ShowTicket(MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER),text,time);
-        delete result;
-        return true;
-    }
-
-    uint64 target_guid;
-    if(!extractPlayerTarget(px,NULL,&target_guid))
-        return false;
-
-    // ticket $char_name
-    GMTicket* ticket = objmgr.GetGMTicket(GUID_LOPART(target_guid));
-    if(!ticket)
-        return false;
-
-    std::string time = TimeToTimestampStr(ticket->GetLastUpdate());
-
-    ShowTicket(target_guid, ticket->GetText(), time.c_str());
-
-    return true;
-}
-
-//dell all tickets
-bool ChatHandler::HandleDelTicketCommand(const char *args)
-{
-    char* px = strtok((char*)args, " ");
-    if (!px)
-        return false;
-
-    // delticket all
-    if(strncmp(px,"all",4) == 0)
-    {
-        objmgr.DeleteAll();
-        SendSysMessage(LANG_COMMAND_ALLTICKETDELETED);
-        return true;
-    }
-
-    int num = (uint32)atoi(px);
-
-    // delticket #num
-    if(num > 0)
-    {
-        QueryResult* result = CharacterDatabase.PQuery("SELECT guid FROM character_ticket ORDER BY ticket_id ASC "_OFFSET_,num-1);
-        if(!result)
-        {
-            PSendSysMessage(LANG_COMMAND_TICKENOTEXIST, num);
-            SetSentErrorMessage(true);
-            return false;
-        }
-        Field* fields = result->Fetch();
-        uint32 guid = fields[0].GetUInt32();
-        delete result;
-
-        objmgr.Delete(guid);
-
-        //notify player
-        if(Player* pl = objmgr.GetPlayer(MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER)))
-        {
-            pl->GetSession()->SendGMTicketGetTicket(0x0A, 0);
-            PSendSysMessage(LANG_COMMAND_TICKETPLAYERDEL, GetNameLink(pl).c_str());
-        }
-        else
-            PSendSysMessage(LANG_COMMAND_TICKETDEL);
-
-        return true;
-    }
-
-    Player* target;
-    uint64 target_guid;
-    std::string target_name;
-    if(!extractPlayerTarget(px,&target,&target_guid,&target_name))
-        return false;
-
-    // delticket $char_name
-    objmgr.Delete(GUID_LOPART(target_guid));
-
-    // notify players about ticket deleting
-    if(target)
-        target->GetSession()->SendGMTicketGetTicket(0x0A,0);
-
-    std::string nameLink = playerLink(target_name);
-
-    PSendSysMessage(LANG_COMMAND_TICKETPLAYERDEL,nameLink.c_str());
-    return true;
-}*/
-
-
 /////WAYPOINT COMMANDS
 
 /**
@@ -3053,7 +2883,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
                 wpCreature->AddObjectToRemoveList();
                 // re-create
                 Creature* wpCreature2 = new Creature;
-                if (!wpCreature2->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMaskForSpawn(), VISUAL_WAYPOINT, 0, chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), chr->GetOrientation()))
+                if (!wpCreature2->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMaskForSpawn(), VISUAL_WAYPOINT, 0, 0, chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), chr->GetOrientation()))
                 {
                     PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
                     delete wpCreature2;
@@ -3272,7 +3102,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             float o = chr->GetOrientation();
 
             Creature* wpCreature = new Creature;
-            if (!wpCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMaskForSpawn(), id, 0, x, y, z, o))
+            if (!wpCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMaskForSpawn(), id, 0, 0, x, y, z, o))
             {
                 PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
                 delete wpCreature;
@@ -3326,7 +3156,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         Map *map = chr->GetMap();
 
         Creature* pCreature = new Creature;
-        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),map, chr->GetPhaseMaskForSpawn(), id, 0, x, y, z, o))
+        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),map, chr->GetPhaseMaskForSpawn(), id, 0, 0, x, y, z, o))
         {
             PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
             delete pCreature;
@@ -3381,7 +3211,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         Map *map = chr->GetMap();
 
         Creature* pCreature = new Creature;
-        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMaskForSpawn(), id, 0, x, y, z, o))
+        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMaskForSpawn(), id, 0, 0, x, y, z, o))
         {
             PSendSysMessage(LANG_WAYPOINT_NOTCREATED, id);
             delete pCreature;
@@ -4371,7 +4201,7 @@ bool ChatHandler::HandleTempAddSpwCommand(const char* args)
 
     uint32 id = atoi(charID);
 
-    chr->SummonCreature(id,x,y,z,ang,TEMPSUMMON_CORPSE_DESPAWN,120);
+    chr->SummonCreature(id,x,y,z,ang,0,TEMPSUMMON_CORPSE_DESPAWN,120);
 
     return true;
 }

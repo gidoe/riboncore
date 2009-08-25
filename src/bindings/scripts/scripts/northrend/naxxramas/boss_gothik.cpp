@@ -1,4 +1,4 @@
-/* Copyright (C) 2008 - 2009 Ribon <http://www.trinitycore.org/>
+/* Copyright (C) 2008 - 2009 Trinity <http://www.trinitycore.org/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -249,9 +249,9 @@ struct RIBON_DLL_DECL boss_gothikAI : public BossAI
     }
 };
 
-struct RIBON_DLL_DECL mob_gothik_minionAI : public SpellAI
+struct RIBON_DLL_DECL mob_gothik_minionAI : public CombatAI
 {
-    mob_gothik_minionAI(Creature *c) : SpellAI(c)
+    mob_gothik_minionAI(Creature *c) : CombatAI(c)
     {
         liveSide = me->GetPositionY() < POS_Y_GATE;
     }
@@ -277,7 +277,7 @@ struct RIBON_DLL_DECL mob_gothik_minionAI : public SpellAI
         if (me->isSummon())
         {
             if (Unit *owner = CAST_SUM(me)->GetSummoner())
-                SpellAI::JustDied(owner);
+                CombatAI::JustDied(owner);
         }
     }
 
@@ -285,7 +285,7 @@ struct RIBON_DLL_DECL mob_gothik_minionAI : public SpellAI
     {
         if (!gateClose)
         {
-            SpellAI::EnterEvadeMode();
+            CombatAI::EnterEvadeMode();
             return;
         }
 
@@ -318,7 +318,7 @@ struct RIBON_DLL_DECL mob_gothik_minionAI : public SpellAI
             return;
         }
 
-        SpellAI::UpdateAI(diff);
+        CombatAI::UpdateAI(diff);
     }
 };
 

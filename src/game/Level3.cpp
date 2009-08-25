@@ -3569,7 +3569,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
                         }
 
                         if (m_session)
-                            PSendSysMessage(LANG_QUEST_LIST_CHAT,qinfo->GetQuestId(),qinfo->GetQuestId(),title.c_str(),statusStr);
+                            PSendSysMessage(LANG_QUEST_LIST_CHAT,qinfo->GetQuestId(),qinfo->GetQuestId(),qinfo->GetQuestLevel(),title.c_str(),statusStr);
                         else
                             PSendSysMessage(LANG_QUEST_LIST_CONSOLE,qinfo->GetQuestId(),title.c_str(),statusStr);
 
@@ -3606,7 +3606,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
             }
 
             if (m_session)
-                PSendSysMessage(LANG_QUEST_LIST_CHAT,qinfo->GetQuestId(),qinfo->GetQuestId(),title.c_str(),statusStr);
+                PSendSysMessage(LANG_QUEST_LIST_CHAT,qinfo->GetQuestId(),qinfo->GetQuestId(),qinfo->GetQuestLevel(),title.c_str(),statusStr);
             else
                 PSendSysMessage(LANG_QUEST_LIST_CONSOLE,qinfo->GetQuestId(),title.c_str(),statusStr);
 
@@ -4059,7 +4059,7 @@ bool ChatHandler::HandleGuildCreateCommand(const char* args)
     }
 
     Guild *guild = new Guild;
-    if (!guild->create (target,guildname))
+    if (!guild->Create (target,guildname))
     {
         delete guild;
         SendSysMessage (LANG_GUILD_NOT_CREATED);
@@ -4382,7 +4382,7 @@ bool ChatHandler::HandleAuraCommand(const char* args)
                 eff_mask|=1<<i;
             }
         }
-        Aura *Aur = new Aura(spellInfo, eff_mask, NULL, target);
+        Aura *Aur = new Aura(spellInfo, eff_mask, target, target, target);
         target->AddAura(Aur);
     }
 
@@ -5544,7 +5544,7 @@ bool ChatHandler::HandleQuestAdd(const char* args)
     }
 
     // .addquest #entry'
-    // number or [name] Shift-click form |color|Hquest:quest_id|h[name]|h|r
+    // number or [name] Shift-click form |color|Hquest:quest_id:quest_level|h[name]|h|r
     char* cId = extractKeyFromLink((char*)args,"Hquest");
     if(!cId)
         return false;
@@ -5598,7 +5598,7 @@ bool ChatHandler::HandleQuestRemove(const char* args)
     }
 
     // .removequest #entry'
-    // number or [name] Shift-click form |color|Hquest:quest_id|h[name]|h|r
+    // number or [name] Shift-click form |color|Hquest:quest_id:quest_level|h[name]|h|r
     char* cId = extractKeyFromLink((char*)args,"Hquest");
     if(!cId)
         return false;
@@ -5648,7 +5648,7 @@ bool ChatHandler::HandleQuestComplete(const char* args)
     }
 
     // .quest complete #entry
-    // number or [name] Shift-click form |color|Hquest:quest_id|h[name]|h|r
+    // number or [name] Shift-click form |color|Hquest:quest_id:quest_level|h[name]|h|r
     char* cId = extractKeyFromLink((char*)args,"Hquest");
     if(!cId)
         return false;
@@ -7352,7 +7352,7 @@ bool ChatHandler::HandleFreezeCommand(const char *args)
 
         //m_session->GetPlayer()->CastSpell(player,spellID,false);
         SpellEntry const *spellInfo = sSpellStore.LookupEntry( 9454 );
-        Aura *Aur = new Aura(spellInfo, 1, NULL, player);
+        Aura *Aur = new Aura(spellInfo, 1, player, player, player);
         player->AddAura(Aur);
 
         //save player

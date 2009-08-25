@@ -104,6 +104,7 @@ class RIBON_DLL_SPEC CreatureAI : public UnitAI
 
         // Called when the creature summon successfully other creature
         virtual void JustSummoned(Creature* ) {}
+        virtual void IsSummonedBy(Unit *summoner) {}
 
         virtual void SummonedCreatureDespawn(Creature* /*unit*/) {}
 

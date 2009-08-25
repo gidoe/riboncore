@@ -1216,6 +1216,42 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(m_caster,spell_id,true,NULL);
                     return;
                 }
+                case 62324: // Throw Passenger
+                    if(m_targets.HasTraj())
+                    {
+                        if(Vehicle *vehicle = m_caster->GetVehicleKit())
+                            if(Unit *passenger = vehicle->GetPassenger(damage - 1))
+                            {
+                                std::list<Unit*> unitList;
+                                // use 99 because it is 3d search
+                                SearchAreaTarget(unitList, 99, PUSH_DST_CENTER, SPELL_TARGETS_ENTRY, 33114);
+                                float minDist = 99 * 99;
+                                Vehicle *target = NULL;
+                                for(std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+                                {
+                                    if(Vehicle *seat = (*itr)->GetVehicleKit())
+                                        if(!seat->GetPassenger(0))
+                                            if(Unit *device = seat->GetPassenger(2))
+                                                if(!device->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+                                                {
+                                                    float dist = (*itr)->GetExactDistSq(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ);
+                                                    if(dist < minDist)
+                                                    {
+                                                        minDist = dist;
+                                                        target = seat;
+                                                    }
+                                                }
+                                }
+                                if(target && target->GetBase()->IsWithinDist2d(m_targets.m_destX, m_targets.m_destY, GetSpellRadius(m_spellInfo, i, false) * 2)) // now we use *2 because the location of the seat is not correct
+                                    passenger->EnterVehicle(target, 0);
+                                else
+                                {
+                                    passenger->ExitVehicle();
+                                    passenger->GetMotionMaster()->MoveJump(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_targets.GetSpeedXY(), m_targets.GetSpeedZ());
+                                }
+                            }
+                    }
+                    return;
             }
 
             //All IconID Check in there
@@ -1852,8 +1888,8 @@ void Spell::EffectDummy(uint32 i)
             // Death Grip
             if(m_spellInfo->Id == 49560)
             {
-                if (unitTarget->m_Vehicle)
-                    unitTarget->m_Vehicle->CastSpell(m_caster, damage, true);
+                if (Unit *unit = unitTarget->GetVehicleBase()) // what is this for?
+                    unit->CastSpell(m_caster, damage, true);
                 else
                     unitTarget->CastSpell(m_caster, damage, true);
                 return;
@@ -3375,25 +3411,12 @@ void Spell::EffectSummonType(uint32 i)
                     break;
                 case SUMMON_TYPE_VEHICLE:
                 case SUMMON_TYPE_VEHICLE2:
-                {
-                    if(!m_originalCaster)
-                        return;
-
-                    Vehicle *vehicle = m_originalCaster->SummonVehicle(entry, x, y, z, m_caster->GetOrientation());
-                    if(!vehicle)
-                        return;
-
-                    // this is for wintergrasp, need to find a better way
-                    // in the future, we can just use getsummoner
-                    //vehicle->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_originalCasterGUID);
-                    //if(m_originalCaster)
-                    //    vehicle->setFaction(m_originalCaster->getFaction());
-                    vehicle->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+                    if(m_originalCaster)
+                        summon = m_caster->GetMap()->SummonCreature(entry, x, y, z, m_caster->GetOrientation(), 0, properties, duration, m_originalCaster);
                     break;
-                }
                 case SUMMON_TYPE_TOTEM:
                 {
-                    summon = m_caster->GetMap()->SummonCreature(entry, x, y, z, m_caster->GetOrientation(), properties, duration, m_originalCaster);
+                    summon = m_caster->GetMap()->SummonCreature(entry, x, y, z, m_caster->GetOrientation(), 0, properties, duration, m_originalCaster);
                     if(!summon || !summon->isTotem())
                         return;
 
@@ -3421,8 +3444,8 @@ void Spell::EffectSummonType(uint32 i)
                 }
                 case SUMMON_TYPE_MINIPET:
                 {
-                    summon = m_caster->GetMap()->SummonCreature(entry, x, y, z, m_caster->GetOrientation(), properties, duration, m_originalCaster);
-                    if(!summon || !summon->HasSummonMask(SUMMON_MASK_MINION))
+                    summon = m_caster->GetMap()->SummonCreature(entry, x, y, z, m_caster->GetOrientation(), 0, properties, duration, m_originalCaster);
+                    if(!summon || !summon->HasUnitTypeMask(UNIT_MASK_MINION))
                         return;
 
                     //summon->InitPetCreateSpells();                         // e.g. disgusting oozeling has a create spell as summon...
@@ -3470,23 +3493,19 @@ void Spell::EffectSummonType(uint32 i)
             SummonGuardian(entry, properties);
             break;
         case SUMMON_CATEGORY_PUPPET:
-            summon = m_caster->GetMap()->SummonCreature(entry, x, y, z, m_caster->GetOrientation(), properties, duration, m_originalCaster);
+            summon = m_caster->GetMap()->SummonCreature(entry, x, y, z, m_caster->GetOrientation(), 0, properties, duration, m_originalCaster);
             break;
         case SUMMON_CATEGORY_VEHICLE:
         {
             float x, y, z;
             m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
-            Vehicle *vehicle = m_caster->SummonVehicle(entry, x, y, z, m_caster->GetOrientation());
-            if(!vehicle)
+            summon = m_caster->GetMap()->SummonCreature(entry, x, y, z, m_caster->GetOrientation(), 0, properties, duration, m_caster);
+            if(!summon || !summon->IsVehicle())
                 return;
 
-            //vehicle->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
-            //vehicle->setFaction(m_caster->getFaction());
-            vehicle->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-
             if(damage)
-                m_caster->CastSpell(vehicle, damage, true);
-            m_caster->EnterVehicle(vehicle);
+                m_caster->CastSpell(summon, damage, true);
+            m_caster->EnterVehicle(summon->GetVehicleKit());
             break;
         }
     }
@@ -3706,7 +3725,7 @@ void Spell::EffectAddFarsight(uint32 i)
 
     // Need to update visibility of object for client to accept farsight guid
     ((Player*)m_caster)->SetViewpoint(dynObj, true);
-    ((Player*)m_caster)->UpdateVisibilityOf(dynObj);
+    //((Player*)m_caster)->UpdateVisibilityOf(dynObj);
 }
 
 void Spell::EffectTeleUnitsFaceCaster(uint32 i)
@@ -4679,6 +4698,61 @@ void Spell::EffectScriptEffect(uint32 effIndex)
         {
             switch(m_spellInfo->Id)
             {
+                // Glyph of Starfire
+                case 54846:
+                {
+                    if (AuraEffect const * aurEff = unitTarget->GetAura(SPELL_AURA_PERIODIC_DAMAGE,SPELLFAMILY_DRUID,0x00000002,0,0,m_caster->GetGUID()))
+                    {
+                        uint32 countMin = aurEff->GetParentAura()->GetAuraMaxDuration();
+                        uint32 countMax = 18000;
+                        countMax += m_caster->HasAura(38414) ? 3000 : 0;
+                        countMax += m_caster->HasAura(57865) ? 3000 : 0;
+
+                        if (countMin < countMax)
+                        {
+                            aurEff->GetParentAura()->SetAuraDuration(uint32(aurEff->GetParentAura()->GetAuraDuration()+3000));
+                            aurEff->GetParentAura()->SetAuraMaxDuration(countMin+3000);
+                        }
+                    }
+                    return;
+                }
+                // Glyph of Shred
+                case 63974:
+                {
+                    if (AuraEffect const * aurEff = unitTarget->GetAura(SPELL_AURA_PERIODIC_DAMAGE,SPELLFAMILY_DRUID,0x00800000,0,0,m_caster->GetGUID()))
+                    {
+                        uint32 countMin = aurEff->GetParentAura()->GetAuraMaxDuration();
+                        uint32 countMax = 20000;
+                        countMax += m_caster->HasAura(54818) ? 4000 : 0;
+                        countMax += m_caster->HasAura(60141) ? 4000 : 0;
+
+                        if (countMin < countMax)
+                        {
+                            aurEff->GetParentAura()->SetAuraDuration(uint32(aurEff->GetParentAura()->GetAuraDuration()+3000));
+                            aurEff->GetParentAura()->SetAuraMaxDuration(countMin+2000);
+                        }
+
+                    }
+                    return;
+                }
+                // Glyph of Backstab
+                case 63975:
+                {
+                    if (AuraEffect const * aurEff = unitTarget->GetAura(SPELL_AURA_PERIODIC_DAMAGE,SPELLFAMILY_ROGUE,0x00100000,0,0,m_caster->GetGUID()))
+                    {
+                        uint32 countMin = aurEff->GetParentAura()->GetAuraMaxDuration();
+                        uint32 countMax = 12000;
+                        countMax += m_caster->HasAura(56801) ? 4000 : 0;
+
+                        if (countMin < countMax)
+                        {
+                            aurEff->GetParentAura()->SetAuraDuration(uint32(aurEff->GetParentAura()->GetAuraDuration()+3000));
+                            aurEff->GetParentAura()->SetAuraMaxDuration(countMin+2000);
+                        }
+
+                    }
+                    return;
+                }
                 // Dispelling Analysis
                 case 37028:
                 {
@@ -5196,9 +5270,10 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                     return;
                 }
                 case 62428: // Load into Catapult
-                    if(m_caster->m_Vehicle && m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->isVehicle())
-                        if(Unit *passenger = ((Vehicle*)m_caster)->GetPassenger(0))
-                            passenger->CastSpell(m_caster->m_Vehicle, damage, true);
+                    if(Unit *demolisher = m_caster->GetVehicleBase())
+                        if(Vehicle *seat = m_caster->GetVehicleKit())
+                            if(Unit *passenger = seat->GetPassenger(0))
+                                passenger->CastSpell(demolisher, damage, true);
                     return;
                 case 60123: // Lightwell
                 {
@@ -5228,6 +5303,7 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                     }
                     else
                         ((TempSummon*)m_caster)->UnSummon();
+                    return;
                 }
             }
             break;
@@ -6535,10 +6611,15 @@ void Spell::EffectTransmitted(uint32 effIndex)
     }
 
     Map *cMap = m_caster->GetMap();
-
     if(goinfo->type==GAMEOBJECT_TYPE_FISHINGNODE)
     {
-        if ( !cMap->IsInWater(fx, fy, fz-0.5f, 0.5f))             // Hack to prevent fishing bobber from failing to land on fishing hole
+        //dirty way to hack serpent shrine pool
+        if(cMap->GetId() == 548 && m_caster->GetDistance(36.69, -416.38, -19.9645) <= 16)//center of strange pool
+        {
+            fx = 36.69+irand(-8,8);//random place for the bobber
+            fy = -416.38+irand(-8,8);
+            fz = -19.9645;//serpentshrine water level        
+        }else if ( !cMap->IsInWater(fx, fy, fz-0.5f, 0.5f))             // Hack to prevent fishing bobber from failing to land on fishing hole
         { // but this is not proper, we really need to ignore not materialized objects
             SendCastResult(SPELL_FAILED_NOT_HERE);
             SendChannelUpdate(0);
@@ -6546,7 +6627,8 @@ void Spell::EffectTransmitted(uint32 effIndex)
         }
 
         // replace by water level in this case
-        fz = cMap->GetWaterLevel(fx, fy);
+        if(cMap->GetId() != 548)//if map is not serpentshrine caverns
+            fz = cMap->GetWaterLevel(fx, fy);
     }
     // if gameobject is summoning object, it should be spawned right on caster's position
     else if(goinfo->type==GAMEOBJECT_TYPE_SUMMONING_RITUAL)
@@ -6888,14 +6970,14 @@ void Spell::SummonGuardian(uint32 entry, SummonPropertiesEntry const *properties
         float px, py, pz;
         GetSummonPosition(0, px, py, pz, radius, count);
 
-        TempSummon *summon = map->SummonCreature(entry, px, py, pz, m_caster->GetOrientation(), properties, duration, caster);
+        TempSummon *summon = map->SummonCreature(entry, px, py, pz, m_caster->GetOrientation(), 0, properties, duration, caster);
         if(!summon)
             return;
-        if(summon->HasSummonMask(SUMMON_MASK_GUARDIAN))
+        if(summon->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
             ((Guardian*)summon)->InitStatsForLevel(level);
 
         summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-        if(summon->HasSummonMask(SUMMON_MASK_MINION) && m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+        if(summon->HasUnitTypeMask(UNIT_MASK_MINION) && m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
             ((Minion*)summon)->SetFollowAngle(m_caster->GetAngle(summon));
 
         summon->AI()->EnterEvadeMode();

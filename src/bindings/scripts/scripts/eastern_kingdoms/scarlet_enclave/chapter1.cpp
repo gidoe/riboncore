@@ -336,9 +336,9 @@ int32 m_auiRandomSay[] =
     SAY_DUEL_A, SAY_DUEL_B, SAY_DUEL_C, SAY_DUEL_D, SAY_DUEL_E, SAY_DUEL_F, SAY_DUEL_G, SAY_DUEL_H, SAY_DUEL_I
 };
 
-struct RIBON_DLL_DECL npc_death_knight_initiateAI : public SpellAI
+struct RIBON_DLL_DECL npc_death_knight_initiateAI : public CombatAI
 {
-    npc_death_knight_initiateAI(Creature* pCreature) : SpellAI(pCreature)
+    npc_death_knight_initiateAI(Creature* pCreature) : CombatAI(pCreature)
     {
         m_bIsDuelInProgress = false;
     }
@@ -352,7 +352,7 @@ struct RIBON_DLL_DECL npc_death_knight_initiateAI : public SpellAI
     {
         lose = false;
         me->RestoreFaction();
-        SpellAI::Reset();
+        CombatAI::Reset();
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
 
@@ -376,7 +376,7 @@ struct RIBON_DLL_DECL npc_death_knight_initiateAI : public SpellAI
         {
             if (pDoneBy->GetGUID() != m_uiDuelerGUID && pDoneBy->GetOwnerGUID() != m_uiDuelerGUID) // other players cannot help
                 uiDamage = 0;
-            else if (uiDamage >= m_creature->GetHealth()) 
+            else if (uiDamage >= m_creature->GetHealth())
             {
                 uiDamage = 0;
 
@@ -432,7 +432,7 @@ struct RIBON_DLL_DECL npc_death_knight_initiateAI : public SpellAI
 
         // TODO: spells
 
-        SpellAI::UpdateAI(uiDiff);
+        CombatAI::UpdateAI(uiDiff);
     }
 };
 
@@ -488,6 +488,7 @@ bool GossipSelect_npc_death_knight_initiate(Player* pPlayer, Creature* pCreature
 ######*/
 
 #define DESPAWN_HORSE 52267
+#define SAY_DARK_RIDER      "The realm of shadows awaits..."
 
 struct RIBON_DLL_DECL npc_dark_rider_of_acherusAI : public ScriptedAI
 {
@@ -516,7 +517,7 @@ struct RIBON_DLL_DECL npc_dark_rider_of_acherusAI : public ScriptedAI
             switch(Phase)
             {
                case 0:
-                    m_creature->MonsterSay("The realm of shadows awaits...", LANG_UNIVERSAL, 0);
+                    m_creature->MonsterSay(SAY_DARK_RIDER, LANG_UNIVERSAL, 0);
                     PhaseTimer = 5000;
                     Phase = 1;
                     break;
@@ -541,7 +542,7 @@ struct RIBON_DLL_DECL npc_dark_rider_of_acherusAI : public ScriptedAI
     }
 
     void InitDespawnHorse(Unit *who)
-    {   
+    {
         if (!who)
             return;
 
@@ -566,9 +567,11 @@ CreatureAI* GetAI_npc_dark_rider_of_acherus(Creature* pCreature)
 
 enum
 {
-    REALM_OF_SHADOWS     = 52693,
-    DELIVER_STOLEN_HORSE = 52264,
-    CALL_DARK_RIDER      = 52266
+    REALM_OF_SHADOWS            = 52693,
+    EFFECT_STOLEN_HORSE         = 52263,
+    DELIVER_STOLEN_HORSE        = 52264,
+    CALL_DARK_RIDER             = 52266,
+    SPELL_EFFECT_OVERTAKE       = 52349
 };
 
 struct RIBON_DLL_DECL npc_salanar_the_horsemanAI : public ScriptedAI
@@ -579,11 +582,11 @@ struct RIBON_DLL_DECL npc_salanar_the_horsemanAI : public ScriptedAI
     {
         if (spell->Id == DELIVER_STOLEN_HORSE)
         {
-            if (caster->GetTypeId() == TYPEID_UNIT && CAST_CRE(caster)->isVehicle())
+            if (caster->GetTypeId() == TYPEID_UNIT && caster->IsVehicle())
             {
                 if (Unit *charmer = caster->GetCharmer())
                 {
-                    charmer->ExitVehicle();
+                    charmer->RemoveAurasDueToSpell(EFFECT_STOLEN_HORSE);
                     caster->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                     caster->setFaction(35);
                     DoCast(caster, CALL_DARK_RIDER, true);
@@ -598,7 +601,7 @@ struct RIBON_DLL_DECL npc_salanar_the_horsemanAI : public ScriptedAI
     {
         ScriptedAI::MoveInLineOfSight(who);
 
-        if (who->GetTypeId() == TYPEID_UNIT && CAST_CRE(who)->isVehicle() && me->IsWithinDistInMap(who, 5.0f))
+        if (who->GetTypeId() == TYPEID_UNIT && who->IsVehicle() && me->IsWithinDistInMap(who, 5.0f))
         {
             if (Unit *charmer = who->GetCharmer())
             {
@@ -606,13 +609,15 @@ struct RIBON_DLL_DECL npc_salanar_the_horsemanAI : public ScriptedAI
                 {
                     // for quest Into the Realm of Shadows(12687)
                     if(me->GetEntry() == 28788 && CAST_PLR(charmer)->GetQuestStatus(12687) == QUEST_STATUS_INCOMPLETE)
+                    {
                         CAST_PLR(charmer)->GroupEventHappens(12687, me);
+                        charmer->RemoveAurasDueToSpell(SPELL_EFFECT_OVERTAKE);
+                        CAST_CRE(who)->ForcedDespawn();
+                        //CAST_CRE(who)->Respawn(true);
+                    }
 
                     if (CAST_PLR(charmer)->HasAura(REALM_OF_SHADOWS))
                         charmer->RemoveAurasDueToSpell(REALM_OF_SHADOWS);
-
-                    CAST_PLR(charmer)->ExitVehicle();
-                    CAST_CRE(who)->Respawn(true);
                 }
             }
         }
@@ -644,15 +649,15 @@ struct RIBON_DLL_DECL npc_ros_dark_riderAI : public ScriptedAI
         deathcharger->RestoreFaction();
         deathcharger->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
         deathcharger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        if (!me->m_Vehicle && deathcharger->isVehicle() && CAST_VEH(deathcharger)->HasEmptySeat(0))
-            me->EnterVehicle(CAST_VEH(deathcharger));
+        if (!me->GetVehicle() && deathcharger->IsVehicle() && deathcharger->GetVehicleKit()->HasEmptySeat(0))
+            me->EnterVehicle(deathcharger);
     }
 
     void JustDied(Unit *killer)
     {
         Creature* deathcharger = me->FindNearestCreature(28782, 30);
         if (!deathcharger) return;
-        if (killer->GetTypeId() == TYPEID_PLAYER && deathcharger->GetTypeId() == TYPEID_UNIT && deathcharger->isVehicle())
+        if (killer->GetTypeId() == TYPEID_PLAYER && deathcharger->GetTypeId() == TYPEID_UNIT && deathcharger->IsVehicle())
         {
             deathcharger->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             deathcharger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -750,6 +755,9 @@ CreatureAI* GetAI_npc_scarlet_miner_cart(Creature *_Creature)
 ## npc_scarlet_miner
 ####*/
 
+#define SAY_SCARLET_MINER1  "Where'd this come from? I better get this down to the ships before the foreman sees it!"
+#define SAY_SCARLET_MINER2  "Now I can have a rest!"
+
 struct RIBON_DLL_DECL npc_scarlet_minerAI : public npc_escortAI
 {
     npc_scarlet_minerAI(Creature *c) : npc_escortAI(c)
@@ -803,7 +811,7 @@ struct RIBON_DLL_DECL npc_scarlet_minerAI : public npc_escortAI
 
     void InitCartQuest(Player *who)
     {
-        carGUID = who->m_Vehicle->GetGUID();
+        carGUID = who->GetVehicleBase()->GetGUID();
         InitWaypoint();
         Start(false, false, who->GetGUID());
         SetDespawnAtFar(false);
@@ -819,7 +827,7 @@ struct RIBON_DLL_DECL npc_scarlet_minerAI : public npc_escortAI
                     me->SetInFront(car);
                     me->SendMovementFlagUpdate();
                 }
-                me->MonsterSay("Where'd this come from? I better get this down to the ships before the foreman sees it!",LANG_UNIVERSAL,NULL);
+                me->MonsterSay(SAY_SCARLET_MINER1,LANG_UNIVERSAL,NULL);
                 SetRun(true);
                 IntroTimer = 4000;
                 IntroPhase = 1;
@@ -835,7 +843,7 @@ struct RIBON_DLL_DECL npc_scarlet_minerAI : public npc_escortAI
                     //car->GetMotionMaster()->MovePoint(0, car->GetPositionX(), car->GetPositionY(), me->GetPositionZ());
                     car->RemoveAura(SPELL_CART_DRAG);
                 }
-                me->MonsterSay("Now I can have a rest!",LANG_UNIVERSAL,NULL);
+                me->MonsterSay(SAY_SCARLET_MINER2,LANG_UNIVERSAL,NULL);
                 break;
             default:
                 break;
@@ -886,7 +894,7 @@ bool GOHello_go_inconspicuous_mine_car(Player* pPlayer, GameObject* pGO)
         if(Creature *miner = pPlayer->SummonCreature(28841, 2383.869629, -5900.312500, 107.996086, pPlayer->GetOrientation(),TEMPSUMMON_DEAD_DESPAWN, 1))
         {
             pPlayer->CastSpell(pPlayer, SPELL_CART_SUMM, true);
-            if(Vehicle *car = pPlayer->m_Vehicle)
+            if(Creature *car = pPlayer->GetVehicleCreatureBase())
             {
                 if(car->GetEntry() == 28817)
                 {
@@ -899,7 +907,7 @@ bool GOHello_go_inconspicuous_mine_car(Player* pPlayer, GameObject* pGO)
     return true;
 }
 
-// npc 28912 quest 17217 boss 29001 mob 29007 go 191092 
+// npc 28912 quest 17217 boss 29001 mob 29007 go 191092
 
 void AddSC_the_scarlet_enclave_c1()
 {
@@ -969,7 +977,7 @@ void AddSC_the_scarlet_enclave_c1()
     newscript->RegisterSelf();
 }
 
-/*   
+/*
 DELETE FROM `script_texts` WHERE `entry` IN(-1609301, -1609302);
 INSERT INTO `script_texts` (`entry`,`content_default`,`type`,`language`,`emote`,`comment`) VALUES
 (-1609301, 'Come, weakling! Strike me down!', 0, 0, 0, 'SAY_DEATH_RIDER_FINAL'),

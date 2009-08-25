@@ -111,7 +111,7 @@ struct RIBON_DLL_DECL boss_maexxnaAI : public BossAI
                     break;
                 }
             }
-        }                    
+        }
 
         if (!enraged && HealthBelowPct(30))
         {

@@ -258,6 +258,8 @@ enum WorldConfigs
     CONFIG_LOGDB_CLEARINTERVAL,
     CONFIG_LOGDB_CLEARTIME,
     CONFIG_CLIENTCACHE_VERSION,
+    CONFIG_GUILD_EVENT_LOG_COUNT,
+    CONFIG_GUILD_BANK_EVENT_LOG_COUNT,
     CONFIG_VALUE_COUNT
 };
 
@@ -578,10 +580,10 @@ class World
         static float GetVisibleUnitGreyDistance()       { return m_VisibleUnitGreyDistance;       }
         static float GetVisibleObjectGreyDistance()     { return m_VisibleObjectGreyDistance;     }
         //movement anticheat
-        static bool GetEnableMvAnticheat()     {return m_EnableMvAnticheat;}
-        static uint32 GetTeleportToPlaneAlarms()  {return m_TeleportToPlaneAlarms;}
-        static uint32 GetMistimingDelta()  {return m_MistimingDelta;}
-        static uint32 GetMistimingAlarms() {return m_MistimingAlarms;}
+        static bool GetEnableMvAnticheat()       { return m_EnableMvAnticheat;     }
+        static uint32 GetTeleportToPlaneAlarms() { return m_TeleportToPlaneAlarms; }
+        static uint32 GetMistimingDelta()        { return m_MistimingDelta;        }
+        static uint32 GetMistimingAlarms()       { return m_MistimingAlarms;       }
         //<<< end movement anticheat
         void ProcessCliCommands();
         void QueueCliCommand( CliCommandHolder::Print* zprintf, char const* input ) { cliCmdQueue.add(new CliCommandHolder(input, zprintf)); }

@@ -401,27 +401,27 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     rest_type=REST_TYPE_NO;
     ////////////////////Rest System/////////////////////
     //movement anticheat
-    m_anti_LastClientTime  = 0;   //last movement client time
-    m_anti_LastServerTime  = 0;   //last movement server time
-    m_anti_DeltaClientTime = 0;   //client side session time
-    m_anti_DeltaServerTime = 0;   //server side session time
-    m_anti_MistimingCount  = 0;   //mistiming counts before kick
+    m_anti_LastClientTime  = 0;     // last movement client time
+    m_anti_LastServerTime  = 0;     // last movement server time
+    m_anti_DeltaClientTime = 0;     // client side session time
+    m_anti_DeltaServerTime = 0;     // server side session time
+    m_anti_MistimingCount  = 0;     // mistiming counts before kick
 
-    m_anti_LastSpeedChangeTime = 0;  //last speed change time
-    m_anti_BeginFallTime = 0;     //alternative falling begin time (obsolete)
+    m_anti_LastSpeedChangeTime = 0; // last speed change time
 
-    m_anti_Last_HSpeed =  7.0f;   //horizontal speed, default RUN speed
-    m_anti_Last_VSpeed = -2.3f;   //vertical speed, default max jump height
+    m_anti_Last_HSpeed =  7.0f;     // horizontal speed, default RUN speed
+    m_anti_Last_VSpeed = -2.3f;     // vertical speed, default max jump height
 
-    m_anti_TransportGUID = 0;     //current transport GUID
+    m_anti_TransportGUID = 0;       // current transport GUID
 
-    m_anti_JustTeleported = 0;    //seted when player was teleported
-    m_anti_TeleToPlane_Count = 0; //Teleport To Plane alarm counter
+    m_anti_JustTeleported = 0;      // seted when player was teleported
+    m_anti_AntiCheatOffCount = 0;
+    m_anti_TeleToPlane_Count = 0;   // Teleport To Plane alarm counter
 
-    m_anti_AlarmCount = 0;        //alarm counter
+    m_anti_AlarmCount = 0;          // alarm counter
 
-    m_anti_JustJumped = 0;        //Jump already began, anti air jump check
-    m_anti_JumpBaseZ = 0;          //Z coord before jump (AntiGrav)
+    m_anti_JumpCount = 0;           // Jump already began, anti air jump check
+    m_anti_JumpBaseZ = 0;           // Z coord before jump (AntiGrav)
     // << movement anticheat
     /////////////////////////////////
 
@@ -1696,7 +1696,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     MapEntry const* mEntry = sMapStore.LookupEntry(mapid);
 
     //movement anticheat
-    m_anti_JustTeleported = 1;
+    m_anti_JustTeleported = true;
     //end movement anticheat
     // don't let enter battlegrounds without assigned battleground id (for example through areatrigger)...
     // don't let gm level > 1 either
@@ -4275,6 +4275,9 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     CharacterDatabase.PExecute("DELETE FROM character_achievement WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_achievement_progress WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_equipmentsets WHERE guid = '%u'",guid);
+    CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE PlayerGuid1 = '%u'",guid);
+    CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE PlayerGuid2 = '%u'",guid);
+    CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE PlayerGuid = '%u'",guid);
     CharacterDatabase.CommitTransaction();
 
     //loginDatabase.PExecute("UPDATE realmcharacters SET numchars = numchars - 1 WHERE acctid = %d AND realmid = %d", accountId, realmID);
@@ -6517,7 +6520,8 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
 
         zone = MapManager::Instance().GetZoneId(map,posx,posy,posz);
 
-        CharacterDatabase.PExecute("UPDATE characters SET zone='%u' WHERE guid='%u'", zone, guidLow);
+        if (zone > 0)
+            CharacterDatabase.PExecute("UPDATE characters SET zone='%u' WHERE guid='%u'", zone, guidLow);
     }
 
     return zone;
@@ -14090,7 +14094,7 @@ void Player::KilledMonsterCredit( uint32 entry, uint64 guid )
 
 void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
 {
-    bool isCreature = IS_CREATURE_GUID(guid);
+    bool isCreature = IS_CRE_OR_VEH_GUID(guid);
 
     uint32 addCastCount = 1;
     for( uint8 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
@@ -15404,7 +15408,7 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
             else
                 remaincharges = 0;
 
-            Aura* aura = new Aura(spellproto, effmask, NULL, this, NULL, NULL);
+            Aura* aura = new Aura(spellproto, effmask, this, this, this);
             aura->SetLoadedState(caster_guid,maxduration,remaintime,remaincharges, stackcount, &damage[0]);
             if(!aura->CanBeSaved())
             {
@@ -17140,9 +17144,9 @@ void Player::StopCastingCharm()
 
     if(charm->GetTypeId() == TYPEID_UNIT)
     {
-        if(((Creature*)charm)->HasSummonMask(SUMMON_MASK_PUPPET))
+        if(((Creature*)charm)->HasUnitTypeMask(UNIT_MASK_PUPPET))
             ((Puppet*)charm)->UnSummon();
-        else if(((Creature*)charm)->isVehicle())
+        else if(charm->IsVehicle())
             ExitVehicle();
     }
     if(GetCharmGUID())
@@ -17350,21 +17354,21 @@ void Player::PossessSpellInitialize()
 
 void Player::VehicleSpellInitialize()
 {
-    Unit* charm = m_Vehicle;
-    if(!charm)
+    Creature* veh = GetVehicleCreatureBase();
+    if(!veh)
         return;
 
-    SetPosition(m_Vehicle->GetPositionX(), m_Vehicle->GetPositionY(), m_Vehicle->GetPositionZ(), m_Vehicle->GetOrientation());
+    // SetPosition(m_Vehicle->GetPositionX(), m_Vehicle->GetPositionY(), m_Vehicle->GetPositionZ(), m_Vehicle->GetOrientation());
 
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*10+1+1);
-    data << uint64(charm->GetGUID());
+    data << uint64(veh->GetGUID());
     data << uint16(0);
     data << uint32(0);
     data << uint32(0x00000101);
 
     for(uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
     {
-        uint32 spellId = ((Creature*)charm)->m_spells[i];
+        uint32 spellId = ((Creature*)veh)->m_spells[i];
         if(!spellId)
             continue;
 
@@ -17374,7 +17378,7 @@ void Player::VehicleSpellInitialize()
 
         if(IsPassiveSpell(spellId))
         {
-            charm->CastSpell(charm, spellId, true);
+            veh->CastSpell(veh, spellId, true);
             data << uint16(0) << uint8(0) << uint8(i+8);
         }
         else
@@ -18918,8 +18922,13 @@ bool Player::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bool
         return false;
 
     // always seen by owner
-    if(GetGUID() == u->GetCharmerOrOwnerGUID())
-        return true;
+    if(uint64 guid = u->GetCharmerOrOwnerGUID())
+        if(GetGUID() == guid)
+            return true;
+
+    if(uint64 guid = GetUInt64Value(PLAYER_FARSIGHT))
+        if(u->GetGUID() == guid)
+            return true;
 
     // different visible distance checks
     if(isInFlight())                                     // what see player in flight
@@ -19101,6 +19110,9 @@ void Player::UpdateVisibilityOf(WorldObject* target)
     {
         if(target->isVisibleForInState(this,false))
         {
+            //if(target->isType(TYPEMASK_UNIT) && ((Unit*)target)->m_Vehicle)
+            //    UpdateVisibilityOf(((Unit*)target)->m_Vehicle);
+                
             target->SendUpdateToPlayer(this);
             UpdateVisibilityOf_helper(m_clientGUIDs, target);
 
@@ -19145,10 +19157,13 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data, std::set<WorldObjec
             #endif
         }
     }
-    else //if(visibleNow.size() < 30 || target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->isVehicle())
+    else //if(visibleNow.size() < 30 || target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsVehicle())
     {
         if(target->isVisibleForInState(this,false))
         {
+            //if(target->isType(TYPEMASK_UNIT) && ((Unit*)target)->m_Vehicle)
+            //    UpdateVisibilityOf(((Unit*)target)->m_Vehicle, data, visibleNow);
+
             visibleNow.insert(target);
             target->BuildCreateUpdateBlockForPlayer(&data, this);
             UpdateVisibilityOf_helper(m_clientGUIDs,target);
@@ -19770,7 +19785,7 @@ void Player::UpdateForQuestWorldObjects()
             if(obj)
                 obj->BuildValuesUpdateBlockForPlayer(&udata,this);
         }
-        else if(IS_CREATURE_GUID(*itr) || IS_VEHICLE_GUID(*itr))
+        else if(IS_CRE_OR_VEH_GUID(*itr))
         {
             Creature *obj = ObjectAccessor::GetCreatureOrPetOrVehicle(*this, *itr);
             if(!obj)
@@ -20241,13 +20256,6 @@ void Player::SetClientControl(Unit* target, uint8 allowMove)
     GetSession()->SendPacket(&data);
     if(target == this)
         SetMover(this);
-    else if(target->canFly())
-    {
-        WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 12);
-        data.append(target->GetPackGUID());
-        data << uint32(0);
-        SendDirectMessage(&data);
-    }
 }
 
 void Player::UpdateZoneDependentAuras( uint32 newZone )
@@ -20279,14 +20287,14 @@ void Player::UpdateAreaDependentAuras( uint32 newArea )
             if( !HasAura(itr->second->spellId) )
                 CastSpell(this,itr->second->spellId,true);
 
-    if(newArea == 4273 && m_Vehicle && GetPositionX() > 400) // Ulduar
+    if(newArea == 4273 && GetVehicle() && GetPositionX() > 400) // Ulduar
     {
-        switch(m_Vehicle->GetEntry())
+        switch(GetVehicleBase()->GetEntry())
         {
             case 33062:
             case 33109:
             case 33060:
-                m_Vehicle->Dismiss();
+                GetVehicle()->Dismiss();
                 break;
         }
     }
@@ -20556,7 +20564,10 @@ void Player::SetViewpoint(WorldObject* target, bool apply)
             return;
         }
 
-        if(target->isType(TYPEMASK_UNIT) && !m_Vehicle)
+        // farsight dynobj or puppet may be very far away
+        UpdateVisibilityOf(target);
+
+        if(target->isType(TYPEMASK_UNIT) && !GetVehicle())
             ((Unit*)target)->AddPlayerToVision(this);
     }
     else
@@ -20569,7 +20580,7 @@ void Player::SetViewpoint(WorldObject* target, bool apply)
             return;
         }
 
-        if(target->isType(TYPEMASK_UNIT) && !m_Vehicle)
+        if(target->isType(TYPEMASK_UNIT) && !GetVehicle())
             ((Unit*)target)->RemovePlayerFromVision(this);
 
         //must immediately set seer back otherwise may crash
@@ -21590,8 +21601,9 @@ void Player::BuildEnchantmentsInfoData(WorldPacket *data)
 
         data->put<uint16>(enchantmentMaskPos, enchantmentMask);
 
-        *data << uint16(0);                                 // ?
-        *data << uint8(0);                                  // PGUID!
+
+        *data << uint16(0);                                 // unknown
+        data->appendPackGUID(item->GetUInt64Value(ITEM_FIELD_CREATOR)); // item creator
         *data << uint32(0);                                 // seed?
     }
 
@@ -21845,7 +21857,6 @@ void Player::UpdateSpecCount(uint8 count)
         _SaveActions(); // make sure the button list is cleaned up
         // active spec becomes only spec?
         CharacterDatabase.PExecute("DELETE FROM character_action WHERE spec<>'%u' AND guid='%u'",m_activeSpec, GetGUIDLow());
-        CharacterDatabase.PExecute("UPDATE character_action SET spec='0' WHERE guid='%u'", GetGUIDLow());
         m_activeSpec = 0;
     }
     else if (count == MAX_TALENT_SPECS)
@@ -21876,6 +21887,8 @@ void Player::ActivateSpec(uint8 spec)
         return;
 
     _SaveActions();
+    
+    UnsummonPetTemporaryIfAny();
     
     uint32 const* talentTabIds = GetTalentTabPages(getClass());
     
@@ -21972,7 +21985,8 @@ void Player::ActivateSpec(uint8 spec)
     {
         _LoadActions(result, false);
     }
-    UnsummonPetTemporaryIfAny();
+    
+    ResummonPetTemporaryUnSummonedIfAny();
     SendActionButtons(1);
 
     Powers pw = getPowerType();

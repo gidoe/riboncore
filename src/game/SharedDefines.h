@@ -266,7 +266,7 @@ enum SpellCategory
 #define SPELL_ATTR_EX_UNK11                       0x00000800            // 11 aura
 #define SPELL_ATTR_EX_UNK12                       0x00001000            // 12
 #define SPELL_ATTR_EX_UNK13                       0x00002000            // 13
-#define SPELL_ATTR_EX_UNK14                       0x00004000            // 14
+#define SPELL_ATTR_EX_STACK_FOR_DIFF_CASTERS      0x00004000            // 14
 #define SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY    0x00008000            // 15 remove auras on immunity
 #define SPELL_ATTR_EX_UNK16                       0x00010000            // 16 on immuniy
 #define SPELL_ATTR_EX_UNAUTOCASTABLE_BY_PET       0x00020000            // 17
@@ -316,7 +316,7 @@ enum SpellCategory
 #define SPELL_ATTR_EX2_UNK28                      0x10000000            // 28 no breaks stealth if it fails??
 #define SPELL_ATTR_EX2_CANT_CRIT                  0x20000000            // 29 Spell can't crit
 #define SPELL_ATTR_EX2_TRIGGERED_CAN_TRIGGER      0x40000000            // 30 spell can trigger even if triggered
-#define SPELL_ATTR_EX2_FOOD                       0x80000000            // 31 food, well-fed, and a few others
+#define SPELL_ATTR_EX2_FOOD_BUFF                  0x80000000            // 31 Food or Drink Buff (like Well Fed)
 
 #define SPELL_ATTR_EX3_UNK0                       0x00000001            // 0
 #define SPELL_ATTR_EX3_UNK1                       0x00000002            // 1
@@ -325,7 +325,7 @@ enum SpellCategory
 #define SPELL_ATTR_EX3_UNK4                       0x00000010            // 4 Druid Rebirth only this spell have this flag
 #define SPELL_ATTR_EX3_UNK5                       0x00000020            // 5
 #define SPELL_ATTR_EX3_UNK6                       0x00000040            // 6
-#define SPELL_ATTR_EX3_STACKS_FOR_DIFFERENT_CASTERS 0x00000080            // 7 separate stack for every caster
+#define SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS     0x00000080            // 7 separate stack for every caster
 #define SPELL_ATTR_EX3_PLAYERS_ONLY               0x00000100            // 8 Player only?
 #define SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_2    0x00000200            // 9 triggered from effect?
 #define SPELL_ATTR_EX3_MAIN_HAND                  0x00000400            // 10 Main hand weapon required
@@ -2418,9 +2418,11 @@ enum PetDiet
 // Max values for Guild & Guild Bank
 #define GUILD_BANK_MAX_TABS         6
 #define GUILD_BANK_MAX_SLOTS        98
-#define GUILD_BANK_MAX_LOGS         24
-#define GUILD_EVENTLOG_MAX_ENTRIES  100
-#define GUILD_MAX_RANKS             10
+#define GUILD_BANK_MAX_LOGS         25
+#define GUILD_BANK_MONEY_LOGS_TAB   100
+#define GUILD_EVENTLOG_MAX_RECORDS  100
+#define GUILD_RANKS_MIN_COUNT       5
+#define GUILD_RANKS_MAX_COUNT       10
 
 enum AiReaction
 {
@@ -2495,6 +2497,11 @@ enum SummonType
     SUMMON_TYPE_VEHICLE     = 9,
     SUMMON_TYPE_VEHICLE2    = 10,
     SUMMON_TYPE_OBJECT      = 11,
+};
+
+enum EventId
+{
+    EVENT_SPELLCLICK        = 1001,
 };
 
 enum ResponseCodes

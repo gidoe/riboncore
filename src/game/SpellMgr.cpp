@@ -469,21 +469,45 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
     {
         case SPELLFAMILY_GENERIC:
         {
-            //food/drink
-            if (spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
+            // Food / Drinks (mostly)
+            if(spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
             {
-                for(int i = 0; i < 3; i++)
-                    if( spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_POWER_REGEN
-                        || spellInfo->EffectApplyAuraName[i] == SPELL_AURA_OBS_MOD_ENERGY)
-                        return SPELL_DRINK;
-                    else if ( spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_REGEN
-                        || spellInfo->EffectApplyAuraName[i] == SPELL_AURA_OBS_MOD_HEALTH)
-                        return SPELL_FOOD;
+                bool food = false;
+                bool drink = false;
+                for(int i = 0; i < 3; ++i)
+                {
+                    switch(spellInfo->EffectApplyAuraName[i])
+                    {
+                        // Food
+                        case SPELL_AURA_MOD_REGEN:
+                        case SPELL_AURA_OBS_MOD_HEALTH:
+                            food = true;
+                            break;
+                        // Drink
+                        case SPELL_AURA_MOD_POWER_REGEN:
+                        case SPELL_AURA_OBS_MOD_POWER:
+                            drink = true;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                if(food && drink)
+                    return SPELL_FOOD_AND_DRINK;
+                else if(food)
+                    return SPELL_FOOD;
+                else if(drink)
+                    return SPELL_DRINK;
             }
-            // this may be a hack
-            else if((spellInfo->AttributesEx2 & SPELL_ATTR_EX2_FOOD)
-                && !spellInfo->Category)
+            // Well Fed buffs (must be exclusive with Food / Drink replenishment effects, or else Well Fed will cause them to be removed)
+            // SpellIcon 2560 is Spell 46687, does not have this flag
+            else if ((spellInfo->AttributesEx2 & SPELL_ATTR_EX2_FOOD_BUFF) || spellInfo->SpellIconID == 2560)
                 return SPELL_WELL_FED;
+            // this may be a hack
+            //else if((spellInfo->AttributesEx2 & SPELL_ATTR_EX2_FOOD_BUFF)
+            //    && !spellInfo->Category)
+            //    return SPELL_WELL_FED;
             // scrolls effects
             else
             {
@@ -519,14 +543,6 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
 
             break;
         }
-        case SPELLFAMILY_PRIEST:
-        {
-            // Divine Spirit and Prayer of Spirit
-            if (spellInfo->SpellFamilyFlags[0] & 0x20)
-                return SPELL_PRIEST_DIVINE_SPIRIT;
-
-            break;
-        }
         case SPELLFAMILY_WARRIOR:
         {
             if (spellInfo->SpellFamilyFlags[1] & 0x000080 || spellInfo->SpellFamilyFlags[0] & 0x10000)
@@ -549,6 +565,20 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             //seed of corruption and corruption
             if (spellInfo->SpellFamilyFlags[1] & 0x10 || spellInfo->SpellFamilyFlags[0] & 0x2)
                 return SPELL_WARLOCK_CORRUPTION;
+            break;
+        }
+        case SPELLFAMILY_PRIEST:
+        {
+            // "Well Fed" buff from Blessed Sunfruit, Blessed Sunfruit Juice, Alterac Spring Water
+            if ((spellInfo->Attributes & SPELL_ATTR_CASTABLE_WHILE_SITTING) &&
+                (spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_AUTOATTACK) &&
+                (spellInfo->SpellIconID == 52 || spellInfo->SpellIconID == 79))
+                return SPELL_WELL_FED;
+
+            // Divine Spirit and Prayer of Spirit
+            if (spellInfo->SpellFamilyFlags[0] & 0x20)
+                return SPELL_PRIEST_DIVINE_SPIRIT;
+
             break;
         }
         case SPELLFAMILY_HUNTER:
@@ -629,7 +659,8 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
     return SPELL_NORMAL;
 }
 
-bool IsSingleFromSpellSpecificPerCaster(uint32 spellSpec1,uint32 spellSpec2)
+// target not allow have more one spell specific from same caster
+bool IsSingleFromSpellSpecificPerCaster(SpellSpecific spellSpec1,SpellSpecific spellSpec2)
 {
     switch(spellSpec1)
     {
@@ -649,7 +680,7 @@ bool IsSingleFromSpellSpecificPerCaster(uint32 spellSpec1,uint32 spellSpec2)
     }
 }
 
-bool IsSingleFromSpellSpecificPerTarget(uint32 spellSpec1,uint32 spellSpec2)
+bool IsSingleFromSpellSpecificPerTarget(SpellSpecific spellSpec1, SpellSpecific spellSpec2)
 {
     switch(spellSpec1)
     {
@@ -661,14 +692,22 @@ bool IsSingleFromSpellSpecificPerTarget(uint32 spellSpec1,uint32 spellSpec2)
         case SPELL_MAGE_POLYMORPH:
         case SPELL_PRESENCE:
         case SPELL_WELL_FED:
-        case SPELL_DRINK:
-        case SPELL_FOOD:
         case SPELL_CHARM:
         case SPELL_SCROLL:
         case SPELL_WARRIOR_ENRAGE:
         case SPELL_MAGE_ARCANE_BRILLANCE:
         case SPELL_PRIEST_DIVINE_SPIRIT:
             return spellSpec1==spellSpec2;
+        case SPELL_FOOD:
+            return spellSpec2==SPELL_FOOD
+                || spellSpec2==SPELL_FOOD_AND_DRINK;
+        case SPELL_DRINK:
+            return spellSpec2==SPELL_DRINK
+                || spellSpec2==SPELL_FOOD_AND_DRINK;
+        case SPELL_FOOD_AND_DRINK:
+            return spellSpec2==SPELL_FOOD
+                || spellSpec2==SPELL_DRINK
+                || spellSpec2==SPELL_FOOD_AND_DRINK;
         case SPELL_BATTLE_ELIXIR:
             return spellSpec2==SPELL_BATTLE_ELIXIR
                 || spellSpec2==SPELL_FLASK_ELIXIR;
@@ -1372,11 +1411,10 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
             if (!(procExtra & PROC_EX_INTERNAL_DOT))
                 return false;
         }
-        else if (EventProcFlag & PROC_FLAG_TAKEN_POSITIVE_MAGIC_SPELL
-            && !(procExtra & PROC_EX_INTERNAL_HOT))
-            return false;
         else if (procExtra & PROC_EX_INTERNAL_HOT)
             procExtra |= PROC_EX_INTERNAL_REQ_FAMILY;
+        else if (EventProcFlag & PROC_FLAG_SUCCESSFUL_POSITIVE_MAGIC_SPELL)
+            return false;
     }
 
     if (procFlags & PROC_FLAG_ON_TAKE_PERIODIC)
@@ -1386,11 +1424,10 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
             if (!(procExtra & PROC_EX_INTERNAL_DOT))
                 return false;
         }
-        else if (EventProcFlag & PROC_FLAG_TAKEN_POSITIVE_MAGIC_SPELL
-            && !(procExtra & PROC_EX_INTERNAL_HOT))
-            return false;
         else if (procExtra & PROC_EX_INTERNAL_HOT)
             procExtra |= PROC_EX_INTERNAL_REQ_FAMILY;
+        else if (EventProcFlag & PROC_FLAG_TAKEN_POSITIVE_MAGIC_SPELL)
+            return false;
     }
     // Trap casts are active by default
     if (procFlags & PROC_FLAG_ON_TRAP_ACTIVATION)
@@ -2766,6 +2803,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Howl of Terror
             else if (spellproto->SpellFamilyFlags[1] & 0x8)
                 return DIMINISHING_FEAR_BLIND;
+            // Seduction
+            else if (spellproto->SpellFamilyFlags[0] & 0x40000000)
+                return DIMINISHING_FEAR_BLIND;
             break;
         }
         case SPELLFAMILY_DRUID:
@@ -3002,94 +3042,98 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
 
 //-----------RIBON-------------
 
-bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2, bool sameCaster) const
+bool SpellMgr::CanAurasStack(SpellEntry const *spellInfo_1, SpellEntry const *spellInfo_2, bool sameCaster) const
 {
-    SpellEntry const *spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
-    SpellEntry const *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
-
-    if(!spellInfo_1 || !spellInfo_2)
-        return false;
-
-    SpellSpecific spellId_spec_1 = GetSpellSpecific(spellId_1);
-    SpellSpecific spellId_spec_2 = GetSpellSpecific(spellId_2);
-    if (spellId_spec_1 && spellId_spec_2)
-        if (IsSingleFromSpellSpecificPerTarget(spellId_spec_1, spellId_spec_2)
-            ||(sameCaster && IsSingleFromSpellSpecificPerCaster(spellId_spec_1, spellId_spec_2)))
-            return true;
+    SpellSpecific spellSpec_1 = GetSpellSpecific(spellInfo_1->Id);
+    SpellSpecific spellSpec_2 = GetSpellSpecific(spellInfo_2->Id);
+    if (spellSpec_1 && spellSpec_2)
+        if (IsSingleFromSpellSpecificPerTarget(spellSpec_1, spellSpec_2)
+            || sameCaster && IsSingleFromSpellSpecificPerCaster(spellSpec_1, spellSpec_2))
+            return false;
 
     if(spellInfo_1->SpellFamilyName != spellInfo_2->SpellFamilyName)
-        return false;
+        return true;
 
     if(!sameCaster)
     {
+        if(spellInfo_1->AttributesEx & SPELL_ATTR_EX_STACK_FOR_DIFF_CASTERS
+            || spellInfo_1->AttributesEx3 & SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS)
+            return true;
+            
+        // check same periodic auras
         for(uint32 i = 0; i < 3; ++i)
-            if (spellInfo_1->Effect[i] == SPELL_EFFECT_APPLY_AURA
-                || spellInfo_1->Effect[i] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+        {
+            // area auras should not stack (shaman totem)
+            if(spellInfo_1->Effect[i] != SPELL_EFFECT_APPLY_AURA
+                && spellInfo_1->Effect[i] != SPELL_EFFECT_PERSISTENT_AREA_AURA)
+                continue;
+
+            // not channeled AOE effects should not stack (blizzard should, but Consecration should not)
+            if((IsAreaEffectTarget[spellInfo_1->EffectImplicitTargetA[i]] || IsAreaEffectTarget[spellInfo_1->EffectImplicitTargetB[i]])
+                && !IsChanneledSpell(spellInfo_1))
+                continue;
+
+            switch(spellInfo_1->EffectApplyAuraName[i])
             {
-                // not channeled AOE effects can stack
-                if(IsAreaEffectTarget[spellInfo_1->EffectImplicitTargetA[i]] || IsAreaEffectTarget[spellInfo_1->EffectImplicitTargetB[i]]
-                    && !IsChanneledSpell(spellInfo_1))
-                        continue;
-                // not area auras (shaman totem)
-                switch(spellInfo_1->EffectApplyAuraName[i])
-                {
-                    // DOT or HOT from different casters will stack
-                    case SPELL_AURA_PERIODIC_DAMAGE:
-                    case SPELL_AURA_PERIODIC_HEAL:
-                    case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
-                    case SPELL_AURA_PERIODIC_ENERGIZE:
-                    case SPELL_AURA_PERIODIC_MANA_LEECH:
-                    case SPELL_AURA_PERIODIC_LEECH:
-                    case SPELL_AURA_POWER_BURN_MANA:
-                    case SPELL_AURA_OBS_MOD_ENERGY:
-                    case SPELL_AURA_OBS_MOD_HEALTH:
-                    case SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE:
-                        return false;
-                    default:
-                        break;
-                }
+                // DOT or HOT from different casters will stack
+                case SPELL_AURA_PERIODIC_DAMAGE:
+                case SPELL_AURA_PERIODIC_HEAL:
+                case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
+                case SPELL_AURA_PERIODIC_ENERGIZE:
+                case SPELL_AURA_PERIODIC_MANA_LEECH:
+                case SPELL_AURA_PERIODIC_LEECH:
+                case SPELL_AURA_POWER_BURN_MANA:
+                case SPELL_AURA_OBS_MOD_POWER:
+                case SPELL_AURA_OBS_MOD_HEALTH:
+                case SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE:
+                    return true;
+                default:
+                    break;
             }
+        }
     }
 
-    spellId_2 = GetLastSpellInChain(spellId_2);
-    spellId_1 = GetLastSpellInChain(spellId_1);
+    uint32 spellId_1 = GetLastSpellInChain(spellInfo_1->Id);
+    uint32 spellId_2 = GetLastSpellInChain(spellInfo_2->Id);
 
-    // Hack for Incanter's Absorption
-    if (spellId_1 == spellId_2 && (spellId_1 == 44413 || (!sameCaster && spellInfo_1->AttributesEx3 & SPELL_ATTR_EX3_STACKS_FOR_DIFFERENT_CASTERS)))
-        return false;
-
+    // same spell
     if (spellId_1 == spellId_2)
-        return true;
+    {
+        // Hack for Incanter's Absorption
+        if(spellId_1 == 44413)
+            return true;
+        // same spell with same caster should not stack
+        return false;
+    }
 
-    // generic spells
+    // use icon to check generic spells
     if(!spellInfo_1->SpellFamilyName)
     {
-        if(!spellInfo_1->SpellIconID
-            || spellInfo_1->SpellIconID == 1
+        if(!spellInfo_1->SpellIconID || spellInfo_1->SpellIconID == 1
             || spellInfo_1->SpellIconID != spellInfo_2->SpellIconID)
-            return false;
+            return true;
     }
-    // check for class spells
+    // use familyflag to check class spells
     else
     {
-        if (spellInfo_1->SpellFamilyFlags != spellInfo_2->SpellFamilyFlags)
-            return false;
-        if (!spellInfo_1->SpellFamilyFlags)
-            return false;
+        if(!spellInfo_1->SpellFamilyFlags
+            || spellInfo_1->SpellFamilyFlags != spellInfo_2->SpellFamilyFlags)
+            return true;
     }
 
     //use data of highest rank spell(needed for spells which ranks have different effects)
-    spellInfo_1=sSpellStore.LookupEntry(spellId_1);
-    spellInfo_2=sSpellStore.LookupEntry(spellId_2);
+    spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
+    spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
 
-    //if spells have exactly the same effect they cannot stack
+    //if spells do not have the same effect or aura or miscvalue, they will stack
     for(uint32 i = 0; i < 3; ++i)
         if(spellInfo_1->Effect[i] != spellInfo_2->Effect[i]
             || spellInfo_1->EffectApplyAuraName[i] != spellInfo_2->EffectApplyAuraName[i]
             || spellInfo_1->EffectMiscValue[i] != spellInfo_2->EffectMiscValue[i]) // paladin resist aura
-            return false; // need itemtype check? need an example to add that check
+            return true; // need itemtype check? need an example to add that check
 
-    return (!(!sameCaster && spellInfo_1->AttributesEx3 & SPELL_ATTR_EX3_STACKS_FOR_DIFFERENT_CASTERS));
+    // different spells with same effect
+    return false;
 }
 
 bool IsDispelableBySpell(SpellEntry const * dispelSpell, uint32 spellId, bool def)
@@ -3540,14 +3584,12 @@ void SpellMgr::LoadSpellCustomAttr()
                     mSpellCustomAttr[i] |= SPELL_ATTR_CU_CHARGE;
                     break;
                 case SPELL_EFFECT_TRIGGER_SPELL:
-                    if (SpellTargetType[spellInfo->EffectImplicitTargetA[j]]== TARGET_TYPE_DEST_CASTER ||
-                        SpellTargetType[spellInfo->EffectImplicitTargetA[j]]== TARGET_TYPE_DEST_TARGET ||
-                        SpellTargetType[spellInfo->EffectImplicitTargetA[j]]== TARGET_TYPE_DEST_DEST ||
+                    if (IsPositionTarget(spellInfo->EffectImplicitTargetA[j]) ||
                         spellInfo->Targets & (TARGET_FLAG_SOURCE_LOCATION|TARGET_FLAG_DEST_LOCATION))
                         spellInfo->Effect[j] = SPELL_EFFECT_TRIGGER_MISSILE;
                     break;
             }
-            
+
             switch(SpellTargetType[spellInfo->EffectImplicitTargetA[j]])
             {
                 case TARGET_TYPE_UNIT_TARGET:
@@ -3730,6 +3772,10 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 30421:     // Nether Portal - Perseverence
             spellInfo->EffectBasePoints[2] += 30000;
+            break;
+        // some dummy spell only has dest, should push caster in this case
+        case 62324: // Throw Passenger
+            spellInfo->Targets |= TARGET_FLAG_CASTER;
             break;
         default:
             break;

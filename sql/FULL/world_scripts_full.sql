@@ -1,4 +1,4 @@
--- Up to RC 599
+-- Up to RC 718
 
 /* WORLD BOSS */
 UPDATE `creature_template` SET `ScriptName`='boss_ysondre' WHERE `entry`=14887;
@@ -115,9 +115,9 @@ UPDATE `gameobject_template` SET `ScriptName`='go_inconspicuous_mine_car' WHERE 
 UPDATE `creature_template` SET `ScriptName`='npc_scarlet_miner_cart' WHERE (`entry`='28817');
 UPDATE `creature_template` SET `ScriptName`='npc_scarlet_miner' WHERE (`entry`='28841');
 UPDATE `creature_template` SET `ScriptName`='npc_crusade_persuaded' WHERE `entry` IN (28939,28940,28610);
-
 UPDATE `creature_template` SET `ScriptName`='mob_scarlet_courier' WHERE `entry`='29076';
-update creature_template set scriptname="mob_anti_air" where entry in (29102,29103,29104);
+update creature_template set AIName = 'ArchorAI', scriptname='' where entry in (29102,29103);
+update creature_template set AIName = 'TurretAI', scriptname='' where entry = 29104;
 UPDATE `creature_template` SET `ScriptName`='npc_highlord_darion_mograine' WHERE `entry`='29173';
 UPDATE `creature_template` SET `ScriptName`='npc_the_lich_king_tirion_dawn' WHERE `entry` in (29183,29175);
 
@@ -314,6 +314,7 @@ UPDATE `creature_template` SET `ScriptName`='npc_surristrasz' WHERE `entry`=2479
 UPDATE `creature_template` SET `ScriptName`='npc_tiare' WHERE `entry`=30051;
 UPDATE `creature_template` SET `ScriptName`='npc_sinkhole_kill_credit' WHERE `entry` IN (26248,26249);
 UPDATE `creature_template` SET `ScriptName`='npc_khunok_the_behemoth' WHERE `entry`=25862;
+UPDATE `creature_template` SET `ScriptName`='npc_keristrasza' WHERE `entry`=26206;
 
 /* BURNING STEPPES */
 UPDATE `creature_template` SET `ScriptName`='npc_ragged_john' WHERE `entry`=9563;
@@ -1061,6 +1062,7 @@ UPDATE `creature_template` SET `ScriptName` = 'boss_flame_leviathan_turret' WHER
 UPDATE `creature_template` SET `ScriptName` = 'boss_flame_leviathan_seat' WHERE entry=33114;
 UPDATE `creature_template` SET `ScriptName` = 'boss_flame_leviathan_defense_turret' WHERE entry=33142;
 UPDATE `creature_template` SET `ScriptName` = 'boss_flame_leviathan_overload_device' WHERE entry=33143;
+UPDATE `creature_template` SET `ScriptName` = 'spell_pool_of_tar' WHERE `entry` = 33090;
 UPDATE `creature_template` SET `ScriptName` = 'boss_ignis' WHERE `entry` = 33118;
 UPDATE `creature_template` SET `ScriptName` = 'boss_razorscale' WHERE `entry` = 33186;
 UPDATE `creature_template` SET `ScriptName` = 'boss_xt002' WHERE `entry` = 33293;
