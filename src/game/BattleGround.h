@@ -524,7 +524,7 @@ class BattleGround
         void DoorOpen(uint32 type);
         void DoorClose(uint32 type);
         //to be removed
-        const char *GetTrinityString(int32 entry);
+        const char *GetRibonString(int32 entry);
 
         virtual bool HandlePlayerUnderMap(Player * /*plr*/) { return false; }
 
