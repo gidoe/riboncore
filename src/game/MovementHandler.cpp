@@ -157,10 +157,10 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         }
     }
 
-    if((mEntry->IsRaid() || (mEntry->IsNonRaidDungeon() && mEntry->SupportsHeroicMode() && GetPlayer()->IsHeroic())) && mInstance)
+    if((mEntry->IsRaid() || (mEntry->IsNonRaidDungeon() && mEntry->SupportsHeroicMode() && GetPlayer()->IsHeroicDungeon())) && mInstance)
     {
         uint32 timeleft = sInstanceSaveManager.GetResetTimeFor(GetPlayer()->GetMapId()) - time(NULL);
-        GetPlayer()->SendInstanceResetWarning(GetPlayer()->GetMapId(), GetPlayer()->GetDifficulty(), timeleft);
+        GetPlayer()->SendInstanceResetWarning(GetPlayer()->GetMapId(), GetPlayer()->GetDungeonDifficulty(), timeleft);
     }
 
     // mount allow check
@@ -182,9 +182,11 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 {
     sLog.outDebug("MSG_MOVE_TELEPORT_ACK");
     uint64 guid;
-    uint32 flags, time;
 
-    recv_data >> guid;
+    if(!recv_data.readPackGUID(guid))
+        return;
+
+    uint32 flags, time;
     recv_data >> flags >> time;
     DEBUG_LOG("Guid " UI64FMTD, guid);
     DEBUG_LOG("Flags %u, time %u", flags, time/IN_MILISECONDS);
@@ -229,6 +231,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 {
     uint32 opcode = recv_data.GetOpcode();
     //sLog.outDebug("WORLD: Recvd %s (%u, 0x%X) opcode", LookupOpcodeName(opcode), opcode, opcode);
+    recv_data.hexlike();
 
     Unit *mover = _player->m_mover;
     Player *plMover = mover->GetTypeId()==TYPEID_PLAYER ? (Player*)mover : NULL;
@@ -244,17 +247,23 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     }
 
     /* extract packet */
+    uint64 guid;
+
+    if(!recv_data.readPackGUID(guid))
+        return;
+
     MovementInfo movementInfo;
+    movementInfo.guid = guid;
     ReadMovementInfo(recv_data, &movementInfo);
     /*----------------*/
 
-    if(recv_data.size() != recv_data.rpos())
+   /* if(recv_data.size() != recv_data.rpos())
     {
         sLog.outError("MovementHandler: player %s (guid %d, account %u) sent a packet (opcode %u) that is " SIZEFMTD " bytes larger than it should be. Kicked as cheater.", _player->GetName(), _player->GetGUIDLow(), _player->GetSession()->GetAccountId(), recv_data.GetOpcode(), recv_data.size() - recv_data.rpos());
-        KickPlayer();
+        KickPlayer();*/
         recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
-        return;
-    }
+    /*    return;
+    }*/
 
      if (!MaNGOS::IsValidMapCoord(movementInfo.x, movementInfo.y, movementInfo.z, movementInfo.o))
      {
@@ -659,7 +668,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     if(plMover)                                             // nothing is charmed, or player charmed
     {
         plMover->SetPosition(movementInfo.x, movementInfo.y, movementInfo.z, movementInfo.o);
-        plMover->UpdateFallInformationIfNeed(movementInfo, recv_data.GetOpcode());
+        plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
         if(movementInfo.z < -500.0f)
         {
@@ -724,14 +733,16 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
 void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
 {
-    //sLog.outDebug("WORLD: Recvd %s (%u, 0x%X) opcode", LookupOpcodeName(recv_data.GetOpcode()), recv_data.GetOpcode(), recv_data.GetOpcode());
-
+    uint32 opcode = recv_data.GetOpcode();
+    sLog.outDebug("WORLD: Recvd %s (%u, 0x%X) opcode", LookupOpcodeName(opcode), opcode, opcode);
+    
     /* extract packet */
     uint64 guid;
     uint32 unk1;
     float  newspeed;
 
-    recv_data >> guid;
+    if(!recv_data.readPackGUID(guid))
+        return;
 
     // now can skip not our packet
     if(_player->GetGUID() != guid)
@@ -745,6 +756,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     recv_data >> unk1;                                      // counter or moveEvent
 
     MovementInfo movementInfo;
+    movementInfo.guid = guid;
     ReadMovementInfo(recv_data, &movementInfo);
 
     recv_data >> newspeed;
@@ -757,7 +769,6 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
 
     static char const* move_type_name[MAX_MOVE_TYPE] = {  "Walk", "Run", "RunBack", "Swim", "SwimBack", "TurnRate", "Flight", "FlightBack", "PitchRate" };
 
-    uint16 opcode = recv_data.GetOpcode();
     switch(opcode)
     {
         case CMSG_FORCE_WALK_SPEED_CHANGE_ACK:          move_type = MOVE_WALK;          force_move_type = MOVE_WALK;        break;
@@ -833,7 +844,8 @@ void WorldSession::HandleMoveNotActiveMover(WorldPacket &recv_data)
     sLog.outDebug("WORLD: Recvd CMSG_MOVE_NOT_ACTIVE_MOVER");
 
     uint64 old_mover_guid;
-    recv_data >> old_mover_guid;
+    if(!recv_data.readPackGUID(old_mover_guid))
+        return;
 
     /*if(_player->m_mover->GetGUID() == old_mover_guid)
     {
@@ -842,7 +854,12 @@ void WorldSession::HandleMoveNotActiveMover(WorldPacket &recv_data)
         return;
     }*/
 
-    ReadMovementInfo(recv_data, &_player->m_mover->m_movementInfo);
+    MovementInfo mi;
+    mi.guid = old_mover_guid;
+    ReadMovementInfo(recv_data, &mi);
+    
+    //ReadMovementInfo(recv_data, &_player->m_mover->m_movementInfo);
+    _player->m_movementInfo = mi;
 }
 
 void WorldSession::HandleDismissControlledVehicle(WorldPacket &recv_data)
@@ -858,7 +875,19 @@ void WorldSession::HandleDismissControlledVehicle(WorldPacket &recv_data)
         return;
     }
 
-    ReadMovementInfo(recv_data, &_player->m_mover->m_movementInfo);
+    uint64 guid;
+
+    if(!recv_data.readPackGUID(guid))
+        return;
+
+    MovementInfo mi;
+    mi.guid = guid;
+    ReadMovementInfo(recv_data, &mi);
+
+    _player->m_movementInfo = mi;
+     
+    /* 
+    ReadMovementInfo(recv_data, &_player->m_mover->m_movementInfo);*/
     _player->ExitVehicle();
 }
 

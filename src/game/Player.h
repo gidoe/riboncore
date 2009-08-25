@@ -178,7 +178,7 @@ struct ActionButton
     }
 };
 
-#define  MAX_ACTION_BUTTONS 132                             //checked in 2.3.0
+#define  MAX_ACTION_BUTTONS 144                             //checked in 3.2.0
 
 typedef std::map<uint8,ActionButton> ActionButtonList;
 
@@ -339,10 +339,10 @@ enum LfgType
 
 enum LfgRoles
 {
-    LEADER  = 1,
-    TANK    = 2,
-    HEALER  = 4,
-    DAMAGE  = 8
+    LEADER  = 0x01,
+    TANK    = 0x02,
+    HEALER  = 0x04,
+    DAMAGE  = 0x08
 };
 
 struct LookingForGroupSlot
@@ -728,6 +728,19 @@ enum InstanceResetWarningType
     RAID_INSTANCE_EXPIRED           = 5
 };
 
+// PLAYER_FIELD_ARENA_TEAM_INFO_1_1 offsets
+enum ArenaTeamInfoType
+{
+    ARENA_TEAM_ID               = 0,
+    ARENA_TEAM_UNK2             = 1,                        // new in 3.2 - team type?
+    ARENA_TEAM_MEMBER           = 2,                        // 0 - captain, 1 - member
+    ARENA_TEAM_GAMES_WEEK       = 3,
+    ARENA_TEAM_GAMES_SEASON     = 4,
+    ARENA_TEAM_WINS_SEASON      = 5,
+    ARENA_TEAM_PERSONAL_RATING  = 6,
+    ARENA_TEAM_END              = 7
+};
+
 class InstanceSave;
 
 enum RestType
@@ -808,8 +821,8 @@ enum PlayerDelayedOperations
     DELAYED_SAVE_PLAYER         = 0x01,
     DELAYED_RESURRECT_PLAYER    = 0x02,
     DELAYED_SPELL_CAST_DESERTER = 0x04,
-    DELAYED_BG_MOUNT_RESTORE    = 0x08, ///< Flag to restore mount state after teleport from BG
-    DELAYED_BG_TAXI_RESTORE     = 0x10, ///< Flag to restore taxi state after teleport from BG
+    DELAYED_BG_MOUNT_RESTORE    = 0x08,                     ///< Flag to restore mount state after teleport from BG
+    DELAYED_BG_TAXI_RESTORE     = 0x10,                     ///< Flag to restore taxi state after teleport from BG   
     DELAYED_END
 };
 
@@ -1023,8 +1036,8 @@ class RIBON_DLL_SPEC Player : public Unit
         time_t m_logintime;
         time_t m_Last_tick;
         uint32 m_Played_time[MAX_PLAYED_TIME_INDEX];
-        uint32 GetTotalPlayedTime() { return m_Played_time[PLAYED_TIME_TOTAL]; };
-        uint32 GetLevelPlayedTime() { return m_Played_time[PLAYED_TIME_LEVEL]; };
+        uint32 GetTotalPlayedTime() { return m_Played_time[PLAYED_TIME_TOTAL]; }
+        uint32 GetLevelPlayedTime() { return m_Played_time[PLAYED_TIME_LEVEL]; }
 
         void setDeathState(DeathState s);                   // overwrite Unit::setDeathState
 
@@ -1035,21 +1048,21 @@ class RIBON_DLL_SPEC Player : public Unit
             inn_pos_y = y;
             inn_pos_z = z;
             time_inn_enter = time;
-        };
+        }
 
-        float GetRestBonus() const { return m_rest_bonus; };
+        float GetRestBonus() const { return m_rest_bonus; }
         void SetRestBonus(float rest_bonus_new);
 
-        RestType GetRestType() const { return rest_type; };
-        void SetRestType(RestType n_r_type) { rest_type = n_r_type; };
+        RestType GetRestType() const { return rest_type; }
+        void SetRestType(RestType n_r_type) { rest_type = n_r_type; }
 
-        uint32 GetInnPosMapId() const { return inn_pos_mapid; };
-        float GetInnPosX() const { return inn_pos_x; };
-        float GetInnPosY() const { return inn_pos_y; };
-        float GetInnPosZ() const { return inn_pos_z; };
+        uint32 GetInnPosMapId() const { return inn_pos_mapid; }
+        float GetInnPosX() const { return inn_pos_x; }
+        float GetInnPosY() const { return inn_pos_y; }
+        float GetInnPosZ() const { return inn_pos_z; }
 
-        int GetTimeInnEnter() const { return time_inn_enter; };
-        void UpdateInnerTime (int time) { time_inn_enter = time; };
+        int GetTimeInnEnter() const { return time_inn_enter; }
+        void UpdateInnerTime (int time) { time_inn_enter = time; }
 
         Pet* GetPet() const;
         Pet* SummonPet(uint32 entry, float x, float y, float z, float ang, PetType petType, uint32 despwtime);
@@ -1308,12 +1321,12 @@ class RIBON_DLL_SPEC Player : public Unit
         void SendQuestUpdateAddItem( Quest const* pQuest, uint32 item_idx, uint32 count );
         void SendQuestUpdateAddCreatureOrGo( Quest const* pQuest, uint64 guid, uint32 creatureOrGO_idx, uint32 old_count, uint32 add_count );
 
-        uint64 GetDivider() { return m_divider; };
-        void SetDivider( uint64 guid ) { m_divider = guid; };
+        uint64 GetDivider() { return m_divider; }
+        void SetDivider( uint64 guid ) { m_divider = guid; }
 
-        uint32 GetInGameTime() { return m_ingametime; };
+        uint32 GetInGameTime() { return m_ingametime; }
 
-        void SetInGameTime( uint32 time ) { m_ingametime = time; };
+        void SetInGameTime( uint32 time ) { m_ingametime = time; }
 
         void AddTimedQuest( uint32 quest_id ) { m_timedquests.insert(quest_id); }
 
@@ -1401,15 +1414,14 @@ class RIBON_DLL_SPEC Player : public Unit
         void AddNewMailDeliverTime(time_t deliver_time);
         bool IsMailsLoaded() const { return m_mailsLoaded; }
 
-        //void SetMail(Mail *m);
         void RemoveMail(uint32 id);
 
         void AddMail(Mail* mail) { m_mail.push_front(mail);}// for call from WorldSession::SendMailTo
-        uint32 GetMailSize() { return m_mail.size();};
+        uint32 GetMailSize() { return m_mail.size();}
         Mail* GetMail(uint32 id);
 
-        PlayerMails::iterator GetmailBegin() { return m_mail.begin();};
-        PlayerMails::iterator GetmailEnd() { return m_mail.end();};
+        PlayerMails::iterator GetMailBegin() { return m_mail.begin();}
+        PlayerMails::iterator GetMailEnd() { return m_mail.end();}
 
         /*********************************************************/
         /*** MAILED ITEMS SYSTEM ***/
@@ -1604,6 +1616,7 @@ class RIBON_DLL_SPEC Player : public Unit
         void UpdateDuelFlag(time_t currTime);
         void CheckDuelDistance(time_t currTime);
         void DuelComplete(DuelCompleteType type);
+        void SendDuelCountdown(uint32 counter);
 
         bool IsGroupVisibleFor(Player* p) const;
         bool IsInSameGroupWith(Player const* p) const;
@@ -1626,17 +1639,19 @@ class RIBON_DLL_SPEC Player : public Unit
         // Arena Team
         void SetInArenaTeam(uint32 ArenaTeamId, uint8 slot)
         {
-            SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * 6), ArenaTeamId);
+            SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * ARENA_TEAM_END), ArenaTeamId);
         }
-        uint32 GetArenaTeamId(uint8 slot) { return GetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * 6)); }
+        uint32 GetArenaTeamId(uint8 slot) { return GetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * ARENA_TEAM_END)); }
         static uint32 GetArenaTeamIdFromDB(uint64 guid, uint8 slot);
         void SetArenaTeamIdInvited(uint32 ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
         uint32 GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
         static void LeaveAllArenaTeams(uint64 guid);
 
-        void SetDifficulty(uint32 dungeon_difficulty) { m_dungeonDifficulty = dungeon_difficulty; }
-        uint8 GetDifficulty() { return m_dungeonDifficulty; }
-        bool IsHeroic() { return m_dungeonDifficulty == DIFFICULTY_HEROIC; }
+        void SetDungeonDifficulty(uint32 dungeon_difficulty) { m_dungeonDifficulty = dungeon_difficulty; }
+        uint8 GetDungeonDifficulty() { return m_dungeonDifficulty; }
+        bool IsHeroicDungeon() { return m_dungeonDifficulty == DUNGEON_DIFFICULTY_HEROIC; }
+        void SetRaidDifficulty(uint32 raid_difficulty) { m_raidDifficulty = raid_difficulty; }
+        uint8 GetRaidDifficulty() { return m_raidDifficulty; }
 
         bool UpdateSkill(uint32 skill_id, uint32 step);
         bool UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step);
@@ -1726,6 +1741,7 @@ class RIBON_DLL_SPEC Player : public Unit
         void SendExplorationExperience(uint32 Area, uint32 Experience);
 
         void SendDungeonDifficulty(bool IsInGroup);
+        void SendRaidDifficulty(bool IsInGroup);
         void ResetInstances(uint8 method);
         void SendResetInstanceSuccess(uint32 MapId);
         void SendResetInstanceFailed(uint32 reason, uint32 MapId);
@@ -2029,8 +2045,8 @@ class RIBON_DLL_SPEC Player : public Unit
 
         bool isRested() const { return GetRestTime() >= 10*IN_MILISECONDS; }
         uint32 GetXPRestBonus(uint32 xp);
-        uint32 GetRestTime() const { return m_restTime;};
-        void SetRestTime(uint32 v) { m_restTime = v;};
+        uint32 GetRestTime() const { return m_restTime;}
+        void SetRestTime(uint32 v) { m_restTime = v;}
 
         /*********************************************************/
         /***              ENVIROMENTAL SYSTEM                  ***/
@@ -2138,7 +2154,7 @@ class RIBON_DLL_SPEC Player : public Unit
         uint32 m_HomebindTimer;
         bool m_InstanceValid;
         // permanent binds and solo binds by difficulty
-        BoundInstancesMap m_boundInstances[TOTAL_DIFFICULTIES];
+        BoundInstancesMap m_boundInstances[TOTAL_DUNGEON_DIFFICULTIES];
         InstancePlayerBind* GetBoundInstance(uint32 mapid, uint8 difficulty);
         BoundInstancesMap& GetBoundInstances(uint8 difficulty) { return m_boundInstances[difficulty]; }
         InstanceSave * GetInstanceSave(uint32 mapid);
@@ -2308,6 +2324,7 @@ class RIBON_DLL_SPEC Player : public Unit
         time_t m_speakTime;
         uint32 m_speakCount;
         uint32 m_dungeonDifficulty;
+        uint32 m_raidDifficulty;
 
         uint32 m_atLoginFlags;
 

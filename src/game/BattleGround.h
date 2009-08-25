@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ * Copyright (C) 2008-2009 Trinity <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -158,11 +158,12 @@ enum BattleGroundQueueTypeId
     BATTLEGROUND_QUEUE_AB       = 3,
     BATTLEGROUND_QUEUE_EY       = 4,
     BATTLEGROUND_QUEUE_SA       = 5,
-    BATTLEGROUND_QUEUE_2v2      = 6,
-    BATTLEGROUND_QUEUE_3v3      = 7,
-    BATTLEGROUND_QUEUE_5v5      = 8
+    BATTLEGROUND_QUEUE_IC       = 6,
+    BATTLEGROUND_QUEUE_2v2      = 7,
+    BATTLEGROUND_QUEUE_3v3      = 8,
+    BATTLEGROUND_QUEUE_5v5      = 9,
+    MAX_BATTLEGROUND_QUEUE_TYPES
 };
-#define MAX_BATTLEGROUND_QUEUE_TYPES 9
 
 enum BGQueueIdBasedOnLevel                        // queue_id for level ranges
 {
@@ -523,7 +524,7 @@ class BattleGround
         void DoorOpen(uint32 type);
         void DoorClose(uint32 type);
         //to be removed
-        const char *GetRibonString(int32 entry);
+        const char *GetTrinityString(int32 entry);
 
         virtual bool HandlePlayerUnderMap(Player * /*plr*/) { return false; }
 

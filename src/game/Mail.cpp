@@ -572,23 +572,23 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
         return;
 
-    Player* pl = _player;
-
-    //load players mails, and mailed items
-    if(!pl->m_mailsLoaded)
-        pl ->_LoadMail();
+    // load players mails, and mailed items
+    if(!_player->m_mailsLoaded)
+        _player->_LoadMail();
 
     // client can't work with packets > max int16 value
     const uint32 maxPacketSize = 32767;
 
-    uint32 mails_count = 0;                                 // real send to client mails amount
+    uint32 mailsCount = 0;                                 // real send to client mails amount
+    uint32 realCount = 0;                                   // real mails amount
 
-    WorldPacket data(SMSG_MAIL_LIST_RESULT, (200));         // guess size
+    WorldPacket data(SMSG_MAIL_LIST_RESULT, 200);           // guess size
+    data << uint32(0);                                      // real mail's count
     data << uint8(0);                                       // mail's count
     time_t cur_time = time(NULL);
 
-    for(PlayerMails::iterator itr = pl->GetmailBegin(); itr != pl->GetmailEnd(); ++itr)
-    {
+     for(PlayerMails::iterator itr = _player->GetMailBegin(); itr != _player->GetMailEnd(); ++itr)
+     {
         // skip deleted or not delivered (deliver delay not expired) mails
         if ((*itr)->state == MAIL_STATE_DELETED || cur_time < (*itr)->deliver_time)
             continue;
@@ -598,7 +598,10 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
         size_t next_mail_size = 2+4+1+8+4*8+((*itr)->subject.size()+1)+1+item_count*(1+4+4+6*3*4+4+4+1+4+4+4);
 
         if(data.wpos()+next_mail_size > maxPacketSize)
-            break;
+        {
+            realCount += 1;
+            continue;
+       }
 
         uint32 show_flags = 0;
         if ((*itr)->messageType != MAIL_NORMAL)
@@ -608,10 +611,10 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
         if ((*itr)->COD)
             show_flags |= MAIL_SHOW_COD;
 
-        data << (uint16) 0x0040;                            // unknown 2.3.0, different values
-        data << (uint32) (*itr)->messageID;                 // Message ID
-        data << (uint8) (*itr)->messageType;                // Message Type
-
+        data << uint16(0x0040);                             // unknown 2.3.0, different values
+        data << uint32((*itr)->messageID);                  // Message ID
+        data << uint8((*itr)->messageType);                 // Message Type
+        
         switch((*itr)->messageType)
         {
             case MAIL_NORMAL:                               // sender guid
@@ -620,63 +623,64 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
             case MAIL_CREATURE:
             case MAIL_GAMEOBJECT:
             case MAIL_AUCTION:
-                data << (uint32) (*itr)->sender;            // creature/gameobject entry, auction id
+                data << uint32((*itr)->sender);             // creature/gameobject entry, auction id
                 break;
             case MAIL_ITEM:                                 // item entry (?) sender = "Unknown", NYI
+                data << uint32(0);                          // item entry
                 break;
         }
 
-        data << (uint32) (*itr)->COD;                       // COD
-        data << (uint32) (*itr)->itemTextId;                // sure about this
-        data << (uint32) 0;                                 // unknown
-        data << (uint32) (*itr)->stationery;                // stationery (Stationery.dbc)
-        data << (uint32) (*itr)->money;                     // Gold
-        data << (uint32) show_flags;                        // unknown, 0x4 - auction, 0x10 - normal
-                                                            // Time
-        data << (float)  ((*itr)->expire_time-time(NULL))/DAY;
-        data << (uint32) (*itr)->mailTemplateId;            // mail template (MailTemplate.dbc)
+        data << uint32((*itr)->COD);                        // COD
+        data << uint32((*itr)->itemTextId);                 // sure about this
+        data << uint32(0);                                  // unknown
+        data << uint32((*itr)->stationery);                 // stationery (Stationery.dbc)
+        data << uint32((*itr)->money);                      // Gold
+        data << uint32(show_flags);                         // unknown, 0x4 - auction, 0x10 - normal
+        data << float(((*itr)->expire_time-time(NULL))/DAY);// Time
+        data << uint32((*itr)->mailTemplateId);             // mail template (MailTemplate.dbc)
         data << (*itr)->subject;                            // Subject string - once 00, when mail type = 3
 
-        data << (uint8) item_count;                         // client limit is 0x10
+        data << uint8(item_count);                          // client limit is 0x10
 
         for(uint8 i = 0; i < item_count; ++i)
         {
-            Item *item = pl->GetMItem((*itr)->items[i].item_guid);
+            Item *item = _player->GetMItem((*itr)->items[i].item_guid);
             // item index (0-6?)
-            data << (uint8)  i;
+            data << uint8(i);
             // item guid low?
-            data << (uint32) (item ? item->GetGUIDLow() : 0);
+            data << uint32(item ? item->GetGUIDLow() : 0);
             // entry
-            data << (uint32) (item ? item->GetEntry() : 0);
             for(uint8 j = 0; j < MAX_INSPECTED_ENCHANTMENT_SLOT; ++j)
-            {
-                // unsure
-                data << (uint32) (item ? item->GetEnchantmentCharges((EnchantmentSlot)j) : 0);
-                // unsure
-                data << (uint32) (item ? item->GetEnchantmentDuration((EnchantmentSlot)j) : 0);
-                // unsure
-                data << (uint32) (item ? item->GetEnchantmentId((EnchantmentSlot)j) : 0);
-            }
-            // can be negative
-            data << (uint32) (item ? item->GetItemRandomPropertyId() : 0);
+             {
+                 // unsure
+                 data << uint32(item ? item->GetEnchantmentCharges((EnchantmentSlot)j) : 0);
+                 // unsure
+                 data << uint32(item ? item->GetEnchantmentDuration((EnchantmentSlot)j) : 0);
+                 // unsure
+                 data << uint32(item ? item->GetEnchantmentId((EnchantmentSlot)j) : 0);
+             }
+            data << uint32(item ? item->GetItemRandomPropertyId() : 0);
             // unk
-            data << (uint32) (item ? item->GetItemSuffixFactor() : 0);
+            data << uint32(item ? item->GetItemSuffixFactor() : 0);
             // stack count
-            data << (uint32) (item ? item->GetCount() : 0);
+            data << uint32(item ? item->GetCount() : 0);
             // charges
-            data << (uint32) (item ? item->GetSpellCharges() : 0);
+            data << uint32(item ? item->GetSpellCharges() : 0);
             // durability
             data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0);
+            data << uint32(item ? item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0);
             // durability
-            data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0);
+            data << uint32(item ? item->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0);
             // unknown wotlk
-            data << (uint8)  0;
+            data << uint8(0);
         }
 
-        mails_count += 1;
+        mailsCount += 1;
+        realCount += 1;
     }
 
-    data.put<uint8>(0, mails_count);                        // set real send mails to client
+    data.put<uint32>(0, realCount);                         // this will display warning about undelivered mail to player if realCount > mailsCount
+    data.put<uint8>(4, mailsCount);                         // set real send mails to client
     SendPacket(&data);
 
     // recalculate m_nextMailDelivereTime and unReadMails
@@ -763,13 +767,12 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket & /*recv_data*/ )
 
     if( _player->unReadMails > 0 )
     {
-        data << (uint32) 0;                                 // float
-        data << (uint32) 0;                                 // count
+        data << uint32(0);                                  // float
+        data << uint32(0);                                  // count
 
         uint32 count = 0;
         time_t now = time(NULL);
-        for(PlayerMails::iterator itr = _player->GetmailBegin(); itr != _player->GetmailEnd(); ++itr)
-        {
+        for(PlayerMails::iterator itr = _player->GetMailBegin(); itr != _player->GetMailEnd(); ++itr)        {
             Mail *m = (*itr);
             // must be not checked yet
             if(m->checked & MAIL_CHECK_MASK_READ)
@@ -779,23 +782,23 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket & /*recv_data*/ )
             if(now < m->deliver_time)
                 continue;
 
-            data << (uint64) m->sender;                     // sender guid
+            data << uint64(m->sender);                      // sender guid
 
             switch(m->messageType)
             {
                 case MAIL_AUCTION:
-                    data << (uint32) 2;
-                    data << (uint32) 2;
-                    data << (uint32) m->stationery;
+                    data << uint32(2);
+                    data << uint32(2);
+                    data << uint32(m->stationery);
                     break;
                 default:
-                    data << (uint32) 0;
-                    data << (uint32) 0;
-                    data << (uint32) m->stationery;
+                    data << uint32(0);
+                    data << uint32(0);
+                    data << uint32(m->stationery);
                     break;
             }
-            data << (uint32) 0xC6000000;                    // float unk, time or something
-
+            data << uint32(0xC6000000);                     // float unk, time or something
+            
             ++count;
             if(count == 2)                                  // do not display more than 2 mails
                 break;
@@ -804,8 +807,8 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket & /*recv_data*/ )
     }
     else
     {
-        data << (uint32) 0xC7A8C000;
-        data << (uint32) 0x00000000;
+        data << uint32(0xC7A8C000);
+        data << uint32(0x00000000);
     }
     SendPacket(&data);
 }

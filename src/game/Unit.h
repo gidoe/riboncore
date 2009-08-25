@@ -712,6 +712,7 @@ enum MonsterMovementFlags
 struct MovementInfo
 {
     // common
+    uint64 guid;
     uint32  flags;
     uint16  unk1;
     uint32  time;

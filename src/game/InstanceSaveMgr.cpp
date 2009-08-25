@@ -60,13 +60,13 @@ InstanceSaveManager::~InstanceSaveManager()
         for(InstanceSave::PlayerListType::iterator itr2 = save->m_playerList.begin(), next = itr2; itr2 != save->m_playerList.end(); itr2 = next)
         {
             ++next;
-            (*itr2)->UnbindInstance(save->GetMapId(), save->GetDifficulty(), true);
+            (*itr2)->UnbindInstance(save->GetMapId(), save->GetDungeonDifficulty(), true);
         }
         save->m_playerList.clear();
         for(InstanceSave::GroupListType::iterator itr2 = save->m_groupList.begin(), next = itr2; itr2 != save->m_groupList.end(); itr2 = next)
         {
             ++next;
-            (*itr2)->UnbindInstance(save->GetMapId(), save->GetDifficulty(), true);
+            (*itr2)->UnbindInstance(save->GetMapId(), save->GetDungeonDifficulty(), true);
         }
         save->m_groupList.clear();
         delete save;
@@ -93,7 +93,7 @@ InstanceSave* InstanceSaveManager::AddInstanceSave(uint32 mapId, uint32 instance
     {
         // initialize reset time
         // for normal instances if no creatures are killed the instance will reset in two hours
-        if(entry->map_type == MAP_RAID || difficulty == DIFFICULTY_HEROIC)
+        if(entry->map_type == MAP_RAID || difficulty == DUNGEON_DIFFICULTY_HEROIC)
             resetTime = GetResetTimeFor(mapId);
         else
         {
@@ -173,14 +173,14 @@ void InstanceSave::SaveToDB()
         }
     }
 
-    CharacterDatabase.PExecute("INSERT INTO instance VALUES ('%u', '%u', '"UI64FMTD"', '%u', '%s')", m_instanceid, GetMapId(), (uint64)GetResetTimeForDB(), GetDifficulty(), data.c_str());
+    CharacterDatabase.PExecute("INSERT INTO instance VALUES ('%u', '%u', '"UI64FMTD"', '%u', '%s')", m_instanceid, GetMapId(), (uint64)GetResetTimeForDB(), GetDungeonDifficulty(), data.c_str());
 }
 
 time_t InstanceSave::GetResetTimeForDB()
 {
     // only save the reset time for normal instances
     const MapEntry *entry = sMapStore.LookupEntry(GetMapId());
-    if(!entry || entry->map_type == MAP_RAID || GetDifficulty() == DIFFICULTY_HEROIC)
+    if(!entry || entry->map_type == MAP_RAID || GetDungeonDifficulty() == DUNGEON_DIFFICULTY_HEROIC)
         return 0;
     else
         return GetResetTime();
@@ -564,13 +564,13 @@ void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
     while(!pList.empty())
     {
         Player *player = *(pList.begin());
-        player->UnbindInstance(itr->second->GetMapId(), itr->second->GetDifficulty(), true);
+        player->UnbindInstance(itr->second->GetMapId(), itr->second->GetDungeonDifficulty(), true);
     }
     InstanceSave::GroupListType &gList = itr->second->m_groupList;
     while(!gList.empty())
     {
         Group *group = *(gList.begin());
-        group->UnbindInstance(itr->second->GetMapId(), itr->second->GetDifficulty(), true);
+        group->UnbindInstance(itr->second->GetMapId(), itr->second->GetDungeonDifficulty(), true);
     }
     delete itr->second;
     m_instanceSaveById.erase(itr++);

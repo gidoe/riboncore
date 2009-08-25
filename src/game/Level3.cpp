@@ -3099,9 +3099,9 @@ bool ChatHandler::HandleGameObjectStateCommand(const char* args)
             gobj->SendObjectDeSpawnAnim(gobj->GetGUID());
         else if(type == -2)
         {
-            WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
+            /*WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
             data << gobj->GetGUID();
-            gobj->SendMessageToSet(&data,true);
+            gobj->SendMessageToSet(&data,true);*/
         }
         return true;
     }
@@ -3924,7 +3924,7 @@ bool ChatHandler::HandleLookupMapCommand(const char* args)
     if(!*args)
         return false;
 
-    std::string namepart = args;
+    /*std::string namepart = args;
     std::wstring wnamepart;
 
     // converting string that we try to find to lower case
@@ -3991,6 +3991,7 @@ bool ChatHandler::HandleLookupMapCommand(const char* args)
                     ss << GetRibonString(LANG_HEROIC);
 
                 uint32 ResetTimeRaid = MapInfo->resetTimeRaid;
+
                 std::string ResetTimeRaidStr;
                 if(ResetTimeRaid)
                     ResetTimeRaidStr = secsToTimeString(ResetTimeRaid, true, false);
@@ -4020,7 +4021,7 @@ bool ChatHandler::HandleLookupMapCommand(const char* args)
 
     if(!found)
         SendSysMessage(LANG_COMMAND_NOMAPFOUND);
-
+    */
     return true;
 }
 
@@ -6791,14 +6792,14 @@ bool ChatHandler::HandleInstanceListBindsCommand(const char* /*args*/)
     Player* player = getSelectedPlayer();
     if (!player) player = m_session->GetPlayer();
     uint32 counter = 0;
-    for(uint8 i = 0; i < TOTAL_DIFFICULTIES; ++i)
+    for(uint8 i = 0; i < TOTAL_DUNGEON_DIFFICULTIES; ++i)
     {
         Player::BoundInstancesMap &binds = player->GetBoundInstances(i);
         for(Player::BoundInstancesMap::const_iterator itr = binds.begin(); itr != binds.end(); ++itr)
         {
             InstanceSave *save = itr->second.save;
             std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
-            PSendSysMessage("map: %d inst: %d perm: %s diff: %s canReset: %s TTR: %s", itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no",  save->GetDifficulty() == DIFFICULTY_NORMAL ? "normal" : "heroic", save->CanReset() ? "yes" : "no", timeleft.c_str());
+            PSendSysMessage("map: %d inst: %d perm: %s diff: %s canReset: %s TTR: %s", itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no",  save->GetDungeonDifficulty() == DUNGEON_DIFFICULTY_NORMAL ? "normal" : "heroic", save->CanReset() ? "yes" : "no", timeleft.c_str());
             counter++;
         }
     }
@@ -6807,15 +6808,14 @@ bool ChatHandler::HandleInstanceListBindsCommand(const char* /*args*/)
     Group *group = player->GetGroup();
     if(group)
     {
-        for(uint8 i = 0; i < TOTAL_DIFFICULTIES; ++i)
+        for(uint8 i = 0; i < TOTAL_DUNGEON_DIFFICULTIES; ++i)
         {
             Group::BoundInstancesMap &binds = group->GetBoundInstances(i);
             for(Group::BoundInstancesMap::const_iterator itr = binds.begin(); itr != binds.end(); ++itr)
             {
                 InstanceSave *save = itr->second.save;
                 std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
-                PSendSysMessage("map: %d inst: %d perm: %s diff: %s canReset: %s TTR: %s", itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no",  save->GetDifficulty() == DIFFICULTY_NORMAL ? "normal" : "heroic", save->CanReset() ? "yes" : "no", timeleft.c_str());
-                counter++;
+                PSendSysMessage("map: %d inst: %d perm: %s diff: %s canReset: %s TTR: %s", itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no",  save->GetDungeonDifficulty() == DUNGEON_DIFFICULTY_NORMAL ? "normal" : "heroic", save->CanReset() ? "yes" : "no", timeleft.c_str());                counter++;
             }
         }
     }
@@ -6835,7 +6835,7 @@ bool ChatHandler::HandleInstanceUnbindCommand(const char* args)
         Player* player = getSelectedPlayer();
         if (!player) player = m_session->GetPlayer();
         uint32 counter = 0;
-        for(uint8 i = 0; i < TOTAL_DIFFICULTIES; ++i)
+        for(uint8 i = 0; i < TOTAL_DUNGEON_DIFFICULTIES; ++i)
         {
             Player::BoundInstancesMap &binds = player->GetBoundInstances(i);
             for(Player::BoundInstancesMap::iterator itr = binds.begin(); itr != binds.end();)
@@ -6844,8 +6844,7 @@ bool ChatHandler::HandleInstanceUnbindCommand(const char* args)
                 {
                     InstanceSave *save = itr->second.save;
                     std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
-                    PSendSysMessage("unbinding map: %d inst: %d perm: %s diff: %s canReset: %s TTR: %s", itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no",  save->GetDifficulty() == DIFFICULTY_NORMAL ? "normal" : "heroic", save->CanReset() ? "yes" : "no", timeleft.c_str());
-                    player->UnbindInstance(itr, i);
+                    PSendSysMessage("unbinding map: %d inst: %d perm: %s diff: %s canReset: %s TTR: %s", itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no",  save->GetDungeonDifficulty() == DUNGEON_DIFFICULTY_NORMAL ? "normal" : "heroic", save->CanReset() ? "yes" : "no", timeleft.c_str());                    player->UnbindInstance(itr, i);
                     counter++;
                 }
                 else

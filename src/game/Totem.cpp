@@ -98,8 +98,6 @@ void Totem::InitSummon()
 
 void Totem::UnSummon()
 {
-    SendObjectDeSpawnAnim(GetGUID());
-
     CombatStop();
     RemoveAurasDueToSpell(GetSpell());
 
@@ -119,6 +117,7 @@ void Totem::UnSummon()
     Group *pGroup = NULL;
     if (m_owner->GetTypeId() == TYPEID_PLAYER)
     {
+        ((Player*)m_owner)->SendAutoRepeatCancel(this);
         // Not only the player can summon the totem (scripted AI)
         pGroup = ((Player*)m_owner)->GetGroup();
         if (pGroup)

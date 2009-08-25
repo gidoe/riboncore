@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
- * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
+ * Copyright (C) 2008-2009 Trinity <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,8 @@
 #include "BattleGroundSA.h"
 #include "BattleGroundDS.h"
 #include "BattleGroundRV.h"
+#include "BattleGroundIC.h"
+#include "BattleGroundABG.h"
 #include "Chat.h"
 #include "Map.h"
 #include "MapInstanced.h"
@@ -1419,6 +1421,8 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
             case BATTLEGROUND_SA:                           // wotlk
             case BATTLEGROUND_DS:                           // wotlk
             case BATTLEGROUND_RV:                           // wotlk
+            case BATTLEGROUND_IC:                           // wotlk
+            case BATTLEGROUND_ABG:                          // wotlk
                 *data << (int32)0;                          // 0
                 break;
             default:
@@ -1598,6 +1602,12 @@ BattleGround * BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeI
         case BATTLEGROUND_RV:
             bg = new BattleGroundRV(*(BattleGroundRV*)bg_template);
             break;
+        case BATTLEGROUND_IC:
+            bg = new BattleGroundIC(*(BattleGroundIC*)bg_template);
+            break;
+        case BATTLEGROUND_ABG:
+            bg = new BattleGroundABG(*(BattleGroundABG*)bg_template);
+            break;
         default:
             //error, but it is handled few lines above
             return 0;
@@ -1643,6 +1653,8 @@ uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, bool IsA
         case BATTLEGROUND_SA: bg = new BattleGroundSA; break;
         case BATTLEGROUND_DS: bg = new BattleGroundDS; break;
         case BATTLEGROUND_RV: bg = new BattleGroundRV; break;
+        case BATTLEGROUND_IC: bg = new BattleGroundIC; break;
+        case BATTLEGROUND_ABG: bg = new BattleGroundABG; break;
         default:bg = new BattleGround;   break;             // placeholder for non implemented BG
     }
 
@@ -1737,7 +1749,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
             AStartLoc[2] = start->z;
             AStartLoc[3] = fields[6].GetFloat();
         }
-        else if (bgTypeID == BATTLEGROUND_AA)
+        else if (bgTypeID == BATTLEGROUND_AA || bgTypeID == BATTLEGROUND_ABG)
         {
             AStartLoc[0] = 0;
             AStartLoc[1] = 0;
@@ -1760,7 +1772,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
             HStartLoc[2] = start->z;
             HStartLoc[3] = fields[8].GetFloat();
         }
-        else if (bgTypeID == BATTLEGROUND_AA)
+        else if (bgTypeID == BATTLEGROUND_AA || bgTypeID == BATTLEGROUND_ABG)
         {
             HStartLoc[0] = 0;
             HStartLoc[1] = 0;
@@ -1945,6 +1957,10 @@ BattleGroundQueueTypeId BattleGroundMgr::BGQueueTypeId(BattleGroundTypeId bgType
             return BATTLEGROUND_QUEUE_EY;
         case BATTLEGROUND_SA:
             return BATTLEGROUND_QUEUE_SA;
+        case BATTLEGROUND_IC:
+            return BATTLEGROUND_QUEUE_IC;
+        case BATTLEGROUND_ABG:
+            return BATTLEGROUND_QUEUE_NONE;
         case BATTLEGROUND_AA:
         case BATTLEGROUND_NA:
         case BATTLEGROUND_RL:
@@ -1981,6 +1997,8 @@ BattleGroundTypeId BattleGroundMgr::BGTemplateId(BattleGroundQueueTypeId bgQueue
             return BATTLEGROUND_EY;
         case BATTLEGROUND_QUEUE_SA:
             return BATTLEGROUND_SA;
+        case BATTLEGROUND_QUEUE_IC:
+            return BATTLEGROUND_IC;
         case BATTLEGROUND_QUEUE_2v2:
         case BATTLEGROUND_QUEUE_3v3:
         case BATTLEGROUND_QUEUE_5v5:

@@ -95,7 +95,7 @@ class InstanceSave
 
         /* currently it is possible to omit this information from this structure
            but that would depend on a lot of things that can easily change in future */
-        uint8 GetDifficulty() { return m_difficulty; }
+        uint8 GetDungeonDifficulty() { return m_difficulty; }
 
         typedef std::list<Player*> PlayerListType;
         typedef std::list<Group*> GroupListType;

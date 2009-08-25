@@ -690,10 +690,8 @@ void WorldSession::HandleSetContactNotesOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
 {
-    uint32 suggestion, contentlen;
-    std::string content;
-    uint32 typelen;
-    std::string type;
+    uint32 suggestion, contentlen, typelen;
+    std::string content, type;
 
     recv_data >> suggestion >> contentlen >> content;
 
@@ -989,8 +987,8 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
 
     dest.resize(destSize);
 
-    WorldPacket data (SMSG_UPDATE_ACCOUNT_DATA, 8+4+4+4+destSize);
-    data << uint64(_player->GetGUID());                     // player guid
+    WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA, 8+4+4+4+destSize);
+    data << uint64(_player ? _player->GetGUID() : 0);       // player guid
     data << uint32(type);                                   // type (0-7)
     data << uint32(adata->Time);                            // unix time
     data << uint32(size);                                   // decompressed length
@@ -1054,7 +1052,12 @@ void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
     /*  WorldSession::Update( getMSTime() );*/
     DEBUG_LOG( "WORLD: Time Lag/Synchronization Resent/Update" );
 
-    recv_data.read_skip<uint64>();
+    uint64 guid;
+    if(!recv_data.readPackGUID(guid))
+    {
+        recv_data.rpos(recv_data.wpos());
+        return;
+    }
     recv_data.read_skip<uint32>();
     /*
         uint64 guid;
@@ -1455,10 +1458,10 @@ void WorldSession::HandleSetDungeonDifficultyOpcode( WorldPacket & recv_data )
     uint32 mode;
     recv_data >> mode;
 
-    if(mode == _player->GetDifficulty())
+    if(mode == _player->GetDungeonDifficulty())
         return;
 
-    if(mode > DIFFICULTY_HEROIC)
+    if(mode > DUNGEON_DIFFICULTY_HEROIC)
     {
         sLog.outError("WorldSession::HandleSetDungeonDifficultyOpcode: player %d sent an invalid instance mode %d!", _player->GetGUIDLow(), mode);
         return;
@@ -1482,20 +1485,63 @@ void WorldSession::HandleSetDungeonDifficultyOpcode( WorldPacket & recv_data )
             // the difficulty is set even if the instances can't be reset
             //_player->SendDungeonDifficulty(true);
             pGroup->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, _player);
-            pGroup->SetDifficulty(mode);
+            pGroup->SetDungeonDifficulty(mode);
         }
     }
     else
     {
         _player->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY);
-        _player->SetDifficulty(mode);
+        pGroup->SetDungeonDifficulty(mode);
     }
+}
+
+void WorldSession::HandleSetRaidDifficultyOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("MSG_SET_RAID_DIFFICULTY");
+
+    uint32 mode;
+    recv_data >> mode;
+
+    if(mode == _player->GetRaidDifficulty())
+        return;
+
+    if(mode > RAID_DIFFICULTY_25MAN_HEROIC)
+    {
+        sLog.outError("WorldSession::HandleSetRaidDifficultyOpcode: player %d sent an invalid instance mode %d!", _player->GetGUIDLow(), mode);
+        return;
+    }
+
+    // cannot reset while in an instance
+    Map *map = _player->GetMap();
+    if(map && map->IsDungeon())
+    {
+        sLog.outError("WorldSession::HandleSetRaidDifficultyOpcode: player %d tried to reset the instance while inside!", _player->GetGUIDLow());
+        return;
+    }
+
+    if(_player->getLevel() < LEVELREQUIREMENT_HEROIC)
+        return;
+
+    if(Group *pGroup = _player->GetGroup())
+    {
+        if(pGroup->IsLeader(_player->GetGUID()))
+        {
+            // the difficulty is set even if the instances can't be reset
+            //_player->SendDungeonDifficulty(true);
+            pGroup->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, _player);
+            pGroup->SetRaidDifficulty(mode);
+        }
+    }
+    else
+    {
+        _player->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY);
+        _player->SetRaidDifficulty(mode);
+     }
 }
 
 void WorldSession::HandleCancelMountAuraOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug("WORLD: CMSG_CANCEL_MOUNT_AURA");
-    //recv_data.hexlike();
 
     //If player is not mounted, so go out :)
     if (!_player->IsMounted())                              // not blizz like; no any messages on blizz
@@ -1557,3 +1603,14 @@ void WorldSession::HandleQueryInspectAchievements( WorldPacket & recv_data )
 
     player->GetAchievementMgr().SendRespondInspectAchievements(_player);
 }
+
+void WorldSession::HandleWorldStateUITimerUpdate(WorldPacket& recv_data)
+{
+    // empty opcode
+    sLog.outDebug("WORLD: CMSG_WORLD_STATE_UI_TIMER_UPDATE");
+
+    WorldPacket data(SMSG_WORLD_STATE_UI_TIMER_UPDATE, 4);
+    data << uint32(time(NULL));
+    SendPacket(&data);
+}
+ 

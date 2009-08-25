@@ -45,7 +45,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &recv_data)
     size_t p_counter = data.wpos();
     data << uint32(counter);                                // instance save count
 
-    for(int i = 0; i < TOTAL_DIFFICULTIES; ++i)
+    for(int i = 0; i < TOTAL_DUNGEON_DIFFICULTIES; ++i)
     {
         for (Player::BoundInstancesMap::const_iterator itr = _player->m_boundInstances[i].begin(); itr != _player->m_boundInstances[i].end(); ++itr)
         {
@@ -53,7 +53,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &recv_data)
             {
                 InstanceSave *save = itr->second.save;
                 data << uint32(save->GetMapId());
-                data << uint32(save->GetDifficulty());
+                data << uint32(save->GetDungeonDifficulty());
                 data << uint32(save->GetResetTime() - cur_time);
                 data << uint64(save->GetInstanceId());      // instance save id as unique instance copy id
                 ++counter;

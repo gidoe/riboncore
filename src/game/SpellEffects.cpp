@@ -862,9 +862,9 @@ void Spell::EffectDummy(uint32 i)
 
                     creatureTarget->ForcedDespawn();
 
-                    WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
+                    /*WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
                     data << uint64(Crystal_Prison->GetGUID());
-                    m_caster->SendMessageToSet(&data, true);
+                    m_caster->SendMessageToSet(&data, true);*/
 
                     return;
                 }
@@ -6082,9 +6082,6 @@ void Spell::EffectSummonObject(uint32 i)
     m_caster->AddGameObject(pGameObj);
 
     map->Add(pGameObj);
-    WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
-    data << uint64(pGameObj->GetGUID());
-    m_caster->SendMessageToSet(&data, true);
 
     m_caster->m_ObjectSlot[slot] = pGameObj->GetGUID();
 }
@@ -6698,11 +6695,11 @@ void Spell::EffectTransmitted(uint32 effIndex)
     //m_ObjToDel.push_back(pGameObj);
 
     cMap->Add(pGameObj);
-
+/*
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
     data << uint64(pGameObj->GetGUID());
     m_caster->SendMessageToSet(&data,true);
-
+*/
     if(uint32 linkedEntry = pGameObj->GetGOInfo()->GetLinkedGameObjectEntry())
     {
         GameObject* linkedGO = new GameObject;

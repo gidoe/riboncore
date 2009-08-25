@@ -601,6 +601,18 @@ void WorldSession::SetAccountData(uint32 type, time_t time_, std::string data)
     CharacterDatabase.CommitTransaction ();
 }
 
+void WorldSession::SendAccountDataTimes(uint32 mask)
+{
+    WorldPacket data( SMSG_ACCOUNT_DATA_TIMES, 4+1+4+8*4 ); // changed in WotLK
+    data << uint32(time(NULL));                             // unix time of something
+    data << uint8(1);
+    data << uint32(mask);
+    for(int i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
+        if(mask & (1 << i))
+            data << uint32(GetAccountData(i)->Time);        // also unix time
+    SendPacket(&data);
+}
+
 void WorldSession::LoadTutorialsData()
 {
     for ( int aX = 0 ; aX < 8 ; ++aX )
@@ -701,6 +713,51 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
     if(mi->flags & MOVEMENTFLAG_SPLINE)
     {
         data >> mi->u_unk1;
+    }
+}
+
+void WorldSession::WriteMovementInfo(WorldPacket *data, MovementInfo *mi)
+{
+    data->appendPackGUID(mi->guid);
+
+    *data << mi->flags;
+    *data << mi->unk1;
+    *data << mi->time;
+    *data << mi->x;
+    *data << mi->y;
+    *data << mi->z;
+    *data << mi->o;
+
+    if(mi->HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+    {
+       data->appendPackGUID(mi->t_guid);
+
+        *data << mi->t_x;
+        *data << mi->t_y;
+        *data << mi->t_z;
+        *data << mi->t_o;
+        *data << mi->t_time;
+        *data << mi->t_seat;
+    }
+
+    if((mi->HasMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING))) || (mi->unk1 & 0x20))
+    {
+        *data << mi->s_pitch;
+    }
+
+    *data << mi->fallTime;
+
+    if(mi->HasMovementFlag(MOVEMENTFLAG_JUMPING))
+    {
+        *data << mi->j_zspeed;
+        *data << mi->j_sinAngle;
+        *data << mi->j_cosAngle;
+        *data << mi->j_xyspeed;
+    }
+
+    if(mi->HasMovementFlag(MOVEMENTFLAG_SPLINE))
+    {
+        *data << mi->u_unk1;
     }
 }
 

@@ -1556,6 +1556,12 @@ void ObjectMgr::LoadGameobjects()
             continue;
         }
 
+        if(!gInfo->displayId)
+        {
+            sLog.outErrorDb("Gameobject (GUID: %u Entry %u GoType: %u) doesn't have displayId (%u), not loaded.", guid, entry, gInfo->type, gInfo->displayId);
+            continue;
+        }
+
         if(gInfo->displayId && !sGameObjectDisplayInfoStore.LookupEntry(gInfo->displayId))
         {
             sLog.outErrorDb("Gameobject (GUID: %u Entry %u GoType: %u) have invalid displayId (%u), not loaded.",guid, entry, gInfo->type, gInfo->displayId);
@@ -3287,9 +3293,9 @@ void ObjectMgr::LoadGroups()
     Group *group = NULL;
     uint64 leaderGuid = 0;
     uint32 count = 0;
-    //                                                     0         1              2           3           4              5      6      7      8      9      10     11     12     13      14          15
-    QueryResult *result = CharacterDatabase.Query("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid, difficulty, leaderGuid FROM groups");
-
+    //                                                     0         1              2           3           4              5      6      7      8      9      10     11     12     13      14         15              16
+    QueryResult *result = CharacterDatabase.Query("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid, difficulty, raiddifficulty, leaderGuid FROM groups");
+ 
     if( !result )
     {
         barGoLink bar( 1 );
@@ -3308,7 +3314,7 @@ void ObjectMgr::LoadGroups()
         bar.step();
         Field *fields = result->Fetch();
         ++count;
-        leaderGuid = MAKE_NEW_GUID(fields[15].GetUInt32(),0,HIGHGUID_PLAYER);
+        leaderGuid = MAKE_NEW_GUID(fields[16].GetUInt32(),0,HIGHGUID_PLAYER);
 
         group = new Group;
         if(!group->LoadGroupFromDB(leaderGuid, result, false))
@@ -4788,7 +4794,7 @@ void ObjectMgr::LoadInstanceTemplate()
         if(temp->reset_delay == 0)
         {
             // use defaults from the DBC
-            if(entry->resetTimeHeroic)                      // for both raid and non raids, read above
+            /*if(entry->resetTimeHeroic)                      // for both raid and non raids, read above
             {
                 temp->reset_delay = entry->resetTimeHeroic / DAY;
             }
@@ -4796,7 +4802,7 @@ void ObjectMgr::LoadInstanceTemplate()
                                                             // for normal raid only
             {
                 temp->reset_delay = entry->resetTimeRaid / DAY;
-            }
+            }*/
         }
 
         // the reset_delay must be at least one day
