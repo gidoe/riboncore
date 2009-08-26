@@ -588,7 +588,7 @@ void Spell::SpellDamageSchoolDmg(uint32 effect_idx)
                         }
                     }
 
-                    //TODO: should this be put on taken but not done?
+                    // TODO: should this be put on taken but not done?
                     if(found)
                         damage += m_spellInfo->EffectBasePoints[1];
                         
@@ -598,7 +598,12 @@ void Spell::SpellDamageSchoolDmg(uint32 effect_idx)
                         Item *item = ((Player*)m_caster)->GetWeaponForAttack(RANGED_ATTACK);
                         if(item)
                         {
-                            damage += urand(uint32(item->GetProto()->Damage->DamageMin), uint32(item->GetProto()->Damage->DamageMax));
+                            float dmg_min = item->GetProto()->Damage->DamageMin;
+                            float dmg_max = item->GetProto()->Damage->DamageMax;
+                            if(dmg_max == 0.0f && dmg_min > dmg_max)
+                                damage += uint32(dmg_min);
+                            else
+                                damage += urand(uint32(dmg_min), uint32(dmg_max));
                             damage += ((Player*)m_caster)->GetAmmoDPS()*item->GetProto()->Delay/1000;
                         }
                     }
@@ -6373,6 +6378,16 @@ void Spell::EffectKnockBack(uint32 i)
             return;
     }
 
+    float ratio = m_caster->GetCombatReach() / std::max(unitTarget->GetCombatReach(), 1.0f);
+    if(ratio < 1.0f)
+        ratio = ratio * ratio * ratio * 0.1f; // volume = length^3
+    else
+        ratio = 0.1f; // dbc value ratio
+    float speedxy = float(m_spellInfo->EffectMiscValue[i]) * ratio;
+    float speedz = float(damage) * ratio;
+    if(speedxy < 0.1f && speedz < 0.1f)
+        return;
+
     float x, y;
     if(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
@@ -6384,9 +6399,6 @@ void Spell::EffectKnockBack(uint32 i)
         x = m_caster->GetPositionX();
         y = m_caster->GetPositionY();
     }
-
-    float speedxy = float(m_spellInfo->EffectMiscValue[i])/10;
-    float speedz = float(damage/10);
 
     unitTarget->KnockbackFrom(x, y, speedxy, speedz);
 }

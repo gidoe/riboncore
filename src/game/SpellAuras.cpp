@@ -603,8 +603,9 @@ AuraEffect* CreateAuraEffect(Aura * parentAura, uint32 effIndex, int32 *currentB
     else if (parentAura->GetSpellProto()->Effect[effIndex] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
     {
         //assert(source->isType(TYPEMASK_DYNAMICOBJECT));
-        assert(IS_DYNAMICOBJECT_GUID(sourceGuid));
-        return new PersistentAreaAuraEffect(parentAura, effIndex, currentBasePoints);
+        // TODO: creature addon or save? may add persistent AA without correct source
+        if(IS_DYNAMICOBJECT_GUID(sourceGuid))
+            return new PersistentAreaAuraEffect(parentAura, effIndex, currentBasePoints);
     }
     return NULL;
 }
@@ -624,7 +625,7 @@ Unit* Aura::GetUnitSource() const
     if(m_sourceGuid == m_target->GetGUID())
         return m_target;
 
-    return ObjectAccessor::GetObjectInWorld(m_casterGuid, (Unit*)NULL);
+    return ObjectAccessor::GetObjectInWorld(m_sourceGuid, (Unit*)NULL);
 }
 
 void Aura::Update(uint32 diff)
@@ -716,16 +717,10 @@ void AuraEffect::Update(uint32 diff)
 
 void AreaAuraEffect::Update(uint32 diff)
 {
-    Unit *source = GetSource();
-    if(!source) // this should never happen
-    {
-        m_target->RemoveAura(GetParentAura());
-        return;
-    }
-
     // update for the source of the aura
-    if(source == m_target)
+    if(GetParentAura()->GetSourceGUID() == m_target->GetGUID())
     {
+        Unit *source = m_target;
         Unit *caster = GetCaster();
         if (!caster)
         {
@@ -868,6 +863,7 @@ void AreaAuraEffect::Update(uint32 diff)
 
 void PersistentAreaAuraEffect::Update(uint32 diff)
 {
+    /*
     if(Unit *caster = GetParentAura()->GetCaster())
     {
         if(DynamicObject *dynObj = caster->GetDynObject(GetId(), GetEffIndex()))
@@ -877,6 +873,15 @@ void PersistentAreaAuraEffect::Update(uint32 diff)
                 AuraEffect::Update(diff);
                 return;
             }
+        }
+    }
+    */
+    if(DynamicObject *dynObj = GetSource())
+    {
+        if(m_target->IsWithinDistInMap(dynObj, dynObj->GetRadius()))
+        {
+            AuraEffect::Update(diff);
+            return;
         }
     }
 
@@ -1798,6 +1803,9 @@ bool Aura::DropAuraCharge()
 bool Aura::CanBeSaved() const
 {
     if (IsPassive())
+        return false;
+
+    if(IsPersistent())
         return false;
 
     if (GetCasterGUID() != m_target->GetGUID())
