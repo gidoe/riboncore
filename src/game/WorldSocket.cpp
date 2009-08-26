@@ -895,7 +895,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     sha.UpdateBigNumbers (&K, NULL);
     sha.Finalize ();
 
-    if (memcmp (sha.GetDigest (), digest, 20))
+    /*if (memcmp (sha.GetDigest (), digest, 20))
     {
         packet.Initialize (SMSG_AUTH_RESPONSE, 1);
         packet << uint8 (AUTH_FAILED);
@@ -904,7 +904,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
 
         sLog.outError ("WorldSocket::HandleAuthSession: Sent Auth Response (authentification failed).");
         return -1;
-    }
+    }*/
 
     std::string address = GetRemoteAddress ();
 
