@@ -1421,10 +1421,10 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
             case BATTLEGROUND_SA:                           // wotlk
             case BATTLEGROUND_DS:                           // wotlk
             case BATTLEGROUND_RV:                           // wotlk
-            //case BATTLEGROUND_IC:                           // wotlk
-            //case BATTLEGROUND_ABG:                          // wotlk
-                //*data << (int32)0;                          // 0
-                //break;
+            case BATTLEGROUND_IC:                           // wotlk
+            case BATTLEGROUND_ABG:                          // wotlk
+                *data << (int32)0;                          // 0
+                break;
             default:
                 sLog.outDebug("Unhandled MSG_PVP_LOG_DATA for BG id %u", bg->GetTypeID());
                 *data << (int32)0;
@@ -1602,12 +1602,12 @@ BattleGround * BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeI
         case BATTLEGROUND_RV:
             bg = new BattleGroundRV(*(BattleGroundRV*)bg_template);
             break;
-        //case BATTLEGROUND_IC:
-        //    bg = new BattleGroundIC(*(BattleGroundIC*)bg_template);
-        //    break;
-        //case BATTLEGROUND_ABG:
-        //    bg = new BattleGroundABG(*(BattleGroundABG*)bg_template);
-        //    break;
+        case BATTLEGROUND_IC:
+            bg = new BattleGroundIC(*(BattleGroundIC*)bg_template);
+            break;
+        case BATTLEGROUND_ABG:
+            bg = new BattleGroundABG(*(BattleGroundABG*)bg_template);
+            break;
         default:
             //error, but it is handled few lines above
             return 0;
@@ -1653,8 +1653,8 @@ uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, bool IsA
         case BATTLEGROUND_SA: bg = new BattleGroundSA; break;
         case BATTLEGROUND_DS: bg = new BattleGroundDS; break;
         case BATTLEGROUND_RV: bg = new BattleGroundRV; break;
-        //case BATTLEGROUND_IC: bg = new BattleGroundIC; break;
-        //case BATTLEGROUND_ABG: bg = new BattleGroundABG; break;
+        case BATTLEGROUND_IC: bg = new BattleGroundIC; break;
+        case BATTLEGROUND_ABG: bg = new BattleGroundABG; break;
         default:bg = new BattleGround;   break;             // placeholder for non implemented BG
     }
 
@@ -1749,7 +1749,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
             AStartLoc[2] = start->z;
             AStartLoc[3] = fields[6].GetFloat();
         }
-        /*else if (bgTypeID == BATTLEGROUND_AA || bgTypeID == BATTLEGROUND_ABG)
+        else if (bgTypeID == BATTLEGROUND_AA || bgTypeID == BATTLEGROUND_ABG)
         {
             AStartLoc[0] = 0;
             AStartLoc[1] = 0;
@@ -1760,7 +1760,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
         {
             sLog.outErrorDb("Table `battleground_template` for id %u have non-existed WorldSafeLocs.dbc id %u in field `AllianceStartLoc`. BG not created.", bgTypeID, start1);
             continue;
-        }*/
+        }
 
         start2 = fields[7].GetUInt32();
 
@@ -1772,7 +1772,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
             HStartLoc[2] = start->z;
             HStartLoc[3] = fields[8].GetFloat();
         }
-        /*else if (bgTypeID == BATTLEGROUND_AA || bgTypeID == BATTLEGROUND_ABG)
+        else if (bgTypeID == BATTLEGROUND_AA || bgTypeID == BATTLEGROUND_ABG)
         {
             HStartLoc[0] = 0;
             HStartLoc[1] = 0;
@@ -1783,7 +1783,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
         {
             sLog.outErrorDb("Table `battleground_template` for id %u have non-existed WorldSafeLocs.dbc id %u in field `HordeStartLoc`. BG not created.", bgTypeID, start2);
             continue;
-        }*/
+        }
 
         //sLog.outDetail("Creating battleground %s, %u-%u", bl->name[sWorld.GetDBClang()], MinLvl, MaxLvl);
         if (!CreateBattleGround(bgTypeID, IsArena, MinPlayersPerTeam, MaxPlayersPerTeam, MinLvl, MaxLvl, bl->name[sWorld.GetDefaultDbcLocale()], bl->mapid[0], AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]))
@@ -1957,10 +1957,10 @@ BattleGroundQueueTypeId BattleGroundMgr::BGQueueTypeId(BattleGroundTypeId bgType
             return BATTLEGROUND_QUEUE_EY;
         case BATTLEGROUND_SA:
             return BATTLEGROUND_QUEUE_SA;
-        /*case BATTLEGROUND_IC:
+        case BATTLEGROUND_IC:
             return BATTLEGROUND_QUEUE_IC;
         case BATTLEGROUND_ABG:
-            return BATTLEGROUND_QUEUE_NONE;*/
+            return BATTLEGROUND_QUEUE_NONE;
         case BATTLEGROUND_AA:
         case BATTLEGROUND_NA:
         case BATTLEGROUND_RL:
@@ -1997,8 +1997,8 @@ BattleGroundTypeId BattleGroundMgr::BGTemplateId(BattleGroundQueueTypeId bgQueue
             return BATTLEGROUND_EY;
         case BATTLEGROUND_QUEUE_SA:
             return BATTLEGROUND_SA;
-        /*case BATTLEGROUND_QUEUE_IC:
-            return BATTLEGROUND_IC;*/
+        case BATTLEGROUND_QUEUE_IC:
+            return BATTLEGROUND_IC;
         case BATTLEGROUND_QUEUE_2v2:
         case BATTLEGROUND_QUEUE_3v3:
         case BATTLEGROUND_QUEUE_5v5:

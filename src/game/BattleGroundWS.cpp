@@ -66,9 +66,32 @@ BattleGroundWS::~BattleGroundWS()
 void BattleGroundWS::Update(uint32 diff)
 {
     BattleGround::Update(diff);
-
+    
     if (GetStatus() == STATUS_IN_PROGRESS)
     {
+        if( GetStartTime() >= 22*MINUTE*1000 )         // 2 minutes wait time + 20 minutes playtime. increments in BattleGround::Update
+        {
+            if( GetTeamScore(ALLIANCE) == 0 )
+            {
+                if ( GetTeamScore(HORDE) == 0 ) // No one scored - result is tie
+                    EndBattleGround(NULL);
+                
+                else                                 // Horde has more points and thus wins
+                    EndBattleGround(HORDE);
+            }
+            
+            else if( GetTeamScore(HORDE) == 0 )
+                EndBattleGround(ALLIANCE);     // Alliance has >0, Horde has 0, alliance wins
+                
+            else if( GetTeamScore(HORDE) == GetTeamScore(ALLIANCE) ) // Team score equal, winner is team that scored the first flag
+                EndBattleGround(m_FirstFlagCaptureTeam);
+                
+            else if( GetTeamScore(HORDE) > GetTeamScore(ALLIANCE) ) // Last but not least, check who has the higher score
+                EndBattleGround(HORDE);
+            else
+                EndBattleGround(ALLIANCE);
+        }
+        
         if (m_FlagState[BG_TEAM_ALLIANCE] == BG_WS_FLAG_STATE_WAIT_RESPAWN)
         {
             m_FlagsTimer[BG_TEAM_ALLIANCE] -= diff;
@@ -293,6 +316,9 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
     UpdateTeamScore(Source->GetTeam());
     // only flag capture should be updated
     UpdatePlayerScore(Source, SCORE_FLAG_CAPTURES, 1);      // +1 flag captures
+    
+    if(!m_FirstFlagCaptureTeam)
+        SetFirstFlagCapture(Source->GetTeam());
 
     if (GetTeamScore(ALLIANCE) == BG_WS_MAX_TEAM_SCORE)
         winner = ALLIANCE;
