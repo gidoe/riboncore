@@ -668,13 +668,10 @@ bool ChatHandler::HandleGameObjectTurnCommand(const char* args)
         o = chr->GetOrientation();
     }
 
-    Map* map = obj->GetMap();
-    map->Remove(obj,false);
-
     obj->Relocate(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), o);
     obj->UpdateRotationFields();
-
-    map->Add(obj);
+    obj->DestroyForNearbyPlayers();
+    ObjectAccessor::UpdateObjectVisibility(obj);
 
     obj->SaveToDB();
     obj->Refresh();
@@ -716,13 +713,9 @@ bool ChatHandler::HandleGameObjectMoveCommand(const char* args)
     if (!px)
     {
         Player *chr = m_session->GetPlayer();
-
-        Map* map = obj->GetMap();
-        map->Remove(obj,false);
-
         obj->Relocate(chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), obj->GetOrientation());
-
-        map->Add(obj);
+        obj->DestroyForNearbyPlayers();
+        ObjectAccessor::UpdateObjectVisibility(obj);
     }
     else
     {
@@ -740,12 +733,9 @@ bool ChatHandler::HandleGameObjectMoveCommand(const char* args)
             return false;
         }
 
-        Map* map = obj->GetMap();
-        map->Remove(obj,false);
-
         obj->Relocate(x, y, z, obj->GetOrientation());
-
-        map->Add(obj);
+        obj->DestroyForNearbyPlayers();
+        ObjectAccessor::UpdateObjectVisibility(obj);
     }
 
     obj->SaveToDB();

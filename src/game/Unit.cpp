@@ -8478,7 +8478,7 @@ uint32 Unit::BuildAuraStateUpdateForTarget(Unit * target) const
     return auraStates;
 }
 
-bool Unit::HasAuraState(AuraState flag, SpellEntry const *spellProto, Unit * Caster) const
+bool Unit::HasAuraState(AuraState flag, SpellEntry const *spellProto, Unit const * Caster) const
 {
     if (Caster)
     {
@@ -8847,7 +8847,10 @@ Unit* Unit::SelectMagnetTarget(Unit *victim, SpellEntry const *spellInfo)
         for(Unit::AuraEffectList::const_iterator itr = magnetAuras.begin(); itr != magnetAuras.end(); ++itr)
             if(Unit* magnet = (*itr)->GetParentAura()->GetUnitSource())
                 if(magnet->isAlive())
+                {
+                    (*itr)->GetParentAura()->DropAuraCharge();
                     return magnet;
+                }
     }
     // Melee && ranged case
     else
@@ -9492,7 +9495,7 @@ int32 Unit::SpellBaseDamageBonusForVictim(SpellSchoolMask schoolMask, Unit *pVic
     return TakenAdvertisedBenefit;
 }
 
-bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType)
+bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType) const
 {
     // not critting spell
     if((spellProto->AttributesEx2 & SPELL_ATTR_EX2_CANT_CRIT))
@@ -10840,25 +10843,6 @@ bool Unit::canDetectStealthOf(Unit const* target, float distance) const
     visibleDistance = visibleDistance > MAX_PLAYER_STEALTH_DETECT_RANGE ? MAX_PLAYER_STEALTH_DETECT_RANGE : visibleDistance;
 
     return distance < visibleDistance;
-}
-
-void Unit::DestroyForNearbyPlayers()
-{
-    if(!IsInWorld())
-        return;
-
-    std::list<Unit*> targets;
-    Ribon::AnyUnitInObjectRangeCheck check(this, World::GetMaxVisibleDistance());
-    Ribon::UnitListSearcher<Ribon::AnyUnitInObjectRangeCheck> searcher(this, targets, check);
-    VisitNearbyWorldObject(World::GetMaxVisibleDistance(), searcher);
-    for(std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
-        if(*iter != this && (*iter)->GetTypeId() == TYPEID_PLAYER
-            && ((Player*)(*iter))->HaveAtClient(this)
-            && GetCharmerGUID() != (*iter)->GetGUID()) // TODO: this is for puppet
-        {
-            DestroyForPlayer((Player*)(*iter));
-            ((Player*)(*iter))->m_clientGUIDs.erase(GetGUID());
-        }
 }
 
 void Unit::SetVisibility(UnitVisibility x)
