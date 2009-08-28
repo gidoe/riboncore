@@ -3488,6 +3488,7 @@ void Spell::EffectSummonType(uint32 i)
                         {
                             summon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_originalCaster->GetGUID());
                             summon->setFaction(m_originalCaster->getFaction());
+                            summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
                         }
                     }
                     break;
@@ -4130,14 +4131,17 @@ void Spell::EffectSummonPet(uint32 i)
             if( OldSummon->isDead() )
                 return;
 
-            OldSummon->GetMap()->Remove((Creature*)OldSummon,false);
+            assert(OldSummon->GetMap() == owner->GetMap());
+
+            //OldSummon->GetMap()->Remove((Creature*)OldSummon,false);
 
             float px, py, pz;
             owner->GetClosePoint(px, py, pz, OldSummon->GetObjectSize());
 
-            OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
-            OldSummon->SetMap(owner->GetMap());
-            owner->GetMap()->Add((Creature*)OldSummon);
+            OldSummon->NearTeleportTo(px, py, pz, OldSummon->GetOrientation());
+            //OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
+            //OldSummon->SetMap(owner->GetMap());
+            //owner->GetMap()->Add((Creature*)OldSummon);
 
             if(owner->GetTypeId() == TYPEID_PLAYER && OldSummon->isControlled() )
             {
