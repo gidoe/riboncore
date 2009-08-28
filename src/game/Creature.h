@@ -535,7 +535,7 @@ class RIBON_DLL_SPEC Creature : public Unit
         void Motion_Initialize();
 
         void AI_SendMoveToPacket(float x, float y, float z, uint32 time, uint32 MovementFlags, uint8 type);
-        CreatureAI* AI() { return (CreatureAI*)i_AI; }
+        CreatureAI * AI() const { return (CreatureAI*)i_AI; }
 
         uint32 GetShieldBlockValue() const                  //dunno mob block value
         {
