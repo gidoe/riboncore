@@ -1190,9 +1190,9 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `Spell
 ( 51474, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00010000,   0,   0,   0), -- Astral Shift (Rank 1)
 ( 51478, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00010000,   0,   0,   0), -- Astral Shift (Rank 2)
 ( 51479, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00010000,   0,   0,   0), -- Astral Shift (Rank 3)
-(51483, 0x00000001, 11, 0x20000000, 0x00000000, 0x00000000, 0x00004000, 0x00000001, 0.000000, 0.000000,  0),
-(51485, 0x00000001, 11, 0x20000000, 0x00000000, 0x00000000, 0x00004000, 0x00000001, 0.000000, 0.000000,  0),
-(51486, 0x00000001, 11, 0x20000000, 0x00000000, 0x00000000, 0x00004000, 0x00000001, 0.000000, 0.000000,  0),
+( 51483, 0x01,  11, 0x20000000, 0x00000000, 0x00000000, 0x00004000, 0x00000001,   0,   0,   0), -- Storm, Earth and Fire
+( 51485, 0x01,  11, 0x20000000, 0x00000000, 0x00000000, 0x00004000, 0x00000001,   0,   0,   0), -- Storm, Earth and Fire
+( 51486, 0x01,  11, 0x20000000, 0x00000000, 0x00000000, 0x00004000, 0x00000001,   0,   0,   0), -- Storm, Earth and Fire
 ( 51521, 0x00,  11, 0x00000000, 0x01000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Improved Stormstrike
 ( 51522, 0x00,  11, 0x00000000, 0x01000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Improved Stormstrike
 ( 51528, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 2.5,   0,   0), -- Maelstrom Weapon (Rank 1)
@@ -1671,12 +1671,12 @@ INSERT INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`
 (31898, 0.25, -1, 0.16, -1, 'Paladin - Judgement of Blood Enemy'),
 (32220, 0.0833, -1, 0.0533, -1, 'Paladin - Judgement of Blood Self'),
 (20467, 0.25, -1, 0.16, -1, 'Paladin - Judgement of Command'),
-(53733, 0, 0, 0, 0, 'Paladin - Judgement of Corruption'),
+(53733, 0.22, -1, 0.14, -1, 'Paladin - Judgement of Corruption'),
 (20267, 0.1, -1, 0.1, -1, 'Paladin - Judgement of Light Proc'),
 (20187, 0.4, -1, 0.25, -1, 'Paladin - Judgement of Righteousness'),
 (53726, 0.25, -1, 0.16, -1, 'Paladin - Judgement of the Martyr Enemy'),
 (53725, 0.0833, -1, 0.0533, -1, 'Paladin - Judgement of the Martyr Self'),
-(31804, 0, 0, 0, 0, 'Paladin - Judgement of Vengeance'),
+(31804, 0.22, -1, 0.14, -1, 'Paladin - Judgement of Vengeance'),
 (54158, 0.25, -1, 0.16, -1, 'Paladin - Jugdement (Seal of Light, Seal of Wisdom, Seal of Justice)'),
 (58597, 0.75, -1, -1, -1, 'Paladin - Sacred Shield'),
 (53601, 0.75, -1, -1, -1, 'Paladin - Sacred Shield'),
