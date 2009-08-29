@@ -93,6 +93,7 @@ uint32 World::m_MistimingDelta = 2000;
 World::World()
 {
     m_playerLimit = 0;
+    m_allowedSecurityLevel = SEC_PLAYER;
     m_allowMovement = true;
     m_ShutdownMask = 0;
     m_ShutdownTimer = 0;
@@ -432,7 +433,7 @@ void World::LoadConfigSettings(bool reload)
 
     ///- Read the player limit and the Message of the day from the config file
     SetPlayerLimit( sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT), true );
-    SetMotd( sConfig.GetStringDefault("Motd", "Welcome to the Massive Network Game Object Server." ) );
+    SetMotd( sConfig.GetStringDefault("Motd", "Welcome to a Ribon Core Server." ) );
 
     ///- Get string for new logins (newly created characters)
     SetNewCharString(sConfig.GetStringDefault("PlayerStart.String", ""));
@@ -2542,18 +2543,20 @@ void World::ResetDailyQuests()
             itr->second->GetPlayer()->ResetDailyQuestStatus();
 }
 
+void World::UpdateAllowedSecurity()
+{
+    QueryResult *result = loginDatabase.PQuery("SELECT allowedSecurityLevel from realmlist WHERE id = '%d'", realmID);
+    if (result)
+    {
+        m_allowedSecurityLevel = AccountTypes(result->Fetch()->GetUInt16());
+        sLog.outDebug("Allowed Level: %u Result %u", m_allowedSecurityLevel, result->Fetch()->GetUInt16());
+        delete result;
+    }
+}
+
 void World::SetPlayerLimit( int32 limit, bool needUpdate )
 {
-    if(limit < -SEC_ADMINISTRATOR)
-        limit = -SEC_ADMINISTRATOR;
-
-    // lock update need
-    bool db_update_need = needUpdate || (limit < 0) != (m_playerLimit < 0) || (limit < 0 && m_playerLimit < 0 && limit != m_playerLimit);
-
     m_playerLimit = limit;
-
-    if(db_update_need)
-        loginDatabase.PExecute("UPDATE realmlist SET allowedSecurityLevel = '%u' WHERE id = '%d'",uint8(GetPlayerSecurityLimit()),realmID);
 }
 
 void World::UpdateMaxSessionCounters()
