@@ -2310,8 +2310,8 @@ void WorldObject::DestroyForNearbyPlayers()
         return;
 
     std::list<Unit*> targets;
-    Trinity::AnyUnitInObjectRangeCheck check(this, World::GetMaxVisibleDistance());
-    Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(this, targets, check);
+    Ribon::AnyUnitInObjectRangeCheck check(this, World::GetMaxVisibleDistance());
+    Ribon::UnitListSearcher<Ribon::AnyUnitInObjectRangeCheck> searcher(this, targets, check);
     VisitNearbyWorldObject(World::GetMaxVisibleDistance(), searcher);
     for(std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
     {
