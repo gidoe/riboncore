@@ -35,7 +35,6 @@ EndScriptData */
 #define SPELL_WATERBOLT     37138
 #define SPELL_SUBMERGE      37550
 #define SPELL_EMERGE        20568
-#define SPELL_SCALDINGWATER 37284
 
 #define EMOTE_SPOUT "The Lurker Below takes a deep breath."
 
@@ -164,27 +163,14 @@ struct RIBON_DLL_DECL boss_the_lurker_belowAI : public Scripted_NoMovementAI
         }
     }
 
+    void MovementInform(uint32 type, uint32 id)
+    {
+        if(type == ROTATE_MOTION_TYPE)
+            me->SetReactState(REACT_AGGRESSIVE);
+    }
+
     void UpdateAI(const uint32 diff)
     {
-        //MAP 548
-        //Check if players in water and if in water cast spell
-        /*Map* pMap = m_creature->GetMap();
-        if (pMap->IsDungeon() && pInstance && pInstance->GetData(DATA_THELURKERBELOWEVENT) == IN_PROGRESS)
-        {
-            Map::PlayerList const &PlayerList = pMap->GetPlayers();
-
-            if (PlayerList.isEmpty())
-                return;
-
-            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-            {
-                if (i->getSource()->isAlive() && i->getSource()->IsInWater() && !i->getSource()->HasAura(SPELL_SCALDINGWATER))
-                    i->getSource()->CastSpell(i->getSource(), SPELL_SCALDINGWATER, true);
-                else if (!i->getSource()->IsInWater())
-                    i->getSource()->RemoveAurasDueToSpell(SPELL_SCALDINGWATER);
-            }
-        }*/
-
         if(!CanStartEvent)//boss is invisible, don't attack
         {
             if(CheckCanStart())
@@ -236,10 +222,8 @@ struct RIBON_DLL_DECL boss_the_lurker_belowAI : public Scripted_NoMovementAI
             if (SpoutTimer < diff)
             {
                 m_creature->MonsterTextEmote(EMOTE_SPOUT,0,true);
-                if(rand()%2)
-                    m_creature->StartAutoRotate(CREATURE_ROTATE_LEFT,20000);
-                else
-                    m_creature->StartAutoRotate(CREATURE_ROTATE_RIGHT,20000);
+                me->SetReactState(REACT_PASSIVE);
+                me->GetMotionMaster()->MoveRotate(20000, rand()%2 ? ROTATE_DIRECTION_LEFT : ROTATE_DIRECTION_RIGHT);
                 SpoutTimer = 45000;
                 WhirlTimer = 20000;//whirl directly after spout
                 RotTimer = 20000;
@@ -318,7 +302,7 @@ struct RIBON_DLL_DECL boss_the_lurker_belowAI : public Scripted_NoMovementAI
                 }else WaterboltTimer -= diff;
             }
 
-            if (!UpdateVictim())
+            if (!UpdateCombatState())
                 return;
 
             DoMeleeAttackIfReady();

@@ -1095,10 +1095,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\Traveller.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\Unit.cpp"
 				>
 			</File>
@@ -1219,6 +1215,10 @@
 				</File>
 				<File
 					RelativePath="..\..\src\game\TargetedMovementGenerator.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\game\Traveller.h"
 					>
 				</File>
 				<File
