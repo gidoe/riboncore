@@ -2415,19 +2415,19 @@ class RIBON_DLL_SPEC Player : public Unit
 
         uint32 m_anti_LastSpeedChangeTime; // last speed change time
 
-        float  m_anti_Last_HSpeed;         // horizontal speed, default RUN speed
-        float  m_anti_Last_VSpeed;         // vertical speed, default max jump height
+        float m_anti_Last_HSpeed;          // horizontal speed, default RUN speed
+        float m_anti_Last_VSpeed;          // vertical speed, default max jump height
 
         uint64 m_anti_TransportGUID;       // current transport GUID
-
-        bool   m_anti_JustTeleported;      // set when player was teleported
+    public:
         uint32 m_anti_AntiCheatOffCount;   // set to number of loops anticheat should be disabled for
+    protected:
         uint32 m_anti_TeleToPlane_Count;   // Teleport To Plane alarm counter
 
         uint64 m_anti_AlarmCount;          // alarm counter
 
         uint16 m_anti_JumpCount;           // Jump already began, anti air jump check
-        float  m_anti_JumpBaseZ;           // Z coord before jump
+        float m_anti_JumpBaseZ;            // Z coord before jump
         // << movement anticheat
 
         uint32 m_resetTalentsCost;

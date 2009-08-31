@@ -2995,6 +2995,9 @@ void Spell::handle_immediate()
         int32 duration = GetSpellDuration(m_spellInfo);
         if (duration)
         {
+            // anticheat
+            if(m_caster->GetTypeId() == TYPEID_PLAYER) ((Player*)m_caster)->m_anti_AntiCheatOffCount = 5;
+            // end anticheat
             //apply haste mods
             m_caster->ModSpellCastTime(m_spellInfo, duration, this);
             // Apply duration mod
@@ -3319,7 +3322,12 @@ void Spell::finish(bool ok)
     m_spellState = SPELL_STATE_FINISHED;
 
     if(IsChanneledSpell(m_spellInfo))
+    {
+        // anticheat
+        if(m_caster->GetTypeId() == TYPEID_PLAYER) ((Player*)m_caster)->m_anti_AntiCheatOffCount = 5;
+        // end anticheat
         m_caster->UpdateInterruptMask();
+    }
 
     if(m_caster->hasUnitState(UNIT_STAT_CASTING) && !m_caster->IsNonMeleeSpellCasted(false, false, true))
         m_caster->clearUnitState(UNIT_STAT_CASTING);
@@ -6236,7 +6244,12 @@ SpellEvent::SpellEvent(Spell* spell) : BasicEvent()
 SpellEvent::~SpellEvent()
 {
     if (m_Spell->getState() != SPELL_STATE_FINISHED)
+    {
+        //if(IsChanneledSpell(m_Spell->m_spellInfo) && (m_caster->GetTypeId() == TYPEID_PLAYER))
+            //(Player*)m_caster->m_anti_AntiCheatOffCount = 5; // Commented out because m_caster isn't defined(?)
+
         m_Spell->cancel();
+    }
 
     if (m_Spell->IsDeletable())
     {

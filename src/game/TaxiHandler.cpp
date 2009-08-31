@@ -237,7 +237,7 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
             GetPlayer()->m_anti_LastServerTime = cServerTime;
         }
 
-        GetPlayer()->m_anti_JustTeleported = true;
+        GetPlayer()->m_anti_AntiCheatOffCount = 25;
         //end movement anticheat
         return;
     }

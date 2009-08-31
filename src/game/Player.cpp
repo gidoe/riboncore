@@ -414,8 +414,7 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
 
     m_anti_TransportGUID = 0;       // current transport GUID
 
-    m_anti_JustTeleported = 0;      // seted when player was teleported
-    m_anti_AntiCheatOffCount = 0;
+    m_anti_AntiCheatOffCount = 0;   // set to number of loops anticheat should be disabled for
     m_anti_TeleToPlane_Count = 0;   // Teleport To Plane alarm counter
 
     m_anti_AlarmCount = 0;          // alarm counter
@@ -1701,9 +1700,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
     MapEntry const* mEntry = sMapStore.LookupEntry(mapid);
 
-    //movement anticheat
-    m_anti_JustTeleported = true;
-    //end movement anticheat
+    // anticheat
+    m_anti_AntiCheatOffCount = 25;
+    //end anticheat
     // don't let enter battlegrounds without assigned battleground id (for example through areatrigger)...
     // don't let gm level > 1 either
     if(!InBattleGround() && mEntry->IsBattleGroundOrArena())
@@ -17383,7 +17382,7 @@ void Player::VehicleSpellInitialize()
     if(!veh)
         return;
 
-    // SetPosition(m_Vehicle->GetPositionX(), m_Vehicle->GetPositionY(), m_Vehicle->GetPositionZ(), m_Vehicle->GetOrientation());
+    // GetPosition_ is not a member of 'Vehicle', SetPosition is a member of 'Player': SetPosition(GetVehicle()->GetPositionX(), GetVehicle()->GetPositionY(), GetVehicle()->GetPositionZ(), GetVehicle()->GetOrientation());
 
     WorldPacket data(SMSG_PET_SPELLS, 8+2+4+4+4*10+1+1);
     data << uint64(veh->GetGUID());
