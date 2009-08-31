@@ -1,4 +1,4 @@
--- Up to RC 718-- --------
+-- Up to RC 787-- --------
 -- LINKED
 -- --------
 # spell1 / spell2 / type
@@ -2266,3 +2266,11 @@ INSERT INTO `spell_linked_spell`(`spell_trigger`,`spell_effect`,`type`,`comment`
 ('-30422','38638','0','Netherspite\'s Serenity'),
 ('-30423','38639','0','Netherspite\'s Dominance');
 UPDATE `script_texts` SET `type` = '3' WHERE `entry` IN ('-1532089','-1532090');
+
+
+# Chicken Net
+DELETE FROM `spell_script_target` WHERE `entry` = '51959' and `type` = '1';
+INSERT INTO `spell_script_target` ( `entry`, `type`, `targetEntry`) VALUES ('51959', '1', '28161');
+
+# the lurker below
+update creature_template set inhabittype=3 where entry=21217;
