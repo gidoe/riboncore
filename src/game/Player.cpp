@@ -307,6 +307,7 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     m_questRewardTalentCount = 0;
 
     m_regenTimer = 0;
+    m_regenTimerCount = 0;
     m_weaponChangeTimer = 0;
 
     m_zoneUpdateId = 0;
@@ -1296,13 +1297,7 @@ void Player::Update( uint32 p_time )
         }
     }
 
-    if(m_regenTimer > 0)
-    {
-        if(p_time >= m_regenTimer)
-            m_regenTimer = 0;
-        else
-            m_regenTimer -= p_time;
-    }
+    m_regenTimer += p_time;
 
     if (m_weaponChangeTimer > 0)
     {
@@ -2042,31 +2037,37 @@ void Player::RemoveFromWorld()
 
 void Player::RegenerateAll()
 {
-    if (m_regenTimer != 0)
+    if (m_regenTimer <= 500)
         return;
-    uint32 regenDelay = 2000;
-
-    // Not in combat or they have regeneration
-    if( !isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) ||
-        HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT) || IsPolymorphed() )
-    {
-        RegenerateHealth();
-        if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
-        {
-            Regenerate(POWER_RAGE);
-            if(getClass() == CLASS_DEATH_KNIGHT)
-                Regenerate(POWER_RUNIC_POWER);
-        }
-    }
+    
+    m_regenTimerCount += m_regenTimer;
 
     Regenerate( POWER_ENERGY );
 
     Regenerate( POWER_MANA );
 
-    if(getClass() == CLASS_DEATH_KNIGHT)
-        Regenerate( POWER_RUNE );
+    if(m_regenTimerCount >= 2000)
+    {
+        // Not in combat or they have regeneration
+        if( !isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) ||
+            HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT) || IsPolymorphed() )
+        {
+            RegenerateHealth();
+            if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
+            {
+                Regenerate(POWER_RAGE);
+                if(getClass() == CLASS_DEATH_KNIGHT)
+                    Regenerate(POWER_RUNIC_POWER);
+            }
+        }
 
-    m_regenTimer = regenDelay;
+        if(getClass() == CLASS_DEATH_KNIGHT)
+            Regenerate( POWER_RUNE );
+
+        m_regenTimerCount = 0;
+    }
+
+    m_regenTimer = 0;
 }
 
 void Player::Regenerate(Powers power)
@@ -2088,11 +2089,11 @@ void Player::Regenerate(Powers power)
             if (recentCast)
             {
                 // Ribon Updates Mana in intervals of 2s, which is correct
-                addvalue = GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * 2.00f;
+                addvalue = GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * 0.001f * m_regenTimer;
             }
             else
             {
-                addvalue = GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * 2.00f;
+                addvalue = GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * 0.001f * m_regenTimer;
             }
         }   break;
         case POWER_RAGE:                                    // Regenerate rage
@@ -2101,7 +2102,7 @@ void Player::Regenerate(Powers power)
             addvalue = 20 * RageDecreaseRate;               // 2 rage by tick (= 2 seconds => 1 rage/sec)
         }   break;
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
-            addvalue = 20;
+            addvalue = 0.01 * m_regenTimer;
             break;
         case POWER_RUNIC_POWER:
         {
@@ -2132,7 +2133,11 @@ void Player::Regenerate(Powers power)
 
     if (power != POWER_RAGE && power != POWER_RUNIC_POWER)
     {
-        curValue += uint32(addvalue);
+        if((addvalue-uint32(addvalue)) >= 0.50f)
+            curValue += uint32(addvalue+1);
+        else
+            curValue += uint32(addvalue);
+
         if (curValue > maxValue)
             curValue = maxValue;
     }
@@ -2143,7 +2148,10 @@ void Player::Regenerate(Powers power)
         else
             curValue -= uint32(addvalue);
     }
-    SetPower(power, curValue);
+    if(m_regenTimerCount >= 2000)
+        SetPower(power, curValue);
+    else
+        SetStatInt32Value(UNIT_FIELD_POWER1 + power, curValue);
 }
 
 void Player::RegenerateHealth()
