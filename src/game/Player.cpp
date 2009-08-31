@@ -6161,10 +6161,15 @@ void Player::RewardReputation(Unit *pVictim, float rate)
         }
     }
 
+    // Increase reputation gain on kill under certain conditions
+    uint32 zone = GetZoneId();
+    float zonerepmult = 0;
+    if(HasAura(32096) && (zone == 3483 || zone == 3562 || zone == 3836 || zone == 3713 || zone == 3714)) zonerepmult = 0.25; // Thrallmar's Favor
+   
     if(Rep->repfaction1 && (!Rep->team_dependent || GetTeam()==ALLIANCE))
     {
         int32 donerep1 = CalculateReputationGain(pVictim->getLevel(), Rep->repvalue1, ChampioningFaction ? ChampioningFaction : Rep->repfaction1, false);
-        donerep1 = int32(donerep1*rate);
+        donerep1 = int32(donerep1*(rate + zonerepmult));
         FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rep->repfaction1);
         uint32 current_reputation_rank1 = GetReputationMgr().GetRank(factionEntry1);
         if (factionEntry1 && current_reputation_rank1 <= Rep->reputation_max_cap1)
@@ -6182,7 +6187,7 @@ void Player::RewardReputation(Unit *pVictim, float rate)
     if(Rep->repfaction2 && (!Rep->team_dependent || GetTeam()==HORDE))
     {
         int32 donerep2 = CalculateReputationGain(pVictim->getLevel(), Rep->repvalue2, ChampioningFaction ? ChampioningFaction : Rep->repfaction2, false);
-        donerep2 = int32(donerep2*rate);
+        donerep2 = int32(donerep2*(rate + zonerepmult));
         FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rep->repfaction2);
         uint32 current_reputation_rank2 = GetReputationMgr().GetRank(factionEntry2);
         if (factionEntry2 && current_reputation_rank2 <= Rep->reputation_max_cap2)
@@ -21157,9 +21162,9 @@ void Player::LearnTalent(uint32 talentId, uint32 talentRank)
     if( (getClassMask() & talentTabInfo->ClassMask) == 0 )
         return;
 
-    // find current max talent rank
-    uint8 curtalent_maxrank = 0;
-    for(uint8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
+    // find current max talent rank (1~5)
+    uint8 curtalent_maxrank = 1;
+    for(uint8 rank = MAX_TALENT_RANK-1; rank > 0; --rank)
     {
         if(talentInfo->RankID[rank] && HasSpell(talentInfo->RankID[rank]))
         {
@@ -21208,13 +21213,13 @@ void Player::LearnTalent(uint32 talentId, uint32 talentRank)
             {
                 if (tmpTalent->TalentTab == tTab)
                 {
-                    for (int j = 0; j < MAX_TALENT_RANK; j++)
+                    for (uint8 rank = 0; rank < MAX_TALENT_RANK; rank++)
                     {
-                        if (tmpTalent->RankID[j] != 0)
+                        if (tmpTalent->RankID[rank] != 0)
                         {
-                            if (HasSpell(tmpTalent->RankID[j]))
+                            if (HasSpell(tmpTalent->RankID[rank]))
                             {
-                                spentPoints += j + 1;
+                                spentPoints += (rank + 1);
                             }
                         }
                     }
@@ -21294,9 +21299,9 @@ void Player::LearnPetTalent(uint64 petGuid, uint32 talentId, uint32 talentRank)
     if(!((1 << pet_family->petTalentType) & talentTabInfo->petTalentMask))
         return;
 
-    // find current max talent rank
-    uint8 curtalent_maxrank = 0;
-    for(uint8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
+    // find current max talent rank (1~5)
+    uint8 curtalent_maxrank = 1;
+    for(uint8 rank = MAX_TALENT_RANK-1; rank > 0; --rank)
     {
         if(talentInfo->RankID[rank] && pet->HasSpell(talentInfo->RankID[rank]))
         {
@@ -21483,9 +21488,9 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket *data)
                     if(talentInfo->TalentTab != talentTabId)
                         continue;
 
-                    // find max talent rank
-                    uint8 curtalent_maxrank = 0;
-                    for(uint8 rank = MAX_TALENT_RANK-1; rank > 0; --rank)
+                    // find max talent rank (0~4)
+                    int8 curtalent_maxrank = -1;
+                    for(int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
                     {
                         if(talentInfo->RankID[rank] && HasTalent(talentInfo->RankID[rank], specIdx))
                         {
@@ -21495,7 +21500,7 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket *data)
                     }
 
                     // not learned talent
-                    if(!curtalent_maxrank)
+                    if(curtalent_maxrank < 0)
                         continue;
 
                     *data << uint32(talentInfo->TalentID);  // Talent.dbc
@@ -21560,9 +21565,9 @@ void Player::BuildPetTalentsInfoData(WorldPacket *data)
             if(talentInfo->TalentTab != talentTabId)
                 continue;
 
-            // find max talent rank
-            uint8 curtalent_maxrank = 0;
-            for(uint8 rank = MAX_TALENT_RANK-1; rank > 0; --rank)
+            // find max talent rank (0~4)
+            int8 curtalent_maxrank = -1;
+            for(int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
             {
                 if(talentInfo->RankID[rank] && pet->HasSpell(talentInfo->RankID[rank]))
                 {
@@ -21572,7 +21577,7 @@ void Player::BuildPetTalentsInfoData(WorldPacket *data)
             }
 
             // not learned talent
-            if(!curtalent_maxrank)
+            if(curtalent_maxrank < 0)
                 continue;
 
             *data << uint32(talentInfo->TalentID);          // Talent.dbc
@@ -21942,7 +21947,7 @@ void Player::ActivateSpec(uint8 spec)
                 continue;
 
             // remove all talent ranks, starting at highest rank
-            for(uint8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
+            for(int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
             {
                 if(talentInfo->RankID[rank] != 0 && HasTalent(talentInfo->RankID[rank], m_activeSpec))
                 {
@@ -21983,7 +21988,7 @@ void Player::ActivateSpec(uint8 spec)
                 continue;
 
             // learn highest talent rank that exists in newly activated spec
-            for(uint8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
+            for(int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
             {
                 if(talentInfo->RankID[rank] && HasTalent(talentInfo->RankID[rank], m_activeSpec))
                 {
