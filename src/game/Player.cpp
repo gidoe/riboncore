@@ -1139,12 +1139,12 @@ void Player::Update( uint32 p_time )
     if(!IsInWorld())
         return;
 
-    if(GetHealth() && (isDead() || HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST)))
+    if(GetHealth() && getDeathState() != JUST_ALIVED && (!isAlive() || HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST)))
     {
-        sLog.outError("Player %s(GUID: %u) was dead(isDead() = %u, PLAYER_FLAGS_GHOST = %u) and had health > 0. This _might_ be an exploit attempt. They have been kicked.", GetName(), GetGUIDLow(), uint8(isDead()), uint8(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST)));
-        SetHealth(0);
-        if(!isGameMaster() && GetSession()->GetSecurity() < SEC_GAMEMASTER) GetSession()->KickPlayer();
-        return;
+        sLog.outError("Player %s(GUID: %u) was dead(getDeathState() = %u, PLAYER_FLAGS_GHOST = %u) and had health = %u. This _might_ be an exploit attempt, if you think this information is useful, please report it.", GetName(), GetGUIDLow(), uint8(getDeathState()), uint8(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST)), GetHealth());
+        //SetHealth(0); <- Don't use unless you're damn sure they're exploiting..
+        //if(!isGameMaster() && GetSession()->GetSecurity() < SEC_GAMEMASTER) GetSession()->KickPlayer();
+        //return;
     }
 
     // undelivered mail
@@ -3546,7 +3546,8 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
             if (!pSkill)
                 continue;
 
-            if (_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL ||
+            if(_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL &&
+                pSkill->categoryId != SKILL_CATEGORY_CLASS ||// not unlearn class skills (spellbook/talent pages)
                 // lockpicking/runeforging special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
                 (pSkill->id==SKILL_LOCKPICKING || pSkill->id==SKILL_RUNEFORGING) && _spell_idx->second->max_value==0 )
             {
@@ -4280,6 +4281,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     }
 
     CharacterDatabase.PExecute("DELETE FROM characters WHERE guid = '%u'",guid);
+    CharacterDatabase.PExecute("DELETE FROM character_account_data WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_declinedname WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_action WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = '%u'",guid);
