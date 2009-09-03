@@ -364,16 +364,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     }
     #endif
 
-    #ifdef PLAYERBOT_EXISTS
-    bool playerbot = plMover->IsPlayerbot();
-    #else
-    bool playerbot = false;
-    #endif
-    if(plMover->m_anti_AntiCheatOffCount > 0){
-        check_passed = true;
-        --(GetPlayer()->m_anti_AntiCheatOffCount);
-    }
-    else if(plMover && World::GetEnableMvAnticheat() && !plMover->isGameMaster() && !playerbot)
+    if (plMover && World::GetEnableMvAnticheat() && !plMover->isGameMaster() && GetPlayer()->m_anti_AntiCheatOffCount <= 0)
     {
         //calc time deltas
         int32 cClientTimeDelta = 1500;

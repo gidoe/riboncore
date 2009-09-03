@@ -41,7 +41,8 @@
 #include "ScriptCalls.h"
 #include "Timer.h"
 #include "Util.h"
-#include "revision.h"
+#include "revision_nr.h"
+#include "revision_sql.h"
 
 #include "sockets/TcpSocket.h"
 #include "sockets/Utility.h"
@@ -49,7 +50,6 @@
 #include "sockets/Socket.h"
 #include "sockets/SocketHandler.h"
 #include "sockets/ListenSocket.h"
-#include "revision.h"
 
 #define _FULLVERSION (_REVISION)
 
@@ -440,6 +440,9 @@ bool Master::_StartDB()
         return false;
     }
 
+    if(!WorldDatabase.CheckRequiredField("db_version",REVISION_DB_RIBONCORE))
+        return false;
+
     ///- Get character database info from configuration file
     dbstring = sConfig.GetStringDefault("CharacterDatabaseInfo", "");
     if(dbstring.empty())
@@ -455,6 +458,9 @@ bool Master::_StartDB()
         return false;
     }
 
+    if(!CharacterDatabase.CheckRequiredField("character_db_version",REVISION_DB_CHARACTERS))
+        return false;
+
     ///- Get login database info from configuration file
     dbstring = sConfig.GetStringDefault("loginDatabaseInfo", "");
     if(dbstring.empty())
@@ -469,6 +475,9 @@ bool Master::_StartDB()
         sLog.outError("Cannot connect to login database %s",dbstring.c_str());
         return false;
     }
+
+    if(!loginDatabase.CheckRequiredField("logon_db_version",REVISION_DB_LOGON))
+        return false;
 
     ///- Get the realm Id from the configuration file
     realmID = sConfig.GetIntDefault("RealmID", 0);

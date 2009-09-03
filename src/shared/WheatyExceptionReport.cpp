@@ -15,7 +15,7 @@
 #include <dbghelp.h>
 #include "WheatyExceptionReport.h"
 #include "SystemConfig.h"
-#include "revision.h"
+#include "revision_nr.h"
 #define CrashFolder _T("Crashes")
 #define _FULLVERSION (_REVISION)
 

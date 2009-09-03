@@ -27,7 +27,7 @@
 #endif
 
 #include "Platform/Define.h"
-#include "revision.h" //-----here u are ------ _REVISION is the magic key
+#include "revision_nr.h" //-----here u are ------ _REVISION is the magic key
 
 #ifndef _VERSION
 #if PLATFORM == PLATFORM_WINDOWS

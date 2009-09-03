@@ -24,7 +24,8 @@
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
-#include "revision.h"
+#include "revision_nr.h"
+#include "revision_sql.h"
 #include "RealmList.h"
 
 #include "Config/ConfigEnv.h"
@@ -373,6 +374,9 @@ bool StartDB()
         return false;
     }
     loginDatabase.ThreadStart();
+
+    if(!loginDatabase.CheckRequiredField("logon_db_version",REVISION_DB_LOGON))
+        return false;
 
     return true;
 }

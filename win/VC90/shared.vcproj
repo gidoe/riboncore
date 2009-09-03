@@ -864,7 +864,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\shared\revision.h"
+			RelativePath="..\..\src\shared\revision_nr.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\shared\revision_sql.h"
 			>
 		</File>
 		<File
