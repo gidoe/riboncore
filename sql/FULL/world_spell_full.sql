@@ -1,4 +1,4 @@
--- Up to RC 718-- --------
+-- Up to RC 787-- --------
 -- LINKED
 -- --------
 # spell1 / spell2 / type
@@ -79,6 +79,8 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 ( 34471, 24397, 2, 'The Beast Within'),
 ( 34471, 26592, 2, 'The Beast Within'),
 (-59907,     7, 0, 'Lightwell Charges - Suicide'),
+( 26022, 61417, 2, 'Pursuit of Justice'),
+( 26023, 61418, 2, 'Pursuit of Justice'),
 -- Quest
 ( 40214, 40216, 2, 'Dragonmaw Illusion'),
 ( 40214, 42016, 2, 'Dragonmaw Illusion'),
@@ -1093,9 +1095,9 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `Spell
 ( 46867, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000002,   0,   0,   0), -- Wrecking Crew (Rank 1)
 ( 46910, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000001, 5.5,   0,   0), -- Furious Attacks (Rank 1)
 ( 46911, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000001, 7.5,   0,   0), -- Furious Attacks (Rank 2)
-( 46913, 0x00,   4, 0x00000000, 0x00000400, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Bloodsurge (Rank 1)
-( 46914, 0x00,   4, 0x00000000, 0x00000400, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Bloodsurge (Rank 2)
-( 46915, 0x00,   4, 0x00000000, 0x00000400, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Bloodsurge (Rank 3)
+( 46913, 0x00,   4, 0x00000040, 0x00000404, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Bloodsurge (Rank 1)
+( 46914, 0x00,   4, 0x00000040, 0x00000404, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Bloodsurge (Rank 2)
+( 46915, 0x00,   4, 0x00000040, 0x00000404, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Bloodsurge (Rank 3)
 ( 46916, 0x00,   4, 0x00000000, 0x00000400, 0x00000000, 0x00000000, 0x00000002,   0,   0,   0), -- Slam! 
 ( 46951, 0x00,   4, 0x00000400, 0x00000040, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Sword and Board (Rank 1)
 ( 46952, 0x00,   0, 0x00000400, 0x00000040, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Sword and Board (Rank 2)
@@ -1125,8 +1127,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `Spell
 ( 47535, 0x00,   6, 0x00000001, 0x00000000, 0x00000000, 0x00004000, 0x00002000,   0,   0,  12), -- Rapture (Rank 1)
 ( 47536, 0x00,   6, 0x00000001, 0x00000000, 0x00000000, 0x00004000, 0x00002000,   0,   0,  12), -- Rapture (Rank 2)
 ( 47537, 0x00,   6, 0x00000001, 0x00000000, 0x00000000, 0x00004000, 0x00002000,   0,   0,  12), -- Rapture (Rank 3)
-( 47569, 0x00,   6, 0x00004000, 0x00000000, 0x00000000, 0x00004000, 0x00000000,   0,  50,   0), -- Improved Shadowform (Rank 1)
-( 47570, 0x00,   6, 0x00004000, 0x00000000, 0x00000000, 0x00004000, 0x00000000,   0, 100,   0), -- Improved Shadowform (Rank 2)
+( 47569, 0x00,   6, 0x00004000, 0x00000000, 0x00000000, 0x00004000, 0x00000000,   0,   0,   0), -- Improved Shadowform (Rank 1)
+( 47570, 0x00,   6, 0x00004000, 0x00000000, 0x00000000, 0x00004000, 0x00000000,   0,   0,   0), -- Improved Shadowform (Rank 2)
 ( 47580, 0x00,   6, 0x00000000, 0x00000000, 0x00000040, 0x00000000, 0x00010000,   0,   0,   0), -- Pain and Suffering (Rank 1)
 ( 47581, 0x00,   6, 0x00000000, 0x00000000, 0x00000040, 0x00000000, 0x00010000,   0,   0,   0), -- Pain and Suffering (Rank 2)
 ( 47582, 0x00,   6, 0x00000000, 0x00000000, 0x00000040, 0x00000000, 0x00010000,   0,   0,   0), -- Pain and Suffering (Rank 3)
@@ -1190,9 +1192,9 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `Spell
 ( 51474, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00010000,   0,   0,   0), -- Astral Shift (Rank 1)
 ( 51478, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00010000,   0,   0,   0), -- Astral Shift (Rank 2)
 ( 51479, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00010000,   0,   0,   0), -- Astral Shift (Rank 3)
-(51483, 0x00000001, 11, 0x20000000, 0x00000000, 0x00000000, 0x00004000, 0x00000001, 0.000000, 0.000000,  0),
-(51485, 0x00000001, 11, 0x20000000, 0x00000000, 0x00000000, 0x00004000, 0x00000001, 0.000000, 0.000000,  0),
-(51486, 0x00000001, 11, 0x20000000, 0x00000000, 0x00000000, 0x00004000, 0x00000001, 0.000000, 0.000000,  0),
+( 51483, 0x01,  11, 0x20000000, 0x00000000, 0x00000000, 0x00004000, 0x00000001,   0,   0,   0), -- Storm, Earth and Fire
+( 51485, 0x01,  11, 0x20000000, 0x00000000, 0x00000000, 0x00004000, 0x00000001,   0,   0,   0), -- Storm, Earth and Fire
+( 51486, 0x01,  11, 0x20000000, 0x00000000, 0x00000000, 0x00004000, 0x00000001,   0,   0,   0), -- Storm, Earth and Fire
 ( 51521, 0x00,  11, 0x00000000, 0x01000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Improved Stormstrike
 ( 51522, 0x00,  11, 0x00000000, 0x01000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Improved Stormstrike
 ( 51528, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 2.5,   0,   0), -- Maelstrom Weapon (Rank 1)
@@ -1567,7 +1569,41 @@ INSERT INTO spell_enchant_proc_data (`entry`, `customChance`, `PPMChance`,`procE
 (625, 0, 8.53,0),
 (2641, 0, 8.53,0),
 (3768, 0, 8.53,0),
-(3769, 0, 8.53,0);
+(3769, 0, 8.53,0),
+ -- Fiery Weapon
+(803, 0, 6.0,0),
+ -- Demonslaying
+(912, 0, 6.0,0),
+ -- Icy Weapon
+(1894, 0, 3.0,0),
+ -- Lifestealing
+(1898, 0, 6.0,0),
+ -- Unholy Weapon
+(1899, 0, 1.0,0),
+ -- Crusader
+(1900, 0, 1.0,0),
+ -- Mongoose
+(2673, 0, 1.0,0),
+ -- Battlemaster
+(2675, 0, 1.0,0),
+ -- Executioner
+(3225, 0, 1.0,0),
+ -- Icebreaker Weapon
+(3239, 0, 3.0,0),
+ -- Lifeward
+(3241, 0, 3.0,0),
+ -- Giantslaying
+(3251, 0, 3.0,0),
+ -- Deathfrost
+(3273, 0, 3.0,0),
+ -- Rune of the Fallen Crusader
+(3368, 0, 1.0,0),
+ -- Rune of Cinderglacier
+(3369, 0, 1.0,0),
+ -- Berserking
+(3789, 0, 1.0,0),
+ -- Blade Ward
+(3869, 0, 1.0,0);
 
 -- --------
 -- SPELL BONUS DATA
@@ -1671,12 +1707,12 @@ INSERT INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`
 (31898, 0.25, -1, 0.16, -1, 'Paladin - Judgement of Blood Enemy'),
 (32220, 0.0833, -1, 0.0533, -1, 'Paladin - Judgement of Blood Self'),
 (20467, 0.25, -1, 0.16, -1, 'Paladin - Judgement of Command'),
-(53733, 0, 0, 0, 0, 'Paladin - Judgement of Corruption'),
+(53733, 0.22, -1, 0.14, -1, 'Paladin - Judgement of Corruption'),
 (20267, 0.1, -1, 0.1, -1, 'Paladin - Judgement of Light Proc'),
 (20187, 0.4, -1, 0.25, -1, 'Paladin - Judgement of Righteousness'),
 (53726, 0.25, -1, 0.16, -1, 'Paladin - Judgement of the Martyr Enemy'),
 (53725, 0.0833, -1, 0.0533, -1, 'Paladin - Judgement of the Martyr Self'),
-(31804, 0, 0, 0, 0, 'Paladin - Judgement of Vengeance'),
+(31804, 0.22, -1, 0.14, -1, 'Paladin - Judgement of Vengeance'),
 (54158, 0.25, -1, 0.16, -1, 'Paladin - Jugdement (Seal of Light, Seal of Wisdom, Seal of Justice)'),
 (58597, 0.75, -1, -1, -1, 'Paladin - Sacred Shield'),
 (53601, 0.75, -1, -1, -1, 'Paladin - Sacred Shield'),
@@ -1842,6 +1878,15 @@ INSERT INTO `spell_bonus_data` (`entry`, `direct_bonus`, `dot_bonus`, `ap_bonus`
 (6572, -1, -1, 0.207, -1, 'Warrior - Revenge'),
 (64382, -1, -1, 0.5, -1, 'Warrior - Shattering Throw'),
 (6343, -1, -1, 0.12, -1, 'Warrior - Thunder Clap');
+
+-- --------
+-- SPELL DBC
+-- --------
+
+TRUNCATE TABLE `spell_dbc`;
+INSERT INTO `spell_dbc` (`Id`, `Dispel`, `Mechanic`, `AttributesEx3`, `DurationIndex`, `RangeIndex`, `Effect1`, `EffectImplicitTargetA1`, `EffectApplyAuraName1`, `EffectMiscValue1`, `SpellFamilyName`, `SchoolMask`, `Comment`) VALUES 
+(62388, 0,  0, 0x00000000, 21,  1, 6, 1,   4,  0,  0, 0, 'Demonic Circle: Teleport(48020) - casterAuraSpell'),
+(65142, 3, 22, 0x00000080, 21, 13, 6, 6, 255, 22, 15, 8, 'Crypt Fever - SPELL_AURA_LINKED');
 
 -- --------
 -- SPELL ELIXIR
@@ -2114,8 +2159,11 @@ INSERT INTO `spell_script_target` (`entry`, `type`, `targetEntry`) VALUES
 -- ULDUAR
 -- --------
 INSERT INTO creature_template (entry, vehicleid) VALUES
+(32930, 328), # Kologarn
+(32934, 380), # Right Arm
 (33113, 340), # Flame Leviathan
-(33114, 341) # Flame Leviathan Seat
+(33114, 341), # Flame Leviathan Seat
+(33214, 348) # Mechanolift 304-A
 ON DUPLICATE KEY UPDATE
 vehicleid = VALUES(vehicleid);
 
@@ -2126,6 +2174,7 @@ UPDATE creature_template SET speed=2 WHERE entry=33062;
 UPDATE creature_template SET faction_A=1965,faction_H=1965 WHERE entry IN (33090,33113,33139);
 
 UPDATE creature_template SET flags_extra = 0 WHERE entry IN (33114);
+UPDATE creature_template SET InhabitType = 4 WHERE entry = 33214; # Mechanolift 304-A
 
 INSERT INTO creature_template (entry, spell1, spell2, spell3, spell4, spell5, spell6, vehicleid) VALUES
 (33062, 62974, 62286, 62299, 64660, 0, 0, 335), # Salvaged Chopper
@@ -2142,22 +2191,31 @@ spell5 = VALUES(spell5),
 spell6 = VALUES(spell6),
 vehicleid = VALUES(vehicleid);
 
-DELETE FROM `spell_script_target` WHERE `entry` IN (62427,62374,62399);
+DELETE FROM `spell_script_target` WHERE `entry` IN (62427,62496,62374,62399,62056,63985);
 INSERT INTO `spell_script_target` (`entry`, `type`, `targetEntry`) VALUES
 (62427, 1, 33109), # Load into Catapult
 (62374, 1, 33060), # Pursued
 (62374, 1, 33109),
-(62399, 1, 33139); # Overload Circuit
+(62399, 1, 33139), # Overload Circuit
+(62496, 1, 33167), # Liquid Pyrite - Salvaged Demolisher Mechanic Seat
+(63985, 1, 32934), # Stone Grip
+(62056, 1, 32934);
 
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (-62475,62427);
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
-(-62475,-62399, 0, 'System Shutdown'),
+(-62475,-62399, 0, 'System Shutdown - Overload Circuit'),
+(-62475,-62375, 0, 'System Shutdown - Gathering Speed'),
 (-62475, 62472, 0, 'System Shutdown'), #inform, not correct spell
 ( 62427, 62340, 2, 'Load into Catapult - Passenger Loaded');
 
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (33143);
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `quest_start`, `quest_start_active`, `quest_end`, `cast_flags`) VALUES
 (33143, 62399, 0, 0, 0, 0); # Overide device
+
+update creature_template set spell1=62395, AIName = 'TurretAI', scriptname='' where entry = 33139;
+update creature_template set spell1=62402 where entry = 33142;
+update creature_template set ScriptName = 'boss_kologarn' where entry = 32930;
+update creature_template set scriptname = "boss_flame_leviathan_safety_container" where entry = 33218;
 
 
 -- --------
@@ -2189,6 +2247,8 @@ DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (54643);
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
 ( 54643,-54643, 2, 'Wintergrasp Defender Teleport');
 
+update game_graveyard_zone set ghost_zone = 4603 where id = 1474;
+
 
 -- temp
 
@@ -2206,3 +2266,22 @@ INSERT INTO `spell_linked_spell`(`spell_trigger`,`spell_effect`,`type`,`comment`
 ('-30422','38638','0','Netherspite\'s Serenity'),
 ('-30423','38639','0','Netherspite\'s Dominance');
 UPDATE `script_texts` SET `type` = '3' WHERE `entry` IN ('-1532089','-1532090');
+
+
+# Chicken Net
+DELETE FROM `spell_script_target` WHERE `entry` = '51959' and `type` = '1';
+INSERT INTO `spell_script_target` ( `entry`, `type`, `targetEntry`) VALUES ('51959', '1', '28161');
+
+# the lurker below
+update creature_template set inhabittype=3 where entry=21217;
+
+-- update creature_template set ScriptName = 'npc_iruk' where entry = 26219;
+-- UPDATE creature_template SET ScriptName = 'npc_corastrasza' WHERE entry = 32548;
+
+DELETE FROM `spell_script_target` WHERE entry = 61245;
+INSERT INTO `spell_script_target` (`entry`, `type`, `targetEntry`) VALUES
+(61245, 1, 32535);
+ 
+UPDATE creature_template SET VehicleId = 165 , spell1 = 56091,spell2 = 56092,spell3 = 57090,spell4 = 57143 ,spell5 = 57108,spell6=57403, unit_class = 1, minhealth = 100000, maxhealth = 100000 WHERE entry = 32535;
+UPDATE creature_template SET armor = 9729, mindmg = 422, maxdmg=586, minrangedmg=345, maxrangedmg=509, attackpower=642, rangedattackpower=103 WHERE entry = 32535;
+update creature set DeathState = 0 where id = 26219;

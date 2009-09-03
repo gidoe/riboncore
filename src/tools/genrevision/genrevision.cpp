@@ -282,7 +282,7 @@ int main(int argc, char **argv)
     /// get existed header data for compare
     std::string oldData;
 
-    if(FILE* HeaderFile = fopen("revision.h","rb"))
+    if(FILE* HeaderFile = fopen("revision_nr.h","rb"))
     {
         while(!feof(HeaderFile))
         {
@@ -298,7 +298,7 @@ int main(int argc, char **argv)
     /// update header only if different data
     if(newData != oldData)
     {
-        if(FILE* OutputFile = fopen("revision.h","wb"))
+        if(FILE* OutputFile = fopen("revision_nr.h","wb"))
         {
             fprintf(OutputFile,"%s",newData.c_str());
             fclose(OutputFile);

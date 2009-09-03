@@ -46,6 +46,7 @@
 #include "OutdoorPvPMgr.h"
 #include "GameEventMgr.h"
 #include "CreatureGroups.h"
+#include "Vehicle.h"
 // apply implementation of the singletons
 #include "Policies/SingletonImp.h"
 
@@ -169,7 +170,7 @@ Creature::~Creature()
     }
 
     //if(m_uint32Values)
-    //    sLog.outDetail("Deconstruct Creature Entry = %u", GetEntry());
+    //    sLog.outError("Deconstruct Creature Entry = %u", GetEntry());
 }
 
 void Creature::AddToWorld()
@@ -183,6 +184,8 @@ void Creature::AddToWorld()
         Unit::AddToWorld();
         SearchFormationAndPath();
         AIM_Initialize();
+        if(IsVehicle())
+            GetVehicleKit()->Install();
     }
 }
 
@@ -201,10 +204,12 @@ void Creature::RemoveFromWorld()
 
 void Creature::DisappearAndDie()
 {
-    //DestroyForNearbyPlayers();
-    SetVisibility(VISIBILITY_OFF);
-    ObjectAccessor::UpdateObjectVisibility(this);
-    setDeathState(JUST_DIED);
+    DestroyForNearbyPlayers();
+    //SetVisibility(VISIBILITY_OFF);
+    //ObjectAccessor::UpdateObjectVisibility(this);
+    if(isAlive())
+        setDeathState(JUST_DIED);
+    RemoveCorpse();
 }
 
 void Creature::SearchFormationAndPath()
@@ -551,7 +556,10 @@ void Creature::Update(uint32 diff)
                     RegenerateHealth();
 
                 if(getPowerType() == POWER_ENERGY)
-                    Regenerate(POWER_ENERGY);
+                {
+                    if(!IsVehicle() || GetVehicleKit()->GetVehicleInfo()->m_powerType != POWER_PYRITE)
+                        Regenerate(POWER_ENERGY);
+                }
                 else
                     RegenerateMana();
 
@@ -561,10 +569,8 @@ void Creature::Update(uint32 diff)
             break;
         }
         case DEAD_FALLING:
-        {
-            if (!FallGround())
-                setDeathState(JUST_DIED);
-        }
+            GetMotionMaster()->UpdateMotion(diff);
+            break;
         default:
             break;
     }
@@ -1707,8 +1713,16 @@ bool Creature::canStartAttack(Unit const* who, bool force) const
         // TODO: should switch to range attack
         return false;
 
-    if(!force && (IsNeutralToAll() || !IsWithinDistInMap(who, GetAttackDistance(who) + m_CombatDistance)))
-        return false;
+    if(!force)
+    {
+        if(who->isInCombat())
+            if(Unit *victim = who->getAttackerForHelper())
+                if(IsWithinDistInMap(victim, sWorld.getConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS)))
+                    force = true;
+
+        if(!force && (IsNeutralToAll() || !IsWithinDistInMap(who, GetAttackDistance(who) + m_CombatDistance)))
+            return false;
+    }
 
     if(!canCreatureAttack(who, force))
         return false;
@@ -1763,9 +1777,6 @@ void Creature::setDeathState(DeathState s)
         // always save boss respawn time at death to prevent crash cheating
         if(sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY) || isWorldBoss())
             SaveRespawnTime();
-
-        if (canFly() && FallGround())
-            return;
     }
     Unit::setDeathState(s);
 
@@ -1780,17 +1791,18 @@ void Creature::setDeathState(DeathState s)
             if ( LootTemplates_Skinning.HaveLootFor(GetCreatureInfo()->SkinLootId) )
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
-        if (canFly() && FallGround())
-            return;
-
         SetNoSearchAssistance(false);
-        Unit::setDeathState(CORPSE);
     
         //Dismiss group if is leader
         if(m_formation && m_formation->getLeader() == this)
             m_formation->FormationReset(true);
+
+        if (canFly() && FallGround())
+            return;
+
+        Unit::setDeathState(CORPSE);
     }
-    if(s == JUST_ALIVED)
+    else if(s == JUST_ALIVED)
     {
         //if(isPet())
         //    setActive(true);
@@ -1799,6 +1811,8 @@ void Creature::setDeathState(DeathState s)
         ResetPlayerDamageReq();
         CreatureInfo const *cinfo = GetCreatureInfo();
         AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
+        if(GetCreatureInfo()->InhabitType & INHABIT_AIR)
+            AddUnitMovementFlag(MOVEMENTFLAG_FLY_MODE + MOVEMENTFLAG_FLYING);
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
         clearUnitState(UNIT_STAT_ALL_STATE);
         SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
@@ -1806,6 +1820,7 @@ void Creature::setDeathState(DeathState s)
         Motion_Initialize();
         if(GetCreatureData() && GetPhaseMask() != GetCreatureData()->phaseMask)
             SetPhaseMask(GetCreatureData()->phaseMask, false);
+        if(m_vehicleKit) m_vehicleKit->Reset();
         Unit::setDeathState(ALIVE);
     }
 }
@@ -1822,9 +1837,8 @@ bool Creature::FallGround()
     if (fabs(ground_Z - z) < 0.1f)
         return false;
 
+    GetMotionMaster()->MoveFall(ground_Z, EVENT_FALL_GROUND);
     Unit::setDeathState(DEAD_FALLING);
-    GetMotionMaster()->MovePoint(0, x, y, ground_Z);
-    Relocate(x, y, ground_Z);
     return true;
 }
 
@@ -2185,6 +2199,9 @@ bool Creature::canCreatureAttack(Unit const *pVictim, bool force) const
     if(!pVictim->isInAccessiblePlaceFor(this))
         return false;
 
+    if(!AI()->CanAIAttack(pVictim))
+        return false;
+
     if(sMapStore.LookupEntry(GetMapId())->IsDungeon())
         return true;
 
@@ -2194,7 +2211,7 @@ bool Creature::canCreatureAttack(Unit const *pVictim, bool force) const
     if(Unit *unit = GetCharmerOrOwner())
         return pVictim->IsWithinDist(unit, dist);
     else
-        return pVictim->IsWithinDist3d(mHome_X, mHome_Y, mHome_Z, dist);
+        return pVictim->IsInDist(&m_homePosition, dist);
 }
 
 CreatureDataAddon const* Creature::GetCreatureAddon() const
@@ -2375,11 +2392,6 @@ bool Creature::HasSpellCooldown(uint32 spell_id) const
 {
     CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spell_id);
     return (itr != m_CreatureSpellCooldowns.end() && itr->second > time(NULL)) || HasCategoryCooldown(spell_id);
-}
-
-bool Creature::IsInEvadeMode() const
-{
-    return /*!i_motionMaster.empty() &&*/ i_motionMaster.GetCurrentMovementGeneratorType() == HOME_MOTION_TYPE;
 }
 
 bool Creature::HasSpell(uint32 spellID) const

@@ -81,6 +81,7 @@ struct RIBON_DLL_SPEC TurretAI : public CreatureAI
 {
     public:
         explicit TurretAI(Creature *c);
+        bool CanAIAttack(const Unit *who) const;
         void AttackStart(Unit *who);
         void UpdateAI(const uint32 diff);
 

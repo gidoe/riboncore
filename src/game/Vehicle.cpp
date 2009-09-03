@@ -44,29 +44,44 @@ Vehicle::Vehicle(Unit *unit, VehicleEntry const *vehInfo) : me(unit), m_vehicleI
 
 Vehicle::~Vehicle()
 {
+    for(SeatMap::const_iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
+        assert(!itr->second.passenger);
 }
 
 void Vehicle::Install()
 {
     if(Creature *cre = dynamic_cast<Creature*>(me))
     {
-        for(uint32 i = 0; i < MAX_SPELL_VEHICLE; ++i)
+        if(m_vehicleInfo->m_powerType == POWER_STEAM)
         {
-            if(!cre->m_spells[i])
-                continue;
-
-            SpellEntry const *spellInfo = sSpellStore.LookupEntry(cre->m_spells[i]);
-            if(!spellInfo)
-                continue;
-
-            if(spellInfo->powerType == POWER_MANA)
-                break;
-
-            if(spellInfo->powerType == POWER_ENERGY)
+            me->setPowerType(POWER_ENERGY);
+            me->SetMaxPower(POWER_ENERGY, 100);
+        }
+        else if(m_vehicleInfo->m_powerType == POWER_PYRITE)
+        {
+            me->setPowerType(POWER_ENERGY);
+            me->SetMaxPower(POWER_ENERGY, 50);
+        }
+        else
+        {
+            for(uint32 i = 0; i < MAX_SPELL_VEHICLE; ++i)
             {
-                me->setPowerType(POWER_ENERGY);
-                me->SetMaxPower(POWER_ENERGY, 100);
-                break;
+                if(!cre->m_spells[i])
+                    continue;
+
+                SpellEntry const *spellInfo = sSpellStore.LookupEntry(cre->m_spells[i]);
+                if(!spellInfo)
+                    continue;
+
+                if(spellInfo->powerType == POWER_MANA)
+                    break;
+
+                if(spellInfo->powerType == POWER_ENERGY)
+                {
+                    me->setPowerType(POWER_ENERGY);
+                    me->SetMaxPower(POWER_ENERGY, 100);
+                    break;
+                }
             }
         }
     }
@@ -79,11 +94,11 @@ void Vehicle::InstallAllAccessories()
     switch(me->GetEntry())
     {
         //case 27850:InstallAccessory(27905,1);break;
-        case 28782:InstallAccessory(28768,0);break; // Acherus Deathcharger
+        case 28782:InstallAccessory(28768,0,false);break; // Acherus Deathcharger
         case 28312:InstallAccessory(28319,7);break;
         case 32627:InstallAccessory(32629,7);break;
         case 32930:
-            InstallAccessory(32933,2);
+            InstallAccessory(32933,0);
             InstallAccessory(32934,1);
             break;
         case 33109:InstallAccessory(33167,1);break;
@@ -99,28 +114,33 @@ void Vehicle::InstallAllAccessories()
             InstallAccessory(33143,2); // Overload Control Device
             InstallAccessory(33142,1); // Leviathan Defense Turret
             break;
-        case 33214:InstallAccessory(33218,1);break;
+        case 33214:InstallAccessory(33218,1,false);break; // Mechanolift 304-A
     }
 }
 
 void Vehicle::Uninstall()
 {
+    sLog.outDebug("Vehicle::Uninstall %u", me->GetEntry());
+    for(SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
+        if(Unit *passenger = itr->second.passenger)
+            if(passenger->HasUnitTypeMask(UNIT_MASK_ACCESSORY))
+                ((TempSummon*)passenger)->UnSummon();
     RemoveAllPassengers();
 }
 
 void Vehicle::Die()
 {
+    sLog.outDebug("Vehicle::Die %u", me->GetEntry());
     for(SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
-    {
         if(Unit *passenger = itr->second.passenger)
             if(passenger->HasUnitTypeMask(UNIT_MASK_ACCESSORY))
                 passenger->setDeathState(JUST_DIED);
-    }
     RemoveAllPassengers();
 }
 
 void Vehicle::Reset()
 {
+    sLog.outDebug("Vehicle::Reset");
     InstallAllAccessories();
     if(m_usableSeatNum)
         me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
@@ -128,6 +148,7 @@ void Vehicle::Reset()
 
 void Vehicle::RemoveAllPassengers()
 {
+    sLog.outDebug("Vehicle::RemoveAllPassengers");
     for(SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
         if(Unit *passenger = itr->second.passenger)
         {
@@ -183,7 +204,7 @@ int8 Vehicle::GetNextEmptySeat(int8 seatId, bool next) const
     return seat->first;
 }
 
-void Vehicle::InstallAccessory(uint32 entry, int8 seatId)
+void Vehicle::InstallAccessory(uint32 entry, int8 seatId, bool minion)
 {
     if(Unit *passenger = GetPassenger(seatId))
     {
@@ -198,13 +219,15 @@ void Vehicle::InstallAccessory(uint32 entry, int8 seatId)
         passenger->ExitVehicle(); // this should not happen
     }
 
-    Creature *accessory = me->SummonCreature(entry, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, 0);
-    if(!accessory)
-        return;
-    accessory->AddUnitTypeMask(UNIT_MASK_ACCESSORY);
-    accessory->EnterVehicle(this, seatId);
-    // This is not good, we have to send update twice
-    accessory->SendMovementFlagUpdate();
+    //TODO: accessory should be minion
+    if(Creature *accessory = me->SummonCreature(entry, *me, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+    {
+        if(minion)
+            accessory->AddUnitTypeMask(UNIT_MASK_ACCESSORY);
+        accessory->EnterVehicle(this, seatId);
+        // This is not good, we have to send update twice
+        accessory->SendMovementFlagUpdate();
+    }
 }
 
 bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
@@ -245,10 +268,10 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
     }
 
-    if(!(seat->second.seatInfo->m_flags & 0x4000))
+    if(seat->second.seatInfo->m_flags && !(seat->second.seatInfo->m_flags & 0x4000))
         unit->addUnitState(UNIT_STAT_ONVEHICLE);
 
-    //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_24);
+    //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
     unit->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
     VehicleSeatEntry const *veSeat = seat->second.seatInfo;
@@ -273,14 +296,16 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
         }
 
         if(((Creature*)me)->IsAIEnabled)
-            ((Creature*)me)->AI()->PassengerBoarded(unit, seat->first);
+            ((Creature*)me)->AI()->PassengerBoarded(unit, seat->first, true);
     }
 
     //if(unit->GetTypeId() == TYPEID_PLAYER)
     //    ((Player*)unit)->SendTeleportAckMsg();
     //unit->SendMovementFlagUpdate();
 
-    if(unit->GetTypeId() == TYPEID_PLAYER) Player::GetPlayer(unit->GetGUID())->AntiCheatOff(5);
+    // anticheat
+    if(unit->GetTypeId() == TYPEID_PLAYER) Player::GetPlayer(unit->GetGUID())->m_anti_AntiCheatOffCount = 25;
+    // end anticheat
 
     return true;
 }
@@ -307,8 +332,7 @@ void Vehicle::RemovePassenger(Unit *unit)
         ++m_usableSeatNum;
     }
 
-    if(!(seat->second.seatInfo->m_flags & 0x4000))
-        unit->clearUnitState(UNIT_STAT_ONVEHICLE);
+    unit->clearUnitState(UNIT_STAT_ONVEHICLE);
 
     //SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
 
@@ -316,26 +340,20 @@ void Vehicle::RemovePassenger(Unit *unit)
         me->RemoveCharmedBy(unit);
 
     if(me->GetTypeId() == TYPEID_UNIT && ((Creature*)me)->IsAIEnabled)
-        ((Creature*)me)->AI()->PassengerLeft(unit, seat->first);
+        ((Creature*)me)->AI()->PassengerBoarded(unit, seat->first, false);
 
     // only for flyable vehicles?
     //CastSpell(this, 45472, true);                           // Parachute
 
-    if(unit->GetTypeId() == TYPEID_PLAYER) Player::GetPlayer(unit->GetGUID())->AntiCheatOff(5);
+    // anticheat
+    if(unit->GetTypeId() == TYPEID_PLAYER) Player::GetPlayer(unit->GetGUID())->m_anti_AntiCheatOffCount = 25;
+    // end anticheat
 }
 
 void Vehicle::Dismiss()
 {
-    for(SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
-    {
-        if(Unit *passenger = itr->second.passenger)
-            if(passenger->GetTypeId() == TYPEID_UNIT && ((Creature*)passenger)->IsVehicle())
-            {
-                passenger->ExitVehicle();
-                passenger->GetVehicleKit()->Dismiss();
-            }
-    }
-    RemoveAllPassengers();
+    sLog.outDebug("Vehicle::Dismiss %u", me->GetEntry());
+    Uninstall();
     me->SendObjectDeSpawnAnim(me->GetGUID());
     me->CombatStop();
     me->AddObjectToRemoveList();

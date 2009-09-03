@@ -518,10 +518,19 @@ void WorldSession::HandleSpellClick( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
+    // this will get something not in world. crash
     Creature *unit = ObjectAccessor::GetCreatureOrPetOrVehicle(*_player, guid);
-
+    
     if(!unit)
         return;
+
+    // TODO: Unit::SetCharmedBy: 28782 is not in world but 0 is trying to charm it! -> crash
+    if(!unit->IsInWorld())
+    {
+        sLog.outCrash("Spell click target %u is not in world!", unit->GetEntry());
+        assert(false);
+        return;
+    }
 
     SpellClickInfoMapBounds clickPair = objmgr.GetSpellClickInfoMapBounds(unit->GetEntry());
     for(SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
@@ -571,7 +580,7 @@ void WorldSession::HandleMirrrorImageDataRequest( WorldPacket & recv_data )
         data << (uint8)pCreator->GetByteValue(PLAYER_BYTES, 3); // haircolor
         data << (uint8)pCreator->GetByteValue(PLAYER_BYTES_2, 0); // facialhair
 
-        data << (uint32)0;  // unk
+        data << (uint32)pCreator->GetGuildId();  // unk
         static const EquipmentSlots ItemSlots[] = 
         {
             EQUIPMENT_SLOT_HEAD,
@@ -589,10 +598,16 @@ void WorldSession::HandleMirrrorImageDataRequest( WorldPacket & recv_data )
         };
         // Display items in visible slots
         for (EquipmentSlots const* itr = &ItemSlots[0];*itr!=EQUIPMENT_SLOT_END;++itr)
-            if (Item const *item =  pCreator->GetItemByPos(INVENTORY_SLOT_BAG_0, *itr))
+        {
+            if (*itr == EQUIPMENT_SLOT_HEAD && pCreator->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
+                data << (uint32)0;
+            else if (*itr == EQUIPMENT_SLOT_BACK && pCreator->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
+                data << (uint32)0;
+            else if (Item const *item = pCreator->GetItemByPos(INVENTORY_SLOT_BAG_0, *itr))
                 data << (uint32)item->GetProto()->DisplayInfoID;
             else
                 data << (uint32)0;
+        }
     }
     else
     {

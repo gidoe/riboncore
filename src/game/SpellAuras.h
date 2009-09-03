@@ -402,6 +402,8 @@ class RIBON_DLL_SPEC AuraEffect
         bool m_isAreaAura:1;
         bool m_isPersistent:1;
         bool m_isApplied:1;
+    private:
+        bool IsPeriodicTickCrit(Unit const * pCaster) const;
 };
 
 class RIBON_DLL_SPEC AreaAuraEffect : public AuraEffect

@@ -24,7 +24,8 @@
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
-#include "revision.h"
+#include "revision_nr.h"
+#include "revision_sql.h"
 #include "RealmList.h"
 
 #include "Config/ConfigEnv.h"
@@ -145,6 +146,7 @@ extern int main(int argc, char **argv)
         sLog.outError("Could not find configuration file %s.", cfg_file);
         return 1;
     }
+    sLog.Initialize();
 
     sLog.outString( "(logon-daemon) Revision: %s ", _FULLVERSION );
     sLog.outString( "Build Date: %s", __DATE__ );
@@ -373,6 +375,9 @@ bool StartDB()
         return false;
     }
     loginDatabase.ThreadStart();
+
+    if(!loginDatabase.CheckRequiredField("logon_db_version",REVISION_DB_LOGON))
+        return false;
 
     return true;
 }

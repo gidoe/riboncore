@@ -45,6 +45,7 @@ class RIBON_DLL_SPEC UnitAI
         Unit * const me;
     public:
         explicit UnitAI(Unit *u) : me(u) {}
+        virtual bool CanAIAttack(const Unit *who) const { return true; }
         virtual void AttackStart(Unit *);
         virtual void UpdateAI(const uint32 diff) = 0;
 
@@ -69,6 +70,7 @@ class RIBON_DLL_SPEC UnitAI
 
         void DoCast(uint32 spellId);
         void DoCast(Unit* victim, uint32 spellId, bool triggered = false);
+        void DoCastVictim(uint32 spellId, bool triggered = false);
         void DoCastAOE(uint32 spellId, bool triggered = false);
 
         float DoGetSpellMaxRange(uint32 spellId, bool positive = false);

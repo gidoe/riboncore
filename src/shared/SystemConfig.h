@@ -27,7 +27,7 @@
 #endif
 
 #include "Platform/Define.h"
-#include "revision.h" //-----here u are ------ _REVISION is the magic key
+#include "revision_nr.h" //-----here u are ------ _REVISION is the magic key
 
 #ifndef _VERSION
 #if PLATFORM == PLATFORM_WINDOWS
@@ -40,10 +40,10 @@
 // Format is YYYYMMDDRR where RR is the change in the conf file
 // for that day.
 #ifndef _RIBONDCONFVERSION
-# define _RIBONDCONFVERSION 2009082214
+# define _RIBONDCONFVERSION 2009083016
 #endif
 #ifndef _REALMDCONFVERSION
-# define _REALMDCONFVERSION 2009081701
+# define _REALMDCONFVERSION 2009082815
 #endif
 
 #if MANGOS_ENDIAN == MANGOS_BIGENDIAN

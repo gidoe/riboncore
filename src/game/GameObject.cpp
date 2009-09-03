@@ -489,17 +489,13 @@ void GameObject::AddUniqueUse(Player* player)
     m_unique_users.insert(player->GetGUIDLow());
 }
 
-void GameObject::DeleteObjectWithOwner()
+void GameObject::Delete()
 {
     SetLootState(GO_NOT_READY);
     if (GetOwnerGUID())
         if (Unit * owner = GetOwner(false))
             owner->RemoveGameObject(this, false);
-    Delete();
-}
 
-void GameObject::Delete()
-{
     assert (!GetOwnerGUID());
     SendObjectDeSpawnAnim(GetGUID());
 
@@ -1476,7 +1472,7 @@ void GameObject::TakenDamage(uint32 damage)
 
             SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
             SetUInt32Value(GAMEOBJECT_DISPLAYID, m_goInfo->building.destroyedDisplayId);
-            EventInform(m_goInfo->building.damagedEvent);
+            EventInform(m_goInfo->building.destroyedEvent);
         }
     }
     else // from intact to damaged
@@ -1490,7 +1486,7 @@ void GameObject::TakenDamage(uint32 damage)
 
             SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
             SetUInt32Value(GAMEOBJECT_DISPLAYID, m_goInfo->building.damagedDisplayId);
-            EventInform(m_goInfo->building.destroyedEvent);
+            EventInform(m_goInfo->building.damagedEvent);
         }
     }
 }

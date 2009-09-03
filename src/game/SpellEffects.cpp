@@ -93,7 +93,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectUnused,                                   // 26 SPELL_EFFECT_DEFENSE                  one spell: Defense
     &Spell::EffectPersistentAA,                             // 27 SPELL_EFFECT_PERSISTENT_AREA_AURA
     &Spell::EffectSummonType,                               // 28 SPELL_EFFECT_SUMMON
-    &Spell::EffectMomentMove,                               // 29 SPELL_EFFECT_LEAP
+    &Spell::EffectLeapForward,                              // 29 SPELL_EFFECT_LEAP
     &Spell::EffectEnergize,                                 // 30 SPELL_EFFECT_ENERGIZE
     &Spell::EffectWeaponDmg,                                // 31 SPELL_EFFECT_WEAPON_PERCENT_DAMAGE
     &Spell::EffectTriggerMissileSpell,                      // 32 SPELL_EFFECT_TRIGGER_MISSILE
@@ -202,7 +202,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //135 SPELL_EFFECT_CALL_PET
     &Spell::EffectHealPct,                                  //136 SPELL_EFFECT_HEAL_PCT
     &Spell::EffectEnergizePct,                              //137 SPELL_EFFECT_ENERGIZE_PCT
-    &Spell::EffectJump2,                                    //138 SPELL_EFFECT_138                      Leap
+    &Spell::EffectJump2,                                    //138 SPELL_EFFECT_LEAP_BACK                Leap back
     &Spell::EffectUnused,                                   //139 SPELL_EFFECT_CLEAR_QUEST              (misc - is quest ID)
     &Spell::EffectForceCast,                                //140 SPELL_EFFECT_FORCE_CAST
     &Spell::EffectNULL,                                     //141 SPELL_EFFECT_141                      damage and reduce speed?
@@ -520,6 +520,14 @@ void Spell::SpellDamageSchoolDmg(uint32 effect_idx)
                     int32 energy = -(m_caster->ModifyPower(POWER_ENERGY, -30));
                     damage += int32(energy * multiple);
                     damage += int32(((Player*)m_caster)->GetComboPoints() * ap * 7 / 100);
+                }
+                // Wrath
+                else if (m_spellInfo->SpellFamilyFlags[0] & 0x00000001)
+                {
+                    // Improved Insect Swarm
+                    if (AuraEffect const * aurEff = m_caster->GetDummyAura(SPELLFAMILY_DRUID, 1771, 0))
+                        if (unitTarget->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00200000))
+                            damage = int32(damage*(100.0f+aurEff->GetAmount())/100.0f);
                 }
                 break;
             }
@@ -1239,7 +1247,7 @@ void Spell::EffectDummy(uint32 i)
                                             if(Unit *device = seat->GetPassenger(2))
                                                 if(!device->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
                                                 {
-                                                    float dist = (*itr)->GetExactDistSq(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ);
+                                                    float dist = (*itr)->GetExactDistSq(&m_targets.m_dstPos);
                                                     if(dist < minDist)
                                                     {
                                                         minDist = dist;
@@ -1247,12 +1255,14 @@ void Spell::EffectDummy(uint32 i)
                                                     }
                                                 }
                                 }
-                                if(target && target->GetBase()->IsWithinDist2d(m_targets.m_destX, m_targets.m_destY, GetSpellRadius(m_spellInfo, i, false) * 2)) // now we use *2 because the location of the seat is not correct
+                                if(target && target->GetBase()->IsWithinDist2d(&m_targets.m_dstPos, GetSpellRadius(m_spellInfo, i, false) * 2)) // now we use *2 because the location of the seat is not correct
                                     passenger->EnterVehicle(target, 0);
                                 else
                                 {
                                     passenger->ExitVehicle();
-                                    passenger->GetMotionMaster()->MoveJump(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_targets.GetSpeedXY(), m_targets.GetSpeedZ());
+                                    float x, y, z;
+                                    m_targets.m_dstPos.GetPosition(x, y, z);
+                                    passenger->GetMotionMaster()->MoveJump(x, y, z, m_targets.GetSpeedXY(), m_targets.GetSpeedZ());
                                 }
                             }
                     }
@@ -1914,11 +1924,11 @@ void Spell::EffectDummy(uint32 i)
 
                 if (m_targets.HasDst())
                 {
-                    targets.setDestination(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ);
+                    targets.setDst(&m_targets.m_dstPos);
                 }
                 else
                 {
-                    targets.setDestination(m_caster);
+                    targets.setDst(m_caster);
                     // Corpse not found - take reagents ( only not triggered cast can take them)
                     triggered = false;
                 }
@@ -1930,7 +1940,7 @@ void Spell::EffectDummy(uint32 i)
             else if (m_spellInfo->Id ==48289)
             {
                 if (m_targets.HasDst())
-                    targets.setDestination(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ);
+                    targets.setDst(&m_targets.m_dstPos);
 
                 spell_id = m_currentBasePoints[0];
             }
@@ -2260,7 +2270,9 @@ void Spell::EffectTriggerMissileSpell(uint32 effect_idx)
         && m_spellInfo->Category == spellInfo->Category)
         ((Player*)m_caster)->RemoveSpellCooldown(spellInfo->Id);
 
-    m_caster->CastSpell(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, spellInfo->Id, true, m_CastItem, 0, m_originalCasterGUID);
+    float x, y, z;
+    m_targets.m_dstPos.GetPosition(x, y, z);
+    m_caster->CastSpell(x, y, z, spellInfo->Id, true, m_CastItem, 0, m_originalCasterGUID);
 }
 
 void Spell::EffectJump(uint32 i)
@@ -2272,9 +2284,7 @@ void Spell::EffectJump(uint32 i)
     float x,y,z,o;
     if(m_targets.HasDst())
     {
-        x = m_targets.m_destX;
-        y = m_targets.m_destY;
-        z = m_targets.m_destZ;
+        m_targets.m_dstPos.GetPosition(x, y, z);
 
         if(m_spellInfo->EffectImplicitTargetA[i] == TARGET_DEST_TARGET_BACK)
         {
@@ -2317,7 +2327,7 @@ void Spell::EffectJump(uint32 i)
         speedZ = float(m_spellInfo->EffectMiscValueB[i])/10;
     else
         speedZ = 10.0f;
-    float speedXY = m_caster->GetExactDistance2d(x, y) * 10.0f / speedZ;
+    float speedXY = m_caster->GetExactDist2d(x, y) * 10.0f / speedZ;
     m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ);
 }
 
@@ -2334,11 +2344,10 @@ void Spell::EffectTeleportUnits(uint32 i)
     }
 
     // Init dest coordinates
-    int32 mapid = m_targets.m_mapId;
-    if(mapid < 0) mapid = (int32)unitTarget->GetMapId();
-    float x = m_targets.m_destX;
-    float y = m_targets.m_destY;
-    float z = m_targets.m_destZ;
+    uint32 mapid = m_targets.m_dstPos.GetMapId();
+    if(mapid == MAPID_INVALID) mapid = unitTarget->GetMapId();
+    float x, y, z;
+    m_targets.m_dstPos.GetPosition(x, y, z);
     float orientation = m_targets.getUnitTarget() ? m_targets.getUnitTarget()->GetOrientation() : unitTarget->GetOrientation();
     sLog.outDebug("Spell::EffectTeleportUnits - teleport unit to %u %f %f %f\n", mapid, x, y, z);
 
@@ -2926,6 +2935,13 @@ void Spell::EffectCreateRandomItem(uint32 i)
 
 void Spell::EffectPersistentAA(uint32 i)
 {
+    if(m_spellDynObj)
+    {
+        assert(ObjectAccessor::GetObjectInWorld(m_spellDynObj->GetGUID(), (DynamicObject*)NULL) == m_spellDynObj);
+        m_spellDynObj->AddEffect(i);
+        return;
+    }
+
     float radius = GetSpellRadiusForFriend(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
     if(Player* modOwner = m_originalCaster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius);
@@ -2933,7 +2949,7 @@ void Spell::EffectPersistentAA(uint32 i)
     Unit *caster = m_caster->GetEntry() == WORLD_TRIGGER ? m_originalCaster : m_caster;
     int32 duration = GetSpellDuration(m_spellInfo);
     DynamicObject* dynObj = new DynamicObject;
-    if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), caster, m_spellInfo->Id, i, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, radius))
+    if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), caster, m_spellInfo->Id, 1<<i, m_targets.m_dstPos, duration, radius, false))
     {
         delete dynObj;
         return;
@@ -2941,6 +2957,7 @@ void Spell::EffectPersistentAA(uint32 i)
     dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x01eeeeee);
     caster->AddDynObject(dynObj);
     dynObj->GetMap()->Add(dynObj);
+    m_spellDynObj = dynObj;
 }
 
 void Spell::EffectEnergize(uint32 i)
@@ -3374,8 +3391,8 @@ void Spell::EffectSummonType(uint32 i)
     if(Player* modOwner = m_originalCaster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
 
-    float x, y, z;
-    GetSummonPosition(i, x, y, z);
+    Position pos;
+    GetSummonPosition(i, pos);
 
     /*//totem must be at same Z in case swimming caster and etc.
         if( fabs( z - m_caster->GetPositionZ() ) > 5 )
@@ -3404,7 +3421,7 @@ void Spell::EffectSummonType(uint32 i)
         default:
             if (properties->Flags & 512)
             {
-                SummonGuardian(entry, properties);
+                SummonGuardian(i, entry, properties);
                 break;
             }
             switch(properties->Type)
@@ -3412,16 +3429,16 @@ void Spell::EffectSummonType(uint32 i)
                 case SUMMON_TYPE_PET:
                 case SUMMON_TYPE_GUARDIAN:
                 case SUMMON_TYPE_MINION:
-                    SummonGuardian(entry, properties);
+                    SummonGuardian(i, entry, properties);
                     break;
                 case SUMMON_TYPE_VEHICLE:
                 case SUMMON_TYPE_VEHICLE2:
                     if(m_originalCaster)
-                        summon = m_caster->GetMap()->SummonCreature(entry, x, y, z, m_caster->GetOrientation(), 0, properties, duration, m_originalCaster);
+                        summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster);
                     break;
                 case SUMMON_TYPE_TOTEM:
                 {
-                    summon = m_caster->GetMap()->SummonCreature(entry, x, y, z, m_caster->GetOrientation(), 0, properties, duration, m_originalCaster);
+                    summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster);
                     if(!summon || !summon->isTotem())
                         return;
 
@@ -3449,7 +3466,7 @@ void Spell::EffectSummonType(uint32 i)
                 }
                 case SUMMON_TYPE_MINIPET:
                 {
-                    summon = m_caster->GetMap()->SummonCreature(entry, x, y, z, m_caster->GetOrientation(), 0, properties, duration, m_originalCaster);
+                    summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster);
                     if(!summon || !summon->HasUnitTypeMask(UNIT_MASK_MINION))
                         return;
 
@@ -3476,18 +3493,18 @@ void Spell::EffectSummonType(uint32 i)
 
                     for(uint32 count = 0; count < amount; ++count)
                     {
-                        float px, py, pz;
-                        GetSummonPosition(i, px, py, pz, radius, count);
+                        GetSummonPosition(i, pos, radius, count);
 
                         TempSummonType summonType = (duration == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_DESPAWN;
 
-                        TempSummon * summon = m_originalCaster->SummonCreature(entry,px,py,pz,m_caster->GetOrientation(),summonType,duration);
+                        TempSummon * summon = m_originalCaster->SummonCreature(entry, pos, summonType, duration);
                         if (!summon)
                             continue;
                         if (properties->Category == SUMMON_CATEGORY_ALLY)
                         {
                             summon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_originalCaster->GetGUID());
                             summon->setFaction(m_originalCaster->getFaction());
+                            summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
                         }
                     }
                     break;
@@ -3495,16 +3512,16 @@ void Spell::EffectSummonType(uint32 i)
             }//switch
             break;
         case SUMMON_CATEGORY_PET:
-            SummonGuardian(entry, properties);
+            SummonGuardian(i, entry, properties);
             break;
         case SUMMON_CATEGORY_PUPPET:
-            summon = m_caster->GetMap()->SummonCreature(entry, x, y, z, m_caster->GetOrientation(), 0, properties, duration, m_originalCaster);
+            summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster);
             break;
         case SUMMON_CATEGORY_VEHICLE:
         {
             float x, y, z;
             m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
-            summon = m_caster->GetMap()->SummonCreature(entry, x, y, z, m_caster->GetOrientation(), 0, properties, duration, m_caster);
+            summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_caster);
             if(!summon || !summon->IsVehicle())
                 return;
 
@@ -3663,7 +3680,7 @@ void Spell::EffectDistract(uint32 /*i*/)
     if( unitTarget->hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_STUNNED | UNIT_STAT_FLEEING ) )
         return;
 
-    float angle = unitTarget->GetAngle(m_targets.m_destX, m_targets.m_destY);
+    float angle = unitTarget->GetAngle(&m_targets.m_dstPos);
 
     if ( unitTarget->GetTypeId() == TYPEID_PLAYER )
     {
@@ -3717,7 +3734,7 @@ void Spell::EffectAddFarsight(uint32 i)
     float radius = GetSpellRadiusForFriend(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
     int32 duration = GetSpellDuration(m_spellInfo);
     DynamicObject* dynObj = new DynamicObject;
-    if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, 4, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, radius))
+    if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, 0, m_targets.m_dstPos, duration, radius, true))
     {
         delete dynObj;
         return;
@@ -4115,7 +4132,7 @@ void Spell::EffectSummonPet(uint32 i)
     {
         SummonPropertiesEntry const *properties = sSummonPropertiesStore.LookupEntry(67);
         if(properties)
-            SummonGuardian(petentry, properties);
+            SummonGuardian(i, petentry, properties);
         return;
     }
 
@@ -4130,14 +4147,17 @@ void Spell::EffectSummonPet(uint32 i)
             if( OldSummon->isDead() )
                 return;
 
-            OldSummon->GetMap()->Remove((Creature*)OldSummon,false);
+            assert(OldSummon->GetMap() == owner->GetMap());
+
+            //OldSummon->GetMap()->Remove((Creature*)OldSummon,false);
 
             float px, py, pz;
             owner->GetClosePoint(px, py, pz, OldSummon->GetObjectSize());
 
-            OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
-            OldSummon->SetMap(owner->GetMap());
-            owner->GetMap()->Add((Creature*)OldSummon);
+            OldSummon->NearTeleportTo(px, py, pz, OldSummon->GetOrientation());
+            //OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
+            //OldSummon->SetMap(owner->GetMap());
+            //owner->GetMap()->Add((Creature*)OldSummon);
 
             if(owner->GetTypeId() == TYPEID_PLAYER && OldSummon->isControlled() )
             {
@@ -4616,11 +4636,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
 
     float x, y, z;
     if(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-    {
-        x = m_targets.m_destX;
-        y = m_targets.m_destY;
-        z = m_targets.m_destZ;
-    }
+        m_targets.m_dstPos.GetPosition(x, y, z);
     else
         m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
 
@@ -5144,7 +5160,7 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                     float radius = GetSpellRadius(m_spellInfo, effIndex, true);
                     for(uint32 i = 0; i < 15; ++i)
                     {
-                        m_caster->GetRandomPoint(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, radius, x, y, z);
+                        m_caster->GetRandomPoint(m_targets.m_dstPos, radius, x, y, z);
                         m_caster->CastSpell(x, y, z, 54522, true);
                     }
                     break;
@@ -5275,10 +5291,23 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                     return;
                 }
                 case 62428: // Load into Catapult
-                    if(Unit *demolisher = m_caster->GetVehicleBase())
-                        if(Vehicle *seat = m_caster->GetVehicleKit())
-                            if(Unit *passenger = seat->GetPassenger(0))
+                    if(Vehicle *seat = m_caster->GetVehicleKit())
+                        if(Unit *passenger = seat->GetPassenger(0))
+                            if(Unit *demolisher = m_caster->GetVehicleBase())
                                 passenger->CastSpell(demolisher, damage, true);
+                    return;
+                case 62482: // Grab Crate
+                    if(unitTarget)
+                    {
+                        if(Vehicle *seat = m_caster->GetVehicleKit())
+                        {
+                            if(Creature *oldContainer = dynamic_cast<Creature*>(seat->GetPassenger(1)))
+                                oldContainer->DisappearAndDie();
+                            // TODO: a hack, range = 11, should after some time cast, otherwise too far
+                            unitTarget->CastSpell(seat->GetBase(), 62496, true);
+                            unitTarget->EnterVehicle(seat, 1);
+                        }
+                    }
                     return;
                 case 60123: // Lightwell
                 {
@@ -5708,13 +5737,13 @@ void Spell::EffectAddComboPoints(uint32 /*i*/)
     if(!unitTarget)
         return;
 
-    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+    if(!m_caster->m_movedPlayer)
         return;
 
     if(damage <= 0)
         return;
 
-    ((Player*)m_caster)->AddComboPoints(unitTarget, damage, this);
+    m_caster->m_movedPlayer->AddComboPoints(unitTarget, damage, this);
 }
 
 void Spell::EffectDuel(uint32 i)
@@ -6062,12 +6091,8 @@ void Spell::EffectSummonObject(uint32 i)
 
     float x, y, z;
     // If dest location if present
-    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-    {
-        x = m_targets.m_destX;
-        y = m_targets.m_destY;
-        z = m_targets.m_destZ;
-    }
+    if (m_targets.HasDst())
+        m_targets.m_dstPos.GetPosition(x, y, z);
     // Summon in random point all other units if location present
     else
         m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
@@ -6173,7 +6198,7 @@ void Spell::EffectBlock(uint32 /*i*/)
         ((Player*)unitTarget)->SetCanBlock(true);
 }
 
-void Spell::EffectMomentMove(uint32 i)
+void Spell::EffectLeapForward(uint32 i)
 {
     if(unitTarget->isInFlight())
         return;
@@ -6183,6 +6208,9 @@ void Spell::EffectMomentMove(uint32 i)
 
     uint32 mapid = m_caster->GetMapId();
     float dist = m_caster->GetSpellRadiusForTarget(unitTarget, sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    if(Player* modOwner = m_originalCaster->GetSpellModOwner())
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, dist);
+
     float x,y,z;
     float destx,desty,destz,ground,floor;
     float orientation = unitTarget->GetOrientation(), step = dist/10.0f;
@@ -6339,11 +6367,7 @@ void Spell::EffectCharge2(uint32 /*i*/)
 {
     float x, y, z;
     if(m_targets.HasDst())
-    {
-        x = m_targets.m_destX;
-        y = m_targets.m_destY;
-        z = m_targets.m_destZ;
-    }
+        m_targets.m_dstPos.GetPosition(x, y, z);
     else if(Unit *target = m_targets.getUnitTarget())
     {
         target->GetContactPoint(m_caster, x, y, z);
@@ -6389,16 +6413,10 @@ void Spell::EffectKnockBack(uint32 i)
         return;
 
     float x, y;
-    if(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-    {
-        x = m_targets.m_destX;
-        y = m_targets.m_destY;
-    }
+    if(m_targets.HasDst() && !m_targets.HasTraj())
+        m_targets.m_dstPos.GetPosition(x, y);
     else
-    {
-        x = m_caster->GetPositionX();
-        y = m_caster->GetPositionY();
-    }
+        m_caster->GetPosition(x, y);
 
     unitTarget->KnockbackFrom(x, y, speedxy, speedz);
 }
@@ -6429,26 +6447,10 @@ void Spell::EffectSendTaxi(uint32 i)
 
 void Spell::EffectPlayerPull(uint32 i)
 {
-    if(!unitTarget || !m_caster)
+    if(!unitTarget)
         return;
 
-    // Effect only works on players
-    if(unitTarget->GetTypeId()!=TYPEID_PLAYER)
-        return;
-
-    float vsin = sin(unitTarget->GetAngle(m_caster));
-    float vcos = cos(unitTarget->GetAngle(m_caster));
-
-    WorldPacket data(SMSG_MOVE_KNOCK_BACK, 8+4+4+4+4+4);
-    data.append(unitTarget->GetPackGUID());
-    data << uint32(0);                                      // Sequence
-    data << float(vcos);                                    // x direction
-    data << float(vsin);                                    // y direction
-                                                            // Horizontal speed
-    data << float(damage ? damage : unitTarget->GetDistance2d(m_caster));
-    data << float(m_spellInfo->EffectMiscValue[i])/-10;     // Z Movement speed
-
-    ((Player*)unitTarget)->GetSession()->SendPacket(&data);
+    unitTarget->KnockbackFrom(m_caster->GetPositionX(), m_caster->GetPositionY(), float(damage ? damage : unitTarget->GetDistance2d(m_caster)), float(m_spellInfo->EffectMiscValue[i])/10);
 }
 
 void Spell::EffectDispelMechanic(uint32 i)
@@ -6597,12 +6599,8 @@ void Spell::EffectTransmitted(uint32 effIndex)
 
     float fx, fy, fz;
 
-    if(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-    {
-        fx = m_targets.m_destX;
-        fy = m_targets.m_destY;
-        fz = m_targets.m_destZ;
-    }
+    if(m_targets.HasDst())
+        m_targets.m_dstPos.GetPosition(fx, fy, fz);
     //FIXME: this can be better check for most objects but still hack
     else if(m_spellInfo->EffectRadiusIndex[effIndex] && m_spellInfo->speed==0)
     {
@@ -6936,13 +6934,14 @@ void Spell::EffectWMORepair(uint32 /*i*/)
         gameObjTarget->Rebuild();
 }
 
-void Spell::SummonGuardian(uint32 entry, SummonPropertiesEntry const *properties)
+void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *properties)
 {
     Unit *caster = m_originalCaster;
-    if(caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem())
-        caster = ((Totem*)caster)->GetOwner();
     if(!caster)
         return;
+
+    if(caster->isTotem())
+        caster = ((Totem*)caster)->GetOwner();
 
     // in another case summon new
     uint32 level = caster->getLevel();
@@ -6976,10 +6975,10 @@ void Spell::SummonGuardian(uint32 entry, SummonPropertiesEntry const *properties
 
     for(uint32 count = 0; count < amount; ++count)
     {
-        float px, py, pz;
-        GetSummonPosition(0, px, py, pz, radius, count);
+        Position pos;
+        GetSummonPosition(i, pos, radius, count);
 
-        TempSummon *summon = map->SummonCreature(entry, px, py, pz, m_caster->GetOrientation(), 0, properties, duration, caster);
+        TempSummon *summon = map->SummonCreature(entry, pos, properties, duration, caster);
         if(!summon)
             return;
         if(summon->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
@@ -6993,17 +6992,15 @@ void Spell::SummonGuardian(uint32 entry, SummonPropertiesEntry const *properties
     }
 }
 
-void Spell::GetSummonPosition(uint32 i, float &x, float &y, float &z, float radius, uint32 count)
+void Spell::GetSummonPosition(uint32 i, Position &pos, float radius, uint32 count)
 {
+    pos.SetOrientation(m_caster->GetOrientation());
+
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
         // Summon 1 unit in dest location
         if (count == 0)
-        {
-            x = m_targets.m_destX;
-            y = m_targets.m_destY;
-            z = m_targets.m_destZ;
-        }
+            pos.Relocate(m_targets.m_dstPos);
         // Summon in random point all other units if location present
         else
         {
@@ -7012,23 +7009,25 @@ void Spell::GetSummonPosition(uint32 i, float &x, float &y, float &z, float radi
             {
                 case TARGET_MINION:
                 case TARGET_DEST_CASTER_RANDOM:
-                    m_caster->GetGroundPointAroundUnit(x, y, z, radius * rand_norm(), rand_norm()*2*M_PI);
+                    m_caster->GetNearPosition(pos, radius * rand_norm(), rand_norm()*2*M_PI);
                     break;
                 case TARGET_DEST_DEST_RANDOM:
                 case TARGET_DEST_TARGET_RANDOM:
-                    m_caster->GetRandomPoint(m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,radius,x,y,z);
+                    m_caster->GetRandomPoint(m_targets.m_dstPos, radius, pos);
                     break;
                 default:
-                    x = m_targets.m_destX;
-                    y = m_targets.m_destY;
-                    z = m_targets.m_destZ;
+                    pos.Relocate(m_targets.m_dstPos);
                     break;
             }
         }
     }
     // Summon if dest location not present near caster
     else
+    {
+        float x, y, z;
         m_caster->GetClosePoint(x,y,z,3.0f);
+        pos.Relocate(x, y, z);
+    }
 }
 
 void Spell::EffectRenamePet(uint32 /*eff_idx*/)
