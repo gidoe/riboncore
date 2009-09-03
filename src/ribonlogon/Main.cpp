@@ -146,6 +146,7 @@ extern int main(int argc, char **argv)
         sLog.outError("Could not find configuration file %s.", cfg_file);
         return 1;
     }
+    sLog.Initialize();
 
     sLog.outString( "(logon-daemon) Revision: %s ", _FULLVERSION );
     sLog.outString( "Build Date: %s", __DATE__ );
