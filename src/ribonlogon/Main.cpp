@@ -148,9 +148,9 @@ extern int main(int argc, char **argv)
     }
     sLog.Initialize();
 
-    sLog.outString( "(logon-daemon) Revision: %s ", _FULLVERSION );
     sLog.outString( "Build Date: %s", __DATE__ );
     sLog.outString( "Build Time: %s", __TIME__ );
+    sLog.outString( "(logon-daemon) Revision: %s ", _FULLVERSION );
     sLog.outString( "<Ctrl-C> to stop.\n" );
 
     sLog.outString( "'########::'####:'########:::'#######::'##::: ##:");
@@ -161,7 +161,7 @@ extern int main(int argc, char **argv)
     sLog.outString( " ##::. ##::: ##:: ##:::: ##: ##:::: ##: ##:. ###:");
     sLog.outString( " ##:::. ##:'####: ########::. #######:: ##::. ##:");
     sLog.outString( "..:::::..::....::........::::.......:::..::::..::");
-    sLog.outString( "                                        L O G O N");
+    sLog.outString( "         Supports Only 3.2.0a           L O G O N");
     sLog.outString( "http://www.dark-resurrection.de/wowsp/         \n");
 
     sLog.outString("Using configuration file %s.", cfg_file);

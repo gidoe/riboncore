@@ -204,9 +204,9 @@ Master::~Master()
 /// Main function
 int Master::Run()
 {
-    sLog.outString( "(core-daemon) Revision: %s ", _FULLVERSION );
     sLog.outString( "Build Date: %s", __DATE__ );
     sLog.outString( "Build Time: %s", __TIME__ );
+    sLog.outString( "(core-daemon) Revision: %s ", _FULLVERSION );
     sLog.outString( "<Ctrl-C> to stop.\n" );
 
     sLog.outString( "'########::'####:'########:::'#######::'##::: ##:");
@@ -217,7 +217,7 @@ int Master::Run()
     sLog.outString( " ##::. ##::: ##:: ##:::: ##: ##:::: ##: ##:. ###:");
     sLog.outString( " ##:::. ##:'####: ########::. #######:: ##::. ##:");
     sLog.outString( "..:::::..::....::........::::.......:::..::::..::");
-	sLog.outString( "                                          C O R E");
+    sLog.outString( "          Supports Only 3.2.0a            C O R E");
     sLog.outString( "http://www.dark-resurrection.de/wowsp/         \n");
 
     /// worldd PID file creation
