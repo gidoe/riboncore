@@ -11,7 +11,6 @@ EndScriptData */
 
 #include "precompiled.h"
 #include "escort_ai.h"
-#include "../system/system.h"
 
 enum
 {

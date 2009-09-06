@@ -1,4 +1,4 @@
--- Up to RC 787
+-- Up to RC 832
 
 TRUNCATE TABLE `ribon_string`;
 INSERT INTO `ribon_string` (`entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`) VALUES
@@ -267,7 +267,7 @@ INSERT INTO `ribon_string` (`entry`, `content_default`, `content_loc1`, `content
 (323, 'Honored', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (324, 'Revered', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (325, 'Exalted', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(326, 'Faction %s (%u) can''not have reputation.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(326, 'Faction %s (%u) can''nt have reputation.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (327, ' [no reputation]', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (328, 'Characters at account %s (Id: %u)', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (329, '  %s (GUID %u)', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
@@ -289,7 +289,7 @@ INSERT INTO `ribon_string` (`entry`, `content_default`, `content_loc1`, `content
 (345, 'Forced customize for player %s will be requested at next login.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (346, 'Forced customize for player %s (GUID #%u) will be requested at next login.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (347, 'TaxiNode ID %u not found!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(348,'Game Object (Entry: %u) have invalid data and can\'t be spawned',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(348,'Game Object (Entry: %u) have invalid data and can''t be spawned',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (400, '|cffff0000[System Message]:|rScripts reloaded', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (401, 'You change security level of account %s to %i.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (402, '%s changed your security level to %i.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),

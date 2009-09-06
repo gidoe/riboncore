@@ -114,7 +114,7 @@ struct RIBON_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
         {
             if(FishingTimer < diff)
             {
-                LurkerSubEvent == LURKER_HOOKED;
+                LurkerSubEvent = LURKER_HOOKED;
                 SetData(DATA_STRANGE_POOL, IN_PROGRESS);//just fished, signal Lurker script to emerge and start fight, we use IN_PROGRESS so it won't get saved and lurker will be alway invis at start if server restarted
             }else FishingTimer -= diff;
         }
