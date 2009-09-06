@@ -30,7 +30,6 @@
 #include "SystemConfig.h"
 #include "revision_nr.h"
 #include "Util.h"
-#include "revision_nr.h"
 
 #define _FULLVERSION (_REVISION)
 
