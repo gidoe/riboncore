@@ -860,6 +860,18 @@ struct SpellPeriodicAuraLogInfo
     bool   critical;
 };
 
+struct TriggeredSpellInfo
+{
+    TriggeredSpellInfo(uint32 _spell, Unit *_source, Unit *_target, int32 _amount = 0, AuraEffect *_auraEff = NULL)
+        : spell(_spell), amount(_amount), source(_source), target(_target), auraEff(_auraEff) {}
+    uint32 spell;
+    int32 amount;
+    Unit *source, *target;
+    AuraEffect *auraEff;
+};
+
+typedef std::vector<TriggeredSpellInfo> TriggeredSpellInfoVct;
+
 uint32 createProcExtendMask(SpellNonMeleeDamage *damageInfo, SpellMissInfo missCondition);
 
 #define MAX_DECLINED_NAME_CASES 5
@@ -999,6 +1011,19 @@ struct CharmInfo
         void ToggleCreatureAutocast(uint32 spellid, bool apply);
 
         CharmSpellEntry* GetCharmSpell(uint8 index) { return &(m_charmspells[index]); }
+
+        // MrSmite 09-05-2009 PetAI_v1.0
+        void SetIsCommandAttack(bool val);
+        bool IsCommandAttack();
+        void SetIsAtStay(bool val);
+        bool IsAtStay();
+        void SetIsFollowing(bool val);
+        bool IsFollowing();
+        void SetIsReturning(bool val);
+        bool IsReturning();
+        void SaveStayPosition();
+        void GetStayPosition(float &x, float &y, float &z);
+
     private:
 
         Unit* m_unit;
@@ -1011,6 +1036,15 @@ struct CharmInfo
 
         //for restoration after charmed
         ReactStates     m_oldReactState;
+
+        // MrSmite 09-05-2009 PetAI_v1.0
+        bool m_isCommandAttack;
+        bool m_isAtStay;
+        bool m_isFollowing;
+        bool m_isReturning;
+        float m_stayX;
+        float m_stayY;
+        float m_stayZ;
 };
 
 // for clearing special attacks
