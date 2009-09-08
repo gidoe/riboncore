@@ -15021,4 +15021,56 @@ void Unit::OutDebugInfo() const
     if(GetVehicle())
         sLog.outString("On vehicle %u.", GetVehicleBase()->GetEntry());
 }
+ 
+// MrSmite 09-05-2009 PetAI_v1.0
+void CharmInfo::SetIsCommandAttack(bool val)
+{
+    m_isCommandAttack = val;
+}
 
+bool CharmInfo::IsCommandAttack()
+{
+    return m_isCommandAttack;
+}
+
+void CharmInfo::SaveStayPosition()
+{
+    m_unit->GetPosition(m_stayX, m_stayY, m_stayZ);
+}
+
+void CharmInfo::GetStayPosition(float &x, float &y, float &z)
+{
+    x = m_stayX;
+    y = m_stayY;
+    z = m_stayZ;
+}
+
+void CharmInfo::SetIsAtStay(bool val)
+{
+    m_isAtStay = val;
+}
+
+bool CharmInfo::IsAtStay()
+{
+    return m_isAtStay;
+}
+
+void CharmInfo::SetIsFollowing(bool val)
+{
+    m_isFollowing = val;
+}
+
+bool CharmInfo::IsFollowing()
+{
+    return m_isFollowing;
+}
+
+void CharmInfo::SetIsReturning(bool val)
+{
+    m_isReturning = val;
+}
+
+bool CharmInfo::IsReturning()
+{
+    return m_isReturning;
+}
