@@ -1820,9 +1820,6 @@ struct RIBON_DLL_DECL npc_training_dummy : Scripted_NoMovementAI
     uint32 ResetTimer;
     void Reset()
     {
-        m_creature->SetControlled(true,UNIT_STAT_STUNNED);//disable rotate
-        m_creature->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);//imune to knock aways like blast wave
-        m_creature->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
         ResetTimer = 10000;
     }
 
@@ -1838,8 +1835,6 @@ struct RIBON_DLL_DECL npc_training_dummy : Scripted_NoMovementAI
     {
         if (!UpdateVictim())
             return;
-        if (!m_creature->hasUnitState(UNIT_STAT_STUNNED))
-            m_creature->SetControlled(true,UNIT_STAT_STUNNED);//disable rotate
         if (ResetTimer <= diff)
         {
             EnterEvadeMode();
