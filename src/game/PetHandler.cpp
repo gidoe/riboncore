@@ -251,7 +251,16 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint16 spellid
             if(!pet->HasSpell(spellid) || IsPassiveSpell(spellid))
                 return;
 
-            pet->clearUnitState(UNIT_STAT_FOLLOW);
+            // MrSmite 09-08-2009 PetAI_v1.1
+            // Clear the flags as if owner clicked 'attack'. AI will reset them
+            // after AttackStart, even if spell failed
+            if (pet->GetCharmInfo())
+            {
+                pet->GetCharmInfo()->SetIsAtStay(false);
+                pet->GetCharmInfo()->SetIsCommandAttack(true);
+                pet->GetCharmInfo()->SetIsReturning(false);
+                pet->GetCharmInfo()->SetIsFollowing(false);
+            }
 
             Spell *spell = new Spell(pet, spellInfo, false);
 
@@ -320,6 +329,11 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint16 spellid
 
                 spell->finish(false);
                 delete spell;
+
+                // MrSmite 09-08-2009 PetAI_v1.1
+                // reset specific flags in case of spell fail. AI will reset other flags
+                if (pet->GetCharmInfo())
+                    pet->GetCharmInfo()->SetIsCommandAttack(false);
             }
             break;
         }
