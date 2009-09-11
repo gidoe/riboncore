@@ -267,7 +267,7 @@ struct RIBON_DLL_DECL boss_kalecgosAI : public ScriptedAI
                     }
                     else
                     {
-                        error_log("TSCR: Didn't find Shathrowar. Kalecgos event reseted.");
+                        error_log("RSCR: Didn't find Shathrowar. Kalecgos event reseted.");
                         EnterEvadeMode();
                         return;
                     }
