@@ -1,4 +1,4 @@
--- Up to RC 832
+-- Up to RC 856
 
 -- This file contains all waypoints used by escortAI scripts
 /*
@@ -1540,3 +1540,4 @@ INSERT INTO script_waypoint VALUES
    (29173, 7, 2257.479, -5296.702, 82.165, 0, 'being kicked by Lich King'),
    (29173, 8, 2261.237, -5294.983, 82.167, 0, 'throw'),
    (29173, 9, 2259.34, -5294.379, 82.167, 0, 'event end');
+   
