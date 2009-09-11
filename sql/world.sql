@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
-  `required_843_world_training_dummy` bit(1) default NULL
+  `required_846_world_script_text` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 
 --
@@ -2616,6 +2616,7 @@ DROP TABLE IF EXISTS `script_texts`;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `script_texts` (
+  `npc_entry` mediumint(8) NOT NULL default '0' COMMENT 'creature_template entry',
   `entry` mediumint(8) NOT NULL,
   `content_default` text NOT NULL,
   `content_loc1` text,
@@ -2631,9 +2632,10 @@ CREATE TABLE `script_texts` (
   `language` tinyint(3) unsigned NOT NULL default '0',
   `emote` smallint(5) unsigned NOT NULL default '0',
   `comment` text,
-  PRIMARY KEY  (`entry`)
+  PRIMARY KEY  (`npc_entry`,`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Script Texts';
 SET character_set_client = @saved_cs_client;
+
 
 --
 -- Table structure for table `script_waypoint`

@@ -4,8 +4,11 @@
 -- valid entries for table are between -1000000 and -1999999
 -- 
 
+-- ALTER TABLE `script_texts` ADD COLUMN `npc_entry` mediumint(8)  NOT NULL DEFAULT 0 COMMENT 'creature_template entry' FIRST;
+/*
 DROP TABLE IF EXISTS `script_texts`;
 CREATE TABLE `script_texts` (
+  `npc_entry` mediumint(8) NOT NULL default '0' COMMENT 'creature_template entry',
   `entry` mediumint(8) NOT NULL,
   `content_default` text NOT NULL,
   `content_loc1` text,
