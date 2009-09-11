@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2009 Ribon <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -922,7 +922,7 @@ bool GOHello_go_inconspicuous_mine_car(Player* pPlayer, GameObject* pGO)
 {
     if (pPlayer->GetQuestStatus(12701) == QUEST_STATUS_INCOMPLETE)
     {
-        // Hack Why Trinity Dont Support Custom Summon Location
+        // Hack Why Ribon Dont Support Custom Summon Location
         if(Creature *miner = pPlayer->SummonCreature(28841, 2383.869629, -5900.312500, 107.996086, pPlayer->GetOrientation(),TEMPSUMMON_DEAD_DESPAWN, 1))
         {
             pPlayer->CastSpell(pPlayer, SPELL_CART_SUMM, true);

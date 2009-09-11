@@ -13610,6 +13610,15 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
     if (!pVictim->GetHealth())
         return;
 
+    // Inform pets (if any) when player kills target)
+    if (this->GetTypeId() == TYPEID_PLAYER && ((Player*)this)->GetPet())
+    {
+        Pet *pPet = ((Player *)this)->GetPet();
+
+        if (pPet && pPet->isAlive() && pPet->isControlled())
+            pPet->AI()->KilledUnit(pVictim);
+    }
+
     //sLog.outError("%u kill %u", GetEntry(), pVictim->GetEntry());
 
     pVictim->SetHealth(0);
@@ -15021,8 +15030,7 @@ void Unit::OutDebugInfo() const
     if(GetVehicle())
         sLog.outString("On vehicle %u.", GetVehicleBase()->GetEntry());
 }
- 
-// MrSmite 09-05-2009 PetAI_v1.0
+
 void CharmInfo::SetIsCommandAttack(bool val)
 {
     m_isCommandAttack = val;

@@ -70,7 +70,6 @@ void PetAI::_stopAttack()
         return;
     }
 
-    // MrSmite 09-05-2009 PetAI_v1.0
     m_creature->AttackStop();
     me->GetCharmInfo()->SetIsCommandAttack(false);
     HandleReturnMovement();
@@ -100,17 +99,12 @@ void PetAI::UpdateAI(const uint32 diff)
     }
     else if(owner && m_creature->GetCharmInfo()) //no victim
     {
-        // MrSmite 05-09-2009 PetAI_v1.0
-        Unit* nextTarget = SelectNextTarget();
+        Unit *nextTarget = SelectNextTarget();
 
         if (nextTarget)
-        {
             AttackStart(nextTarget);
-        }
         else
-        {
             HandleReturnMovement();
-        }
     }
     else if (owner && !m_creature->hasUnitState(UNIT_STAT_FOLLOW)) // no charm info and no victim
         m_creature->GetMotionMaster()->MoveFollow(owner,PET_FOLLOW_DIST, m_creature->GetFollowAngle());
@@ -168,7 +162,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
             Spell *spell = new Spell(m_creature, spellInfo, false, 0);
 
-            // MrSmite 09-05-2009 PetAI_v1.0 - Fix to allow pets on STAY to autocast
+            // Fix to allow pets on STAY to autocast
             if (inCombat && _CanAttack(me->getVictim()) && spell->CanAutoCast(me->getVictim()))
             {
                 targetSpellStore.push_back(std::make_pair<Unit*, Spell*>(m_creature->getVictim(), spell));
@@ -272,54 +266,47 @@ void PetAI::UpdateAllies()
 
 void PetAI::KilledUnit(Unit *victim)
 {
-    // MrSmite 09-05-2009 PetAI_v1.0
+    // Called from Unit::Kill() in case where pet or owner kills something
+    // if owner killed this victim, pet may still be attacking something else
+    if (me->getVictim() && me->getVictim() != victim)
+        return;
+
     // Clear target just in case. May help problem where health / focus / mana
-    // regen gets stuck. Also resets attack command.
+    //  regen gets stuck. Also resets attack command.
     _stopAttack();
 
-    Unit* nextTarget = SelectNextTarget();
+    Unit *nextTarget = SelectNextTarget();
 
     if (nextTarget)
-    {
         AttackStart(nextTarget);
-    }
     else
-    {
-        // Return
-        HandleReturnMovement();
-    }
+        HandleReturnMovement(); // Return
 }
 
-void PetAI::AttackStart(Unit* target)
+void PetAI::AttackStart(Unit *target)
 {
-    // MrSmite 09-05-2009 PetAI_v1.0
     // Overrides Unit::AttackStart to correctly evaluate Pet states
+
     // Check all pet states to decide if we can attack this target
     if (!_CanAttack(target))
         return;
 
     // We can attack, should we chase or not?
     if (me->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
-    {
         DoAttack(target,true); // FOLLOW, attack with chase
-    }
     else
     {
         if (me->GetCharmInfo()->IsCommandAttack())
-        {
             DoAttack(target,true); // STAY or FOLLOW, player clicked "attack" so attack with chase
-        }
         else
-        {
             DoAttack(target,false); // STAY, target in range, attack not clicked so attack without chase
-        }	
-    }
+	}
 }
 
-Unit* PetAI::SelectNextTarget()
+Unit *PetAI::SelectNextTarget()
 {
-    // MrSmite 09-05-2009 PetAI_v1.0
     // Provides next target selection after current target death
+
     // Passive pets don't do next target selection
     if (me->HasReactState(REACT_PASSIVE))
         return NULL;
@@ -339,8 +326,8 @@ Unit* PetAI::SelectNextTarget()
 
 void PetAI::HandleReturnMovement()
 {
-    // MrSmite 09-05-2009 PetAI_v1.0
     // Handles moving the pet back to stay or owner
+
     if (me->GetCharmInfo()->HasCommandState(COMMAND_STAY))
     {
         if (!me->GetCharmInfo()->IsAtStay() && !me->GetCharmInfo()->IsReturning())
@@ -357,7 +344,7 @@ void PetAI::HandleReturnMovement()
             }
         }
     }
-    else    // COMMAND_FOLLOW
+    else // COMMAND_FOLLOW
     {
         if (!me->GetCharmInfo()->IsFollowing() && !me->GetCharmInfo()->IsReturning())
         {
@@ -369,16 +356,20 @@ void PetAI::HandleReturnMovement()
             }
         }
     }
+
 }
 
-void PetAI::DoAttack(Unit* target, bool chase)
+void PetAI::DoAttack(Unit *target, bool chase)
 {
     // Handles attack with or without chase and also resets all
     // PetAI flags for next update / creature kill
+
     // me->GetCharmInfo()->SetIsCommandAttack(false);
+
     // The following conditions are true if chase == true
     // (Follow && (Aggressive || Defensive))
     // ((Stay || Follow) && (Passive && player clicked attack))
+
     if (chase)
     {
         if (me->Attack(target,true))
@@ -390,7 +381,7 @@ void PetAI::DoAttack(Unit* target, bool chase)
             me->GetMotionMaster()->MoveChase(target);
         }
     }
-    else    // (Stay && ((Aggressive || Defensive) && In Melee Range)))
+    else // (Stay && ((Aggressive || Defensive) && In Melee Range)))
     {
         me->GetCharmInfo()->SetIsAtStay(true);
         me->GetCharmInfo()->SetIsFollowing(false);
@@ -401,7 +392,6 @@ void PetAI::DoAttack(Unit* target, bool chase)
 
 void PetAI::MovementInform(uint32 moveType, uint32 data)
 {
-    // MrSmite 09-05-2009 PetAI_v1.0
     // Receives notification when pet reaches stay or follow owner
     switch (moveType)
     {
@@ -445,29 +435,24 @@ bool PetAI::_CanAttack(Unit *target)
 {
     // Evaluates wether a pet can attack a specific
     // target based on CommandState, ReactState and other flags
+
     // Returning - check first since pets returning ignore attacks
     if (me->GetCharmInfo()->IsReturning())
         return false;
 
     // Passive - check now so we don't have to worry about passive in later checks
     if (me->HasReactState(REACT_PASSIVE))
-    {
         return me->GetCharmInfo()->IsCommandAttack();
-    }
 
     // From this point on, pet will always be either aggressive or defensive
-    // Stay
+
+    // Stay - can attack if target is within range or commanded to
     if (me->GetCharmInfo()->HasCommandState(COMMAND_STAY))
-    {
-        // can attack if target is within range or commanded to
         return (me->IsWithinMeleeRange(target, MIN_MELEE_REACH) || me->GetCharmInfo()->IsCommandAttack());
-    }
 
     // Follow
     if (me->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
-    {
         return true;
-    }
 
     // default, though we shouldn't ever get here
     return false;
