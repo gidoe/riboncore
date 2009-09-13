@@ -1,4 +1,4 @@
--- Up to RC 856
+﻿-- Up to RC 856
 -- 
 -- ribonscript_script_texts.sql Contains data for table `script_texts` mainly used in C++ parts.
 -- valid entries for table are between -1000000 and -1999999
@@ -30,19 +30,18 @@ CREATE TABLE `script_texts` (
 -- 
 -- -1 000 000 First 100 entries are reserved for special use, do not add regular text here.
 -- 
-
+DELETE FROM `script_texts` WHERE entry between -1999925 and -1000000;
 INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`content_loc1`,`content_loc2`,`content_loc3`,`content_loc4`,`content_loc5`,`content_loc6`,`content_loc7`,`content_loc8`,`sound`,`type`,`language`,`emote`,`comment`) VALUES
    (0,-1000000,'<RibonScript Text Entry Missing!>',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,0,0,'DEFAULT_TEXT'),
    (0,-1000001,'%s goes into a killing frenzy!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,2,0,0,'EMOTE_GENERIC_FRENZY_KILL'),
    (0,-1000004,'goes into a berserker rage!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,2,0,0,'EMOTE_GENERIC_BERSERK'),
-   (0,-1000005,'UNUSED',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,0,0,'REUSE ME');
+   (0,-1000005,'UNUSED',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,0,0,'REUSE ME'),
 
 -- 
 -- Normal text entries. Say/Yell/Whisper/Emote for any regular world object.
 -- 
 
 -- -1 000 100 GENERAL MAPS (not typical instance maps)
-INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`content_loc1`,`content_loc2`,`content_loc3`,`content_loc4`,`content_loc5`,`content_loc6`,`content_loc7`,`content_loc8`,`sound`,`type`,`language`,`emote`,`comment`) VALUES
    (6109,-1000100,'Come, little ones. Face me!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'azuregos SAY_TELEPORT'),
    (467,-1000101,'Follow me, $N. I''ll take you to the Defias hideout. But you better protect me or I am as good as dead.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,7,0,'defias traitor SAY_START'),
    (467,-1000102,'The entrance is hidden here in Moonbrook. Keep your eyes peeled for thieves. They want me dead.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,7,0,'defias traitor SAY_PROGRESS'),
