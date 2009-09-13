@@ -36,7 +36,6 @@ ribonsockets
 ribondatabase
 ribonauth
 ribonconfig
-ZThread
 zlib
 gomp
 ${SSLLIB}

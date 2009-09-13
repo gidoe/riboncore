@@ -223,6 +223,30 @@ void Script::RegisterSelf()
 //*** Functions to be Exported ***
 
 RIBON_DLL_EXPORT
+void OnLogin(Player *pPlayer)
+{
+    Script *tmpscript = m_scripts[GetScriptId("scripted_on_events")];
+    if (!tmpscript || !tmpscript->pOnLogin) return;
+    tmpscript->pOnLogin(pPlayer);
+}
+
+RIBON_DLL_EXPORT
+void OnLogout(Player *pPlayer)
+{
+    Script *tmpscript = m_scripts[GetScriptId("scripted_on_events")];
+    if (!tmpscript || !tmpscript->pOnLogout) return;
+    tmpscript->pOnLogout(pPlayer);
+}
+
+RIBON_DLL_EXPORT
+void OnPVPKill(Player *killer, Player *killed)
+{
+    Script *tmpscript = m_scripts[GetScriptId("scripted_on_events")];
+    if (!tmpscript || !tmpscript->pOnPVPKill) return;
+    tmpscript->pOnPVPKill(killer, killed);
+}
+
+RIBON_DLL_EXPORT
 char const* ScriptsVersion()
 {
     return "Default Ribon scripting library";

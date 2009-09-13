@@ -42,6 +42,7 @@
 #include "SocialMgr.h"
 #include "UpdateMask.h"
 #include "Util.h"
+#include "ScriptCalls.h"
 #include "revision_nr.h"
 
 #define _FULLVERSION (_REVISION)
@@ -815,6 +816,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         pCurrChar->SetStandState(UNIT_STAND_STATE_STAND);
 
     m_playerLoading = false;
+
+    //Hook for OnLogin Event
+    Script->OnLogin(pCurrChar);
+
     delete holder;
 }
 
