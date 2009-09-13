@@ -53,8 +53,8 @@
 #define NUM_DATABASES 3
 
 char remotes[NUM_REMOTES][MAX_REMOTE] = {
-    "git@github.com:mangos/mangos.git",
-    "git://github.com/mangos/mangos.git"        // used for fetch if present
+    "git@github.com:Thyros/riboncore.git",
+    "git://github.com/Thyros/riboncore.git"        // used for fetch if present
 };
 
 char remote_branch[MAX_REMOTE] = "master";
@@ -65,26 +65,26 @@ char new_index_file[MAX_PATH] = ".git/git_id_index";
 
 char databases[NUM_DATABASES][MAX_DB] = {
     "characters",
-    "mangos",
-    "realmd"
+    "world",
+    "logon"
 };
 
 char db_version_table[NUM_DATABASES][MAX_DB] = {
     "character_db_version",
     "db_version",
-    "realmd_db_version",
+    "logon_db_version",
 };
 
 char db_sql_file[NUM_DATABASES][MAX_PATH] = {
     "sql/characters.sql",
-    "sql/mangos.sql",
-    "sql/realmd.sql"
+    "sql/world.sql",
+    "sql/logon.sql"
 };
 
 char db_sql_rev_field[NUM_DATABASES][MAX_PATH] = {
     "REVISION_DB_CHARACTERS",
-    "REVISION_DB_MANGOS",
-    "REVISION_DB_REALMD"
+    "REVISION_DB_RIBONCORE",
+    "REVISION_DB_LOGON"
 };
 
 bool allow_replace = false;
