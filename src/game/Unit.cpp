@@ -7917,7 +7917,8 @@ void Unit::setPowerType(Powers new_powertype)
             break;
         case POWER_ENERGY:
             SetMaxPower(POWER_ENERGY,GetCreatePowers(POWER_ENERGY));
-            SetPower(   POWER_ENERGY,0);
+            if(getClass() != CLASS_DRUID)
+                SetPower(   POWER_ENERGY,0);
             break;
         case POWER_HAPPINESS:
             SetMaxPower(POWER_HAPPINESS,GetCreatePowers(POWER_HAPPINESS));
@@ -10528,8 +10529,8 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
     if(GetTypeId() != TYPEID_PLAYER)
     {
         // Set home position at place of engaging combat for escorted creatures
-        if(((Creature*)this)->IsAIEnabled)
-            if (((Creature *)this)->AI()->IsEscorted())
+        //if(((Creature*)this)->IsAIEnabled)
+            //if (((Creature *)this)->AI()->IsEscorted())
                 ((Creature*)this)->SetHomePosition(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
         if(enemy)
         {
