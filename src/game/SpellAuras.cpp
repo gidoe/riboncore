@@ -3397,34 +3397,10 @@ void AuraEffect::HandleAuraModShapeshift(bool apply, bool Real, bool changeAmoun
         {
             // remove movement affects
             m_target->RemoveMovementImpairingAuras();
-/*
-            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
-            Unit::AuraList const& slowingAuras = m_target->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
-            for (Unit::AuraList::const_iterator iter = slowingAuras.begin(); iter != slowingAuras.end();)
-            {
-                SpellEntry const* aurSpellInfo = (*iter)->GetSpellProto();
-
-                uint32 aurMechMask = GetAllSpellMechanicMask(aurSpellInfo);
-
-                // If spell that caused this aura has Croud Control or Daze effect
-                if((aurMechMask & MECHANIC_NOT_REMOVED_BY_SHAPESHIFT) ||
-                    // some Daze spells have these parameters instead of MECHANIC_DAZE (skip snare spells)
-                    aurSpellInfo->SpellIconID == 15 && aurSpellInfo->Dispel == 0 && (aurMechMask & (1 << MECHANIC_SNARE))==0)
-                {
-                    ++iter;
-                    continue;
-                }
-
-                // All OK, remove aura now
-                m_target->RemoveAurasDueToSpellByCancel(aurSpellInfo->Id);
-                iter = slowingAuras.begin();
-            }
-*/
 
             // and polymorphic affects
             if(m_target->IsPolymorphed())
                 m_target->RemoveAurasDueToSpell(m_target->getTransForm());
-
             break;
         }
         default:
@@ -3444,6 +3420,7 @@ void AuraEffect::HandleAuraModShapeshift(bool apply, bool Real, bool changeAmoun
 
         if(PowerType != POWER_MANA)
         {
+            uint32 oldVal = m_target->GetPower(PowerType);
             // reset power to default values only at power change
             if(m_target->getPowerType()!=PowerType)
                 m_target->setPowerType(PowerType);
@@ -3461,11 +3438,8 @@ void AuraEffect::HandleAuraModShapeshift(bool apply, bool Real, bool changeAmoun
 
                     if (GetMiscValue() == FORM_CAT)
                     {
-                        if(m_target->GetPower(POWER_ENERGY) > FurorChance)
-                        {
-                            m_target->SetPower(POWER_ENERGY, 0);
-                            m_target->CastCustomSpell(m_target,17099,&FurorChance,NULL,NULL,true,NULL,this);
-                        }
+                        int32 basePoints = (FurorChance < oldVal ? FurorChance : oldVal);
+                        m_target->CastCustomSpell(m_target,17099,&basePoints,NULL,NULL,true,NULL,this);
                     }
                     else
                     {
@@ -3656,26 +3630,27 @@ void AuraEffect::HandleAuraTransform(bool apply, bool Real, bool /*changeAmount*
             CreatureInfo const * ci = objmgr.GetCreatureTemplate(GetMiscValue());
             if(!ci)
             {
-                                                            //pig pink ^_^
-                m_target->SetDisplayId(16358);
+                m_target->SetDisplayId(16358);              // pig pink ^_^
                 sLog.outError("Auras: unknown creature id = %d (only need its modelid) Form Spell Aura Transform in Spell ID = %d", GetMiscValue(), GetId());
             }
             else
             {
-                                                            // Will use the default model here
-                if (uint32 modelid = ci->GetRandomValidModelId())
-                    m_target->SetDisplayId(modelid);
+                uint32 model_id;
 
-                // Dragonmaw Illusion (set mount model also)
-                if(GetId()==42016 && m_target->GetMountID() && !m_target->GetAurasByType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED).empty())
-                    m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID,16314);
+                if (uint32 modelid = ci->GetRandomValidModelId())
+                    model_id = modelid;                     // Will use the default model here
 
                 // Polymorph (sheep)
                 if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_MAGE && GetSpellProto()->SpellIconID == 82 && GetSpellProto()->SpellVisual[0] == 12978)
                     if (Unit * caster = GetCaster())
-                        // Glyph of the Penguin
-                        if (caster->HasAura(52648))
-                            m_target->SetDisplayId(26452);
+                        if (caster->HasAura(52648))         // Glyph of the Penguin
+                            model_id = 26452;
+
+                m_target->SetDisplayId(model_id);
+
+                // Dragonmaw Illusion (set mount model also)
+                if(GetId()==42016 && m_target->GetMountID() && !m_target->GetAurasByType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED).empty())
+                    m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID,16314);
             }
         }
 
