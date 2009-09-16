@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `logon_db_version`;
 CREATE TABLE `logon_db_version` (
-  `required_803_logon_db_version` bit(1) default NULL
+  `required_875_logon` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 
 --
@@ -208,6 +208,7 @@ CREATE TABLE `uptime` (
   `startstring` varchar(64) NOT NULL default '',
   `uptime` bigint(20) unsigned NOT NULL default '0',
   `maxplayers` smallint(5) unsigned NOT NULL default '0',
+  `revision` VARCHAR(255) NOT NULL DEFAULT 'RibonCore',
   PRIMARY KEY  (`realmid`,`starttime`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Uptime system';
 
