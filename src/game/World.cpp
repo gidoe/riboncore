@@ -69,6 +69,7 @@
 #include "Transports.h"
 #include "ProgressBar.h"
 
+#define _FULLVERSION (REVISION_NR)
 INSTANTIATE_SINGLETON_1( World );
 
 volatile bool World::m_stopEvent = false;
