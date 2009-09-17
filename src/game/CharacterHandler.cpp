@@ -45,7 +45,7 @@
 #include "ScriptCalls.h"
 #include "revision_nr.h"
 
-#define _FULLVERSION (_REVISION)
+#define _FULLVERSION (REVISION_NR)
 
 class LoginQueryHolder : public SqlQueryHolder
 {

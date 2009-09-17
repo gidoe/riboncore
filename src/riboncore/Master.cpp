@@ -51,7 +51,7 @@
 #include "sockets/SocketHandler.h"
 #include "sockets/ListenSocket.h"
 
-#define _FULLVERSION (_REVISION)
+#define _FULLVERSION (REVISION_NR)
 
 #ifdef WIN32
 #include "ServiceWin32.h"
@@ -507,7 +507,7 @@ bool Master::_StartDB()
     clearOnlineAccounts();
 
     ///- Insert version info into DB
-    WorldDatabase.PExecute("UPDATE version SET core_version = '%s', core_revision = '%s'", _FULLVERSION, _REVISION);
+    WorldDatabase.PExecute("UPDATE version SET core_version = '%s', core_revision = '%s'", _FULLVERSION, _FULLVERSION);
 
     sWorld.LoadDBVersion();
 

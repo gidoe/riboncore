@@ -31,7 +31,7 @@
 #include "revision_nr.h"
 #include "Util.h"
 
-#define _FULLVERSION (_REVISION)
+#define _FULLVERSION (REVISION_NR)
 
 bool ChatHandler::HandleHelpCommand(const char* args)
 {

@@ -37,7 +37,7 @@
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 
-#define _FULLVERSION (_REVISION)
+#define _FULLVERSION (REVISION_NR)
 
 #ifndef _RIBON_REALM_CONFIG
 # define _RIBON_REALM_CONFIG  "RibonLogon.conf"

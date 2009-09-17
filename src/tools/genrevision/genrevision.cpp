@@ -195,7 +195,7 @@ std::string generateHeader(char const* rev_str, char const* date_str, char const
     newData << " #define REVISION_ID \"" << rev_str << "\"" << std::endl;
     newData << " #define REVISION_DATE \"" << date_str << "\"" << std::endl;
     newData << " #define REVISION_TIME \"" << time_str << "\""<< std::endl;
-    newData << " #define _REVISION 386"<< std::endl;
+    newData << " #define REVISION_NR 387"<< std::endl;
     newData << "#endif // __REVISION_H__" << std::endl;
     return newData.str();
 }
