@@ -1,7 +1,7 @@
 ##########################################
 #  RibonCore worldd configuration file   #
 ##########################################
-ConfVersion=2009091322
+ConfVersion=2009091923
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -431,7 +431,7 @@ RaLogFile = "ra_commands.log"
 ArenaLogFile = "arena.log"
 LogColors = "13 8 14 10"
 EnableLogDB = 1
-DBLogLevel = 1
+DBLogLevel = 2
 LogDB.Char   = 0
 LogDB.GM     = 0
 LogDB.RA     = 0
