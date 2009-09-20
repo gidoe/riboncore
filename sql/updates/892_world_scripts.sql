@@ -1,5 +1,3 @@
-
-
 ALTER TABLE db_version CHANGE COLUMN required_890_world_scripts required_892_world_scripts bit;
 
 -- *Zum'Rah Area Trigger Script, Zum'Rah should become hostile when approached. By totoro.

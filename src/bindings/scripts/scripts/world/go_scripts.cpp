@@ -379,6 +379,38 @@ bool GOHello_go_tele_to_violet_stand(Player* pPlayer, GameObject* pGo)
     return true;
 }
 
+/*######
+## go_fel_crystalforge
+######*/
+
+enum
+{
+    SPELL_CREATE_1_FLASK_OF_BEAST   = 40964,
+    SPELL_CREATE_5_FLASK_OF_BEAST   = 40965,
+};
+
+bool GOHello_go_fel_crystalforge(Player* pPlayer, GameObject* pGO)
+{
+    pPlayer->CastSpell(pPlayer,SPELL_CREATE_1_FLASK_OF_BEAST,false);
+    return false;
+}
+
+/*######
+## go_bashir_crystalforge
+######*/
+
+enum
+{
+    SPELL_CREATE_1_FLASK_OF_SORCERER   = 40968,
+    SPELL_CREATE_5_FLASK_OF_SORCERER   = 40970,
+};
+
+bool GOHello_go_bashir_crystalforge(Player* pPlayer, GameObject* pGO)
+{
+    pPlayer->CastSpell(pPlayer,SPELL_CREATE_1_FLASK_OF_SORCERER,false);
+    return false;
+}
+
 void AddSC_go_scripts()
 {
     Script *newscript;
@@ -471,6 +503,16 @@ void AddSC_go_scripts()
     newscript = new Script;
     newscript->Name = "go_tele_to_violet_stand";
     newscript->pGOHello =           &GOHello_go_tele_to_violet_stand;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "go_fel_crystalforge";
+    newscript->pGOHello =           &GOHello_go_fel_crystalforge;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "go_bashir_crystalforge";
+    newscript->pGOHello =           &GOHello_go_bashir_crystalforge;
     newscript->RegisterSelf();
 }
 
