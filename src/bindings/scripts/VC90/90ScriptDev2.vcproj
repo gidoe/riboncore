@@ -424,6 +424,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\scripts\eastern_kingdoms\duskwood.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\scripts\eastern_kingdoms\eastern_plaguelands.cpp"
 					>
 				</File>
