@@ -296,7 +296,10 @@ bool OPvPWintergrasp::SetupOutdoorPvP()
         for(int i = 0; i < WG_REWARD_EVENT_MAX; ++i)
             m_customHonorReward[i] = sWorld.getConfig(CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR_0 + i);
 
-    RegisterZone(ZONE_WINTERGRASP);
+	// if server crashed while in battle there could be players with rank aura from last battle
+	CharacterDatabase.PExecute("DELETE FROM character_aura WHERE spell IN (%u,%u,%u)", SPELL_RECRUIT, SPELL_CORPORAL, SPELL_LIEUTENANT);
+
+	RegisterZone(ZONE_WINTERGRASP);
     return true;
 }
 
