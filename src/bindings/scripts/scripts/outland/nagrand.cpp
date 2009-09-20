@@ -553,7 +553,7 @@ enum
 static float m_afAmbushA[]= {-1568.805786, 8533.873047, 1.958};
 static float m_afAmbushB[]= {-1491.554321, 8506.483398, 1.248};
 
-struct TRINITY_DLL_DECL npc_maghar_captiveAI : public npc_escortAI
+struct RIBON_DLL_DECL npc_maghar_captiveAI : public npc_escortAI
 {
     npc_maghar_captiveAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
