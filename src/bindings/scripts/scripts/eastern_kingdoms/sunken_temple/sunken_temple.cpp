@@ -40,7 +40,7 @@ bool AreaTrigger_at_malfurion_stormrage(Player* pPlayer, AreaTriggerEntry *at)
         Unit* Malfurion = pPlayer->SummonCreature(15362, pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ(), -1. 52, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 100000);
         return false;
     }
-return false;
+    return false;
 }
 /*#####
 # go_atalai_statue
