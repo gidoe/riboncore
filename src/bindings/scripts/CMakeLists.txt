@@ -145,6 +145,9 @@ SET(ribonscript_LIB_SRCS
    scripts/eastern_kingdoms/sunwell_plateau/sunwell_plateau.cpp
    scripts/eastern_kingdoms/sunwell_plateau/def_sunwell_plateau.h
    scripts/eastern_kingdoms/sunwell_plateau/instance_sunwell_plateau.cpp
+   scripts/eastern_kingdoms/sunken_temple/def_sunken_temple.h
+   scripts/eastern_kingdoms/sunken_temple/instance_sunken_temple.cpp
+   scripts/eastern_kingdoms/sunken_temple/sunken_temple.cpp
    scripts/eastern_kingdoms/uldaman/boss_archaedas.cpp
    scripts/eastern_kingdoms/uldaman/instance_uldaman.cpp
    scripts/eastern_kingdoms/uldaman/boss_ironaya.cpp
