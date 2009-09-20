@@ -22,7 +22,6 @@
 #define RIBON_GRIDNOTIFIERS_H
 
 #include "ObjectGridLoader.h"
-#include "ByteBuffer.h"
 #include "UpdateData.h"
 #include <iostream>
 
@@ -1224,7 +1223,7 @@ namespace Ribon
             ~LocalizedPacketListDo()
             {
                 for(size_t i = 0; i < i_data_cache.size(); ++i)
-                    for(int j = 0; j < i_data_cache[i].size(); ++j)
+                    for(size_t j = 0; j < i_data_cache[i].size(); ++j)
                         delete i_data_cache[i][j];
             }
             void operator()( Player* p );
