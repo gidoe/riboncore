@@ -1,7 +1,7 @@
 ##########################################
 #  RibonCore worldd configuration file   #
 ##########################################
-ConfVersion=2009091923
+ConfVersion=2009092224
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -1173,9 +1173,9 @@ GM.AllowAchievementGain  = 1
 ###################################################################################################################
 
 Visibility.GroupMode = 0
-Visibility.Distance.Creature      = 999
+Visibility.Distance.Creature      = 165
 Visibility.Distance.Player        = 66
-Visibility.Distance.Object        = 999
+Visibility.Distance.Object        = 165
 Visibility.Distance.InFlight      = 66
 Visibility.Distance.Grey.Unit   = 1
 Visibility.Distance.Grey.Object = 10
