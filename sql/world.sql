@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
-  `required_903_world_scripts` bit(1) default NULL
+  `required_905_world_scripts` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 
 --
@@ -511,10 +511,10 @@ CREATE TABLE `creature_template` (
   `heroic_entry` mediumint(8) unsigned NOT NULL default '0',
   `unk1` int(11) unsigned NOT NULL default '0',
   `unk2` int(11) unsigned NOT NULL default '0',
-  `modelid_A` mediumint(8) unsigned NOT NULL default '0',
-  `modelid_A2` mediumint(8) unsigned NOT NULL default '0',
-  `modelid_H` mediumint(8) unsigned NOT NULL default '0',
-  `modelid_H2` mediumint(8) unsigned NOT NULL default '0',
+  `modelid1` mediumint(8) unsigned NOT NULL default '0',
+  `modelid2` mediumint(8) unsigned NOT NULL default '0',
+  `modelid3` mediumint(8) unsigned NOT NULL default '0',
+  `modelid4` mediumint(8) unsigned NOT NULL default '0',
   `name` char(100) NOT NULL default '0',
   `subname` char(100) default NULL,
   `IconName` char(100) default NULL,
@@ -1287,7 +1287,7 @@ CREATE TABLE `item_template` (
   `RequiredReputationFaction` smallint(5) unsigned NOT NULL default '0',
   `RequiredReputationRank` smallint(5) unsigned NOT NULL default '0',
   `maxcount` smallint(5) NOT NULL default '-1',
-  `stackable` smallint(5) NOT NULL default '1',
+  `stackable` int NOT NULL default '1',
   `ContainerSlots` tinyint(3) unsigned NOT NULL default '0',
   `StatsCount` tinyint(3) unsigned NOT NULL default '0',
   `stat_type1` tinyint(3) unsigned NOT NULL default '0',
