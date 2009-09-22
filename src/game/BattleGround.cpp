@@ -505,7 +505,7 @@ void BattleGround::SendPacketToAll(WorldPacket *packet)
         if (plr)
             plr->GetSession()->SendPacket(packet);
         else
-            sLog.outError(LANG_PLAYER_GUID_NOT_FOUND, GUID_LOPART(itr->first));
+            sLog.outError("BattleGround: Player (GUID: %u) not found!", GUID_LOPART(itr->first));
     }
 }
 
