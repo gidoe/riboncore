@@ -149,12 +149,17 @@ UPDATE `creature_template` SET `MovementType`=2 WHERE `entry` IN(15700,15701);
 UPDATE `creature` SET `spawnMask`=0 WHERE `guid`=86424;
 UPDATE `creature_template` SET `faction_A`=64,`faction_H`=64 WHERE `entry`=15707;
 DELETE `creature_questrelation` FROM `creature_questrelation` WHERE `id`=15452;
-DELETE `creature_involvedrelation` FROM `creature_involvedrelation` WHERE `id`=15452;
+
+DELETE FROM `creature_questrelation` WHERE `id`=15452;
 INSERT INTO `creature_questrelation` (`id`,`quest`) VALUES
 (15452,8520),(15452,8521);
+DELETE FROM `creature_involvedrelation` WHERE `id`=15452;
 INSERT INTO `creature_involvedrelation` (`id`,`quest`) VALUES
 (15452,8520),(15452,8521);
 UPDATE `quest_template` SET `PrevQuestId`=0 WHERE `entry`=8520;
+DELETE FROM `game_event_quest_condition` WHERE `quest` in (8494,8495,8499,8500,8503,8504,8509,8510,8511,8512,8514,
+8517,8518,8520,8521,8524,8525,8526,8527,8542,8543,8545,8546,8549,8550,8582,8583,8588,8589,8600,8601,8604,8605,8607,
+8608,8611,8612,8615,8616,8492,8493,8506,8516,8526,8529,8532,8533,8505,8581,8580,8515,8591,8590,8609,8613,8614,8528,8513,8523,8522,8610);
 INSERT INTO `game_event_quest_condition` (`quest`,`event_id`,`condition_id`,`num`) VALUES
 -- Alliance only quests
    (8495,22,1,20),(8494,22,1,20),
@@ -184,6 +189,7 @@ INSERT INTO `game_event_quest_condition` (`quest`,`event_id`,`condition_id`,`num
    (8516,22,23,10),(8515,22,23,10),(8591,22,23,10),(8590,22,23,10),
    (8523,22,24,20),(8522,22,24,20),(8610,22,24,20),(8609,22,24,20),
    (8529,22,25,20),(8528,22,25,20),(8614,22,25,20),(8613,22,25,20);
+DELETE FROM `game_event_condition` WHERE `event_id`=22;
 INSERT INTO `game_event_condition` (`event_id`,`condition_id`,`req_num`,`max_world_state_field`,`done_world_state_field`,`description`) VALUES
 -- Alliance reqs
    (22,1,28000,0,2000,'Iron'),
@@ -215,19 +221,24 @@ INSERT INTO `game_event_condition` (`event_id`,`condition_id`,`req_num`,`max_wor
    (22,25,17000,0,2024,'Spotted Yellowtail');
 
 -- Already in world_script_texts.sql
+DELETE FROM `game_event_npc_gossip` WHERE `guid` in (135161,135162);
 INSERT INTO `game_event_npc_gossip` (`guid`,`event_id`,`textid`) VALUES
    (135161,22,16000),
    (135162,22,16001);
+DELETE FROM `npc_text` WHERE `ID` in (16000,16001);
 INSERT INTO `npc_text` (`ID`,`text0_0`,`text0_1`,`prob0`,`lang0`) VALUES
    (16000,'The current situation in the front lines look like this:$B$B Iron $2000w % $B Thorium $2001w % $B Stranglekeep $2002w % $B Arthas Tears $2003w % $B Light Leather $2004w % $B Medium Leather $2005w % $B Linen Bandages $2006w % $B Silk Bandages $2007w % $B Rainbow Fin Albacore $2008w % $B Roast Raptor $2009w % $B$B Allongside with the Horde, we managed to gather: $B Copper $2020w % $B Purple Lotus $2021w % $B Thick Leather $2022w % $B Runecloth Bandage $2023w % $B Spotted Yellowtail $2024w. $B that is the current state of the effort, Aid us $N.','The current situation in the front lines look like this:$B$B Iron $2000w % $B Thorium $2001w % $B Stranglekeep $2002w % $B Arthas Tears $2003w % $B Light Leather $2004w % $B Medium Leather $2005w % $B Linen Bandages $2006w % $B Silk Bandages $2007w % $B Rainbow Fin Albacore $2008w % $B Roast Raptor $2009w % $B$B Allongside with the Horde, we managed to gather: $B Copper $2020w % $B Purple Lotus $2021w % $B Thick Leather $2022w % $B Runecloth Bandage $2023w % $B Spotted Yellowtail $2024w. $B that is the current state of the effort, Aid us $N.',100,0),
    (16001,'The current situation in the front lines look like this:$B$B Tin $2010w % $B Mithril $2011w % $B PeaceBloom $2012w % $B FireBloom $2013w % $B Heavy Leather $2014w % $B Rugged Leather $2015w % $B Wool Bandages $2016w % $B Mageweave Bandages $2017w % $B Lean Wolf Steaks $2018w % $B Baked Salmon $2019w % $B$B Allongside with the Alliance, we managed to gather: $B Copper $2020w % $B Purple Lotus $2021w % $B Thick Leather $2022w % $B Runecloth Bandage $2023w % $B Spotted Yellowtail $2024w. $B that is the current state of the effort, Aid us $N.','The current situation in the front lines look like this:$B$B Tin $2010w % $B Mithril $2011w % $B PeaceBloom $2012w % $B FireBloom $2013w % $B Heavy Leather $2014w % $B Rugged Leather $2015w % $B Wool Bandages $2016w % $B Mageweave Bandages $2017w % $B Lean Wolf Steaks $2018w % $B Baked Salmon $2019w % $B$B Allongside with the Alliance, we managed to gather: $B Copper $2020w % $B Purple Lotus $2021w % $B Thick Leather $2022w % $B Runecloth Bandage $2023w % $B Spotted Yellowtail $2024w. $B that is the current state of the effort, Aid us $N.',100,0);
+DELETE FROM `npc_gossip` WHERE `npc_guid` in (135161,135162);
 INSERT INTO `npc_gossip` (`npc_guid`,`textid`) VALUES
    (135161,16000),
    (135162,16001);
-   
+
 UPDATE `creature_template` SET `npcflag`=1 WHERE `entry`=15458;
+DELETE FROM `creature_questrelation` WHERE `id`=15535;
 INSERT INTO `creature_questrelation` (`id`,`quest`) VALUES
    (15535,8616);
+DELETE FROM `creature_involvedrelation` WHERE `id`=15535;
 INSERT INTO `creature_involvedrelation` (`id`,`quest`) VALUES
    (15535,8616);
 UPDATE `quest_template` SET `SpecialFlags`=1 WHERE `entry` IN
@@ -243,18 +254,25 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equ
 INSERT INTO `game_event` (`entry`,`start_time`,`end_time`,`occurence`,`length`,`description`,`world_event`) VALUES
    (76,'0000-00-00 00:00:00','2020-12-30 22:00:00',5184000,0,'AQ War Effort - Armies Gathered',1),
    (77,'0000-00-00 00:00:00','2020-12-30 22:00:00',5184000,720,'AQ War Effort - Gong Time',1);
+DELETE FROM `game_event_quest_condition` WHERE `quest`=8743;
 INSERT INTO `game_event_quest_condition` (`quest`,`event_id`,`condition_id`,`num`) VALUES
    (8743,76,1,1);
+DELETE FROM `game_event_condition` WHERE `event_id`=76;
 INSERT INTO `game_event_condition` (`event_id`,`condition_id`,`req_num`,`max_world_state_field`,`done_world_state_field`,`description`) VALUES
    (76,1,1,0,0,'First Banger!');
+DELETE FROM `game_event_gameobject_quest` WHERE `id` in (180717);
 INSERT INTO `game_event_gameobject_quest` (`id`,`quest`,`event`) VALUES
    (180717,8743,76),(180717,8743,77);
+DELETE FROM `gameobject_involvedrelation` WHERE `id`=180717;
 INSERT INTO `gameobject_involvedrelation` (`id`,`quest`) VALUES
    (180717,8743);
+DELETE FROM `gameobject_questrelation` WHERE `id`=180717;
 INSERT INTO `gameobject_questrelation` (`id`,`quest`) VALUES
    (180717,8743);
+DELETE FROM `game_event_gameobject` WHERE `guid` in (49451,100000,100001);
 INSERT INTO `game_event_gameobject` (`guid`,`event`) VALUES
    (100000,76),(100001,77),(49451,-77);
+DELETE FROM `gameobject` WHERE `guid` in (100000,100001);
 INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`) VALUES
    (100000,180717,1,1,1,-8069.05,1641.72,27.03,-1.53589,0,0,0.694658,-0.71934,900,100,1),
    (100001,180717,1,1,1,-8069.05,1641.72,27.03,-1.53589,0,0,0.694658,-0.71934,900,100,1);
@@ -267,10 +285,12 @@ UPDATE `gameobject_template` SET `type`=10 WHERE `entry`=180718;
 UPDATE `gameobject_template` SET `type`=2 WHERE `entry`=180717;
 UPDATE `gameobject_template` SET `flags`=0 WHERE `entry`=180717;
 -- AQ Doors
+DELETE FROM `game_event_gameobject` WHERE `guid` BETWEEN 100002 AND 100010;
 INSERT INTO `game_event_gameobject` (`guid`,`event`) VALUES
    (100002,22),(100003,22),(100004,22),
    (100005,75),(100006,75),(100007,75),
    (100008,76),(100009,76),(100010,76);
+DELETE FROM `gameobject` WHERE `guid` BETWEEN 100002 AND 100010;
 INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`) VALUES
    (100002,176148,1,1,1,-8130,1525,17.5,0,0,0,0,0,10,100,1),
    (100003,176147,1,1,1,-8130,1525,17.5,0,0,0,0,0,10,100,1),
@@ -281,6 +301,7 @@ INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`
    (100008,176148,1,1,1,-8130,1525,17.5,0,0,0,0,0,10,100,1),
    (100009,176147,1,1,1,-8130,1525,17.5,0,0,0,0,0,10,100,1),
    (100010,176146,1,1,1,-8130,1525,17.5,0,0,0,0,0,10,100,1);
+DELETE FROM `game_event_creature` WHERE `guid` BETWEEN 135164 AND 135200;
 INSERT INTO `game_event_creature` (`guid`,`event`) VALUES
    (135164,77),(135165,77),(135166,77),(135167,77),(135168,77),
    (135169,77),(135170,77),(135171,77),(135172,77),(135173,77),
@@ -290,6 +311,7 @@ INSERT INTO `game_event_creature` (`guid`,`event`) VALUES
    (135189,77),(135190,77),(135191,77),(135192,77),(135193,77),
    (135194,77),(135195,77),(135196,77),(135197,77),(135198,77),
    (135199,77),(135200,77);
+DELETE FROM `creature` WHERE `guid` BETWEEN 135164 AND 135200;
 INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`DeathState`,`MovementType`) VALUES
 -- General Rajaxx
    (135164,15341,1,1,1,0,0,-8130.05,1525.05,37.90,0,180,0,0,416375,0,0,0),
@@ -335,4 +357,3 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equ
    (135198,15537,1,1,1,0,0,-8245.27,1453.14,6.33,0.3,180,15,0,38844,0,0,1),
    (135199,15537,1,1,1,0,0,-8269.06,1480.93,5.85,0,180,15,0,38844,0,0,1),
    (135200,15537,1,1,1,0,0,-8319.30,1474.29,6.55,0,180,15,0,38844,0,0,1);
-
