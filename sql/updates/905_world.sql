@@ -1,4 +1,4 @@
-ALTER TABLE db_version CHANGE COLUMN required_903_world_scripts required_905_world_scripts bit;
+ALTER TABLE db_version CHANGE COLUMN required_903_world_scripts required_905_world bit;
 
 ALTER TABLE `item_template` MODIFY `stackable` int;
 
