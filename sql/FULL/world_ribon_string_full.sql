@@ -802,4 +802,14 @@ INSERT INTO `ribon_string` (`entry`, `content_default`, `content_loc1`, `content
 (10053, 'Take me to Crown Guard Tower.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (10054, 'Give me the flag, I''ll take it to the central beacon for the glory of the Alliance!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (10055, 'Give me the flag, I''ll take it to the central beacon for the glory of the Horde!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(11000, '|cffffff00[|c00077766Autobroadcast|cffffff00]: |cFFF222FF%s|r', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(11000, '|cffffff00[|c00077766Autobroadcast|cffffff00]: |cFFF222FF%s|r', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+
+(12000, 'BattleGround: Player (GUID: %u) not found!', NULL, NULL, 'BattleGround: Die Player (GUID: %u) wurde nicht gefunden!', NULL, NULL, NULL, NULL, NULL),
+(50010, 'Initialize data stores...', NULL, NULL, 'Initialisiere Datenspeicher...', NULL, NULL, NULL, NULL, NULL),
+(50011, 'Loading Script Names...', NULL, NULL, 'Lade Script-Namen...', NULL, NULL, NULL, NULL, NULL),
+(50012, 'Loading InstanceTemplate...', NULL, NULL, 'Lade Instanzvorlagen...', NULL, NULL, NULL, NULL, NULL),
+(50013, 'Loading SkillLineAbilityMultiMap Data...', NULL, NULL, 'Lade SkillLineAbilityMultiMap Daten...', NULL, NULL, NULL, NULL, NULL),
+(50014, 'Cleaning up instances...', NULL, NULL, 'Bereinige Instanzen...', NULL, NULL, NULL, NULL, NULL),
+(50015, 'Packing instances...', NULL, NULL, 'Verpacke Instanzen...', NULL, NULL, NULL, NULL, NULL),
+(50016, 'Loading Localization strings...', NULL, NULL, 'Lade Lokalisierungen...', NULL, NULL, NULL, NULL, NULL);
+

@@ -1261,13 +1261,13 @@ void World::SetInitialWorldSettings()
         ||m_configs[CONFIG_EXPANSION] && (
         !MapManager::ExistMapAndVMap(530,10349.6f,-6357.29f) || !MapManager::ExistMapAndVMap(530,-3961.64f,-13931.2f) ) )
     {
-        sLog.outError("Correct *.map files not found in path '%smaps' or *.vmap/*vmdir files in '%svmaps'. Please place *.map/*.vmap/*.vmdir files in appropriate directories or correct the DataDir value in the RibonCore.conf file.",m_dataPath.c_str(),m_dataPath.c_str());
+        sLog.outError("ENG: Correct *.map files not found in path '%smaps' or *.vmap/*vmdir files in '%svmaps'. Please place *.map/*.vmap/*.vmdir files in appropriate directories or correct the DataDir value in the RibonCore.conf file.\nDE: Es wurden keine *.map Dateien im Verzeichnis ''%smaps'' oder *.vmap/*vmdir Dateien im Verzeichnis ''%svmaps'' gefunden! Bitte erstelle/kopiere/verschiebe die benötigten *.map/*.vmap/*.vmdir Dateien in das dafür vorgesehene Verzeichnis oder korrigiere die Verzeichnisangaben in der RibonCore.conf Konfigurationsdatei!",m_dataPath.c_str(),m_dataPath.c_str());
         exit(1);
     }
 
     ///- Loading strings. Getting no records means core load has to be canceled because no error message can be output.
     sLog.outString();
-    sLog.outString( "Loading Ribon strings..." );
+    sLog.outString( "Loading Ribon strings... / Lade Ribon-String's..." );
     if (!objmgr.LoadRibonStrings())
         exit(1);                                            // Error message displayed in function already
 
@@ -1283,28 +1283,28 @@ void World::SetInitialWorldSettings()
     CharacterDatabase.PExecute("DELETE FROM corpse WHERE corpse_type = '0'");
 
     ///- Load the DBC files
-    sLog.outString("Initialize data stores...");
+    sLog.outString( objmgr.GetRibonStringForDBCLocale( LANG_WORLD_INITIALIZE_DATA_STORE ) );
     LoadDBCStores(m_dataPath);
     DetectDBCLang();
 
-    sLog.outString( "Loading Script Names...");
+    sLog.outString( objmgr.GetRibonStringForDBCLocale( LANG_WORLD_LOAD_SCRIPT_NAMES ) );
     objmgr.LoadScriptNames();
 
-    sLog.outString( "Loading InstanceTemplate..." );
+    sLog.outString( objmgr.GetRibonStringForDBCLocale( LANG_WORLD_LOAD_INSTANCE_TEMPLATE ) );
     objmgr.LoadInstanceTemplate();
 
-    sLog.outString( "Loading SkillLineAbilityMultiMap Data..." );
+    sLog.outString( objmgr.GetRibonStringForDBCLocale( LANG_WORLD_LOAD_SKILL_LINE_ABILITY ) );
     spellmgr.LoadSkillLineAbilityMap();
 
     ///- Clean up and pack instances
-    sLog.outString( "Cleaning up instances..." );
+    sLog.outString( objmgr.GetRibonStringForDBCLocale( LANG_WORLD_CLEANING_UP_INSTANCES ) );
     sInstanceSaveManager.CleanupInstances();                // must be called before `creature_respawn`/`gameobject_respawn` tables
 
-    sLog.outString( "Packing instances..." );
+    sLog.outString( objmgr.GetRibonStringForDBCLocale( LANG_WORLD_PACKING_INSTANCES ) );
     sInstanceSaveManager.PackInstances();
 
     sLog.outString();
-    sLog.outString( "Loading Localization strings..." );
+    sLog.outString( objmgr.GetRibonStringForDBCLocale( LANG_WORLD_LOAD_LOCALIZATION ) );
     objmgr.LoadCreatureLocales();
     objmgr.LoadGameObjectLocales();
     objmgr.LoadItemLocales();

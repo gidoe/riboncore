@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
-  `required_905_world` bit(1) default NULL
+  `required_915_world_ribon_string` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 
 --
@@ -3135,15 +3135,15 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `ribon_string` (
   `entry` mediumint(8) unsigned NOT NULL default '0',
-  `content_default` text NOT NULL,
-  `content_loc1` text,
-  `content_loc2` text,
-  `content_loc3` text,
-  `content_loc4` text,
-  `content_loc5` text,
-  `content_loc6` text,
-  `content_loc7` text,
-  `content_loc8` text,
+  `content_default` text NOT NULL COMMENT 'Content language default.',
+  `content_loc1` text COMMENT 'Content language 1.',
+  `content_loc2` text COMMENT 'Content language 2.',
+  `content_loc3` text COMMENT 'Content language 3.',
+  `content_loc4` text COMMENT 'Content language 4.',
+  `content_loc5` text COMMENT 'Content language 5.',
+  `content_loc6` text COMMENT 'Content language 6.',
+  `content_loc7` text COMMENT 'Content language 7.',
+  `content_loc8` text COMMENT 'Content language 8.',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
