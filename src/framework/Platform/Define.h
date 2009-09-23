@@ -156,6 +156,9 @@ typedef uint64 OBJECT_HANDLE;
 #  endif
 #endif
 
+#ifndef CLIENT_VER 
+#define CLIENT_VER 313 
+#endif 
 
 #endif //RIBON_DEFINE_H
 
