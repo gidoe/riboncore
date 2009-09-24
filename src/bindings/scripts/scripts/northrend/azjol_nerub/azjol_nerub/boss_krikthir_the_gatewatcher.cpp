@@ -64,10 +64,10 @@ enum
 
 struct RIBON_DLL_DECL boss_krik_thirAI : public ScriptedAI
 {
-    boss_krik_thirAI(Creature *c) : ScriptedAI(c)
+    boss_krik_thirAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        pInstance = c->GetInstanceData();
-        HeroicMode = c->GetMap()->IsHeroic();
+        pInstance = pCreature->GetInstanceData();
+        HeroicMode = pCreature->GetMap()->IsHeroic();
     }
 
     ScriptedInstance* pInstance;
