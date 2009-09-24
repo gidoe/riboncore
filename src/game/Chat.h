@@ -41,7 +41,7 @@ class ChatCommand
         ChatCommand *      ChildCommands;
 };
 
-class ChatHandler
+class RIBON_DLL_SPEC ChatHandler
 {
     public:
         explicit ChatHandler(WorldSession* session) : m_session(session) {}
