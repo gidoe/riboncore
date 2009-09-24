@@ -321,6 +321,6 @@ void AddSC_boss_skadi()
 
     newscript = new Script;
     newscript->Name="boss_skadi";
-    newscript->GetAI = GetAI_boss_skadi;
+    newscript->GetAI = &GetAI_boss_skadi;
     newscript->RegisterSelf();
 }

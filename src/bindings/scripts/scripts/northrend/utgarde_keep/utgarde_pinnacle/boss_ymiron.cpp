@@ -431,6 +431,6 @@ void AddSC_boss_ymiron()
 
     newscript = new Script;
     newscript->Name="boss_ymiron";
-    newscript->GetAI = GetAI_boss_ymiron;
+    newscript->GetAI = &GetAI_boss_ymiron;
     newscript->RegisterSelf();
 }
