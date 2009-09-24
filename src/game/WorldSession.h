@@ -45,7 +45,7 @@ class WorldSession;
 class QueryResult;
 class LoginQueryHolder;
 class CharacterHandler;
-class Gameobject;
+class GameObject;
 class AreaTableEntry;
 
 enum AccountDataType
