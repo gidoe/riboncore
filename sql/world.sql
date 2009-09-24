@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
-  `required_937_world_scripts` bit(1) default NULL
+  `required_940_world_utgarde_pinnacle` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 
 --
@@ -1909,7 +1909,7 @@ CREATE TABLE `npc_spellclick_spells` (
   `spell_id` int(10) unsigned NOT NULL COMMENT 'spell which should be casted ',
   `quest_start`        mediumint(8) unsigned NOT NULL COMMENT 'reference to quest_template',
   `quest_start_active` tinyint(1) unsigned NOT NULL default '0',
-  `quest_end`          mediumint(8) unsigned NOT NULL default '0',  
+  `quest_end`          mediumint(8) unsigned NOT NULL default '0',
   `cast_flags` tinyint(3) unsigned NOT NULL COMMENT 'first bit defines caster: 1=player, 0=creature; second bit defines target, same mapping as caster bit',
   `aura_required` int(11) unsigned NOT NULL default '0' COMMENT 'player without aura cant click',
   `aura_forbidden` int(11) unsigned NOT NULL default '0' COMMENT 'player with aura cant click',
