@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Boss Slava
-SDAuthor: Based on ckegg, modify by Thyros.
+SDAuthor: Based on ckegg's Script, modify by Thyros.
 SD%Complete: 70%
 SDComment: 
 SDCategory: Utgarde Keep: Utgarde Pinnacle
@@ -70,7 +70,6 @@ static Locations RitualChannelerLoc[]=
 /*######
 ## Boss Svala
 ######*/
-
 struct RIBON_DLL_DECL boss_svalaAI : public ScriptedAI
 {
     boss_svalaAI(Creature* pCreature) : ScriptedAI(pCreature)
@@ -321,7 +320,6 @@ struct RIBON_DLL_DECL boss_svala_sorrowgraveAI : public ScriptedAI
                     m_creature->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
 
                     m_creature->GetMap()->CreatureRelocation(m_creature, 296.632, -346.075, 120.85, 0.0f);
-                    //m_creature->SendMonsterMove(296.632, -346.075, 120.85, 0, MONSTER_MOVE_NONE, 0);
                     DoCast(target, SPELL_RITUAL_OF_THE_SWORD);
 
                     switch(rand()%5)
@@ -454,16 +452,16 @@ void AddSC_boss_svala()
 
     newscript = new Script;
     newscript->Name="boss_svala";
-    newscript->GetAI = GetAI_boss_svala;
+    newscript->GetAI = &GetAI_boss_svala;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name="boss_svala_sorrowgrave";
-    newscript->GetAI = GetAI_boss_svala_sorrowgrave;
+    newscript->GetAI = &GetAI_boss_svala_sorrowgrave;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name="mob_ritual_channeler";
-    newscript->GetAI = GetAI_mob_ritual_channeler;
+    newscript->GetAI = &GetAI_mob_ritual_channeler;
     newscript->RegisterSelf();
 }
