@@ -27,6 +27,7 @@
 
 #include "Common.h"
 #include "SharedDefines.h"
+#include "DBCStructure.h"
 
 class MailItemsInfo;
 struct ItemPrototype;
@@ -46,7 +47,6 @@ class QueryResult;
 class LoginQueryHolder;
 class CharacterHandler;
 class GameObject;
-class AreaTableEntry;
 
 enum AccountDataType
 {
