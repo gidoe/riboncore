@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2009 Ribon <http://www.dark-resurrection.de/wowsp/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,15 +17,11 @@
  */
 
 /* ScriptData
-SDName: boss_krikthir_the_gatewatcher
+SDName: Krikthir the Gatewatcher
 SD%Complete: 80 % 
 SDComment: Find in the future best timers and the event is not implemented.
 SDCategory: Azjol Nerub
 EndScriptData */
-
-/*** SQL START ***
-update creature_template set scriptname = 'boss_krik_thir' where entry = '';
-*** SQL END ***/
 
 #include "precompiled.h"
 #include "def_azjol_nerub.h"
@@ -122,7 +118,6 @@ struct RIBON_DLL_DECL boss_krik_thirAI : public ScriptedAI
     {
         if (!UpdateVictim())
             return;
-        
 
         if(SummonTimer < diff)
         {
@@ -156,6 +151,7 @@ struct RIBON_DLL_DECL boss_krik_thirAI : public ScriptedAI
 
         DoMeleeAttackIfReady();
     }
+
     void JustDied(Unit* killer)
     {
         DoScriptText(SAY_DEATH, m_creature);
@@ -163,12 +159,17 @@ struct RIBON_DLL_DECL boss_krik_thirAI : public ScriptedAI
         if (pInstance)
             pInstance->SetData(DATA_KRIKTHIR_THE_GATEWATCHER_EVENT, DONE);
     }
+
     void KilledUnit(Unit *victim)
     {
         if (victim == m_creature)
             return;
 
-        DoScriptText(RAND(SAY_SLAY_1,SAY_SLAY_2), m_creature);
+        switch(rand()%2)
+        {
+            case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
+            case 1: DoScriptText(SAY_SLAY_2, m_creature); break;
+        }
     }
 
     void JustSummoned(Creature* summoned)
@@ -180,7 +181,7 @@ struct RIBON_DLL_DECL boss_krik_thirAI : public ScriptedAI
 
 CreatureAI* GetAI_boss_krik_thir(Creature* pCreature)
 {
-    return new boss_krik_thirAI (pCreature);
+    return new boss_krik_thirAI(pCreature);
 }
 
 void AddSC_boss_krik_thir()
