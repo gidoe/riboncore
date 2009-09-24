@@ -458,6 +458,11 @@ struct RIBON_DLL_DECL npc_dark_fiendAI : public ScriptedAI
         m_creature->addUnitState(UNIT_STAT_STUNNED);
     }
 
+	void InitializeAI()
+	{
+		m_creature->SetSpeed(MOVE_RUN, 0.5f, true);
+	}
+
     void SpellHit(Unit* caster, const SpellEntry* Spell)
     {
         for(uint8 i = 0; i < 3; ++i)

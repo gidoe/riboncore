@@ -78,6 +78,10 @@ enum Event
 #define SPELL_CHAINS_OF_KELTHUZAD   28410 //28408 script effect
 #define SPELL_BERSERK               28498
 
+#define SPELL_WASTE_DARK_BLAST		28457 // Cast spell if it reaches platform
+#define SPELL_WEAVER_WAIL_OF_SOULS	28459 // Cast spell if it reaches platform
+#define H_SPELL_WEAVER_WAIL_OF_SOULS	55714 // Heroic spell
+
 #define MOB_WASTE                   16427 // Soldiers of the Frozen Wastes
 #define MOB_ABOMINATION             16428 // Unstoppable Abominations
 #define MOB_WEAVER                  16429 // Soul Weavers
@@ -284,11 +288,86 @@ CreatureAI* GetAI_boss_kelthuzadAI(Creature* pCreature)
     return new boss_kelthuzadAI (pCreature);
 }
 
+struct RIBON_DLL_DECL mob_wasteAI : public ScriptedAI
+{
+    mob_wasteAI(Creature *c) : ScriptedAI(c) {}
+
+	void InitializeAI()
+	{
+		m_creature->SetSpeed(MOVE_RUN, 0.5f, true);
+	}
+
+	void UpdateAI(const uint32 diff)
+	{
+		if (!UpdateVictim())
+			return;
+	
+		if (m_creature->IsWithinDist(m_creature->getVictim(), 5))
+		{
+			DoCastAOE(SPELL_WASTE_DARK_BLAST, false);
+			m_creature->DealDamage(m_creature, m_creature->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            m_creature->RemoveCorpse();
+		}
+	}
+};
+
+CreatureAI* GetAI_mob_wasteAI(Creature* pCreature)
+{
+    return new mob_wasteAI (pCreature);
+}
+
+struct RIBON_DLL_DECL mob_weaverAI : public ScriptedAI
+{
+    mob_weaverAI(Creature *c) : ScriptedAI(c) {}
+
+	uint32 Wailofsouls_Timer;
+
+	void Reset()
+	{
+		Wailofsouls_Timer = 3000; // Don't know blizzlike value - just prevent from spamming spell
+	}
+
+	void InitializeAI()
+	{
+		m_creature->SetSpeed(MOVE_RUN, 0.5f, true);
+	}
+
+	void UpdateAI(const uint32 diff)
+	{
+		if (!UpdateVictim())
+			return;
+	
+		if (m_creature->IsWithinDist(m_creature->getVictim(), 5))
+		{
+			if (Wailofsouls_Timer < diff)
+			{
+				DoCastAOE(HeroicMode ? H_SPELL_WEAVER_WAIL_OF_SOULS : SPELL_WEAVER_WAIL_OF_SOULS, false);
+				Wailofsouls_Timer = 3000;
+			}else Wailofsouls_Timer -= diff;
+		}
+	}
+};
+
+CreatureAI* GetAI_mob_weaverAI(Creature* pCreature)
+{
+    return new mob_weaverAI (pCreature);
+}
+
 void AddSC_boss_kelthuzad()
 {
     Script *newscript;
     newscript = new Script;
     newscript->Name="boss_kelthuzad";
     newscript->GetAI = &GetAI_boss_kelthuzadAI;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name="mob_waste";
+    newscript->GetAI = &GetAI_mob_wasteAI;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name="mob_weaver";
+    newscript->GetAI = &GetAI_mob_weaverAI;
     newscript->RegisterSelf();
 }
