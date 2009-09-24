@@ -1,4 +1,4 @@
-﻿-- Up to RC 856
+-- Up to RC 934
 -- 
 -- ribonscript_script_texts.sql Contains data for table `script_texts` mainly used in C++ parts.
 -- valid entries for table are between -1000000 and -1999999
@@ -303,7 +303,7 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`content_loc1`
    (10181,-1000358,'Look out! We''re under attack!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,0,0,'KAYA_AMBUSH'),
    (17900,-1000359,'Thank you for helping me. I know my way back from here.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,0,0,'KAYA_END'),
    (17969,-1000360,'The strands of LIFE have been severed! The Dreamers must be avenged!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,' ysondre SAY_AGGRO'),
-   (17969,-1000361,'Come forth, ye Dreamers � and claim your vengeance!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,' ysondre SAY_SUMMONDRUIDS'),
+   (17969,-1000361,'Come forth, ye Dreamers   and claim your vengeance!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,' ysondre SAY_SUMMONDRUIDS'),
    (17969,-1000362,'Let''s go $N. I am ready to reach Whitereach Post.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,1,0,'paoka SAY_START'),
    (17969,-1000363,'Now this looks familiar. If we keep heading east, I think we can... Ahh, Wyvern on the attack!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,1,0,'paoka SAY_WYVERN'),
    (17969,-1000364,'Thanks a bunch... I can find my way back to Whitereach Post from here. Be sure to talk with Motega Firemane; perhaps you can keep him from sending me home.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,1,0,'paoka SAY_COMPLETE'),
@@ -1632,6 +1632,46 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`content_loc1`
    (24201,-1574019,'You may serve me yet.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,13202,1,0,0,'dalronn YELL_DALRONN_KILL'),
    (24201,-1574020,'Skarvald, you incompetent slug! Return and make yourself useful!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,13203,1,0,0,'dalronn YELL_DALRONN_SKA_DIEDFIRST'),
 
+-- -1 575 000 UTGARDE PINNACLE
+   (26687,-1575000, 'What this place? I will destroy you!',13464,1,0, 'palehoof SAY_AGGRO'),
+   (26687,-1575001, 'You die! That what master wants!',13465,1,0, 'palehoof SAY_SLAY_1'),
+   (26687,-1575002, 'An easy task!',13466,1,0, 'palehoof SAY_SLAY_2'),
+   (26687,-1575003, '...',13467,1,0, 'palehoof SAY_DEATH'),
+   (26693,-1575004, 'What mongrels dare intrude here? Look alive, my brothers! A feast for the one that brings me their heads!',13497,1,0, 'skadi SAY_AGGRO'),
+   (26693,-1575005, 'Mjor Na Ul Kaval!',13503,1,0, 'skadi SAY_KILL_1'),
+   (26693,-1575006, 'Not so brash now, are you?',13504,1,0, 'skadi SAY_KILL_2'),
+   (26693,-1575007, 'I\'ll mount your skull from the highest tower!',13505,1,0, 'skadi SAY_KILL_3'),
+   (26693,-1575008, 'ARGH! You call that... an attack? I\'ll... show... aghhhh...',13506,1,0, 'skadi SAY_DEATH'),
+   (26693,-1575009, 'You motherless knaves! Your corpses will make fine morsels for my new drake!',13507,1,0, 'skadi SAY_DRAKE_DEATH'),
+   (26693,-1575010, 'I ask for ... to kill them, yet all I get is feeble whelps! By Ye.. SLAUGHTER THEM!',13501,1,0, 'skadi SAY_DRAKE_HIT_1'),
+   (26693,-1575011, 'If one more harpoon touches my drake I\'ll flae my miserable heins.',13502,1,0, 'skadi SAY_DRAKE_HIT_2'),
+   (26693,-1575012, 'Sear them to the bone!',13498,1,0, 'skadi SAY_DRAKE_BREATH_1'),
+   (26693,-1575013, 'Go now! Leave nothing but ash in your wake!',13499,1,0, 'skadi SAY_DRAKE_BREATH_2'),
+   (26693,-1575014, 'Cleanse our sacred halls with flame!',13500,1,0, 'skadi SAY_DRAKE_BREATH_3'),
+   (26668,-1575015, 'I will vanquish your soul!',13842,1,0, 'svala SAY_AGGRO'),
+   (26668,-1575016, 'You were a fool to challenge the power of the Lich King!',13845, 1,0,'svala SAY_SLAY_1'),
+   (26668,-1575017, 'Your will is done, my king.',13847,1,0, 'svala SAY_SLAY_2'),
+   (26668,-1575018, 'Another soul for my master.',13848, 1,0,'svala SAY_SLAY_3'),
+   (26668,-1575019, 'Nooo! I did not come this far... to...',13855,1,0, 'svala SAY_DEATH'),
+   (26668,-1575020, 'Your death approaches.',13850,1,0, 'svala SAY_SACRIFICE_PLAYER_1'),
+   (26668,-1575021, 'Go now to my master.',13851,1,0, 'svala SAY_SACRIFICE_PLAYER_2'),
+   (26668,-1575022, 'Your end is inevitable.',13852,1,0, 'svala SAY_SACRIFICE_PLAYER_3'),
+   (26668,-1575023, '...',13853,1,0, 'svala SAY_SACRIFICE_PLAYER_4'),
+   (26668,-1575024, 'Any last words?',13854,1,0, 'svala SAY_SACRIFICE_PLAYER_5'),
+   (26668,-1575025, 'My liege! I have done as you asked, and now beseech you for your blessing!',13856,1,0, 'svala SAY_SAY_DIALOG_WITH_ARTHAS_1'),
+   (26668,-1575026, 'The sensation is... beyond my imagining. I am yours to command, my king.',13857,1,0, 'svala SAY_SAY_DIALOG_WITH_ARTHAS_2'),
+   (26668,-1575027, 'I will be happy to slaughter them in your name! Come, enemies of the Scourge! I will show you the might of the Lich King!',13858,1,0, 'svala SAY_SAY_DIALOG_WITH_ARTHAS_3'),
+   (26861,-1575028, 'You invade my home and then dare to challenge me? I will tear the hearts from your chests and offer them as gifts to the death god! Rualg nja gaborr!',13609, 1,0,'ymiron SAY_AGGRO'),
+   (26861,-1575029, 'Your death is only the beginning!',13614,1,0, 'ymiron SAY_SLAY_1'),
+   (26861,-1575030, 'You have failed your people!',13615, 1,0,'ymiron SAY_SLAY_2'),
+   (26861,-1575031, 'There is a reason I am king!',13616, 1,0,'ymiron SAY_SLAY_3'),
+   (26861,-1575032, 'Bleed no more!',13617, 1,0,'ymiron SAY_SLAY_4'),
+   (26861,-1575033, 'What... awaits me... now?',13618,1,0, 'ymiron SAY_DEATH'),
+   (26861,-1575034, 'Bjorn of the Black Storm! Honor me now with your presence!',13610,1,0, 'ymiron SAY_SUMMON_BJORN'),
+   (26861,-1575035, 'Haldor of the rocky cliffs, grant me your strength!',13611, 1,0,'ymiron SAY_SUMMON_HALDOR'),
+   (26861,-1575036, 'Ranulf of the screaming abyss, snuff these maggots with darkest night!',13612,1,0, 'ymiron SAY_SUMMON_RANULF'),
+   (26861,-1575037, 'Tor of the Brutal Siege! Bestow your might upon me!',13613,1,0, 'ymiron SAY_SUMMON_TORGYN');
+
 -- -1 576 000 THE NEXUS: THE NEXUS
    (26731,-1576000,'You know what they say about curiosity.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,13319,1,0,0,'grand magus telestra SAY_AGGRO'),
    (26731,-1576001,'Death becomes you!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,13324,1,0,0,'grand magus telestra SAY_KILL'),
@@ -2174,7 +2214,7 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`content_loc1`
    (29173,-1609283,'collapses.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,2,0,0,'Highlord Darion Mograine'),
    (29173,-1609284,'charges towards the Lich King, Ashbringer in hand and strikes the Lich King.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,2,0,0,'Highlord Tirion Fordring'),
    (29173,-1609285,'disappears. Tirion walks over to where Darion lay',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,2,0,0,'The Lich King'),
-   (29173,-1609286,'Light washes over the chapel  the Light of Dawn is uncovered.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,2,0,0,'');
+   (29173,-1609286,'Light washes over the chapel ? the Light of Dawn is uncovered.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,2,0,0,'');
 
 DELETE FROM `creature_ai_scripts` WHERE `creature_id` in (26796,26798,26929,26928,26930);
 INSERT INTO `creature_ai_scripts` VALUES 

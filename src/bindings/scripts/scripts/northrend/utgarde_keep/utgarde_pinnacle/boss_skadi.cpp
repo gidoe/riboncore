@@ -1,14 +1,27 @@
-/* Script Data Start
-SDName: Boss skadi
-SDAuthor: LordVanMartin
-SD%Complete:
-SDComment:
-SDCategory:
-Script Data End */
+/* Copyright (C) 2006 - 2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
-/*** SQL START ***
-update creature_template set scriptname = 'boss_skadi' where entry = '';
-*** SQL END ***/
+/* ScriptData
+SDName: Boss skadi
+SDAuthor: Based on ckegg's Script, modify by Thyros.
+SD%Complete: 50%
+SDComment: Missing breath
+SDCategory: Utgarde Pinnacle
+EndScriptData */
+
 #include "precompiled.h"
 #include "def_pinnacle.h"
 
@@ -16,36 +29,32 @@ update creature_template set scriptname = 'boss_skadi' where entry = '';
 //Phase 1 Kill the Skadi drake mount with harppons launcher
 //Phase 2 Kill the Skadi
 
-//Skadi Spells
-#define SPELL_CRUSH                              50234
-#define H_SPELL_CRUSH                            59330
-#define SPELL_POISONED_SPEAR                     50225
-#define H_SPELL_POISONED_SPEAR                   59331
-#define SPELL_WHIRLWIND                          50228 //random target,  but not the tank approx. every 20s
-#define H_SPELL_WHIRLWIND                        59332
+enum
+{
+    SAY_AGGRO                             = -1575004,
+    SAY_KILL_1                            = -1575005,
+    SAY_KILL_2                            = -1575006,
+    SAY_KILL_3                            = -1575007,
+    SAY_DEATH                             = -1575008,
+    SAY_DRAKE_DEATH                       = -1575009,
+    SAY_DRAKE_HIT_1                       = -1575010,
+    SAY_DRAKE_HIT_2                       = -1575011,
+    SAY_DRAKE_BREATH_1                    = -1575012,
+    SAY_DRAKE_BREATH_2                    = -1575013,
+    SAY_DRAKE_BREATH_3                    = -1575014,
 
-//Spawned creatures
-#define CREATURE_YMIRJAR_WARRIOR                 26690
-#define CREATURE_YMIRJAR_WITCH_DOCTOR            26691
-#define CREATURE_YMIRJAR_HARPOONER               26692
+    SPELL_CRUSH_N                         = 50234,
+    SPELL_CRUSH_H                         = 59330,
+    SPELL_POISONED_SPEAR_N                = 50225,
+    SPELL_POISONED_SPEAR_H                = 59331,
+    SPELL_WHIRLWIND_N                     = 50228, //random target,  but not the tank approx. every 20s
+    SPELL_WHIRLWIND_H                     = 59332, //random target,  but not the tank approx. every 20s
 
-#define DATA_MOUNT                               27043
+    NPC_YMIRJAR_WARRIOR                   = 26690,
+    NPC_YMIRJAR_WITCH_DOCTOR              = 26691,
+    NPC_YMIRJAR_HARPOONER                 = 26692
+};
 
-//not in db
-//Yell
-#define SAY_AGGRO                             -1575004
-#define SAY_KILL_1                            -1575005
-#define SAY_KILL_2                            -1575006
-#define SAY_KILL_3                            -1575007
-#define SAY_DEATH                             -1575008
-#define SAY_DRAKE_DEATH                       -1575009
-#define SAY_DRAKE_HIT_1                       -1575010
-#define SAY_DRAKE_HIT_2                       -1575011
-#define SAY_DRAKE_BREATH_1                    -1575012
-#define SAY_DRAKE_BREATH_2                    -1575013
-#define SAY_DRAKE_BREATH_3                    -1575014
-
-//Spawn locations
 struct Locations
 {
     float x, y, z;
@@ -61,190 +70,241 @@ static Locations SpawnLoc[]=
     {468.931, -513.555, 104.723}
 };
 
-enum CombatPhase
-{
-    FLYING,
-    SKADI
-};
-
 struct RIBON_DLL_DECL boss_skadiAI : public ScriptedAI
 {
-    boss_skadiAI(Creature *c) : ScriptedAI(c)
+    boss_skadiAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
-        pInstance = c->GetInstanceData();
+    	m_pInstance = pCreature->GetInstanceData();
+    	m_bIsHeroic = pCreature->GetMap()->IsHeroic();
+        Reset();
     }
 
-    uint32 uiCrushTimer;
-    uint32 uiPoisonedSpearTimer;
-    uint32 uiWhirlwindTimer;
-    uint32 uiMovementTimer;
-    uint32 uiWaypointId;
-    uint32 uiSpawnCounter;
+    ScriptedInstance *m_pInstance;
 
-    CombatPhase Phase;
+    bool m_bIsHeroic;
 
-    ScriptedInstance* pInstance;
+    uint8 m_uiphase;
+    uint8 m_uiSpawn_counter;
+
+    uint32 m_uiWaypointId;
+
+    uint32 m_uiCrush_timer;
+    uint32 m_uiSpear_timer;
+    uint32 m_uiWhirlwind_timer;
+    uint32 m_uiMoveNext_Timer;
+    uint32 m_uiPlayerCheck_Timer;
+
+    uint64 m_uiGrauf;
 
     void Reset()
     {
-        uiCrushTimer = 8000;
-        uiPoisonedSpearTimer = 10000;
-        uiWhirlwindTimer = 20000;
-        uiSpawnCounter = 0;
+        m_uiphase = 0;
+        m_uiSpawn_counter = 0;
 
-        uiWaypointId = 0;
-
-        Phase = SKADI;
+        m_uiWaypointId = 0;
+        m_uiCrush_timer = 8000;
+        m_uiSpear_timer = 10000;
+        m_uiWhirlwind_timer = 20000;
+        m_uiMoveNext_Timer = 25000;
+        m_uiPlayerCheck_Timer = 1000;
 
         m_creature->Unmount();
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
-        if (pInstance)
-            pInstance->SetData(DATA_SKADI_THE_RUTHLESS_EVENT, NOT_STARTED);
+        if(m_pInstance)
+            m_pInstance->SetData(DATA_SKADI_THE_RUTHLESS_EVENT, NOT_STARTED);
     }
 
-    void EnterCombat(Unit* who)
+    void AttackStart(Unit* pWho)
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        if (m_uiphase < 2)
+            return;
 
-        m_creature->Mount(DATA_MOUNT);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        m_creature->GetMotionMaster()->MovePoint(uiWaypointId, 340.259, -510.541, 120.869);
+        if (!pWho || pWho == m_creature)
+            return;
 
-        Phase = FLYING;
-
-        if (pInstance)
-            pInstance->SetData(DATA_SKADI_THE_RUTHLESS_EVENT, IN_PROGRESS);
-    }
-
-    void UpdateAI(const uint32 diff)
-    {
-        switch(Phase)
+        if (m_creature->Attack(pWho, true))
         {
-            case FLYING:
-                if (uiMovementTimer < diff)
-                {
-                    switch(uiWaypointId)
-                    {
-                        case 0: m_creature->GetMotionMaster()->MovePoint(uiWaypointId, 340.259, -510.541, 120.869); break;
-                        case 1: m_creature->GetMotionMaster()->MovePoint(uiWaypointId, 472.977, -513.636, 120.869); break;
-                        case 200:
-                            m_creature->GetMotionMaster()->Clear();
-                            m_creature->Unmount();
-                            Phase = SKADI;
-                            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                            Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
-                            while (pTarget && pTarget->GetTypeId() != TYPEID_PLAYER)
-                                pTarget = SelectUnit(SELECT_TARGET_RANDOM,0);
-                            if (pTarget)
-                                AttackStart(pTarget);
-                            break;
-                    }
-                } else uiMovementTimer -= diff;
-                break;
-            case SKADI:
-                //Return since we have no target
-                if (!UpdateVictim())
-                    return;
-
-                if (uiCrushTimer < diff)
-                {
-                    DoCast(m_creature->getVictim(), HeroicMode ? H_SPELL_CRUSH : SPELL_CRUSH);
-                    uiCrushTimer = 8000;
-                } else uiCrushTimer -= diff;
-
-                if (uiPoisonedSpearTimer < diff)
-                {
-                    Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
-                    while (pTarget && pTarget->GetTypeId() != TYPEID_PLAYER)
-                    {
-                      SelectUnit(SELECT_TARGET_RANDOM, 0);
-                    }
-                    if (pTarget)
-                        DoCast(pTarget, HeroicMode ? H_SPELL_POISONED_SPEAR : SPELL_POISONED_SPEAR);
-                    uiPoisonedSpearTimer = 10000;
-                } else uiPoisonedSpearTimer -= diff;
-
-                if (uiWhirlwindTimer < diff)
-                {
-                    Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
-                    while (pTarget && (pTarget->GetTypeId() != TYPEID_PLAYER || pTarget == m_creature->getVictim()))
-                    {
-                      SelectUnit(SELECT_TARGET_RANDOM, 0);
-                    }
-                    if (pTarget)
-                        m_creature->CastSpell(pTarget, HeroicMode ? H_SPELL_WHIRLWIND : SPELL_WHIRLWIND, false);
-                } else uiWhirlwindTimer = 20000;
-
-                DoMeleeAttackIfReady();
-                break;
+            //m_creature->SetInCombatWithZone();
+            DoStartMovement(pWho);
         }
     }
 
-    void JustDied(Unit* killer)
+    void MoveInLineOfSight(Unit* pWho)
     {
-        DoScriptText(SAY_DEATH, m_creature);
+    	if (!pWho)
+    	    return;
 
-        if (pInstance)
-            pInstance->SetData(DATA_SKADI_THE_RUTHLESS_EVENT, DONE);
-    }
+        if (pWho->isTargetableForAttack() && m_creature->IsHostileTo(pWho) &&
+        	!m_uiphase && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 20))
+        {
+            if(m_pInstance)
+                m_pInstance->SetData(DATA_SKADI_THE_RUTHLESS_EVENT, IN_PROGRESS);
 
-    void KilledUnit(Unit *victim)
+            DoScriptText(SAY_AGGRO, m_creature);
+
+            m_creature->SetInCombatWithZone();
+            m_creature->Mount(27043);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            /*if (m_creature->HasUnitMovementFlags(MOVEMENTFLAG_WALK_MODE))
+                m_creature->RemoveUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);*/
+            m_creature->GetMotionMaster()->MovePoint(m_uiWaypointId, 340.259, -510.541, 120.869);
+        	m_uiphase = 1;
+        }
+	}
+
+    void MovementInform(uint32 uiType, uint32 uiPointId)
     {
-        DoScriptText(RAND(SAY_KILL_1,SAY_KILL_2,SAY_KILL_3), m_creature);
-    }
-
-    void MovementInform(uint32 type, uint32 id)
-    {
-        if(type != POINT_MOTION_TYPE)
+        if(uiType != POINT_MOTION_TYPE)
                 return;
 
-        if (HeroicMode ? (uiSpawnCounter >= 4) : (uiSpawnCounter >= 5))
+        if ((m_uiSpawn_counter >= 4 && !m_bIsHeroic) || (m_uiSpawn_counter >= 5 && m_bIsHeroic))
         {
-            uiWaypointId = 200;
-            uiMovementTimer = 3000;
+            m_uiWaypointId = 200;
+            m_uiMoveNext_Timer = 3000;
         }
         else
         {
-            switch(id)
+            switch(uiPointId)
             {
                 case 0:
-                    SpawnMobs(uiSpawnCounter);
-                    uiWaypointId = 1;
-                    ++uiSpawnCounter;
-                    uiMovementTimer = 3000;
+                    SpawnMobs(m_uiSpawn_counter);
+                    m_uiWaypointId = 1;
+                    m_uiSpawn_counter++;
+                    m_uiMoveNext_Timer = 3000;
                     break;
                 case 1:
-                    SpawnMobs(uiSpawnCounter);
-                    uiWaypointId = 0;
-                    ++uiSpawnCounter;
-                    uiMovementTimer = 3000;
+                    SpawnMobs(m_uiSpawn_counter);
+                    m_uiWaypointId = 0;
+                    m_uiSpawn_counter++;
+                    m_uiMoveNext_Timer = 3000;
                     break;
             }
         }
     }
 
-    void SpawnMobs(uint32 spot)
+    void UpdateAI(const uint32 uiDiff)
     {
-        uint8 uiMaxSpawn = (HeroicMode ? 6 : 5);
-        for(uint8 i = 0; i < uiMaxSpawn; ++i)
+        if (m_uiphase == 0)
+            return;
+        // Flying & adds
+        else if (m_uiphase == 1)
+        {
+            if (m_uiPlayerCheck_Timer < uiDiff)
+            {
+                Map *map = m_creature->GetMap();
+                if (map->IsDungeon() && m_pInstance->GetData(DATA_SKADI_THE_RUTHLESS_EVENT) == IN_PROGRESS)
+                {
+                    Map::PlayerList const &PlayerList = map->GetPlayers();
+
+                    if (PlayerList.isEmpty())
+                        return;
+
+                    bool bIsAlive = false;
+                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                        if (i->getSource()->isAlive() && i->getSource()->isTargetableForAttack())
+                        	 bIsAlive = true;
+
+                    if (!bIsAlive)
+                    {
+                        m_creature->GetMotionMaster()->Clear(false);
+                        m_creature->StopMoving();
+                        EnterEvadeMode();
+                        return;
+                    }
+                }
+                m_uiPlayerCheck_Timer = 1000;
+            } else m_uiPlayerCheck_Timer -= uiDiff;
+
+            if (m_uiMoveNext_Timer < uiDiff)
+            {
+                switch(m_uiWaypointId)
+                {
+                    case 0: m_creature->GetMotionMaster()->MovePoint(m_uiWaypointId, 340.259, -510.541, 120.869); break;
+                    case 1: m_creature->GetMotionMaster()->MovePoint(m_uiWaypointId, 472.977, -513.636, 120.869); break;
+                    case 200:
+                        m_creature->GetMotionMaster()->Clear();
+                        m_creature->Unmount();
+                        m_uiphase = 2;
+                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        AttackStart(SelectUnit(SELECT_TARGET_RANDOM, 0));
+                    break;
+                }
+                m_uiMoveNext_Timer = 25000; // prevent stuck
+            } else m_uiMoveNext_Timer -= uiDiff;
+        }
+        // Land & attack
+        else if (m_uiphase == 2)
+        {
+            //Return since we have no target
+            if (!m_creature->getVictim())
+            {
+                EnterEvadeMode();
+                return;
+            }
+
+            if (m_uiCrush_timer < uiDiff)
+            {
+                DoCast(m_creature->getVictim(), m_bIsHeroic ? SPELL_CRUSH_H : SPELL_CRUSH_N);
+                m_uiCrush_timer = 8000;
+            } else m_uiCrush_timer -= uiDiff;
+
+            if (m_uiSpear_timer < uiDiff)
+            {
+                DoCast(SelectUnit(SELECT_TARGET_RANDOM, 0), m_bIsHeroic ? SPELL_POISONED_SPEAR_H : SPELL_POISONED_SPEAR_N);
+                m_uiSpear_timer = 10000;
+            } else m_uiSpear_timer -= uiDiff;
+
+            if (m_uiWhirlwind_timer < uiDiff)
+            {
+                DoCast(SelectUnit(SELECT_TARGET_RANDOM, 0), m_bIsHeroic ? SPELL_WHIRLWIND_H : SPELL_WHIRLWIND_N);
+                m_uiWhirlwind_timer = 20000;
+            } else m_uiWhirlwind_timer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+    }
+
+    void JustDied(Unit* pKiller)
+    {
+        DoScriptText(SAY_DEATH, m_creature);
+
+        if(m_pInstance)
+            m_pInstance->SetData(DATA_SKADI_THE_RUTHLESS_EVENT, DONE);
+    }
+
+    void KilledUnit(Unit* pVictim)
+    {
+        if(pVictim == m_creature)
+            return;
+        switch(rand()%3)
+        {
+            case 0: DoScriptText(SAY_KILL_1, m_creature);break;
+            case 1: DoScriptText(SAY_KILL_2, m_creature);break;
+            case 2: DoScriptText(SAY_KILL_3, m_creature);break;
+        }
+    }
+
+    void SpawnMobs(uint32 uiSpot)
+    {
+        uint8 maxSpawn = (m_bIsHeroic ? 6 : 5);
+        for(uint8 i = 0; i < maxSpawn; ++i)
         {
             Creature* pTemp;
             switch (rand()%3)
             {
-                case 0: pTemp = m_creature->SummonCreature(CREATURE_YMIRJAR_WARRIOR, SpawnLoc[spot].x+rand()%5, SpawnLoc[spot].y+rand()%5, SpawnLoc[spot].z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000); break;
-                case 1: pTemp = m_creature->SummonCreature(CREATURE_YMIRJAR_WITCH_DOCTOR, SpawnLoc[spot].x+rand()%5, SpawnLoc[spot].y+rand()%5, SpawnLoc[spot].z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000); break;
-                case 2: pTemp = m_creature->SummonCreature(CREATURE_YMIRJAR_HARPOONER, SpawnLoc[spot].x+rand()%5, SpawnLoc[spot].y+rand()%5, SpawnLoc[spot].z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000); break;
+                case 0: pTemp = m_creature->SummonCreature(NPC_YMIRJAR_WARRIOR, SpawnLoc[uiSpot].x+rand()%5, SpawnLoc[uiSpot].y+rand()%5, SpawnLoc[uiSpot].z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000); break;
+                case 1: pTemp = m_creature->SummonCreature(NPC_YMIRJAR_WITCH_DOCTOR, SpawnLoc[uiSpot].x+rand()%5, SpawnLoc[uiSpot].y+rand()%5, SpawnLoc[uiSpot].z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000); break;
+                case 2: pTemp = m_creature->SummonCreature(NPC_YMIRJAR_HARPOONER, SpawnLoc[uiSpot].x+rand()%5, SpawnLoc[uiSpot].y+rand()%5, SpawnLoc[uiSpot].z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000); break;
             }
             if (pTemp)
             {
                 pTemp->SetInCombatWithZone();
-                Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
-                if (pTarget)
-                    pTemp->AI()->AttackStart(pTarget);
+                //pTemp->AI()->AttackStart(pPlayer);
+                pTemp->AI()->AttackStart(SelectUnit(SELECT_TARGET_RANDOM, 0));
             }
         }
     }
@@ -261,6 +321,6 @@ void AddSC_boss_skadi()
 
     newscript = new Script;
     newscript->Name="boss_skadi";
-    newscript->GetAI = &GetAI_boss_skadi;
+    newscript->GetAI = GetAI_boss_skadi;
     newscript->RegisterSelf();
 }
