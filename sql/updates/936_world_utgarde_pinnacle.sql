@@ -1,6 +1,6 @@
-﻿ALTER TABLE db_version CHANGE COLUMN required_927_world_scripts required_936_world_utgarde_pinnacle bit;
+﻿ALTER TABLE db_version CHANGE COLUMN required_927_world_scripts required_936_world_utgarde_pinnacle bit;
 /* UTGARDE PINNACLE */
-UPDATE `instance_template` SET `script`='instance_pinnacle' WHERE `map`=575;
+UPDATE `instance_template` SET `script`='instance_utgarde_pinnacle' WHERE `map`=575;
 UPDATE `creature_template` SET `ScriptName`='boss_palehoof' WHERE `entry`='26687';
 UPDATE `creature_template` SET `ScriptName`='boss_skadi', `unit_flags`=0 WHERE `entry`='26693';
 DELETE FROM `creature` WHERE map = 575 AND `id`='26893';

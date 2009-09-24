@@ -372,9 +372,18 @@ bool Guild::LoadMembersFromDB(uint32 GuildId)
     if (!result)
         return false;
 
+    QueryResult *resultGUIDTest;
     do
     {
         Field *fields = result->Fetch();
+        //check if a deleted char is guild member
+        resultGUIDTest = CharacterDatabase.PQuery("SELECT `guid` FROM `characters` WHERE `guid`=%u;",fields[0].GetUInt32());
+        if (!resultGUIDTest)
+        {
+            sLog.outError("Player (GUID: %u) is guild member, but does not exist. Delete entry!",fields[0].GetUInt32());
+            CharacterDatabase.PExecute("DELETE FROM `guild_member` WHERE `guid` = '%u'", fields[0].GetUInt32());
+            continue;
+        }
         MemberSlot newmember;
         uint64 guid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
         newmember.RankId = fields[1].GetUInt32();
