@@ -2998,7 +2998,7 @@ void Spell::handle_immediate()
         if (duration)
         {
             // anticheat
-            if(m_caster->GetTypeId() == TYPEID_PLAYER) ((Player*)m_caster)->m_anti_AntiCheatOffCount = 5;
+            if(m_caster->GetTypeId() == TYPEID_PLAYER) ((Player*)m_caster)->m_anti_AntiCheatOffUntilTime = time(NULL) + 2;
             // end anticheat
             //apply haste mods
             m_caster->ModSpellCastTime(m_spellInfo, duration, this);
@@ -3328,9 +3328,6 @@ void Spell::finish(bool ok)
 
     if(IsChanneledSpell(m_spellInfo))
     {
-        // anticheat
-        if(m_caster->GetTypeId() == TYPEID_PLAYER) ((Player*)m_caster)->m_anti_AntiCheatOffCount = 5;
-        // end anticheat
         m_caster->UpdateInterruptMask();
     }
 
