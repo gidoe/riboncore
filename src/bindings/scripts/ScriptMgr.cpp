@@ -247,6 +247,94 @@ void OnPVPKill(Player *killer, Player *killed)
 }
 
 RIBON_DLL_EXPORT
+bool OnSpellCast (Unit *pUnitTarget, Item *pItemTarget, GameObject *pGoTarget, uint32 i, SpellEntry const *spell)
+{
+    Script *tmpscript = m_scripts[GetScriptId("scripted_on_events")];
+    if (!tmpscript || !tmpscript->pOnSpellCast) return true;
+    return tmpscript->pOnSpellCast(pUnitTarget,pItemTarget,pGoTarget,i,spell);
+}
+
+RIBON_DLL_EXPORT
+uint32 OnGetXP(Player *pPlayer, uint32 amount)
+{
+    Script *tmpscript = m_scripts[GetScriptId("scripted_on_events")];
+    if (!tmpscript || !tmpscript->pOnGetXP) return amount;
+    return tmpscript->pOnGetXP(pPlayer,amount);
+}
+
+RIBON_DLL_EXPORT
+uint32 OnGetMoney(Player *pPlayer, int32 amount)
+{
+    Script *tmpscript = m_scripts[GetScriptId("scripted_on_events")];
+    if (!tmpscript || !tmpscript->pOnGetMoney) return amount;
+    return tmpscript->pOnGetMoney(pPlayer,amount);
+}
+
+RIBON_DLL_EXPORT
+bool OnPlayerChat(Player *pPlayer, const char *text)
+{
+    Script *tmpscript = m_scripts[GetScriptId("scripted_on_events")];
+    if (!tmpscript || !tmpscript->pOnPlayerChat) return true;
+    return tmpscript->pOnPlayerChat(pPlayer,text);
+}
+
+RIBON_DLL_EXPORT
+void OnServerStartup()
+{
+    Script *tmpscript = m_scripts[GetScriptId("scripted_on_events")];
+    if (!tmpscript || !tmpscript->pOnServerStartup) return;
+    tmpscript->pOnServerStartup();
+}
+
+RIBON_DLL_EXPORT
+void OnServerShutdown()
+{
+    Script *tmpscript = m_scripts[GetScriptId("scripted_on_events")];
+    if (!tmpscript || !tmpscript->pOnServerShutdown) return;
+    tmpscript->pOnServerShutdown();
+}
+
+RIBON_DLL_EXPORT
+void OnAreaChange(Player *pPlayer, AreaTableEntry const *pArea)
+{
+    Script *tmpscript = m_scripts[GetScriptId("scripted_on_events")];
+    if (!tmpscript || !tmpscript->pOnAreaChange) return;
+    tmpscript->pOnAreaChange(pPlayer, pArea);
+}
+
+RIBON_DLL_EXPORT
+bool OnItemClick (Player *pPlayer, Item *pItem)
+{
+    Script *tmpscript = m_scripts[GetScriptId("scripted_on_events")];
+    if (!tmpscript || !tmpscript->pOnItemClick) return true;
+    return tmpscript->pOnItemClick(pPlayer,pItem);
+}
+
+RIBON_DLL_EXPORT
+bool OnItemOpen (Player *pPlayer, Item *pItem)
+{
+    Script *tmpscript = m_scripts[GetScriptId("scripted_on_events")];
+    if (!tmpscript || !tmpscript->pOnItemOpen) return true;
+    return tmpscript->pOnItemOpen(pPlayer,pItem);
+}
+
+RIBON_DLL_EXPORT
+bool OnGoClick (Player *pPlayer, GameObject *pGameObject)
+{
+    Script *tmpscript = m_scripts[GetScriptId("scripted_on_events")];
+    if (!tmpscript || !tmpscript->pOnGoClick) return true;
+    return tmpscript->pOnGoClick(pPlayer,pGameObject);
+}
+
+RIBON_DLL_EXPORT
+void OnCreatureKill (Player *pPlayer, Creature *pCreature)
+{
+    Script *tmpscript = m_scripts[GetScriptId("scripted_on_events")];
+    if (!tmpscript || !tmpscript->pOnCreatureKill) return;
+    tmpscript->pOnCreatureKill(pPlayer,pCreature);
+}
+
+RIBON_DLL_EXPORT
 char const* ScriptsVersion()
 {
     return "Default Ribon scripting library";
