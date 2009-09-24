@@ -368,6 +368,7 @@ class RIBON_DLL_SPEC ChatHandler
         bool HandleReloadGOQuestInvRelationsCommand(const char* args);
         bool HandleReloadItemEnchantementsCommand(const char* args);
         bool HandleReloadItemRequiredTragetCommand(const char* args);
+        bool HandleReloadItemTemplateCommand(const char* args);
         bool HandleReloadLocalesAchievementRewardCommand(const char* args);
         bool HandleReloadLocalesCreatureCommand(const char* args);
         bool HandleReloadLocalesGameobjectCommand(const char* args);

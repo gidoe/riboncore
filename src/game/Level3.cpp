@@ -1113,6 +1113,14 @@ bool ChatHandler::HandleReloadItemRequiredTragetCommand(const char*)
     return true;
 }
 
+bool ChatHandler::HandleReloadItemTemplateCommand(const char*)
+{
+    sLog.outString( "Re-Loading Item Templates Table..." );
+    objmgr.LoadItemPrototypes(true);
+    SendGlobalSysMessage("DB table `item_template` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadGameObjectScriptsCommand(const char* arg)
 {
     if(sWorld.IsScriptScheduled())
