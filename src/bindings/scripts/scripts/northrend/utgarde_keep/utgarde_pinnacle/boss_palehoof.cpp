@@ -380,7 +380,7 @@ struct RIBON_DLL_DECL mob_massive_jormungarAI : public ScriptedAI
 /*######
 ## Mob Ferocious Rhino
 ######*/
-struct MANGOS_DLL_DECL mob_ferocious_rhinoAI : public ScriptedAI
+struct RIBON_DLL_DECL mob_ferocious_rhinoAI : public ScriptedAI
 {
     mob_ferocious_rhinoAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
