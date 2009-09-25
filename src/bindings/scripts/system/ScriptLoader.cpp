@@ -717,9 +717,9 @@ void AddScripts()
     AddSC_instance_utgarde_keep();
     AddSC_utgarde_keep();
     AddSC_boss_svala();                 //Utgarde pinnacle
-    AddSC_boss_palehoof();
-    AddSC_boss_skadi();
-    AddSC_boss_ymiron();
+//    AddSC_boss_palehoof();
+//    AddSC_boss_skadi();
+//    AddSC_boss_ymiron();
     AddSC_instance_utgarde_pinnacle();
     AddSC_boss_archavon();              //Vault of Archavon
     AddSC_boss_emalon();
