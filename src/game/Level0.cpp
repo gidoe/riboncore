@@ -97,7 +97,7 @@ bool ChatHandler::HandleServerInfoCommand(const char* /*args*/)
     std::string uptime = secsToTimeString(sWorld.GetUptime());
     uint32 updateTime = sWorld.GetUpdateTime();
 
-    PSendSysMessage(_FULLVERSION);
+    PSendSysMessage("RibonCore revision: %s", _FULLVERSION);
 
     PSendSysMessage(LANG_CONNECTED_PLAYERS, PlayersNum, MaxPlayersNum); //testing
     PSendSysMessage(LANG_CONNECTED_USERS, activeClientsNum, maxActiveClientsNum, queuedClientsNum, maxQueuedClientsNum);
