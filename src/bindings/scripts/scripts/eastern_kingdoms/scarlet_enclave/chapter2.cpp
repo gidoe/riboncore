@@ -570,7 +570,9 @@ enum SpecialSurprise
     SAY_EXEC_WAITING            = -1609077,
     EMOTE_DIES                  = -1609078,
 
-    NPC_PLAGUEFIST              = 29053
+    NPC_PLAGUEFIST              = 29053,
+
+    FACTION_HOSTILE             = 2068
 };
 
 struct RIBON_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
@@ -686,7 +688,9 @@ struct RIBON_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
                                 me->SetStandState(UNIT_STAND_STATE_KNEEL);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                                 break;
-                            case 10: DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                            case 10: 
+                                DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                                me->setFaction(FACTION_HOSTILE);
                             case 11:
                                 DoScriptText(EMOTE_DIES, me);
                                 me->setDeathState(JUST_DIED);
@@ -714,7 +718,9 @@ struct RIBON_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
                                 me->SetStandState(UNIT_STAND_STATE_KNEEL);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                                 break;
-                            case 10: DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                            case 10: 
+                                DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                                me->setFaction(FACTION_HOSTILE);
                             case 11:
                                 DoScriptText(EMOTE_DIES, me);
                                 me->setDeathState(JUST_DIED);
@@ -742,7 +748,9 @@ struct RIBON_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
                                 me->SetStandState(UNIT_STAND_STATE_KNEEL);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                                 break;
-                            case 10: DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                            case 10: 
+                                DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                                me->setFaction(FACTION_HOSTILE);
                             case 11:
                                 DoScriptText(EMOTE_DIES, me);
                                 me->setDeathState(JUST_DIED);
@@ -770,7 +778,9 @@ struct RIBON_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
                                 me->SetStandState(UNIT_STAND_STATE_KNEEL);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                                 break;
-                            case 10: DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                            case 10: 
+                                DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                                me->setFaction(FACTION_HOSTILE);
                             case 11:
                                 DoScriptText(EMOTE_DIES, me);
                                 me->setDeathState(JUST_DIED);
@@ -798,7 +808,9 @@ struct RIBON_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
                                 me->SetStandState(UNIT_STAND_STATE_KNEEL);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                                 break;
-                            case 10: DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                            case 10: 
+                                DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                                me->setFaction(FACTION_HOSTILE);
                             case 11:
                                 DoScriptText(EMOTE_DIES, me);
                                 me->setDeathState(JUST_DIED);
@@ -826,7 +838,9 @@ struct RIBON_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
                                 me->SetStandState(UNIT_STAND_STATE_KNEEL);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                                 break;
-                            case 10: DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                            case 10: 
+                                DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                                me->setFaction(FACTION_HOSTILE);
                             case 11:
                                 DoScriptText(EMOTE_DIES, me);
                                 me->setDeathState(JUST_DIED);
@@ -854,7 +868,9 @@ struct RIBON_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
                                 me->SetStandState(UNIT_STAND_STATE_KNEEL);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                                 break;
-                            case 10: DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                            case 10: 
+                                DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                                me->setFaction(FACTION_HOSTILE);
                             case 11:
                                 DoScriptText(EMOTE_DIES, me);
                                 me->setDeathState(JUST_DIED);
@@ -882,7 +898,9 @@ struct RIBON_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
                                 me->SetStandState(UNIT_STAND_STATE_KNEEL);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                                 break;
-                            case 10: DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                            case 10: 
+                                DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                                me->setFaction(FACTION_HOSTILE);
                             case 11:
                                 DoScriptText(EMOTE_DIES, me);
                                 me->setDeathState(JUST_DIED);
@@ -910,7 +928,9 @@ struct RIBON_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
                                 me->SetStandState(UNIT_STAND_STATE_KNEEL);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                                 break;
-                            case 10: DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                            case 10: 
+                                DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                                me->setFaction(FACTION_HOSTILE);
                             case 11:
                                 DoScriptText(EMOTE_DIES, me);
                                 me->setDeathState(JUST_DIED);
@@ -938,7 +958,9 @@ struct RIBON_DLL_DECL npc_a_special_surpriseAI : public ScriptedAI
                                 me->SetStandState(UNIT_STAND_STATE_KNEEL);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                                 break;
-                            case 10: DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                            case 10: 
+                                DoScriptText(SAY_EXEC_WAITING, me, pPlayer); break;
+                                me->setFaction(FACTION_HOSTILE);
                             case 11:
                                 DoScriptText(EMOTE_DIES, me);
                                 me->setDeathState(JUST_DIED);

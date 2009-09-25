@@ -377,7 +377,7 @@ struct RIBON_DLL_DECL npc_death_knight_initiateAI : public CombatAI
         {
             if (pDoneBy->GetGUID() != m_uiDuelerGUID && pDoneBy->GetOwnerGUID() != m_uiDuelerGUID) // other players cannot help
                 uiDamage = 0;
-            else if (uiDamage >= m_creature->GetHealth())
+            else if (uiDamage >= me->GetHealth())
             {
                 uiDamage = 0;
 
@@ -389,6 +389,8 @@ struct RIBON_DLL_DECL npc_death_knight_initiateAI : public CombatAI
                     lose = true;
                     me->CastSpell(me, SPELL_ID_DUEL_BEG, true);
                     me->RestoreFaction();
+                    Player* pPlayer = pDoneBy->GetPlayer(m_uiDuelerGUID);
+                    pPlayer->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
                 }
             }
         }
