@@ -1052,8 +1052,9 @@ int ChatHandler::ParseCommands(const char* text)
 
     std::string fullcmd = text;
 
-    if(!m_session->HandleOnPlayerChat(text))
-        return 0;
+    if(m_session)
+	    if(!m_session->HandleOnPlayerChat(text))
+		    return 0;
 
     /// chat case (.command or !command format)
     if (m_session)
