@@ -1,4 +1,4 @@
--- Up to RC 935
+-- Up to RC 954
 
 /* WORLD BOSS */
 UPDATE `creature_template` SET `ScriptName`='boss_ysondre' WHERE `entry`=14887;
@@ -514,6 +514,10 @@ UPDATE `creature_template` SET `ScriptName`='boss_kiggler_the_crazed' WHERE `ent
 UPDATE `creature_template` SET `ScriptName`='boss_blindeye_the_seer' WHERE `entry`=18836;
 UPDATE `creature_template` SET `ScriptName`='boss_olm_the_summoner' WHERE `entry`=18834;
 UPDATE `creature_template` SET `ScriptName`='boss_krosh_firehand' WHERE `entry`=18832;
+
+/* GUNDRAK */
+/* Moorabi */
+UPDATE `creature_template` SET `ScriptName`='boss_moorabi' where entry=29305;
 
 /* HALLS OF LIGHTNING */
 UPDATE `instance_template` SET `script`='instance_halls_of_lightning' WHERE `map`=602;

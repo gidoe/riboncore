@@ -60,7 +60,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         return;
     }
     //movement anticheat
-    GetPlayer()->m_anti_AntiCheatOffUntilTime = time(NULL) + 5;
+    GetPlayer()->m_anti_AntiCheatOffUntilTime = time(NULL) + 10;
     //end movement anticheat
 
     // get the destination map entry, not the current one, this will fix homebind and reset greeting
@@ -242,7 +242,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     if(plMover && plMover->IsBeingTeleported())
     {
         // movement anticheat
-        plMover->m_anti_AntiCheatOffUntilTime = time(NULL) + 5;
+        plMover->m_anti_AntiCheatOffUntilTime = time(NULL) + 10;
         // end movement anticheat
         recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
         return;
@@ -452,7 +452,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             float time_delta = (cClientTimeDelta < 1500) ? (float)cClientTimeDelta/1000 : 1.5f; //normalize time - 1.5 second allowed for heavy loaded server
 
             if(!(movementInfo.flags & (MOVEMENTFLAG_FLYING | MOVEMENTFLAG_SWIMMING)))
-              tg_z = (real_delta !=0) ? (delta_z*delta_z / real_delta) : -99999;
+              tg_z = (real_delta != 0) ? (delta_z*delta_z / real_delta) : -99999;
 
             if(current_speed < plMover->m_anti_Last_HSpeed)
             {
@@ -488,20 +488,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 plMover->GetName(), JumpHeight, plMover->m_anti_Last_VSpeed);
                 #endif
                 check_passed = false;
-                // Tell the player "Sure, you can fly!"
-                {
-                    WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 12);
-                    data.append(plMover->GetPackGUID());
-                    data << uint32(0);
-                    SendPacket(&data);
-                }
-                // Then tell the player "Wait, no, you can't."
-                {
-                    WorldPacket data(SMSG_MOVE_UNSET_CAN_FLY, 12);
-                    data.append(plMover->GetPackGUID());
-                    data << uint32(0);
-                    SendPacket(&data);
-                }
+                ((Player *)plMover)->FallGround();
             }
 
             //multi jump checks
@@ -510,20 +497,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 if(plMover->m_anti_JumpCount >= 1)
                 {
                     check_passed = false; //don't process new jump packet
-                    // Tell the player "Sure, you can fly!"
-                    {
-                        WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 12);
-                        data.append(plMover->GetPackGUID());
-                        data << uint32(0);
-                        SendPacket(&data);
-                    }
-                    // Then tell the player "Wait, no, you can't."
-                    {
-                        WorldPacket data(SMSG_MOVE_UNSET_CAN_FLY, 12);
-                        data.append(plMover->GetPackGUID());
-                        data << uint32(0);
-                        SendPacket(&data);
-                    }
+                    ((Player *)plMover)->FallGround();
                 }
                 else
                 {
@@ -571,20 +545,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                    plMover->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK), plMover->GetVehicle());
                 #endif
                 check_passed = false;
-                // Tell the player "Sure, you can fly!"
-                {
-                    WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 12);
-                    data.append(plMover->GetPackGUID());
-                    data << uint32(0);
-                    SendPacket(&data);
-                }
-                // Then tell the player "Wait, no, you can't."
-                {
-                    WorldPacket data(SMSG_MOVE_UNSET_CAN_FLY, 12);
-                    data.append(plMover->GetPackGUID());
-                    data << uint32(0);
-                    SendPacket(&data);
-                }
+                ((Player *)plMover)->FallGround();
             }
             //Waterwalk checks
             if( ((movementInfo.flags & MOVEMENTFLAG_WATERWALKING) != 0)
@@ -741,13 +702,13 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 plMover->RepopAtGraveyard();
             }
         }
-        //movement anticheat >>>
+        //movement anticheat
         if(plMover->m_anti_AlarmCount > 0)
         {
             sLog.outError("AC2-%s produce %d anticheat alarms", plMover->GetName(), plMover->m_anti_AlarmCount);
             plMover->m_anti_AlarmCount = 0;
         }
-    // end movement anticheat
+        // end movement anticheat
     }
     else                                                    // creature charmed
     {
@@ -764,7 +725,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     //sLog.outString("Receive Movement Packet %s:", opcodeTable[recv_data.GetOpcode()]);
     //mover->OutMovementInfo();
     }
-    else if(plMover)
+    else if(plMover && !(movementInfo.flags & MOVEMENTFLAG_ONTRANSPORT && ( plMover->m_transport || objmgr.GetGOData(plMover->m_anti_TransportGUID) )))
     {
         ++(plMover->m_anti_AlarmCount);
         WorldPacket data;
