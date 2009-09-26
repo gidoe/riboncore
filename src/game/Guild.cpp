@@ -384,6 +384,7 @@ bool Guild::LoadMembersFromDB(uint32 GuildId)
             CharacterDatabase.PExecute("DELETE FROM `guild_member` WHERE `guid` = '%u'", fields[0].GetUInt32());
             continue;
         }
+        delete resultGUIDTest;
         MemberSlot newmember;
         uint64 guid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
         newmember.RankId = fields[1].GetUInt32();
