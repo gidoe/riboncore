@@ -42,7 +42,7 @@ void WorldSession::SendNameQueryOpcode(Player *p)
                                                             // guess size
     WorldPacket data( SMSG_NAME_QUERY_RESPONSE, (8+1+1+1+1+1+10) );
     data.append(p->GetPackGUID());                          // player guid
-    data << uint8(0);                                       // added in 3.1
+    data << uint8(0);                                       // added in 3.1; if > 1, then end of packet
     data << p->GetName();                                   // played name
     data << uint8(0);                                       // realm name for cross realm BG usage
     data << uint8(p->getRace());
@@ -106,7 +106,7 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult *result, uint32
                                                             // guess size
     WorldPacket data( SMSG_NAME_QUERY_RESPONSE, (8+1+1+1+1+1+1+10) );
     data.appendPackGUID(MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
-    data << uint8(0);                                       // added in 3.1
+    data << uint8(0);                                       // added in 3.1; if > 1, then end of packet
     data << name;
     data << uint8(0);                                       // realm name for cross realm BG usage
     data << uint8(pRace);                                   // race
@@ -319,13 +319,14 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recv_data*/)
         }
     }
 
-    WorldPacket data(MSG_CORPSE_QUERY, 1+(5*4));
+    WorldPacket data(MSG_CORPSE_QUERY, 1+(6*4));
     data << uint8(1);                                       // corpse found
     data << int32(mapid);
     data << float(x);
     data << float(y);
     data << float(z);
     data << int32(corpsemapid);
+    data << uint32(0);                                      // unknown
     SendPacket(&data);
 }
 
@@ -338,7 +339,7 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
     sLog.outDetail("WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textID);
 
     recv_data >> guid;
-    GetPlayer()->SetUInt64Value(UNIT_FIELD_TARGET, guid);
+    _player->SetTargetGUID(guid);
 
     GossipText const* pGossip = objmgr.GetGossipText(textID);
 
@@ -417,10 +418,13 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePageTextQueryOpcode( WorldPacket & recv_data )
 {
+    sLog.outDetail("WORLD: Received CMSG_PAGE_TEXT_QUERY");
+    recv_data.hexlike();
+
     uint32 pageID;
 
     recv_data >> pageID;
-    sLog.outDetail("WORLD: Received CMSG_PAGE_TEXT_QUERY for pageID '%u'", pageID);
+    recv_data.read_skip<uint64>();                          // guid
 
     while (pageID)
     {
@@ -460,3 +464,17 @@ void WorldSession::HandlePageTextQueryOpcode( WorldPacket & recv_data )
     }
 }
 
+void WorldSession::HandleCorpseMapPositionQuery( WorldPacket & recv_data )
+{
+    sLog.outDebug( "WORLD: Recv CMSG_CORPSE_MAP_POSITION_QUERY" );
+
+    uint32 unk;
+    recv_data >> unk;
+
+    WorldPacket data(CMSG_CORPSE_MAP_POSITION_QUERY_RESPONSE, 4+4+4+4);
+    data << float(0);
+    data << float(0);
+    data << float(0);
+    data << float(0);
+    SendPacket(&data);
+}
