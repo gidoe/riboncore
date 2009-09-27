@@ -1,0 +1,5 @@
+FILE(GLOB _SQL_UPDATES *.sql)
+
+INSTALL(FILES
+${_SQL_UPDATES}
+DESTINATION share/ribon/sql/updates)
