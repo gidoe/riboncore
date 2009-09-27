@@ -3855,7 +3855,7 @@ void Spell::EffectEnchantItemPerm(uint32 effect_idx)
     else
     {
         // do not increase skill if vellum used
-        if (!(m_CastItem && m_CastItem->GetProto()->Flags & ITEM_FLAGS_TRIGGERED_CAST))
+        if (!(m_CastItem && m_CastItem->GetProto()->Flags & ITEM_FLAGS_ENCHANT_SCROLL))
             p_caster->UpdateCraftSkill(m_spellInfo->Id);
 
         uint32 enchant_id = m_spellInfo->EffectMiscValue[effect_idx];

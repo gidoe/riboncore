@@ -4248,7 +4248,7 @@ void Spell::TakeReagents()
         return;
 
     // do not take reagents for these item casts
-    if (m_CastItem && m_CastItem->GetProto()->Flags & ITEM_FLAGS_TRIGGERED_CAST)
+    if (m_CastItem && m_CastItem->GetProto()->Flags & ITEM_FLAGS_ENCHANT_SCROLL)
         return;
 
     Player* p_caster = (Player*)m_caster;
@@ -5635,7 +5635,7 @@ SpellCastResult Spell::CheckItems()
     }
 
     // do not take reagents for these item casts
-    if (!(m_CastItem && m_CastItem->GetProto()->Flags & ITEM_FLAGS_TRIGGERED_CAST))
+    if (!(m_CastItem && m_CastItem->GetProto()->Flags & ITEM_FLAGS_ENCHANT_SCROLL))
     {
         // check reagents (ignore triggered spells with reagents processed by original spell) and special reagent ignore case.
         if (!m_IsTriggeredSpell && !p_caster->CanNoReagentCast(m_spellInfo))
@@ -5733,7 +5733,7 @@ SpellCastResult Spell::CheckItems()
                     if (m_targets.getItemTarget()->GetOwner()!=m_caster)
                         return SPELL_FAILED_NOT_TRADEABLE;
                     // do not allow to enchant vellum from scroll made by vellum-prevent exploit
-                    if (m_CastItem && m_CastItem->GetProto()->Flags & ITEM_FLAGS_TRIGGERED_CAST)
+                    if (m_CastItem && m_CastItem->GetProto()->Flags & ITEM_FLAGS_ENCHANT_SCROLL)
                         return SPELL_FAILED_TOTEM_CATEGORY;
                     ItemPosCountVec dest;
                     uint8 msg = p_caster->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, m_spellInfo->EffectItemType[i], 1 );

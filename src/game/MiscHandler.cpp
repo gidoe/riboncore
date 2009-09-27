@@ -148,7 +148,6 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug( "WORLD: Recvd CMSG_WHO Message" );
-    //recv_data.hexlike();
 
     uint32 clientcount = 0;
 
@@ -190,7 +189,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         std::string temp;
         recv_data >> temp;                                  // user entered string, it used as universal search pattern(guild+player name)?
 
-        if(!Utf8toWStr(temp,str[i]))
+        if(!Utf8toWStr(temp, str[i]))
             continue;
 
         wstrToLower(str[i]);
@@ -457,9 +456,8 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
 
     // use server size data
     uint32 newzone, newarea;
-    GetPlayer()->GetZoneAndAreaId(newzone,newarea);
-    GetPlayer()->UpdateZone(newzone,newarea);
-    //GetPlayer()->SendInitWorldStates(true,newZone);
+    GetPlayer()->GetZoneAndAreaId(newzone, newarea);
+    GetPlayer()->UpdateZone(newzone, newarea);
 }
 
 void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )
@@ -782,22 +780,22 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     uint32 Trigger_ID;
 
     recv_data >> Trigger_ID;
-    sLog.outDebug("Trigger ID:%u",Trigger_ID);
+    sLog.outDebug("Trigger ID:%u", Trigger_ID);
 
     if(GetPlayer()->isInFlight())
     {
-        sLog.outDebug("Player '%s' (GUID: %u) in flight, ignore Area Trigger ID:%u",GetPlayer()->GetName(),GetPlayer()->GetGUIDLow(), Trigger_ID);
+        sLog.outDebug("Player '%s' (GUID: %u) in flight, ignore Area Trigger ID:%u", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), Trigger_ID);
         return;
     }
 
     AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
     if(!atEntry)
     {
-        sLog.outDebug("Player '%s' (GUID: %u) send unknown (by DBC) Area Trigger ID:%u",GetPlayer()->GetName(),GetPlayer()->GetGUIDLow(), Trigger_ID);
+        sLog.outDebug("Player '%s' (GUID: %u) send unknown (by DBC) Area Trigger ID:%u", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), Trigger_ID);
         return;
     }
 
-    if (GetPlayer()->GetMapId()!=atEntry->mapid)
+    if (GetPlayer()->GetMapId() != atEntry->mapid)
     {
         sLog.outDebug("Player '%s' (GUID: %u) too far (trigger map: %u player map: %u), ignore Area Trigger ID: %u", GetPlayer()->GetName(), atEntry->mapid, GetPlayer()->GetMapId(), GetPlayer()->GetGUIDLow(), Trigger_ID);
         return;
@@ -931,7 +929,7 @@ void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)
 
     if(decompressedSize > 0xFFFF)
     {
-        recv_data.rpos(recv_data.wpos());                   // unnneded warning spam in this case
+        recv_data.rpos(recv_data.wpos());                   // unneded warning spam in this case
         sLog.outError("UAD: Account data packet too big, size %u", decompressedSize);
         return;
     }
@@ -1138,7 +1136,7 @@ void WorldSession::HandleSetActionBarToggles(WorldPacket& recv_data)
     if(!GetPlayer())                                        // ignore until not logged (check needed because STATUS_AUTHED)
     {
         if(ActionBar!=0)
-            sLog.outError("WorldSession::HandleSetActionBarToggles in not logged state with value: %u, ignored",uint32(ActionBar));
+            sLog.outError("WorldSession::HandleSetActionBarToggles in not logged state with value: %u, ignored", uint32(ActionBar));
         return;
     }
 
@@ -1233,7 +1231,7 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
 
     if(GetPlayer()->isInFlight())
     {
-        sLog.outDebug("Player '%s' (GUID: %u) in flight, ignore worldport command.",GetPlayer()->GetName(),GetPlayer()->GetGUIDLow());
+        sLog.outDebug("Player '%s' (GUID: %u) in flight, ignore worldport command.", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
         return;
     }
 
@@ -1380,7 +1378,6 @@ void WorldSession::HandleRealmSplitOpcode( WorldPacket & recv_data )
 void WorldSession::HandleFarSightOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_FAR_SIGHT");
-    //recv_data.hexlike();
 
     uint8 apply;
     recv_data >> apply;
@@ -1443,8 +1440,8 @@ void WorldSession::HandleTimeSyncResp( WorldPacket & recv_data )
 void WorldSession::HandleResetInstancesOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug("WORLD: CMSG_RESET_INSTANCES");
-    Group *pGroup = _player->GetGroup();
-    if(pGroup)
+
+    if(Group *pGroup = _player->GetGroup())
     {
         if(pGroup->IsLeader(_player->GetGUID()))
             pGroup->ResetInstances(INSTANCE_RESET_ALL, _player);
@@ -1479,8 +1476,8 @@ void WorldSession::HandleSetDungeonDifficultyOpcode( WorldPacket & recv_data )
 
     if(_player->getLevel() < LEVELREQUIREMENT_HEROIC)
         return;
-    Group *pGroup = _player->GetGroup();
-    if(pGroup)
+
+    if(Group *pGroup = _player->GetGroup())
     {
         if(pGroup->IsLeader(_player->GetGUID()))
         {
@@ -1601,11 +1598,8 @@ void WorldSession::HandleQueryInspectAchievements( WorldPacket & recv_data )
     if(!recv_data.readPackGUID(guid))
         return;
 
-    Player *player = objmgr.GetPlayer(guid);
-    if(!player)
-        return;
-
-    player->GetAchievementMgr().SendRespondInspectAchievements(_player);
+    if(Player *player = objmgr.GetPlayer(guid))
+        player->GetAchievementMgr().SendRespondInspectAchievements(_player);
 }
 
 void WorldSession::HandleWorldStateUITimerUpdate(WorldPacket& recv_data)
