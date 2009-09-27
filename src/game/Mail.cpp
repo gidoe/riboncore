@@ -49,7 +49,7 @@ void MailItem::deleteItem( bool inDB )
             CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid='%u'", item->GetGUIDLow());
 
         delete item;
-        item=NULL;
+        item = NULL;
     }
 }
 
@@ -126,7 +126,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         return;
     }
 
-    uint32 cost = items_count ? 30 * items_count : 30;  // price hardcoded in client
+    uint32 cost = items_count ? 30 * items_count : 30;      // price hardcoded in client
 
     uint32 reqmoney = cost + money;
 
@@ -139,7 +139,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     Player *receive = objmgr.GetPlayer(rc);
 
     uint32 rc_team = 0;
-    uint8 mails_count = 0;                                  //do not allow to send to one player more than 100 mails
+    uint8 mails_count = 0;                                  // do not allow to send to one player more than 100 mails
 
     if(receive)
     {
@@ -157,13 +157,15 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
             delete result;
         }
     }
+
     //do not allow to have more than 100 mails in mailbox.. mails count is in opcode uint8!!! - so max can be 255..
     if (mails_count > 100)
     {
         pl->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_CAP_REACHED);
         return;
     }
-    // test the receiver's Faction...
+
+    // check the receiver's Faction...
     if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_MAIL) && pl->GetTeam() != rc_team && GetSecurity() == SEC_PLAYER)
     {
         pl->SendMailResult(0, MAIL_SEND, MAIL_ERR_NOT_YOUR_TEAM);
@@ -254,7 +256,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
                 pl->MoveItemFromInventory(mailItem.item->GetBagSlot(), mailItem.item->GetSlot(), true);
                 CharacterDatabase.BeginTransaction();
-                mailItem.item->DeleteFromInventoryDB();     //deletes item from character's inventory
+                mailItem.item->DeleteFromInventoryDB();     // deletes item from character's inventory
                 mailItem.item->SaveToDB();                  // recursive and not have transaction guard into self, item not in inventory and can be save standalone
                 // owner in data will set at mail receive and item extracting
                 CharacterDatabase.PExecute("UPDATE item_instance SET owner_guid = '%u' WHERE guid='%u'", GUID_LOPART(rc), mailItem.item->GetGUIDLow());
@@ -694,8 +696,8 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
 void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
 {
     uint32 itemTextId;
-    uint32 mailId;                                          //this value can be item id in bag, but it is also mail id
-    uint32 unk;                                             //maybe something like state - 0x70000000
+    uint32 mailId;                                          // this value can be item id in bag, but it is also mail id
+    uint32 unk;                                             // maybe something like state - 0x70000000
 
     recv_data >> itemTextId >> mailId >> unk;
 
@@ -739,7 +741,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     bodyItem->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , m->itemTextId );
     bodyItem->SetUInt32Value( ITEM_FIELD_CREATOR, m->sender);
 
-    sLog.outDetail("HandleMailCreateTextItem mailid=%u",mailId);
+    sLog.outDetail("HandleMailCreateTextItem mailid=%u", mailId);
 
     ItemPosCountVec dest;
     uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, bodyItem, false );
@@ -835,7 +837,7 @@ void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 station
     if(messageType == MAIL_AUCTION && !mi && !money)        // auction mail without any items and money
         expire_delay = sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY);
     else
-        expire_delay = (COD > 0) ? 3*DAY : 30*DAY;
+        expire_delay = (COD > 0) ? 3 * DAY : 30 * DAY;
 
     time_t expire_time = deliver_time + expire_delay;
 
