@@ -88,21 +88,6 @@ VendorItem const* VendorItemData::FindItem(uint32 item_id) const
     return NULL;
 }
 
-uint32 CreatureInfo::GetRandomValidModelIdIncludingNativeId(uint32 native_id) const
-{
-    uint8 c = 0;
-    uint32 modelIDs[5];
-
-    if (Modelid1) modelIDs[c++] = Modelid1;
-    if (Modelid2) modelIDs[c++] = Modelid2;
-    if (Modelid3) modelIDs[c++] = Modelid3;
-    if (Modelid4) modelIDs[c++] = Modelid4;
-    if (native_id != Modelid1 && native_id != Modelid2
-    && native_id != Modelid3 && native_id != Modelid4) modelIDs[c++] = native_id;
-
-    return ((c>0) ? modelIDs[urand(0,c-1)] : 0);
-}
-
 uint32 CreatureInfo::GetRandomValidModelId() const
 {
     uint8 c = 0;
@@ -655,7 +640,7 @@ void Creature::DoFleeToGetAssistance()
         TypeContainerVisitor<MaNGOS::CreatureLastSearcher<MaNGOS::NearestAssistCreatureInCreatureRangeCheck>, GridTypeMapContainer > grid_creature_searcher(searcher);
 
         CellLock<GridReadGuard> cell_lock(cell, p);
-        cell_lock->Visit(cell_lock, grid_creature_searcher, *GetMap());
+        cell_lock->Visit(cell_lock, grid_creature_searcher, *GetMap(), *this, radius);
 
         SetNoSearchAssistance(true);
         if(!pCreature)
@@ -740,7 +725,15 @@ bool Creature::Create(uint32 guidlow, Map *map, uint32 phaseMask, uint32 Entry, 
                 break;
         }
         LoadCreaturesAddon();
-        SetDisplayId(GetCreatureInfo()->GetRandomValidModelIdIncludingNativeId(GetNativeDisplayId()));
+        CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(GetNativeDisplayId());
+        if (minfo)                                             // Cancel load if no model defined
+        {
+            uint32 display_id = minfo->modelid;                // it can be different (for another gender)
+
+            SetDisplayId(display_id);
+            SetNativeDisplayId(display_id);
+            SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
+        }
     }
     return bResult;
 }
@@ -1861,7 +1854,15 @@ void Creature::Respawn(bool force)
         else
             setDeathState( JUST_ALIVED );
 
-        SetDisplayId(cinfo->GetRandomValidModelIdIncludingNativeId(GetNativeDisplayId()));
+        CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(GetNativeDisplayId());
+        if (minfo)                                             // Cancel load if no model defined
+        {
+            uint32 display_id = minfo->modelid;                // it can be different (for another gender)
+
+            SetDisplayId(display_id);
+            SetNativeDisplayId(display_id);
+            SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
+        }
 
         //Call AI respawn virtual function
         AI()->JustRespawned();
@@ -2051,8 +2052,8 @@ Unit* Creature::SelectNearestTarget(float dist) const
         TypeContainerVisitor<Ribon::UnitLastSearcher<Ribon::NearestHostileUnitInAttackDistanceCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
 
         CellLock<GridReadGuard> cell_lock(cell, p);
-        cell_lock->Visit(cell_lock, world_unit_searcher, *GetMap());
-        cell_lock->Visit(cell_lock, grid_unit_searcher, *GetMap());
+        cell_lock->Visit(cell_lock, world_unit_searcher, *GetMap(), *this, ATTACK_DISTANCE);
+        cell_lock->Visit(cell_lock, grid_unit_searcher, *GetMap(), *this, ATTACK_DISTANCE);
     }
 
     return target;
@@ -2082,7 +2083,7 @@ void Creature::CallAssistance()
                 TypeContainerVisitor<Ribon::CreatureListSearcher<Ribon::AnyAssistCreatureInRangeCheck>, GridTypeMapContainer >  grid_creature_searcher(searcher);
 
                 CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, grid_creature_searcher, *GetMap());
+                cell_lock->Visit(cell_lock, grid_creature_searcher, *GetMap(), *this, radius);
             }
 
             if (!assistList.empty())
@@ -2116,7 +2117,7 @@ void Creature::CallForHelp(float fRadius)
     TypeContainerVisitor<MaNGOS::CreatureWorker<MaNGOS::CallOfHelpCreatureInRangeDo>, GridTypeMapContainer >  grid_creature_searcher(worker);
 
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, grid_creature_searcher, *GetMap());
+    cell_lock->Visit(cell_lock, grid_creature_searcher, *GetMap(), *this, fRadius);
 }
 
 bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /*= true*/) const
@@ -2139,6 +2140,14 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
 
     // only free creature
     if (GetCharmerOrOwnerGUID())
+        return false;
+
+    // don't help players or units controlled or owned by players
+    if (u->GetCharmerOrOwnerPlayerOrPlayerItself())
+        return false;
+
+    // don't help if the unit is fleeing from the enemy player
+    if (!u->isAttackingPlayer() && enemy->GetTypeId() == TYPEID_PLAYER)
         return false;
 
     // only from same creature faction
