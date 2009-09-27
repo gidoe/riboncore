@@ -731,7 +731,7 @@ enum InstanceResetWarningType
 enum ArenaTeamInfoType
 {
     ARENA_TEAM_ID               = 0,
-    ARENA_TEAM_UNK2             = 1,                        // new in 3.2 - team type?
+    ARENA_TEAM_TYPE             = 1,                        // new in 3.2 - team type?
     ARENA_TEAM_MEMBER           = 2,                        // 0 - captain, 1 - member
     ARENA_TEAM_GAMES_WEEK       = 3,
     ARENA_TEAM_GAMES_SEASON     = 4,

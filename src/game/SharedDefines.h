@@ -2609,12 +2609,6 @@ enum ResponseCodes
     CHAR_CREATE_CHARACTER_CHOOSE_RACE                      = 0x3F,
     CHAR_CREATE_CHARACTER_ARENA_LEADER                     = 0x40,
     CHAR_CREATE_CHARACTER_DELETE_MAIL                      = 0x41,
-
-    CHAR_CREATE_CHARACTER_IN_GUILD                         = 0x3D,
-    CHAR_CREATE_RESTRICTED_RACECLASS                       = 0x3E,
-    CHAR_CREATE_CHARACTER_CHOOSE_RACE                      = 0x3F,
-    CHAR_CREATE_CHARACTER_ARENA_LEADER                     = 0x40,
-    CHAR_CREATE_CHARACTER_DELETE_MAIL                      = 0x41,
     CHAR_CREATE_CHARACTER_SWAP_FACTION                     = 0x42,
     CHAR_CREATE_CHARACTER_RACE_ONLY                        = 0x43,
 
