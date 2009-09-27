@@ -202,6 +202,54 @@ bool GossipSelect_npc_weegli_blastfuse(Player* pPlayer, Creature* pCreature, uin
     return true;
 }
 
+enum {
+    ZOMBIE  = 7286,
+    DEAD_HERO = 7276,
+    ZOMBIE_CHANCE = 65,
+    DEAD_HERO_CHANCE = 10
+};
+
+bool GOHello_go_shallow_grave(Player* pPlayer, GameObject* pGo)
+{
+    // randomly summon a zombie or dead hero the first time a grave is used
+    if (pGo->GetUseCount()==0)
+    {
+        uint32 randomchance = urand(0,100);
+        if (randomchance<ZOMBIE_CHANCE)
+        {
+            pGo->SummonCreature(ZOMBIE,pGo->GetPositionX(),pGo->GetPositionY(),pGo->GetPositionZ(),0,TEMPSUMMON_CORPSE_TIMED_DESPAWN,30000);
+        } 
+        else {
+            randomchance-=ZOMBIE_CHANCE;
+            if (randomchance<DEAD_HERO_CHANCE){
+                pGo->SummonCreature(DEAD_HERO,pGo->GetPositionX(),pGo->GetPositionY(),pGo->GetPositionZ(),0,TEMPSUMMON_CORPSE_TIMED_DESPAWN,30000);
+            }
+        }
+    }
+    pGo->AddUse();
+    return false;
+}
+
+/*######
+## at_zumrah
+######*/
+
+enum {
+    ZUMRAH_ID = 7271,
+    ZUMRAH_HOSTILE_FACTION = 37
+};
+
+bool AreaTrigger_at_zumrah(Player* pPlayer, AreaTriggerEntry *at)
+{
+    Creature* Zumrah = pPlayer->FindNearestCreature(ZUMRAH_ID, 30.0f);
+
+    if (!Zumrah)
+        return false;
+
+    Zumrah->setFaction(ZUMRAH_HOSTILE_FACTION);
+    return true;
+}
+
 void AddSC_zulfarrak()
 {
     Script *newscript;
@@ -219,5 +267,14 @@ void AddSC_zulfarrak()
     newscript->pGossipHello =  &GossipHello_npc_weegli_blastfuse;
     newscript->pGossipSelect = &GossipSelect_npc_weegli_blastfuse;
     newscript->RegisterSelf();
-}
 
+    newscript = new Script;
+    newscript->Name="go_shallow_grave";
+    newscript->pGOHello = &GOHello_go_shallow_grave;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "at_zumrah";
+    newscript->pAreaTrigger = &AreaTrigger_at_zumrah;
+    newscript->RegisterSelf();
+}

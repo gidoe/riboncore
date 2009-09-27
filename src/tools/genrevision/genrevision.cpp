@@ -87,7 +87,7 @@ void extractDataFromGit(FILE* EntriesFile, std::string path, bool url, RawData& 
         char* acc_str  = NULL;
         char* repo_str = NULL;
 
-        // parse URL like git@github.com:mangos/mangos
+        // parse URL like git@github.com:Thyros/riboncore
         char url_buf[200];
         int res = sscanf(url_str,"git@%s",url_buf);
         if(res)
@@ -195,7 +195,7 @@ std::string generateHeader(char const* rev_str, char const* date_str, char const
     newData << " #define REVISION_ID \"" << rev_str << "\"" << std::endl;
     newData << " #define REVISION_DATE \"" << date_str << "\"" << std::endl;
     newData << " #define REVISION_TIME \"" << time_str << "\""<< std::endl;
-    newData << " #define _REVISION 386"<< std::endl;
+    newData << " #define REVISION_NR 387"<< std::endl;
     newData << "#endif // __REVISION_H__" << std::endl;
     return newData.str();
 }

@@ -304,7 +304,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
     //unit->SendMovementFlagUpdate();
 
     // anticheat
-    if(unit->GetTypeId() == TYPEID_PLAYER) Player::GetPlayer(unit->GetGUID())->m_anti_AntiCheatOffCount = 25;
+    if(unit->GetTypeId() == TYPEID_PLAYER) ((Player*)unit)->m_anti_AntiCheatOffUntilTime = time(NULL) + 2;
     // end anticheat
 
     return true;
@@ -346,7 +346,7 @@ void Vehicle::RemovePassenger(Unit *unit)
     //CastSpell(this, 45472, true);                           // Parachute
 
     // anticheat
-    if(unit->GetTypeId() == TYPEID_PLAYER) Player::GetPlayer(unit->GetGUID())->m_anti_AntiCheatOffCount = 25;
+    if(unit->GetTypeId() == TYPEID_PLAYER) ((Player*)unit)->m_anti_AntiCheatOffUntilTime = time(NULL) + 2;
     // end anticheat
 }
 

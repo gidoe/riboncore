@@ -49,6 +49,7 @@
 #include "Util.h"
 #include "TemporarySummon.h"
 #include "Vehicle.h"
+#include "ScriptCalls.h"
 
 #define SPELL_CHANNEL_UPDATE_INTERVAL (1 * IN_MILISECONDS)
 
@@ -2997,7 +2998,7 @@ void Spell::handle_immediate()
         if (duration)
         {
             // anticheat
-            if(m_caster->GetTypeId() == TYPEID_PLAYER) ((Player*)m_caster)->m_anti_AntiCheatOffCount = 5;
+            if(m_caster->GetTypeId() == TYPEID_PLAYER) ((Player*)m_caster)->m_anti_AntiCheatOffUntilTime = time(NULL) + 2;
             // end anticheat
             //apply haste mods
             m_caster->ModSpellCastTime(m_spellInfo, duration, this);
@@ -3327,9 +3328,6 @@ void Spell::finish(bool ok)
 
     if(IsChanneledSpell(m_spellInfo))
     {
-        // anticheat
-        if(m_caster->GetTypeId() == TYPEID_PLAYER) ((Player*)m_caster)->m_anti_AntiCheatOffCount = 5;
-        // end anticheat
         m_caster->UpdateInterruptMask();
     }
 
@@ -3866,7 +3864,7 @@ void Spell::SendChannelUpdate(uint32 time)
     data.append(m_caster->GetPackGUID());
     data << uint32(time);
 
-    ((Player*)m_caster)->GetSession()->SendPacket( &data );
+    m_caster->SendMessageToSet(&data, true);
 }
 
 void Spell::SendChannelStart(uint32 duration)
@@ -3897,15 +3895,12 @@ void Spell::SendChannelStart(uint32 duration)
         }
     }
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        WorldPacket data( MSG_CHANNEL_START, (8+4+4) );
-        data.append(m_caster->GetPackGUID());
-        data << uint32(m_spellInfo->Id);
-        data << uint32(duration);
+    WorldPacket data( MSG_CHANNEL_START, (8+4+4) );
+    data.append(m_caster->GetPackGUID());
+    data << uint32(m_spellInfo->Id);
+    data << uint32(duration);
 
-        ((Player*)m_caster)->GetSession()->SendPacket( &data );
-    }
+    m_caster->SendMessageToSet(&data, true);
 
     m_timer = duration;
     if(target)
@@ -4122,7 +4117,7 @@ SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)
 
     for(uint32 i = 0; i < MAX_RUNES; ++i)
     {
-        uint8 rune = plr->GetCurrentRune(i);
+        RuneType rune = plr->GetCurrentRune(i);
         if((plr->GetRuneCooldown(i) == 0) && (runeCost[rune] > 0))
             runeCost[rune]--;
     }
@@ -4164,7 +4159,7 @@ void Spell::TakeRunePower()
 
     for(uint32 i = 0; i < MAX_RUNES; ++i)
     {
-        uint8 rune = plr->GetCurrentRune(i);
+        RuneType rune = plr->GetCurrentRune(i);
         if((plr->GetRuneCooldown(i) == 0) && (runeCost[rune] > 0))
         {
             plr->SetRuneCooldown(i, RUNE_COOLDOWN);         // 5*2=10 sec
@@ -4179,7 +4174,7 @@ void Spell::TakeRunePower()
     {
         for(uint32 i = 0; i < MAX_RUNES; ++i)
         {
-            uint8 rune = plr->GetCurrentRune(i);
+            RuneType rune = plr->GetCurrentRune(i);
             if((plr->GetRuneCooldown(i) == 0) && (rune == RUNE_DEATH))
             {
                 plr->SetRuneCooldown(i, RUNE_COOLDOWN);     // 5*2=10 sec
@@ -4317,6 +4312,10 @@ void Spell::HandleThreatSpells(uint32 spellId)
 
 void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i)
 {
+
+    if(!Script->OnSpellCast(pUnitTarget,pItemTarget,pGOTarget,i,m_spellInfo))
+        return;
+
     //effect has been handled, skip it
     if(m_effectMask & (1<<i))
         return;
@@ -5371,6 +5370,7 @@ SpellCastResult Spell::CheckCasterAuras() const
                                     else if ( m_spellInfo->PreventionType==SPELL_PREVENTION_TYPE_SILENCE)
                                         return SPELL_FAILED_SILENCED;
                                     break;
+                                default: break;
                             }
                         }
                     }

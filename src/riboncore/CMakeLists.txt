@@ -45,7 +45,6 @@ ribondatabase
 ribonauth
 ribonconfig
 vmaps
-ZThread
 g3dlite
 ${READLINE_LIBRARY}
 ${TERMCAP_LIBRARY}

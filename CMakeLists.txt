@@ -25,7 +25,7 @@ OPTION(LARGE_CELL "Large cell size" 0)
 OPTION(SHORT_SLEEP "Short sleep" 0)
 OPTION(CENTOS "CENTOS" 0)
 
-message("* RibonCore revision: ${_REVISION}")
+message("* RibonCore revision: ${REVISION_NR}")
 
 IF (PREFIX)
     SET(CMAKE_INSTALL_PREFIX ${PREFIX})
@@ -46,6 +46,7 @@ FIND_LIBRARY(SSLLIB NAMES ssl DOC "SSL library")
 FIND_LIBRARY(ZLIB z "Zlib library")
 
 IF(DO_POSTGRESQL)
+    SET(DO_MYSQL 0)
     MESSAGE("* With PostgreSQL")
     FIND_PostgreSQL()
     ADD_DEFINITIONS(-DDO_POSTGRESQL)
@@ -155,20 +156,20 @@ ENDIF (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 add_definitions(--no-warnings) #to make build look nice, no gcc nazi warnings.
 
 INCLUDE_DIRECTORIES(
-dep/include 
-dep/include/g3dlite 
+dep/include
+dep/include/g3dlite
 dep/include/sockets
-src/shared 
-src/framework 
-src/shared/Database 
+src/shared
+src/framework
+src/shared/Database
 src/shared/vmap
-src/game 
+src/game
 src/bindings/scripts/base
 ${CMAKE_BINARY_DIR}
 ${SCRIPT_INCLUDE}
-${MYSQL_INCLUDE_DIR} 
-${POSTGRESQL_INCLUDE_DIR} 
-${CMAKE_CURRENT_BINARY_DIR}/src/shared 
+${MYSQL_INCLUDE_DIR}
+${POSTGRESQL_INCLUDE_DIR}
+${CMAKE_CURRENT_BINARY_DIR}/src/shared
 ${CMAKE_CURRENT_SOURCE_DIR}/..
 ${ACE_INCLUDE_DIR}
 )

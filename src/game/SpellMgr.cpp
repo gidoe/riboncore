@@ -1233,7 +1233,7 @@ void SpellMgr::LoadSpellTargetPositions()
         if(found)
         {
             if(!spellmgr.GetSpellTargetPosition(i))
-                sLog.outDetail("Spell (ID: %u) does not have record in `spell_target_position`", i);
+                sLog.outDebug("Spell (ID: %u) does not have record in `spell_target_position`", i);
         }
     }
 
@@ -2057,7 +2057,7 @@ void SpellMgr::LoadSpellScriptTarget()
         {
             SpellScriptTargetBounds bounds = spellmgr.GetSpellScriptTargetBounds(i);
             if(bounds.first==bounds.second)
-                sLog.outDetail("Spell (ID: %u) does not have record in `spell_script_target`", i);
+                sLog.outDebug("Spell (ID: %u) does not have record in `spell_script_target`", i);
         }
     }
 
@@ -2736,6 +2736,20 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
             if(spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED
                 || spellInfo->EffectApplyAuraName[i] == SPELL_AURA_FLY)
                 return SPELL_FAILED_INCORRECT_AREA;
+
+    // aura limitations
+    for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    {
+        switch(spellInfo->EffectApplyAuraName[i])
+        {
+            case SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED:
+            case SPELL_AURA_FLY:
+            {
+                if (player && !player->IsKnowHowFlyIn(map_id, zone_id))
+                    return SPELL_FAILED_INCORRECT_AREA;
+            }
+        }
+    }
 
     return SPELL_CAST_OK;
 }
@@ -3755,6 +3769,9 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 51852:    // The Eye of Acherus (no spawn in phase 2 in db)
             spellInfo->EffectMiscValue[0] |= 1;
+            break;
+        case 52025:    // Cleansing Totem Effect
+            spellInfo->EffectDieSides[1] = 1;
             break;
         case 51904:     // Summon Ghouls On Scarlet Crusade (core does not know the triggered spell is summon spell)
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;

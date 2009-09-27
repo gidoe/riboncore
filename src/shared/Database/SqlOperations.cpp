@@ -73,9 +73,10 @@ void SqlQuery::Execute(Database *db)
 void SqlResultQueue::Update()
 {
     /// execute the callbacks waiting in the synchronization queue
-    while(!empty())
+    Ribon::IQueryCallback* callback; 
+    while (next(callback)) 
+
     {
-        Ribon::IQueryCallback * callback = next();
         callback->Execute();
         delete callback;
     }

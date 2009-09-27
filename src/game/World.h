@@ -206,6 +206,7 @@ enum WorldConfigs
     CONFIG_INSTANT_LOGOUT,
     CONFIG_DISABLE_BREATHING,
     CONFIG_ALL_TAXI_PATHS,
+    CONFIG_INSTANT_TAXI,
     CONFIG_DECLINED_NAMES_USED,
     CONFIG_LISTEN_RANGE_SAY,
     CONFIG_LISTEN_RANGE_TEXTEMOTE,
@@ -239,6 +240,13 @@ enum WorldConfigs
     CONFIG_OUTDOORPVP_WINTERGRASP_START_TIME,
     CONFIG_OUTDOORPVP_WINTERGRASP_BATTLE_TIME,
     CONFIG_OUTDOORPVP_WINTERGRASP_INTERVAL,
+    CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR,
+    CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR_0,
+    CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR_1,
+    CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR_2,
+    CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR_3,
+    CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR_4,
+    CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR_5,
     CONFIG_NO_RESET_TALENT_COST,
     CONFIG_SHOW_KICK_IN_WORLD,
     CONFIG_INTERVAL_LOG_UPDATE,
@@ -378,7 +386,7 @@ enum RealmZone
 };
 
 // DB scripting commands
-#define SCRIPT_COMMAND_TALK                  0              // source = unit, target=any, datalong ( 0=say, 1=whisper, 2=yell, 3=emote text)
+#define SCRIPT_COMMAND_TALK                  0              // source = unit, target=any, datalong (0=say, 1=whisper, 2=yell, 3=emote text, 4=boss emote text)
 #define SCRIPT_COMMAND_EMOTE                 1              // source = unit, datalong = anim_id
 #define SCRIPT_COMMAND_FIELD_SET             2              // source = any, datalong = field_id, datalog2 = value
 #define SCRIPT_COMMAND_MOVE_TO               3              // source = Creature, datalog2 = time, x/y/z

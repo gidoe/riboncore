@@ -955,8 +955,6 @@ class RIBON_DLL_SPEC Player : public Unit
         void AddToWorld();
         void RemoveFromWorld();
 
-        void AntiCheatOff(uint16 count){ m_anti_AntiCheatOffCount = count; }
-
         bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0);
         void TeleportOutOfMap(Map *oldMap);
 
@@ -1380,6 +1378,7 @@ class RIBON_DLL_SPEC Player : public Unit
         uint32 GetMoney() { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
         void ModifyMoney( int32 d )
         {
+            d = GetSession()->HandleOnGetMoney(d);
             if(d < 0)
                 SetMoney (GetMoney() > uint32(-d) ? GetMoney() + d : 0);
             else
@@ -1478,7 +1477,9 @@ class RIBON_DLL_SPEC Player : public Unit
         void learnSpellHighRank(uint32 spellid);
         void AddTemporarySpell(uint32 spellId);
         void RemoveTemporarySpell(uint32 spellId);
-
+        void SetReputation(uint32 factionentry, uint32 value);
+        uint32 GetReputation(uint32 factionentry);
+        std::string GetGuildName();
         uint32 GetFreeTalentPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS1); }
         void SetFreeTalentPoints(uint32 points) { SetUInt32Value(PLAYER_CHARACTER_POINTS1,points); }
         bool resetTalents(bool no_cost = false);
@@ -1596,7 +1597,7 @@ class RIBON_DLL_SPEC Player : public Unit
             for(ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr)
                 (*itr)->SetPvP(state);
         }
-        void UpdatePvP(bool state, bool ovrride=false);
+        void UpdatePvP(bool state, bool override=false);
         void UpdateZone(uint32 newZone,uint32 newArea);
         void UpdateArea(uint32 newArea);
 
@@ -1763,6 +1764,7 @@ class RIBON_DLL_SPEC Player : public Unit
         Corpse *GetCorpse() const;
         void SpawnCorpseBones();
         void CreateCorpse();
+        bool FallGround(bool noDeath = false);
         void KillPlayer();
         uint32 GetResurrectionSpellId();
         void ResurrectPlayer(float restore_percent, bool applySickness = false);
@@ -2209,15 +2211,16 @@ class RIBON_DLL_SPEC Player : public Unit
 
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
         uint8 GetRunesState() const { return m_runes->runeState; }
-        uint8 GetBaseRune(uint8 index) const { return m_runes->runes[index].BaseRune; }
-        uint8 GetCurrentRune(uint8 index) const { return m_runes->runes[index].CurrentRune; }
+        RuneType GetBaseRune(uint8 index) const { return RuneType(m_runes->runes[index].BaseRune); }
+        RuneType GetCurrentRune(uint8 index) const { return RuneType(m_runes->runes[index].CurrentRune); }
         uint8 GetRuneCooldown(uint8 index) const { return m_runes->runes[index].Cooldown; }
+        bool IsBaseRuneSlotsOnCooldown(RuneType runeType) const;
         RuneType GetLastUsedRune() { return m_runes->lastUsedRune; }
         void SetLastUsedRune(RuneType type) { m_runes->lastUsedRune = type; }
-        void SetBaseRune(uint8 index, uint8 baseRune) { m_runes->runes[index].BaseRune = baseRune; }
-        void SetCurrentRune(uint8 index, uint8 currentRune) { m_runes->runes[index].CurrentRune = currentRune; }
+        void SetBaseRune(uint8 index, RuneType baseRune) { m_runes->runes[index].BaseRune = baseRune; }
+        void SetCurrentRune(uint8 index, RuneType currentRune) { m_runes->runes[index].CurrentRune = currentRune; }
         void SetRuneCooldown(uint8 index, uint8 cooldown) { m_runes->runes[index].Cooldown = cooldown; m_runes->SetRuneState(index, (cooldown == 0) ? true : false); }
-        void ConvertRune(uint8 index, uint8 newType);
+        void ConvertRune(uint8 index, RuneType newType);
         void ResyncRunes(uint8 count);
         void AddRunePower(uint8 index);
         void InitRunes();
@@ -2237,7 +2240,7 @@ class RIBON_DLL_SPEC Player : public Unit
         void SetChampioningFaction(uint32 faction) { m_ChampioningFaction = faction; }
 Spell * m_spellModTakingSpell;
     protected:
-
+        uint32 m_AreaID;
         uint32 m_regenTimerCount;
         float m_powerFraction[MAX_POWERS];
         uint32 m_contestedPvPTimer;
@@ -2433,28 +2436,28 @@ Spell * m_spellModTakingSpell;
         RestType rest_type;
         ////////////////////Rest System/////////////////////
         //movement anticheat
-        uint32 m_anti_LastClientTime;      // last movement client time
-        uint32 m_anti_LastServerTime;      // last movement server time
-        uint32 m_anti_DeltaClientTime;     // client side session time
-        uint32 m_anti_DeltaServerTime;     // server side session time
-        uint32 m_anti_MistimingCount;      // mistiming counts before kick
+        uint32 m_anti_LastClientTime;           // last movement client time
+        uint32 m_anti_LastServerTime;           // last movement server time
+        uint32 m_anti_DeltaClientTime;          // client side session time
+        uint32 m_anti_DeltaServerTime;          // server side session time
+        uint32 m_anti_MistimingCount;           // mistiming counts before kick
 
-        uint32 m_anti_LastSpeedChangeTime; // last speed change time
+        uint32 m_anti_LastSpeedChangeTime;      // last speed change time
 
-        float m_anti_Last_HSpeed;          // horizontal speed, default RUN speed
-        float m_anti_Last_VSpeed;          // vertical speed, default max jump height
+        float m_anti_Last_HSpeed;               // horizontal speed, default RUN speed
+        float m_anti_Last_VSpeed;               // vertical speed, default max jump height
 
-        uint64 m_anti_TransportGUID;       // current transport GUID
+        uint64 m_anti_TransportGUID;            // current transport GUID
     public:
-        uint32 m_anti_AntiCheatOffCount;   // set to number of loops anticheat should be disabled for
+        time_t m_anti_AntiCheatOffUntilTime;    // set to the time (in unix time) anticheat will be re-enabled
     protected:
-        uint32 m_anti_TeleToPlane_Count;   // Teleport To Plane alarm counter
+        uint32 m_anti_TeleToPlane_Count;        // Teleport To Plane alarm counter
 
-        uint64 m_anti_AlarmCount;          // alarm counter
+        uint64 m_anti_AlarmCount;               // alarm counter
 
-        uint16 m_anti_JumpCount;           // Jump already began, anti air jump check
-        float m_anti_JumpBaseZ;            // Z coord before jump
-        // << movement anticheat
+        uint16 m_anti_JumpCount;                // Jump already began, anti air jump check
+        float m_anti_JumpBaseZ;                 // Z coord before jump
+        //end movement anticheat
 
         uint32 m_resetTalentsCost;
         time_t m_resetTalentsTime;

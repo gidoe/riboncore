@@ -53,6 +53,7 @@ extern SQLStorage sEquipmentStorage;
 extern SQLStorage sGOStorage;
 extern SQLStorage sPageTextStore;
 extern SQLStorage sItemStorage;
+extern SQLStorage sItemStorageTmp;
 extern SQLStorage sInstanceTemplate;
 
 class Group;
@@ -562,7 +563,7 @@ class ObjectMgr
         void LoadGameObjectLocales();
         void LoadGameobjects();
         void LoadGameobjectRespawnTimes();
-        void LoadItemPrototypes();
+        void LoadItemPrototypes(bool reload = false);
         void LoadItemRequiredTarget();
         void LoadItemLocales();
         void LoadQuestLocales();

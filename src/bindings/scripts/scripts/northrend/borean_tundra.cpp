@@ -369,19 +369,19 @@ bool GossipSelect_npc_keristrasza(Player* pPlayer, Creature* pCreature, uint32 u
 
 enum
 {
-    SPELL_SUMMON_WYRMREST_SKYTALON                = 61240,
+    SPELL_SUMMON_WYRMREST_SKYTALON               = 61240,
     SPELL_WYRMREST_SKYTALON_RIDE_PERIODIC        = 61244,
 
-    QUEST_ACES_HIGH                                = 13414
-
+    QUEST_ACES_HIGH_DAILY                        = 13414,
+    QUEST_ACES_HIGH                              = 13413
 };
 
 bool GossipHello_npc_corastrasza(Player* pPlayer, Creature* pCreature)
 {
     if (pCreature->isQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetGUID());
-
-    if (pPlayer->GetQuestStatus(QUEST_ACES_HIGH) == QUEST_STATUS_INCOMPLETE)
+    
+    if (pPlayer->GetQuestStatus(QUEST_ACES_HIGH) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_ACES_HIGH_DAILY) == QUEST_STATUS_INCOMPLETE) //It's the same dragon for both quests.
     {
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_C_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
     }
@@ -408,7 +408,7 @@ bool GossipSelect_npc_corastrasza(Player* pPlayer, Creature* pCreature, uint32 u
 ## npc_iruk
 ######*/
 
-#define GOSSIP_ITEM_I  "Give me the Issliruk's Totem" // This is not offilike.
+#define GOSSIP_ITEM_I  "<Search corpse for Issliruk's Totem.>"
 
 enum
 {
@@ -417,7 +417,7 @@ enum
 
     SPELL_CREATURE_TOTEM_OF_ISSLIRUK        = 46816,
 
-    GOSSIP_TEXT_I                           = 12585 // This is blizzlike.
+    GOSSIP_TEXT_I                           = 12585
 
 };
 
@@ -443,7 +443,46 @@ bool GossipSelect_npc_iruk(Player* pPlayer, Creature* pCreature, uint32 uiSender
     }
     return true;
 }
+/*######
+## mob_nerubar_victim
+######*/
 
+#define WARSONG_PEON        25270
+
+const uint32 nerubarVictims[3] =
+{
+    45526, 45527, 45514
+};
+struct RIBON_DLL_DECL mob_nerubar_victimAI : public ScriptedAI
+{
+    mob_nerubar_victimAI(Creature *c) : ScriptedAI(c) {}
+
+    void Reset() {}
+    void EnterCombat(Unit *who) {}
+    void MoveInLineOfSight(Unit *who) {}
+
+    void JustDied(Unit* Killer)
+    {
+        if(Killer->GetTypeId() == TYPEID_PLAYER)
+        {
+            if( CAST_PLR(Killer)->GetQuestStatus(11611) == QUEST_STATUS_INCOMPLETE)
+            {
+                uint8 uiRand = rand()%100;
+                if(uiRand < 25)
+                {
+                    Killer->CastSpell(m_creature,45532,true);
+                    CAST_PLR(Killer)->KilledMonsterCredit(WARSONG_PEON, 0);
+                }
+                else if(uiRand < 75)
+                    Killer->CastSpell(m_creature,nerubarVictims[rand()%3],true);            
+            }
+        }
+    }
+};
+CreatureAI* GetAI_mob_nerubar_victim(Creature *pCreature)
+{
+    return new mob_nerubar_victimAI (pCreature);
+}
 void AddSC_borean_tundra()
 {
     Script *newscript;
@@ -492,5 +531,10 @@ void AddSC_borean_tundra()
     newscript->Name = "npc_iruk";
     newscript->pGossipHello = &GossipHello_npc_iruk;
     newscript->pGossipSelect = &GossipSelect_npc_iruk;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name="mob_nerubar_victim";
+    newscript->GetAI = &GetAI_mob_nerubar_victim;
     newscript->RegisterSelf();
 }

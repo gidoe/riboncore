@@ -42,9 +42,10 @@
 #include "SocialMgr.h"
 #include "UpdateMask.h"
 #include "Util.h"
+#include "ScriptCalls.h"
 #include "revision_nr.h"
 
-#define _FULLVERSION (_REVISION)
+#define _FULLVERSION (REVISION_NR)
 
 class LoginQueryHolder : public SqlQueryHolder
 {
@@ -816,6 +817,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         pCurrChar->SetStandState(UNIT_STAND_STATE_STAND);
 
     m_playerLoading = false;
+
+    //Hook for OnLogin Event
+    Script->OnLogin(pCurrChar);
+
     delete holder;
 }
 
@@ -1332,7 +1337,7 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket &recv_data)
         uint8 srcbag, srcslot;
         recv_data >> srcbag >> srcslot;
 
-        sLog.outDebug("Item " I64FMT ": srcbag %u, srcslot %u", itemGuid, srcbag, srcslot);
+        sLog.outDebug("Item " UI64FMTD ": srcbag %u, srcslot %u", itemGuid, srcbag, srcslot);
 
         Item *item = _player->GetItemByGuid(itemGuid);
 
@@ -1366,4 +1371,49 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket &recv_data)
     WorldPacket data(SMSG_EQUIPMENT_SET_USE_RESULT, 1);
     data << uint8(0);                                       // 4 - equipment swap failed - inventory is full
     SendPacket(&data);
+}
+
+void WorldSession::HandleOnPVPKill(Player *killed)
+{
+    Script->OnPVPKill(GetPlayer(), killed);
+}
+
+bool WorldSession::HandleOnPlayerChat(const char *text)
+{
+    return Script->OnPlayerChat(GetPlayer(), text);
+}
+
+uint32 WorldSession::HandleOnGetXP(uint32 amount)
+{
+    return Script->OnGetXP(GetPlayer(), amount);
+}
+
+int32 WorldSession::HandleOnGetMoney(int32 amount)
+{
+    return Script->OnGetMoney(GetPlayer(), amount);
+}
+
+void WorldSession::HandleOnAreaChange(AreaTableEntry const *pArea)
+{
+    Script->OnAreaChange(GetPlayer(), pArea);
+}
+
+bool WorldSession::HandleOnItemClick(Item *pItem)
+{
+    return Script->OnItemClick(GetPlayer(), pItem);
+}
+
+bool WorldSession::HandleOnItemOpen(Item *pItem)
+{
+    return Script->OnItemOpen(GetPlayer(), pItem);
+}
+
+bool WorldSession::HandleOnGoClick(GameObject *pGameObject)
+{
+    return Script->OnGoClick(GetPlayer(), pGameObject);
+}
+
+void WorldSession::HandleOnCreatureKill(Creature *pCreature)
+{
+    Script->OnCreatureKill(GetPlayer(), pCreature);
 }

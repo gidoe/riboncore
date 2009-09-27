@@ -154,7 +154,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectWMODamage,                                // 87 SPELL_EFFECT_WMO_DAMAGE
     &Spell::EffectWMORepair,                                // 88 SPELL_EFFECT_WMO_REPAIR
     &Spell::EffectUnused,                                   // 89 SPELL_EFFECT_WMO_CHANGE
-    &Spell::EffectKillCredit,                               // 90 SPELL_EFFECT_KILL_CREDIT
+    &Spell::EffectKillCreditPersonal,                       // 90 SPELL_EFFECT_KILL_CREDIT              Kill credit but only for single person
     &Spell::EffectUnused,                                   // 91 SPELL_EFFECT_THREAT_ALL               one spell: zzOLDBrainwash
     &Spell::EffectEnchantHeldItem,                          // 92 SPELL_EFFECT_ENCHANT_HELD_ITEM
     &Spell::EffectUnused,                                   // 93 SPELL_EFFECT_SUMMON_PHANTASM
@@ -1619,6 +1619,15 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastCustomSpell(m_caster, 53479, &healthModSpellBasePoints0, NULL, NULL, true, NULL);
                     return;
                 }
+                // Master's Call
+                case 53271:
+                {
+                    if (!m_caster->isHunterPet() || !unitTarget)
+                        return;
+                    else
+                        m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(i), true);
+                        return;
+                }
             }
             break;
         case SPELLFAMILY_PALADIN:
@@ -2744,7 +2753,12 @@ void Spell::EffectHealthLeech(uint32 i)
     if(Player *modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
 
-    int32 new_damage = int32(damage*multiplier);
+    // Do not apply multiplier to damage if it's Death Coil
+    int32 new_damage;
+    if (m_spellInfo->SpellFamilyFlags[0] & 0x80000)
+        new_damage = damage;
+    else
+        new_damage = int32(damage*multiplier);
     uint32 curHealth = unitTarget->GetHealth();
     new_damage = m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage );
     if(curHealth < new_damage)
@@ -2752,6 +2766,9 @@ void Spell::EffectHealthLeech(uint32 i)
 
     if(m_caster->isAlive())
     {
+        // Insead add it just to healing if it's Death Coil
+        if (m_spellInfo->SpellFamilyFlags[0] & 0x80000)
+            new_damage = int32(new_damage*multiplier);
         new_damage = m_caster->SpellHealingBonus(m_caster, m_spellInfo, new_damage, HEAL);
         m_caster->DealHeal(m_caster, uint32(new_damage), m_spellInfo);
     }
@@ -4796,7 +4813,7 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                     return;
                 }
                 case 55693:                                 // Remove Collapsing Cave Aura
-                    if(unitTarget)
+                    if(!unitTarget)
                         return;
                     unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(effIndex));
                     break;
@@ -5337,6 +5354,39 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                         ((TempSummon*)m_caster)->UnSummon();
                     return;
                 }
+                // Stoneclaw Totem
+                case 55328: // Rank 1
+                case 55329: // Rank 2
+                case 55330: // Rank 3
+                case 55332: // Rank 4
+                case 55333: // Rank 5
+                case 55335: // Rank 6
+                case 55278: // Rank 7
+                case 58589: // Rank 8
+                case 58590: // Rank 9
+                case 58591: // Rank 10
+                {
+                    int32 basepoints0 = damage;
+                    // Cast Absorb on totems
+                    for(uint8 slot = SUMMON_SLOT_TOTEM; slot < MAX_TOTEM_SLOT; ++slot)
+                    {
+                        if(!unitTarget->m_SummonSlot[slot])
+                            continue;
+
+                        Creature* totem = unitTarget->GetMap()->GetCreature(unitTarget->m_SummonSlot[slot]);
+                        if(totem && totem->isTotem())
+                        {
+                            m_caster->CastCustomSpell(totem, 55277, &basepoints0, NULL, NULL, true);
+                        }
+                    }
+                    // Glyph of Stoneclaw Totem
+                    if (AuraEffect *aur=unitTarget->GetAuraEffect(63298, 0))
+                    {
+                        basepoints0 *= aur->GetAmount();
+                        m_caster->CastCustomSpell(unitTarget, 55277, &basepoints0, NULL, NULL, true);
+                    }
+                    break;
+                }
             }
             break;
         }
@@ -5545,6 +5595,16 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                     }
                     if (spellId)
                         m_caster->CastCustomSpell(unitTarget, spellId, &basePoint, 0, 0, true);
+                    return;
+                }
+                // Master's Call
+                case 53271:
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // script effect have in value, but this outdated removed part
+                    unitTarget->CastSpell(unitTarget, 62305, true);
                     return;
                 }
                 default:
@@ -6865,6 +6925,14 @@ void Spell::EffectStealBeneficialBuff(uint32 i)
     }
 }
 
+void Spell::EffectKillCreditPersonal(uint32 i)
+{
+    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    ((Player*)unitTarget)->KilledMonsterCredit(m_spellInfo->EffectMiscValue[i], 0);
+}
+
 void Spell::EffectKillCredit(uint32 i)
 {
     if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -6901,7 +6969,7 @@ void Spell::EffectActivateRune(uint32  eff_idx)
 
     for(uint32 j = 0; j < MAX_RUNES; ++j)
     {
-        if(plr->GetRuneCooldown(j) && plr->GetCurrentRune(j) == m_spellInfo->EffectMiscValue[eff_idx])
+        if(plr->GetRuneCooldown(j) && plr->GetCurrentRune(j) == RuneType(m_spellInfo->EffectMiscValue[eff_idx]))
         {
             plr->SetRuneCooldown(j, 0);
         }

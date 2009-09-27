@@ -853,9 +853,9 @@ struct SpellPeriodicAuraLogInfo
 
     AuraEffect *auraEff;
     uint32 damage;
+    uint32 overDamage;                                      // overkill/overheal
     uint32 absorb;
     uint32 resist;
-    uint32 overDamage;                                      // overkill/overheal
     float  multiplier;
     bool   critical;
 };
@@ -1012,7 +1012,6 @@ struct CharmInfo
 
         CharmSpellEntry* GetCharmSpell(uint8 index) { return &(m_charmspells[index]); }
 
-        // MrSmite 09-05-2009 PetAI_v1.0
         void SetIsCommandAttack(bool val);
         bool IsCommandAttack();
         void SetIsAtStay(bool val);
@@ -1037,7 +1036,6 @@ struct CharmInfo
         //for restoration after charmed
         ReactStates     m_oldReactState;
 
-        // MrSmite 09-05-2009 PetAI_v1.0
         bool m_isCommandAttack;
         bool m_isAtStay;
         bool m_isFollowing;
@@ -1956,7 +1954,7 @@ class RIBON_DLL_SPEC Unit : public WorldObject
         //uint32 m_unit_movement_flags;
 
         uint32 m_reactiveTimer[MAX_REACTIVE];
-        int32 m_regenTimer;
+        uint32 m_regenTimer;
 
         ThreatManager m_ThreatManager;
 

@@ -951,6 +951,18 @@ enum RibonStrings
     // Use for custom patches             11000-11999
     LANG_AUTO_BROADCAST                 = 11000,
 
+    // Multilanguage Defines
+    LANG_PLAYER_GUID_NOT_FOUND          = 12000, // "BattleGround: Player (GUID: %u) not found!"
+
+    // World string defines
+    LANG_WORLD_INITIALIZE_DATA_STORE    = 50010, // "Initialize data stores..."
+    LANG_WORLD_LOAD_SCRIPT_NAMES        = 50011, // "Loading Script Names..."
+    LANG_WORLD_LOAD_INSTANCE_TEMPLATE   = 50012, // "Loading InstanceTemplate..."
+    LANG_WORLD_LOAD_SKILL_LINE_ABILITY  = 50013, // "Loading SkillLineAbilityMultiMap Data..."
+    LANG_WORLD_CLEANING_UP_INSTANCES    = 50014, // "Cleaning up instances..."
+    LANG_WORLD_PACKING_INSTANCES        = 50015, // "Packing instances..."
+    LANG_WORLD_LOAD_LOCALIZATION        = 50016, // "Loading Localization strings..."
+
     // NOT RESERVED IDS                   12000-1999999999
     // `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)
     // For other tables maybe             2000010000-2147483647 (max index)

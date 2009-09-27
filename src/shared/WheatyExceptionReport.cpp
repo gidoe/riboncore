@@ -17,7 +17,7 @@
 #include "SystemConfig.h"
 #include "revision_nr.h"
 #define CrashFolder _T("Crashes")
-#define _FULLVERSION (_REVISION)
+#define _FULLVERSION (REVISION_NR)
 
 inline LPTSTR ErrorMessage(DWORD dw)
 {

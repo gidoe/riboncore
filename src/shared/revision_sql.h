@@ -1,6 +1,6 @@
 #ifndef __REVISION_SQL_H__
 #define __REVISION_SQL_H__
- #define REVISION_DB_CHARACTERS "required_803_characters_character_db_version"
- #define REVISION_DB_RIBONCORE "required_832_world_scripts_dk"
- #define REVISION_DB_LOGON "required_803_logon_db_version"
+ #define REVISION_DB_CHARACTERS "required_894_characters_game_event"
+ #define REVISION_DB_RIBONCORE "required_954_world_scripts"
+ #define REVISION_DB_LOGON "required_875_logon_uptime"
 #endif // __REVISION_SQL_H__

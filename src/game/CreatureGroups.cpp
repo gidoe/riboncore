@@ -78,21 +78,21 @@ void CreatureGroupManager::LoadCreatureFormations()
     CreatureGroupMap.clear();
 
     //Check Integrity of the table
-    QueryResult *result = WorldDatabase.PQuery("SELECT MAX(`leaderGUID`) FROM `creature_formations`");
+    QueryResult *result = WorldDatabase.PQuery("SELECT MAX(leaderGUID) FROM creature_formations");
 
     if(!result)
     {
-        sLog.outErrorDb(" ...an error occured while loading the table `creature_formations` ( maybe it doesn't exist ?)\n");
+        sLog.outErrorDb(" ...an error occured while loading the table creature_formations ( maybe it doesn't exist ?)\n");
         return;
     }
     delete result;
 
     //Get group data
-    result = WorldDatabase.PQuery("SELECT `leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI` FROM `creature_formations` ORDER BY `leaderGUID`");
+    result = WorldDatabase.PQuery("SELECT leaderGUID, memberGUID, dist, angle, groupAI FROM creature_formations ORDER BY leaderGUID");
 
     if(!result)
     {
-        sLog.outErrorDb("The table `creature_formations` is empty or corrupted");
+        sLog.outErrorDb("The table creature_formations is empty or corrupted");
         return;
     }
 
@@ -154,7 +154,7 @@ void CreatureGroupManager::LoadCreatureFormations()
 
 void CreatureGroup::AddMember(Creature *member)
 {
-    sLog.outDebug("CreatureGroup::AddMember: Adding unit GUIDLow: %u.", member->GetGUIDLow());
+    sLog.outDebug("CreatureGroup::AddMember: Adding unit GUID: %u.", member->GetGUIDLow());
 
     //Check if it is a leader
     if(member->GetDBTableGUIDLow() == m_groupID)

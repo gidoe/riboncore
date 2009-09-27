@@ -53,6 +53,7 @@
 #include "TemporarySummon.h"
 #include "Vehicle.h"
 #include "Transports.h"
+#include "ScriptCalls.h"
 
 #include <math.h>
 
@@ -778,6 +779,20 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             ((Player*)pVictim)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_DAMAGE_RECEIVED, health);
 
         Kill(pVictim, durabilityLoss);
+
+        //Hook for OnPVPKill Event
+        if (pVictim->GetTypeId() == TYPEID_PLAYER && this->GetTypeId() == TYPEID_PLAYER)
+        {
+            Player *killer = ((Player*)this);
+            Player *killed = ((Player*)pVictim);
+            killer->GetSession()->HandleOnPVPKill(killed);
+        }
+        if (pVictim->GetTypeId() == TYPEID_UNIT && this->GetTypeId() == TYPEID_PLAYER)
+        {
+            Player *killer = ((Player*)this);
+            Creature *pCreature = ((Creature*)pVictim);
+            killer->GetSession()->HandleOnCreatureKill(pCreature);
+        }
     }
     else                                                    // if (health <= damage)
     {
@@ -7556,6 +7571,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             trigger_spell_id = 26470;
             break;
         }
+        // Deflection 
+        case 52420:
+        {
+            if(GetHealth()*100 / GetMaxHealth() >= 35)
+            return false;
+            break;
+        }
+
         // Cheat Death
         case 28845:
         {
@@ -7618,6 +7641,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
             break;
     }
+
+    // Blade Barrier
+    if (auraSpellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && auraSpellInfo->SpellIconID == 85)
+        if (this->GetTypeId() != TYPEID_PLAYER || !((Player*)this)->IsBaseRuneSlotsOnCooldown(RUNE_BLOOD))
+            return false;
 
     // Custom basepoints/target for exist spell
     // dummy basepoints or other customs
@@ -9202,7 +9230,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         }
     }
 
-     // Custom scripted damage
+    // Custom scripted damage
     switch(spellProto->SpellFamilyName)
     {
         case SPELLFAMILY_MAGE:
@@ -9215,18 +9243,16 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
 
             // Torment the weak
             if (spellProto->SpellFamilyFlags[0]&0x20200021 || spellProto->SpellFamilyFlags[1]& 0x9000)
-            {
                 if(pVictim->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED))
                 {
                     AuraEffectList const& mDumyAuras = GetAurasByType(SPELL_AURA_DUMMY);
                     for(AuraEffectList::const_iterator i = mDumyAuras.begin(); i != mDumyAuras.end(); ++i)
                         if ((*i)->GetSpellProto()->SpellIconID == 3263)
                         {
-                            DoneTotalMod *=float((*i)->GetAmount() + 100.f) / 100.f;
+                            DoneTotalMod *= float((*i)->GetAmount() + 100.f) / 100.f;
                             break;
                         }
                 }
-            }
         break;
         // Glyph of Shadow Word: Pain
         case SPELLFAMILY_PRIEST:
@@ -9241,7 +9267,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         break;
 
         case SPELLFAMILY_PALADIN:
-            // Judgement of Vengeance/ Judgement of Corruption
+            // Judgement of Vengeance/Judgement of Corruption
             if((spellProto->SpellFamilyFlags[1] & 0x400000) && spellProto->SpellIconID==2292)
             {
                 // Get stack of Holy Vengeance/Blood Corruption on the target added by caster
@@ -9258,19 +9284,31 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                     DoneTotalMod *= (10.0f + (float)stacks) / 10.0f;
             }
         break;
+        case SPELLFAMILY_WARLOCK:
+            //Fire and Brimstone
+            if(spellProto->SpellFamilyFlags[1] & 0x00020040)
+                if(pVictim->HasAuraState(AURA_STATE_CONFLAGRATE))
+                {
+                    AuraEffectList const& mDumyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+                    for(AuraEffectList::const_iterator i = mDumyAuras.begin(); i != mDumyAuras.end(); ++i)
+                        if ((*i)->GetSpellProto()->SpellIconID == 3173)
+                        {
+                            DoneTotalMod *= float((*i)->GetAmount() + 100.f) / 100.f;
+                            break;
+                        }
+                }
+        break;
         case SPELLFAMILY_DEATHKNIGHT:
             // Improved Icy Touch
             if (spellProto->SpellFamilyFlags[0] & 0x2)
-            {
                 if (AuraEffect * aurEff = GetDummyAura(SPELLFAMILY_DEATHKNIGHT, 2721, 0))
-                    DoneTotalMod *= (100.0f + aurEff->GetAmount()) / 100.0f ;
-            }
+                    DoneTotalMod *= (100.0f + aurEff->GetAmount()) / 100.0f;
+
             // Glacier Rot
             if (spellProto->SpellFamilyFlags[0] & 0x2 || spellProto->SpellFamilyFlags[1] & 0x6)
-            {
                 if (AuraEffect * aurEff = GetDummyAura(SPELLFAMILY_DEATHKNIGHT, 196, 0))
                     DoneTotalMod *= (100.0f + aurEff->GetAmount()) / 100.0f;
-            }
+
             // This is not a typo - Impurity has SPELLFAMILY_DRUID
             if (AuraEffect * aurEff = GetDummyAura(SPELLFAMILY_DRUID, 1986, 0))
                 ApCoeffMod *= (100.0f + aurEff->GetAmount()) / 100.0f;
@@ -10541,9 +10579,9 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
     if(GetTypeId() != TYPEID_PLAYER)
     {
         // Set home position at place of engaging combat for escorted creatures
-        if(((Creature*)this)->IsAIEnabled)
-            if (((Creature *)this)->AI()->IsEscorted())
-                ((Creature*)this)->SetHomePosition(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+        if((((Creature*)this)->IsAIEnabled && ((Creature*)this)->AI()->IsEscorted()) || ((Creature*)this)->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE) 
+             ((Creature*)this)->SetHomePosition(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation()); 
+
         if(enemy)
         {
             if(((Creature*)this)->IsAIEnabled)
@@ -12604,8 +12642,8 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                     ((Player*)this)->UpdateCombatSkills(pTarget, attType, isVictim);
             }
             // Update defence if player is victim and parry/dodge/block
-            if (isVictim && procExtra&(PROC_EX_DODGE|PROC_EX_PARRY|PROC_EX_BLOCK))
-                ((Player*)this)->UpdateDefense();
+            else if (isVictim && procExtra&(PROC_EX_DODGE|PROC_EX_PARRY|PROC_EX_BLOCK))
+                    ((Player*)this)->UpdateCombatSkills(pTarget, attType, MELEE_HIT_DODGE);
         }
         // If exist crit/parry/dodge/block need update aura state (for victim and attacker)
         if (procExtra & (PROC_EX_CRITICAL_HIT|PROC_EX_PARRY|PROC_EX_DODGE|PROC_EX_BLOCK))
@@ -13641,6 +13679,15 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
     // Prevent killing unit twice (and giving reward from kill twice)
     if (!pVictim->GetHealth())
         return;
+
+    // Inform pets (if any) when player kills target)
+    if (this->GetTypeId() == TYPEID_PLAYER && ((Player*)this)->GetPet())
+    {
+        Pet *pPet = ((Player *)this)->GetPet();
+
+        if (pPet && pPet->isAlive() && pPet->isControlled())
+            pPet->AI()->KilledUnit(pVictim);
+    }
 
     //sLog.outError("%u kill %u", GetEntry(), pVictim->GetEntry());
 
@@ -15053,8 +15100,7 @@ void Unit::OutDebugInfo() const
     if(GetVehicle())
         sLog.outString("On vehicle %u.", GetVehicleBase()->GetEntry());
 }
- 
-// MrSmite 09-05-2009 PetAI_v1.0
+
 void CharmInfo::SetIsCommandAttack(bool val)
 {
     m_isCommandAttack = val;

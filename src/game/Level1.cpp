@@ -519,7 +519,7 @@ bool ChatHandler::HandleGMTicketAssignToCommand(const char* args)
     }
     uint64 tarGUID = objmgr.GetPlayerGUIDByName(targm.c_str());
     uint64 accid = objmgr.GetPlayerAccountIdByGUID(tarGUID);
-    QueryResult *result = loginDatabase.PQuery("SELECT `gmlevel` FROM `account` WHERE `id` = '%u'", accid);
+    QueryResult *result = loginDatabase.PQuery("SELECT gmlevel FROM account WHERE id = '%u'", accid);
     if(!tarGUID|| !result || result->Fetch()->GetUInt32() < SEC_MODERATOR)
     {
         SendSysMessage(LANG_COMMAND_TICKETASSIGNERROR_A);
@@ -2755,7 +2755,7 @@ bool ChatHandler::HandleGoTaxinodeCommand(const char* args)
         return false;
     }
 
-    if (node->x == 0.0f && node->y == 0.0f && node->z == 0.0f ||
+    if ((node->x == 0.0f && node->y == 0.0f && node->z == 0.0f) ||
         !MapManager::IsValidMapCoord(node->map_id,node->x,node->y,node->z))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,node->x,node->y,node->map_id);
@@ -2892,7 +2892,7 @@ bool ChatHandler::HandleGoZoneXYCommand(const char* args)
     float y = (float)atof(py);
 
     // prevent accept wrong numeric args
-    if (x==0.0f && *px!='0' || y==0.0f && *py!='0')
+    if ((x==0.0f && *px!='0') || (y==0.0f && *py!='0'))
         return false;
 
     uint32 areaid = cAreaId ? (uint32)atoi(cAreaId) : _player->GetZoneId();

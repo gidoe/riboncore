@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2009 Ribon <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -945,7 +945,7 @@ struct RIBON_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
                             DoScriptText(SAY_LIGHT_OF_DAWN51, pTemp);
                             if (Unit* pTirion = Unit::GetCreature(*me, uiTirionGUID))
                             {
-                                ((Unit*)pTirion)->SetStandState(UNIT_STAND_STATE_KNEEL);
+                                pTirion->SetStandState(UNIT_STAND_STATE_KNEEL);
                                 //pTemp->CastSpell(pTirion, SPELL_APOCALYPSE, false); // not working
                                 pTemp->CastSpell(pTirion, SPELL_SOUL_FEAST_TIRION, false);
                                 DoScriptText(EMOTE_LIGHT_OF_DAWN12, pTirion);
@@ -1018,33 +1018,33 @@ struct RIBON_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
                         {
                             pTemp->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
                             pTemp->SetSpeed(MOVE_RUN, 6.0f);
-                            ((Unit*)pTemp)->SetStandState(UNIT_STAND_STATE_DEAD);
+                            pTemp->SetStandState(UNIT_STAND_STATE_DEAD);
                             pTemp->GetMotionMaster()->MovePoint(0, LightofDawnLoc[14].x, LightofDawnLoc[14].y, LightofDawnLoc[14].z);
                         }
                         if (Creature* pTemp = Unit::GetCreature(*me, uiKorfaxGUID))
                         {
                             pTemp->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
                             pTemp->SetSpeed(MOVE_RUN, 6.0f);
-                            ((Unit*)pTemp)->SetStandState(UNIT_STAND_STATE_DEAD);
+                            pTemp->SetStandState(UNIT_STAND_STATE_DEAD);
                             pTemp->GetMotionMaster()->MovePoint(0, LightofDawnLoc[11].x, LightofDawnLoc[11].y, LightofDawnLoc[11].z);
                         }
                         if (Creature* pTemp = Unit::GetCreature(*me, uiEligorGUID))
                         {
                             pTemp->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
                             pTemp->SetSpeed(MOVE_RUN, 6.0f);
-                            ((Unit*)pTemp)->SetStandState(UNIT_STAND_STATE_DEAD);
+                            pTemp->SetStandState(UNIT_STAND_STATE_DEAD);
                             pTemp->GetMotionMaster()->MovePoint(0, LightofDawnLoc[17].x, LightofDawnLoc[17].y, LightofDawnLoc[17].z);
                         }
                         if (Creature* pTemp = Unit::GetCreature(*me, uiDefenderGUID[0]))
                         {
                             pTemp->SetSpeed(MOVE_RUN, 6.0f);
-                            ((Unit*)pTemp)->SetStandState(UNIT_STAND_STATE_DEAD);
+                            pTemp->SetStandState(UNIT_STAND_STATE_DEAD);
                             pTemp->GetMotionMaster()->MovePoint(0, LightofDawnLoc[0].x+rand()%10, LightofDawnLoc[0].y+rand()%10, LightofDawnLoc[0].z);
                         }
                         if (Creature* pTemp = Unit::GetCreature(*me, uiEarthshatterGUID[0]))
                         {
                             pTemp->SetSpeed(MOVE_RUN, 6.0f);
-                            ((Unit*)pTemp)->SetStandState(UNIT_STAND_STATE_DEAD);
+                            pTemp->SetStandState(UNIT_STAND_STATE_DEAD);
                             pTemp->GetMotionMaster()->MovePoint(0, LightofDawnLoc[0].x+rand()%10, LightofDawnLoc[0].y+rand()%10, LightofDawnLoc[0].z);
                         }
                         JumpToNextStep(3000);
@@ -1052,11 +1052,11 @@ struct RIBON_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
 
                     case 44: // make them stand up
                         if (Creature* pTemp = Unit::GetCreature(*me, uiMaxwellGUID))
-                            ((Unit*)pTemp)->SetStandState(UNIT_STAND_STATE_STAND);
+                            pTemp->SetStandState(UNIT_STAND_STATE_STAND);
                         if (Creature* pTemp = Unit::GetCreature(*me, uiKorfaxGUID))
-                            ((Unit*)pTemp)->SetStandState(UNIT_STAND_STATE_STAND);
+                            pTemp->SetStandState(UNIT_STAND_STATE_STAND);
                         if (Creature* pTemp = Unit::GetCreature(*me, uiEligorGUID))
-                            ((Unit*)pTemp)->SetStandState(UNIT_STAND_STATE_STAND);
+                            pTemp->SetStandState(UNIT_STAND_STATE_STAND);
                         JumpToNextStep(1000);
                         break;
 
@@ -1079,7 +1079,7 @@ struct RIBON_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
                         DoScriptText(EMOTE_LIGHT_OF_DAWN15, me);
                         if (Creature* pTemp = Unit::GetCreature(*me, uiTirionGUID))
                         {
-                            ((Unit*)pTemp)->SetStandState(UNIT_STAND_STATE_STAND);
+                            pTemp->SetStandState(UNIT_STAND_STATE_STAND);
                             pTemp->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, uint32(EQUIP_HIGHLORD_TIRION_FORDRING));
                             pTemp->CastSpell(pTemp, SPELL_REBIRTH_OF_THE_ASHBRINGER, false);
                         }
@@ -1153,13 +1153,13 @@ struct RIBON_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
 
                     case 55:
                         if (Creature* pTemp = Unit::GetCreature(*me, uiLichKingGUID))
-                            ((Unit*)pTemp)->SetStandState(UNIT_STAND_STATE_KNEEL);
+                            pTemp->SetStandState(UNIT_STAND_STATE_KNEEL);
                         JumpToNextStep(2000);
                         break;
 
                     case 56:
                         if (Creature* pTemp = Unit::GetCreature(*me, uiLichKingGUID))
-                            ((Unit*)pTemp)->SetStandState(UNIT_STAND_STATE_STAND);
+                            pTemp->SetStandState(UNIT_STAND_STATE_STAND);
                         JumpToNextStep(1500);
                         break;
 
@@ -1297,62 +1297,49 @@ struct RIBON_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
             {
                 DoCast(me, SPELL_ANTI_MAGIC_ZONE1);
                 uiAnti_magic_zone = 25000 + rand()%5000;
-            }else uiAnti_magic_zone -= diff;
+            } else uiAnti_magic_zone -= diff;
 
             if (uiDeath_strike < diff)
             {
                 DoCast(me->getVictim(), SPELL_DEATH_STRIKE);
                 uiDeath_strike = 5000 + rand()%5000;
-            }else uiDeath_strike -= diff;
+            } else uiDeath_strike -= diff;
 
             if (uiDeath_embrace < diff)
             {
                 DoCast(me->getVictim(), SPELL_DEATH_EMBRACE);
                 uiDeath_embrace = 5000 + rand()%5000;
-            }else uiDeath_embrace -= diff;
+            } else uiDeath_embrace -= diff;
 
             if (uiIcy_touch < diff)
             {
                 DoCast(me->getVictim(), SPELL_ICY_TOUCH1);
                 uiIcy_touch = 5000 + rand()%5000;
-            }else uiIcy_touch -= diff;
+            } else uiIcy_touch -= diff;
 
             if (uiUnholy_blight < diff)
             {
                 DoCast(me->getVictim(), SPELL_UNHOLY_BLIGHT);
                 uiUnholy_blight = 5000 + rand()%5000;
-            }else uiUnholy_blight -= diff;
+            } else uiUnholy_blight -= diff;
 
             if (uiFight_speech < diff)
             {
-                switch(rand()%15)
-                {
-                    case 0: DoScriptText(SAY_LIGHT_OF_DAWN09, me);break;
-                    case 1: DoScriptText(SAY_LIGHT_OF_DAWN10, me);break;
-                    case 2: DoScriptText(SAY_LIGHT_OF_DAWN11, me);break;
-                    case 3: DoScriptText(SAY_LIGHT_OF_DAWN12, me);break;
-                    case 4: DoScriptText(SAY_LIGHT_OF_DAWN13, me);break;
-                    case 5: DoScriptText(SAY_LIGHT_OF_DAWN14, me);break;
-                    case 6: DoScriptText(SAY_LIGHT_OF_DAWN15, me);break;
-                    case 7: DoScriptText(SAY_LIGHT_OF_DAWN16, me);break;
-                    case 8: DoScriptText(SAY_LIGHT_OF_DAWN17, me);break;
-                    case 9: DoScriptText(SAY_LIGHT_OF_DAWN18, me);break;
-                    case 10: DoScriptText(SAY_LIGHT_OF_DAWN19, me);break;
-                    case 11: DoScriptText(SAY_LIGHT_OF_DAWN20, me);break;
-                    case 12: DoScriptText(SAY_LIGHT_OF_DAWN21, me);break;
-                    case 13: DoScriptText(SAY_LIGHT_OF_DAWN22, me);break;
-                    case 14: DoScriptText(SAY_LIGHT_OF_DAWN23, me);break;
-                    case 15: DoScriptText(SAY_LIGHT_OF_DAWN24, me);break;
-                }
+                DoScriptText(RAND(SAY_LIGHT_OF_DAWN09,SAY_LIGHT_OF_DAWN10,SAY_LIGHT_OF_DAWN11,
+                                  SAY_LIGHT_OF_DAWN12,SAY_LIGHT_OF_DAWN13,SAY_LIGHT_OF_DAWN14,
+                                  SAY_LIGHT_OF_DAWN15,SAY_LIGHT_OF_DAWN16,SAY_LIGHT_OF_DAWN17,
+                                  SAY_LIGHT_OF_DAWN18,SAY_LIGHT_OF_DAWN19,SAY_LIGHT_OF_DAWN20,
+                                  SAY_LIGHT_OF_DAWN21,SAY_LIGHT_OF_DAWN22,SAY_LIGHT_OF_DAWN23,
+                                  SAY_LIGHT_OF_DAWN24), me);
                 uiFight_speech = 15000 + rand()%5000;
-            }else uiFight_speech -= diff;
+            } else uiFight_speech -= diff;
 
             // Check spawns
             if (uiSpawncheck < diff)
             {
                 SpawnNPC();
                 uiSpawncheck = 1000;
-            }else uiSpawncheck -= diff;
+            } else uiSpawncheck -= diff;
 
             // Check targets
             if (uiTargetcheck < diff)
@@ -1370,7 +1357,7 @@ struct RIBON_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
                 NPCChangeTarget(uiThassarianGUID);
 
                 uiTargetcheck = 10000;
-            }else uiTargetcheck -= diff;
+            } else uiTargetcheck -= diff;
 
             // Battle end
             if (uiFight_duration < diff + 5000)
@@ -1476,7 +1463,7 @@ struct RIBON_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
 
                 SetHoldState(false);
 
-            }else uiFight_duration -= diff;
+            } else uiFight_duration -= diff;
 
             DoMeleeAttackIfReady();
         }
@@ -1495,12 +1482,12 @@ struct RIBON_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
                 if (Unit* pTarger = SelectUnit(SELECT_TARGET_RANDOM,0))
                     if (pTarger->isAlive())
                     {
-                        //((Creature*)pTemp)->DeleteThreatList();
-                        ((Creature*)pTemp)->AddThreat(pTarger, 0.0f);
-                        ((Creature*)pTemp)->AI()->AttackStart(pTarger);
-                        ((Creature*)pTemp)->SetInCombatWith(pTarger);
+                        // pTemp->DeleteThreatList();
+                        pTemp->AddThreat(pTarger, 0.0f);
+                        pTemp->AI()->AttackStart(pTarger);
+                        pTemp->SetInCombatWith(pTarger);
                         pTarger->SetInCombatWith(pTemp);
-                        //((Creature*)pTemp)->GetMotionMaster()->MoveChase(pTarger, 20.0f);
+                        // pTemp->GetMotionMaster()->MoveChase(pTarger, 20.0f);
                     }
     }
 

@@ -1,4 +1,6 @@
--- Up to RC 832-- --------
+-- Up to RC 954
+
+-- --------
 -- LINKED
 -- --------
 # spell1 / spell2 / type
@@ -32,8 +34,8 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 (-49012, 49010, 0, 'Wyvern Sting'),
 ( 47585, 60069, 2, 'Dispersion (transform/regen)'),
 ( 47585, 63230, 2, 'Dispersion (immunity)'),
-( 61847, 61848, 2, 'Aspect of te dragonhawk'),
-( 61846, 61848, 2, 'Aspect of te dragonhawk'),
+( 61847, 61848, 2, 'Aspect of the dragonhawk'),
+( 61846, 61848, 2, 'Aspect of the dragonhawk'),
 ( 47988, 54501, 2, 'Consume Shadows - Rank 9'),
 ( 47987, 54501, 2, 'Consume Shadows - Rank 8'),
 ( 27272, 54501, 2, 'Consume Shadows - Rank 7'),
@@ -88,9 +90,9 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 ( 36574, 36650, 0, 'Apply Phase Slip Vulnerability'),
 -- instance
 (-30410, 44032, 0, 'Manticron Cube Mind Exhaustion'),
-(-33711, 33686, 0, 'Murmur\'s Shockwave (Normal)'),
-(-38794, 33686, 0, 'Murmur\'s Shockwave (Heroic)'),
-( 33686, 31705, 0, 'Murmur\'s Shockwave Jump'),
+(-33711, 33686, 0, 'Murmur''s Shockwave (Normal)'),
+(-38794, 33686, 0, 'Murmur''s Shockwave (Heroic)'),
+( 33686, 31705, 0, 'Murmur''s Shockwave Jump'),
 -- Zul'aman
 ( 44008, 45265, 1, 'Static Disruption Visual'),
 ( 43648, 44007, 1, 'Storm Eye Safe Zone'),
@@ -139,8 +141,8 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 ( 46262, 46265, 0, 'Void Zone Visual'),
 -- naxx
 (-28169, 28206, 0, 'Mutating Injection - Mutagen Explosion'),
-( 28732,-28798, 1, 'Widow\'s Embrace - Frenzy'),
-( 54097,-54100, 1, 'Widow\'s Embrace - Frenzy (H)'),
+( 28732,-28798, 1, 'Widow''s Embrace - Frenzy'),
+( 54097,-54100, 1, 'Widow''s Embrace - Frenzy (H)'),
 (-28169, 28240, 0, 'Mutating Injection - Poison Cloud'),
 -- Archavon
 ( 58666, 58672, 1, 'Impale (Archavon)'),
@@ -718,6 +720,8 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `Spell
 ( 20180, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000043,   0,   0,   0), -- Reckoning (Rank 4)
 ( 20181, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000043,   0,   0,   0), -- Reckoning (Rank 3)
 ( 20182, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000043,   0,   0,   0), -- Reckoning (Rank 5)
+( 20185, 0x01,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,  15,   0,   0), -- Judgement of Light
+( 20186, 0x01,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,  15,   0,   0), -- Judgement of Wisdom
 ( 20210, 0x00,  10, 0xC0000000, 0x00010000, 0x00000000, 0x00000000, 0x00000002,   0,   0,   0), -- Illumination (Rank 1)
 ( 20212, 0x00,  10, 0xC0000000, 0x00010000, 0x00000000, 0x00000000, 0x00000002,   0,   0,   0), -- Illumination (Rank 2)
 ( 20213, 0x00,  10, 0xC0000000, 0x00010000, 0x00000000, 0x00000000, 0x00000002,   0,   0,   0), -- Illumination (Rank 3)
@@ -1345,7 +1349,7 @@ INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `Spell
 ( 56834, 0x00,  15, 0x00440000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Reaping (Rank 2)
 ( 56835, 0x00,  15, 0x00440000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,   0), -- Reaping (Rank 3)
 ( 57345, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,   0,   0,  45), -- Darkmoon Card: Greatness 
-( 57352, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00051154,   0,   0,  45), -- Darkmoon Card: Death 
+( 57352, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00051154, 0x00000000,   0,   0,  45), -- Darkmoon Card: Death 
 ( 57878, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000010,   0,   0,   0), -- Natural Reaction (Rank 1)
 ( 57880, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000010,   0,   0,   0), -- Natural Reaction (Rank 2)
 ( 57881, 0x00,   0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000010,   0,   0,   0), -- Natural Reaction (Rank 3)
@@ -2116,8 +2120,8 @@ DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN
 (28732,54097,-29865,-55053,-28169,28059,39088,-28059,-39088,28062,39090,28084,
 39091,-28084,-39091,28085,39093);
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
-( 28732,-28798,  1, 'Widow\'s Embrace - Frenzy'),
-( 54097,-54100,  1, 'Widow\'s Embrace - Frenzy (H)'),
+( 28732,-28798,  1, 'Widow''s Embrace - Frenzy'),
+( 54097,-54100,  1, 'Widow''s Embrace - Frenzy (H)'),
 (-29865, 55594,  0, 'Deathbloom'),
 (-55053, 55601,  0, 'Deathbloom (H)'),
 (-28169, 28206,  0, 'Mutating Injection - Mutagen Explosion'),
@@ -2254,7 +2258,7 @@ update game_graveyard_zone set ghost_zone = 4603 where id = 1474;
 -- temp
 
 UPDATE `creature_template` SET `ScriptName`='boss_netherspite', `RegenHealth` = '1' WHERE `entry`='15689';
-UPDATE `creature_template` SET `faction_A` = '35', `faction_H` = '35', `modelid_A`='11686', `modelid_H`='11686', `unit_flags` = '33554496', `ScriptName` = '' WHERE `entry` IN ('17367','17368','17369');
+UPDATE `creature_template` SET `faction_A` = '35', `faction_H` = '35', `modelid1`='11686', `modelid3`='11686', `unit_flags` = '33554496', `ScriptName` = '' WHERE `entry` IN ('17367','17368','17369');
 UPDATE `creature_template` SET `minlevel` = '70', `maxlevel` = '70',`flags_extra`= '2', `speed`= '0.0001', `faction_A` = '16', `faction_H` = '16', `ScriptName` = 'mob_eventai'  WHERE `entry` = '16697';
 DELETE FROM `creature_ai_scripts` WHERE `creature_id` = '16697';
 INSERT INTO `creature_ai_scripts`
@@ -2263,9 +2267,9 @@ INSERT INTO `creature_ai_scripts`
 ('1669702', '16697',         '1',         '100',          '3',        '3000',        '3000',        '3000',        '3000',          '11',         '46264',             '0',             '2','Void Zone - Cast Void Zone Effect');
 DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN ('-30421','-30422','-30423','38637','38638','38639');
 INSERT INTO `spell_linked_spell`(`spell_trigger`,`spell_effect`,`type`,`comment`) VALUES
-('-30421','38637','0','Netherspite\'s Perseverence'),
-('-30422','38638','0','Netherspite\'s Serenity'),
-('-30423','38639','0','Netherspite\'s Dominance');
+('-30421','38637','0','Netherspite''s Perseverence'),
+('-30422','38638','0','Netherspite''s Serenity'),
+('-30423','38639','0','Netherspite''s Dominance');
 UPDATE `script_texts` SET `type` = '3' WHERE `entry` IN ('-1532089','-1532090');
 
 
@@ -2276,13 +2280,14 @@ INSERT INTO `spell_script_target` ( `entry`, `type`, `targetEntry`) VALUES ('519
 # the lurker below
 update creature_template set inhabittype=3 where entry=21217;
 
+
 -- update creature_template set ScriptName = 'npc_iruk' where entry = 26219;
 -- UPDATE creature_template SET ScriptName = 'npc_corastrasza' WHERE entry = 32548;
 
 DELETE FROM `spell_script_target` WHERE entry = 61245;
 INSERT INTO `spell_script_target` (`entry`, `type`, `targetEntry`) VALUES
 (61245, 1, 32535);
- 
+
 UPDATE creature_template SET VehicleId = 165 , spell1 = 56091,spell2 = 56092,spell3 = 57090,spell4 = 57143 ,spell5 = 57108,spell6=57403, unit_class = 1, minhealth = 100000, maxhealth = 100000 WHERE entry = 32535;
 UPDATE creature_template SET armor = 9729, mindmg = 422, maxdmg=586, minrangedmg=345, maxrangedmg=509, attackpower=642, rangedattackpower=103 WHERE entry = 32535;
 update creature set DeathState = 0 where id = 26219;

@@ -424,6 +424,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\scripts\eastern_kingdoms\duskwood.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\scripts\eastern_kingdoms\eastern_plaguelands.cpp"
 					>
 				</File>
@@ -1172,6 +1176,22 @@
 					</File>
 					<File
 						RelativePath="..\scripts\eastern_kingdoms\zulgurub\instance_zulgurub.cpp"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Sunken Temple"
+					>
+					<File
+						RelativePath="..\scripts\eastern_kingdoms\sunken_temple\def_sunken_temple.h"
+						>
+					</File>
+					<File
+						RelativePath="..\scripts\eastern_kingdoms\sunken_temple\instance_sunken_temple.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\scripts\eastern_kingdoms\sunken_temple\sunken_temple.cpp"
 						>
 					</File>
 				</Filter>
@@ -2649,6 +2669,10 @@
 				</File>
 				<File
 					RelativePath="..\scripts\custom\npc_wyrmresttempel_taxi.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\scripts\custom\on_events.cpp"
 					>
 				</File>
 			</Filter>

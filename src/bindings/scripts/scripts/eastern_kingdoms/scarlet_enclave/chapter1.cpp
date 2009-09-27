@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2009 Ribon <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@ enum
 #define EVENT_BLOOD_STRIKE              3
 #define EVENT_DEATH_COIL                4
 
+//used by 29519,29520,29565,29566,29567 but signed for 29519
 int32 say_event_start[8] =
 {
     -1609000,-1609001,-1609002,-1609003,
@@ -376,7 +377,7 @@ struct RIBON_DLL_DECL npc_death_knight_initiateAI : public CombatAI
         {
             if (pDoneBy->GetGUID() != m_uiDuelerGUID && pDoneBy->GetOwnerGUID() != m_uiDuelerGUID) // other players cannot help
                 uiDamage = 0;
-            else if (uiDamage >= m_creature->GetHealth())
+            else if (uiDamage >= me->GetHealth())
             {
                 uiDamage = 0;
 
@@ -388,6 +389,8 @@ struct RIBON_DLL_DECL npc_death_knight_initiateAI : public CombatAI
                     lose = true;
                     me->CastSpell(me, SPELL_ID_DUEL_BEG, true);
                     me->RestoreFaction();
+                    Player* pPlayer = pDoneBy->GetPlayer(m_uiDuelerGUID);
+                    pPlayer->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
                 }
             }
         }
@@ -708,18 +711,26 @@ CreatureAI* GetAI_npc_dkc1_gothik(Creature* pCreature)
 
 struct RIBON_DLL_DECL npc_scarlet_ghoulAI : public ScriptedAI
 {
-    npc_scarlet_ghoulAI(Creature *c) : ScriptedAI(c) {}
+    npc_scarlet_ghoulAI(Creature *c) : ScriptedAI(c)
+    {
+        me->SetReactState(REACT_DEFENSIVE);
+    }
 
-    void MoveInLineOfSight(Unit *target)
+    void UpdateAI(const uint32 diff)
     {
-        EnterEvadeMode();
-        return;
-    }
-    void Aggro(Unit *who)
-    {
-        EnterEvadeMode();
-        return;
-    }
+        if (Unit *owner = m_creature->GetOwner())
+        {
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (CAST_PLR(owner)->GetQuestStatus(12698) != QUEST_STATUS_INCOMPLETE)
+                {
+                    m_creature->ForcedDespawn();
+                    m_creature->GetOwner()->RemoveAllMinionsByEntry(28845);
+                }
+            }
+        }
+         ScriptedAI::UpdateAI(diff);
+   }
 };
 
 CreatureAI* GetAI_npc_scarlet_ghoul(Creature* pCreature)
@@ -739,7 +750,7 @@ struct RIBON_DLL_DECL npc_scarlet_miner_cartAI : public PassiveAI
     npc_scarlet_miner_cartAI(Creature *c) : PassiveAI(c), minerGUID(0)
     {
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-        me->SetDisplayId(me->GetCreatureInfo()->DisplayID_A[0]); // H0 is horse
+        me->SetDisplayId(me->GetCreatureInfo()->Modelid1); // H0 is horse
     }
 
     uint64 minerGUID;
@@ -913,7 +924,7 @@ bool GOHello_go_inconspicuous_mine_car(Player* pPlayer, GameObject* pGO)
 {
     if (pPlayer->GetQuestStatus(12701) == QUEST_STATUS_INCOMPLETE)
     {
-        // Hack Why Trinity Dont Support Custom Summon Location
+        // Hack Why Ribon Dont Support Custom Summon Location
         if(Creature *miner = pPlayer->SummonCreature(28841, 2383.869629, -5900.312500, 107.996086, pPlayer->GetOrientation(),TEMPSUMMON_DEAD_DESPAWN, 1))
         {
             pPlayer->CastSpell(pPlayer, SPELL_CART_SUMM, true);

@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
-  `required_832_world_scripts_dk` bit(1) default NULL
+  `required_954_world_scripts` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 
 --
@@ -511,10 +511,10 @@ CREATE TABLE `creature_template` (
   `heroic_entry` mediumint(8) unsigned NOT NULL default '0',
   `unk1` int(11) unsigned NOT NULL default '0',
   `unk2` int(11) unsigned NOT NULL default '0',
-  `modelid_A` mediumint(8) unsigned NOT NULL default '0',
-  `modelid_A2` mediumint(8) unsigned NOT NULL default '0',
-  `modelid_H` mediumint(8) unsigned NOT NULL default '0',
-  `modelid_H2` mediumint(8) unsigned NOT NULL default '0',
+  `modelid1` mediumint(8) unsigned NOT NULL default '0',
+  `modelid2` mediumint(8) unsigned NOT NULL default '0',
+  `modelid3` mediumint(8) unsigned NOT NULL default '0',
+  `modelid4` mediumint(8) unsigned NOT NULL default '0',
   `name` char(100) NOT NULL default '0',
   `subname` char(100) default NULL,
   `IconName` char(100) default NULL,
@@ -1287,7 +1287,7 @@ CREATE TABLE `item_template` (
   `RequiredReputationFaction` smallint(5) unsigned NOT NULL default '0',
   `RequiredReputationRank` smallint(5) unsigned NOT NULL default '0',
   `maxcount` smallint(5) NOT NULL default '-1',
-  `stackable` smallint(5) NOT NULL default '1',
+  `stackable` int NOT NULL default '1',
   `ContainerSlots` tinyint(3) unsigned NOT NULL default '0',
   `StatsCount` tinyint(3) unsigned NOT NULL default '0',
   `stat_type1` tinyint(3) unsigned NOT NULL default '0',
@@ -1909,7 +1909,7 @@ CREATE TABLE `npc_spellclick_spells` (
   `spell_id` int(10) unsigned NOT NULL COMMENT 'spell which should be casted ',
   `quest_start`        mediumint(8) unsigned NOT NULL COMMENT 'reference to quest_template',
   `quest_start_active` tinyint(1) unsigned NOT NULL default '0',
-  `quest_end`          mediumint(8) unsigned NOT NULL default '0',  
+  `quest_end`          mediumint(8) unsigned NOT NULL default '0',
   `cast_flags` tinyint(3) unsigned NOT NULL COMMENT 'first bit defines caster: 1=player, 0=creature; second bit defines target, same mapping as caster bit',
   `aura_required` int(11) unsigned NOT NULL default '0' COMMENT 'player without aura cant click',
   `aura_forbidden` int(11) unsigned NOT NULL default '0' COMMENT 'player with aura cant click',
@@ -2616,6 +2616,7 @@ DROP TABLE IF EXISTS `script_texts`;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `script_texts` (
+  `npc_entry` mediumint(8) NOT NULL default '0' COMMENT 'creature_template entry',
   `entry` mediumint(8) NOT NULL,
   `content_default` text NOT NULL,
   `content_loc1` text,
@@ -2631,9 +2632,10 @@ CREATE TABLE `script_texts` (
   `language` tinyint(3) unsigned NOT NULL default '0',
   `emote` smallint(5) unsigned NOT NULL default '0',
   `comment` text,
-  PRIMARY KEY  (`entry`)
+  PRIMARY KEY  (`npc_entry`,`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Script Texts';
 SET character_set_client = @saved_cs_client;
+
 
 --
 -- Table structure for table `script_waypoint`
@@ -3133,15 +3135,15 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `ribon_string` (
   `entry` mediumint(8) unsigned NOT NULL default '0',
-  `content_default` text NOT NULL,
-  `content_loc1` text,
-  `content_loc2` text,
-  `content_loc3` text,
-  `content_loc4` text,
-  `content_loc5` text,
-  `content_loc6` text,
-  `content_loc7` text,
-  `content_loc8` text,
+  `content_default` text NOT NULL COMMENT 'Content language default.',
+  `content_loc1` text COMMENT 'Content language 1.',
+  `content_loc2` text COMMENT 'Content language 2.',
+  `content_loc3` text COMMENT 'Content language 3.',
+  `content_loc4` text COMMENT 'Content language 4.',
+  `content_loc5` text COMMENT 'Content language 5.',
+  `content_loc6` text COMMENT 'Content language 6.',
+  `content_loc7` text COMMENT 'Content language 7.',
+  `content_loc8` text COMMENT 'Content language 8.',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;

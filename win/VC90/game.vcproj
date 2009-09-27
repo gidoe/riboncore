@@ -1263,6 +1263,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\omp.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\Opcodes.cpp"
 				>
 			</File>

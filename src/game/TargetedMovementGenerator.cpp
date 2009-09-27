@@ -22,7 +22,7 @@
 #include "TargetedMovementGenerator.h"
 #include "Errors.h"
 #include "Creature.h"
-#include "CreatureAI.h"	// MrSmite 09-05-2009 PetAI_v1.0
+#include "CreatureAI.h"
 #include "DestinationHolderImp.h"
 #include "World.h"
 
@@ -182,14 +182,14 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
     if (!i_target.isValid() || !i_target->IsInWorld())
         return false;
 
-    if( !&owner || !owner.isAlive())
+    if (!&owner || !owner.isAlive())
         return true;
 
-    if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_FLEEING | UNIT_STAT_DISTRACTED) )
+    if (owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED | UNIT_STAT_FLEEING | UNIT_STAT_DISTRACTED))
         return true;
 
     // prevent movement while casting spells with cast time or channel time
-    if(owner.hasUnitState(UNIT_STAT_CASTING))
+    if (owner.hasUnitState(UNIT_STAT_CASTING))
     {
         if (!owner.IsStopped())
             owner.StopMoving();
@@ -202,9 +202,9 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
 
     Traveller<T> traveller(owner);
 
-    if( !i_destinationHolder.HasDestination() )
+    if (!i_destinationHolder.HasDestination())
         _setTargetLocation(owner);
-    else if( owner.IsStopped() && !i_destinationHolder.HasArrived() )
+    else if (owner.IsStopped() && !i_destinationHolder.HasArrived())
     {
         owner.addUnitState(UNIT_STAT_CHASE);
         i_destinationHolder.StartTravel(traveller);
@@ -218,7 +218,7 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
         //i_destinationHolder.ResetUpdate(50);
 
         // target moved
-        if(i_targetX != i_target->GetPositionX() || i_targetY != i_target->GetPositionY()
+        if (i_targetX != i_target->GetPositionX() || i_targetY != i_target->GetPositionY()
             || i_targetZ != i_target->GetPositionZ())
         {
             if(_setTargetLocation(owner) || !owner.hasUnitState(UNIT_STAT_FOLLOW))
@@ -226,7 +226,7 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
             i_target->GetPosition(i_targetX, i_targetY, i_targetZ);
         }
 
-        if(( owner.IsStopped() && !i_destinationHolder.HasArrived() ) || i_recalculateTravel )
+        if ((owner.IsStopped() && !i_destinationHolder.HasArrived()) || i_recalculateTravel)
         {
             i_recalculateTravel = false;
             //Angle update will take place into owner.StopMoving()
@@ -238,12 +238,9 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
         }
     }
 
-    // MrSmite 09-05-2009 PetAI_v1.0
     // Implemented for PetAI to handle resetting flags when pet owner reached
     if (i_destinationHolder.HasArrived())
-    {
         MovementInform(owner);
-    }
 
     return true;
 }
@@ -258,17 +255,15 @@ TargetedMovementGenerator<T>::GetTarget() const
 template<class T>
 void TargetedMovementGenerator<T>::MovementInform(T &unit)
 {
-    // MrSmite 09-05-2009 PetAI_v1.0
 }
 
 template <> void TargetedMovementGenerator<Creature>::MovementInform(Creature &unit)
 {
-    // MrSmite 09-05-2009 PetAI_v1.0
     // Pass back the GUIDLow of the target. If it is pet's owner then PetAI will handle
     unit.AI()->MovementInform(TARGETED_MOTION_TYPE, i_target.getTarget()->GetGUIDLow());
 }
 
-template void TargetedMovementGenerator<Player>::MovementInform(Player&);	// MrSmite 09-05-2009 PetAI_v1.0 - Not implemented for players
+template void TargetedMovementGenerator<Player>::MovementInform(Player&); // Not implemented for players
 template TargetedMovementGenerator<Player>::TargetedMovementGenerator(Unit &target, float offset, float angle);
 template TargetedMovementGenerator<Creature>::TargetedMovementGenerator(Unit &target, float offset, float angle);
 template bool TargetedMovementGenerator<Player>::_setTargetLocation(Player &);

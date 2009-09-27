@@ -1,7 +1,7 @@
 ##########################################
 #  RibonCore worldd configuration file   #
 ##########################################
-ConfVersion=2009083016
+ConfVersion=2009092426
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -431,7 +431,7 @@ RaLogFile = "ra_commands.log"
 ArenaLogFile = "arena.log"
 LogColors = "13 8 14 10"
 EnableLogDB = 1
-DBLogLevel = 1
+DBLogLevel = 2
 LogDB.Char   = 0
 LogDB.GM     = 0
 LogDB.RA     = 0
@@ -639,6 +639,11 @@ ChatLogTimestamp = 0
 #        Default: 0 (false)
 #                 1 (true)
 #
+#    InstantFlightPaths
+#        Flight paths will take players to their destination instantly, instead of making them wait to fly there.
+#        Default: 0 (false)
+#                 1 (true)
+#
 #    AlwaysMaxSkillForLevel
 #        Players will automatically gain max level dependent (weapon/defense) skill when logging in, leveling up etc.
 #        Default: 0 (false)
@@ -782,6 +787,7 @@ StartArenaPoints = 0
 InstantLogout = 1
 DisableWaterBreath = 4
 AllFlightPaths = 0
+InstantFlightPaths = 0
 AlwaysMaxSkillForLevel = 0
 ActivateWeather = 1
 CastUnstuck = 1
@@ -1167,9 +1173,9 @@ GM.AllowAchievementGain  = 1
 ###################################################################################################################
 
 Visibility.GroupMode = 0
-Visibility.Distance.Creature      = 999
+Visibility.Distance.Creature      = 165
 Visibility.Distance.Player        = 66
-Visibility.Distance.Object        = 999
+Visibility.Distance.Object        = 156
 Visibility.Distance.InFlight      = 66
 Visibility.Distance.Grey.Unit   = 1
 Visibility.Distance.Grey.Object = 10
@@ -1863,13 +1869,42 @@ Ra.Secure = 1
 #	NoResetTalentsCost
 #		Enable or disable no cost when reseting talents
 #
+#   Guild.AllowMultipleGuildMaster
+#       Allow override of 1 Guild Master limit. Additional Guild Masters must
+#       be set using the ".guild rank" command, not through the UI
+#       Default: 0 = Only 1 Guild Master per guild
+#                1 = Allow more than one Guild Master
 #
 #   OutdoorPvP.Wintergrasp.StartTime = 30
 #       The start time of the first battle after server starts (default: 30 minutes)
+#
 #   OutdoorPvP.Wintergrasp.BattleTime = 30
 #       Time limit of a battle
+#
 #   OutdoorPvP.Wintergrasp.Interval
 #       Interval between battles (default: 150 minutes)
+#
+#   OutdoorPvP.Wintergrasp.CustomHonorRewards
+#       Defines whether custom honor rewards should be given to player for partaking in the Wintergrasp Battle (1) or not (0).
+#       Default: 0
+#
+#   OutdoorPvP.Wintergrasp.CustomHonorBattleWin
+#       Defines the amount of honor points that should be given to the team winning the Wintergrasp Battle. Requires OutdoorPvP.Wintergrasp.CustomHonorRewards = 1.
+#
+#   OutdoorPvP.Wintergrasp.CustomHonorBattleLose
+#       Defines the amount of honor points that should be given to the team losing the Wintergrasp Battle. Requires OutdoorPvP.Wintergrasp.CustomHonorRewards = 1.
+#
+#   OutdoorPvP.Wintergrasp.CustomHonorDamageTower
+#       Defines the amount of honor points that should be given for damaging a tower. Requires OutdoorPvP.Wintergrasp.CustomHonorRewards = 1.
+#
+#   OutdoorPvP.Wintergrasp.CustomHonorDestroyedTower
+#       Defines the amount of honor points that should be given for destroying a tower. Requires OutdoorPvP.Wintergrasp.CustomHonorRewards = 1.
+#
+#   OutdoorPvP.Wintergrasp.CustomHonorDamagedBuilding
+#       Defines the amount of honor points that should be given for damaged buildings after the battle. Requires OutdoorPvP.Wintergrasp.CustomHonorRewards = 1.
+#
+#   OutdoorPvP.Wintergrasp.CustomHonorIntactBuilding
+#       Defines the amount of honor points that should be given for intact buildings after the battle. Requires OutdoorPvP.Wintergrasp.CustomHonorRewards = 1.
 #
 #   ForbiddenMaps
 #       map ids that users below SEC_GAMEMASTER cannot enter, with delimiter ','
@@ -1917,38 +1952,46 @@ PvPToken.Enable = 0
 PvPToken.MapAllowType = 4
 PvPToken.ItemID = 29434
 PvPToken.ItemCount = 1
+Guild.AllowMultipleGuildMaster = 0
 OutdoorPvP.Wintergrasp.StartTime = 30
 OutdoorPvP.Wintergrasp.BattleTime = 30
 OutdoorPvP.Wintergrasp.Interval = 150
+OutdoorPvP.Wintergrasp.CustomHonorRewards = 0
+OutdoorPvP.Wintergrasp.CustomHonorBattleWin = 0
+OutdoorPvP.Wintergrasp.CustomHonorBattleLose = 0
+OutdoorPvP.Wintergrasp.CustomHonorDamageTower = 0
+OutdoorPvP.Wintergrasp.CustomHonorDestroyedTower = 0
+OutdoorPvP.Wintergrasp.CustomHonorDamagedBuilding = 0
+OutdoorPvP.Wintergrasp.CustomHonorIntactBuilding = 0
 NoResetTalentsCost = 0
 ShowKickInWorld = 0
 RecordUpdateTimeDiffInterval = 60000
 MinRecordUpdateTimeDiff = 10
-PlayerStart.String = "A New Player connected with"
+PlayerStart.String = ""
 CheckDB = 1
 
 ###################################################################################################################
 # MOVEMENT ANTICHEAT
 #
-#    Anticheat.Movement.Enable (Disabled, make Vehilce unusable)
+#    Anticheat.Movement.Enable
 #        Enable Movement Anticheat
 #        Default: 1 - on
 #                 0 - off
 #
 #    Anticheat.Movement.TeleportToPlaneAlarms
-#        maximum alarms before player will be kicked (default 50, allowed 20 - 100)
+#        maximum alarms before logging mode will be switched from debug to error (default 50, allowed 20 - 100)
 #
 #    Anticheat.Movement.MistimingDelta
 #        mistiming intelval between client and serverside (default 10000 ms, allowed 1000 - 15000 ms)
 #
 #    Anticheat.Movement.MistimingAlarms
-#        mistiming alarms before player will be kicked (default 20, allowed 10 - 50)
+#        mistiming alarms before logging mode will be switched from debug to error (default 20, allowed 10 - 50)
 #
 ###################################################################################################################
 
 Anticheat.Movement.Enable = 1
 Anticheat.Movement.TeleportToPlaneAlarms = 50
-Anticheat.Movement.MistimingDelta = 15000
+Anticheat.Movement.MistimingDelta = 10000
 Anticheat.Movement.MistimingAlarms = 20
 
 ###################################################################################################################

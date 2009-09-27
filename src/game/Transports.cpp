@@ -539,7 +539,7 @@ void Transport::Update(uint32 /*p_time*/)
         {
             PlayerSet::const_iterator it2 = itr;
             ++itr;
-            (*it2)->AntiCheatOff(5);
+            (*it2)->m_anti_AntiCheatOffUntilTime = time(NULL) + 2; // Only works if the player is constantly moving while on the transport.
             //(*it2)->SetPosition( m_curr->second.x + (*it2)->GetTransOffsetX(), m_curr->second.y + (*it2)->GetTransOffsetY(), m_curr->second.z + (*it2)->GetTransOffsetZ(), (*it2)->GetTransOffsetO() );
         }
 

@@ -115,7 +115,7 @@ bool SpellClickInfo::IsFitToRequirements(Player const* player, Creature const * 
     if(questStart)
     {
         // not in expected required quest state
-        if(!player || (!questStartCanActive || !player->IsActiveQuest(questStart)) && !player->GetQuestRewardStatus(questStart))
+        if (!player || ((!questStartCanActive || !player->IsActiveQuest(questStart)) && !player->GetQuestRewardStatus(questStart)))
             return false;
     }
 
@@ -670,72 +670,72 @@ void ObjectMgr::LoadCreatureTemplates()
         // used later for scale
         CreatureDisplayInfoEntry const* displayScaleEntry = NULL;
 
-        if (cInfo->DisplayID_A[0])
+        if (cInfo->Modelid1)
         {
-            CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->DisplayID_A[0]);
+            CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->Modelid1);
             if(!displayEntry)
             {
-                sLog.outErrorDb("Creature (Entry: %u) has non-existing DisplayID_A id (%u), can crash client", cInfo->Entry, cInfo->DisplayID_A[0]);
-                const_cast<CreatureInfo*>(cInfo)->DisplayID_A[0] = 0;
+                sLog.outErrorDb("Creature (Entry: %u) has non-existing Modelid1 id (%u), can crash client", cInfo->Entry, cInfo->Modelid1);
+                const_cast<CreatureInfo*>(cInfo)->Modelid1 = 0;
             }
             else if(!displayScaleEntry)
                 displayScaleEntry = displayEntry;
 
-            CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->DisplayID_A[0]);
+            CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->Modelid1);
             if (!minfo)
-                sLog.outErrorDb("Creature (Entry: %u) not has model data for DisplayID_A (%u)", cInfo->Entry, cInfo->DisplayID_A[0]);
+                sLog.outErrorDb("Creature (Entry: %u) not has model data for Modelid1 (%u)", cInfo->Entry, cInfo->Modelid1);
         }
 
-        if (cInfo->DisplayID_A[1])
+        if (cInfo->Modelid2)
         {
-            CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->DisplayID_A[1]);
+            CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->Modelid2);
             if(!displayEntry)
             {
-                sLog.outErrorDb("Creature (Entry: %u) has non-existing DisplayID_A2 id (%u), can crash client", cInfo->Entry, cInfo->DisplayID_A[1]);
-                const_cast<CreatureInfo*>(cInfo)->DisplayID_A[1] = 0;
+                sLog.outErrorDb("Creature (Entry: %u) has non-existing Modelid2 id (%u), can crash client", cInfo->Entry, cInfo->Modelid2);
+                const_cast<CreatureInfo*>(cInfo)->Modelid2 = 0;
             }
             else if(!displayScaleEntry)
                 displayScaleEntry = displayEntry;
 
-            CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->DisplayID_A[1]);
+            CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->Modelid2);
             if (!minfo)
-                sLog.outErrorDb("Creature (Entry: %u) not has model data for DisplayID_A2 (%u)", cInfo->Entry, cInfo->DisplayID_A[1]);
+                sLog.outErrorDb("Creature (Entry: %u) not has model data for Modelid2 (%u)", cInfo->Entry, cInfo->Modelid2);
         }
 
-        if (cInfo->DisplayID_H[0])
+        if (cInfo->Modelid3)
         {
-            CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->DisplayID_H[0]);
+            CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->Modelid3);
             if(!displayEntry)
             {
-                sLog.outErrorDb("Creature (Entry: %u) has non-existing DisplayID_H id (%u), can crash client", cInfo->Entry, cInfo->DisplayID_H[0]);
-                const_cast<CreatureInfo*>(cInfo)->DisplayID_H[0] = 0;
+                sLog.outErrorDb("Creature (Entry: %u) has non-existing Modelid3 id (%u), can crash client", cInfo->Entry, cInfo->Modelid3);
+                const_cast<CreatureInfo*>(cInfo)->Modelid3 = 0;
             }
             else if(!displayScaleEntry)
                 displayScaleEntry = displayEntry;
 
-            CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->DisplayID_H[0]);
+            CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->Modelid3);
             if (!minfo)
-                sLog.outErrorDb("Creature (Entry: %u) not has model data for DisplayID_H (%u)", cInfo->Entry, cInfo->DisplayID_H[0]);
+                sLog.outErrorDb("Creature (Entry: %u) not has model data for Modelid3 (%u)", cInfo->Entry, cInfo->Modelid3);
         }
 
-        if (cInfo->DisplayID_H[1])
+        if (cInfo->Modelid4)
         {
-            CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->DisplayID_H[1]);
+            CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->Modelid4);
             if(!displayEntry)
             {
-                sLog.outErrorDb("Creature (Entry: %u) has non-existing DisplayID_H2 id (%u), can crash client", cInfo->Entry, cInfo->DisplayID_H[1]);
-                const_cast<CreatureInfo*>(cInfo)->DisplayID_H[1] = 0;
+                sLog.outErrorDb("Creature (Entry: %u) has non-existing Modelid4 id (%u), can crash client", cInfo->Entry, cInfo->Modelid4);
+                const_cast<CreatureInfo*>(cInfo)->Modelid4 = 0;
             }
             else if(!displayScaleEntry)
                 displayScaleEntry = displayEntry;
 
-            CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->DisplayID_H[1]);
+            CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->Modelid4);
             if (!minfo)
-                sLog.outErrorDb("Creature (Entry: %u) not has model data for DisplayID_H2 (%u)", cInfo->Entry, cInfo->DisplayID_H[1]);
+                sLog.outErrorDb("Creature (Entry: %u) not has model data for Modelid4 (%u)", cInfo->Entry, cInfo->Modelid4);
         }
 
         if (!displayScaleEntry)
-            sLog.outErrorDb("Creature (Entry: %u) not has any existed display id in DisplayID_A/DisplayID_A2/DisplayID_H/DisplayID_H2", cInfo->Entry);
+            sLog.outErrorDb("Creature (Entry: %u) not has any existed display id in Modelid1/Modelid2/Modelid3/Modelid4", cInfo->Entry);
 
         for(int k = 0; k < MAX_KILL_CREDIT; ++k)
         {
@@ -878,8 +878,8 @@ void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* 
     // replace by new structures array
     const_cast<CreatureDataAddonAura*&>(addon->auras) = new CreatureDataAddonAura[val.size()/2+1];
 
-    int i=0;
-    for(uint32 j=0;j<val.size()/2;++j)
+    uint32 i=0;
+    for(uint32 j = 0; j < val.size()/2;++j)
     {
         CreatureDataAddonAura& cAura = const_cast<CreatureDataAddonAura&>(addon->auras[i]);
         cAura.spell_id = (uint32)val[2*j+0];
@@ -1023,10 +1023,16 @@ CreatureModelInfo const* ObjectMgr::GetCreatureModelInfo(uint32 modelid)
 uint32 ObjectMgr::ChooseDisplayId(uint32 team, const CreatureInfo *cinfo, const CreatureData *data /*= NULL*/)
 {
     // Load creature model (display id)
-    if (data && data->displayid)
+    uint32 display_id = 0;
+
+    if (!data || data->displayid == 0)
+    {
+        display_id = cinfo->GetRandomValidModelId();
+    }
+    else
         return data->displayid;
 
-    if(!team)
+    /*if(!team)
     {
         switch(cinfo->Entry)
         {
@@ -1034,40 +1040,15 @@ uint32 ObjectMgr::ChooseDisplayId(uint32 team, const CreatureInfo *cinfo, const 
             case 33114: // Flame Leviathan Seat (model 24914 chair)
             case 33167: // Salvaged Demolisher Mechanic Seat
             case 33189: // Liquid Pryite
-                return cinfo->DisplayID_A[0];
+                return cinfo->Modelid1;
             case 33218: // Pyrite Safety Container
-                return cinfo->DisplayID_A[1];
+                return cinfo->Modelid2;
             case 33143: // Overload Control Device
-                return cinfo->DisplayID_H[0];
+                return cinfo->Modelid3;
             default:
                 return cinfo->GetRandomValidModelId();
         }
-    }
-
-    // use defaults from the template
-    uint32 display_id;
-
-    // DisplayID_A is used if no team is given
-    if (team == HORDE)
-    {
-        if(cinfo->DisplayID_H[0])
-            display_id = cinfo->DisplayID_H[1] ? cinfo->DisplayID_H[urand(0,1)] : cinfo->DisplayID_H[0];
-        else
-            display_id = cinfo->DisplayID_H[1];
-
-        if(!display_id)
-            display_id = cinfo->DisplayID_A[0] ? cinfo->DisplayID_A[0] : cinfo->DisplayID_A[1];
-    }
-    else if(team == ALLIANCE)
-    {
-        if(cinfo->DisplayID_A[0])
-            display_id = cinfo->DisplayID_A[1] ? cinfo->DisplayID_A[urand(0,1)] : cinfo->DisplayID_A[0];
-        else
-            display_id = cinfo->DisplayID_A[1];
-
-        if(!display_id)
-            display_id = cinfo->DisplayID_H[0] ? cinfo->DisplayID_H[0] : cinfo->DisplayID_H[1];
-    }
+    }*/
 
     return display_id;
 }
@@ -1214,14 +1195,14 @@ bool ObjectMgr::SetCreatureLinkedRespawn(uint32 guid, uint32 linkedGuid)
     if(!linkedGuid) // we're removing the linking
     {
         mCreatureLinkedRespawnMap.erase(guid);
-        WorldDatabase.DirectPExecute("DELETE FROM `creature_linked_respawn` WHERE `guid` = '%u'",guid);
+        WorldDatabase.DirectPExecute("DELETE FROM creature_linked_respawn WHERE guid = '%u'",guid);
         return true;
     }
 
     if(CheckCreatureLinkedRespawn(guid,linkedGuid)) // we add/change linking
     {
         mCreatureLinkedRespawnMap[guid] = linkedGuid;
-        WorldDatabase.DirectPExecute("REPLACE INTO `creature_linked_respawn`(`guid`,`linkedGuid`) VALUES ('%u','%u')",guid,linkedGuid);
+        WorldDatabase.DirectPExecute("REPLACE INTO creature_linked_respawn (guid,linkedGuid) VALUES ('%u','%u')",guid,linkedGuid);
         return true;
     }
     return false;
@@ -1301,7 +1282,7 @@ void ObjectMgr::LoadCreatures()
 
         if(heroicCreatures.find(data.id)!=heroicCreatures.end())
         {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u) that listed as heroic template in `creature_template_substitution`, skipped.",guid,data.id );
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u) that listed as heroic template (entry: %u) in `creature_template_substitution`, skipped.",guid,data.id );
             continue;
         }
 
@@ -1927,12 +1908,473 @@ struct SQLItemLoader : public SQLStorageLoaderBase<SQLItemLoader>
     }
 };
 
-void ObjectMgr::LoadItemPrototypes()
+void ObjectMgr::LoadItemPrototypes(bool reload)
 {
-    SQLItemLoader loader;
-    loader.Load(sItemStorage);
-    sLog.outString( ">> Loaded %u item prototypes", sItemStorage.RecordCount );
-    sLog.outString();
+    if(reload)
+    {
+        // Loading tmp storage
+        sLog.outString( ">> Loading temporary ItemStorage" );
+        SQLItemLoader loader;
+        loader.Load(sItemStorageTmp);
+        sLog.outString( ">> Temporary ItemStorage loaded, modifying..." );
+
+        for(uint32 i = 1; i < sItemStorageTmp.MaxEntry; ++i)
+        {
+            ItemPrototype const* pNew = sItemStorageTmp.LookupEntry<ItemPrototype >(i);
+            if(!pNew)
+                continue;
+            ItemPrototype const* pOld = sItemStorage.LookupEntry<ItemPrototype >(i);
+            if(!pOld)
+            {
+                sLog.outError("Item (Entry %u) was deleted from DB, cannot delete from world currently. Skipping.", i);
+                continue;
+            }
+
+            // Now we are ready to work!
+
+            // SIMPLE VARIABLES
+            if(pNew->Class != pOld->Class)
+            {
+                sLog.outBasic("Item %u: changed Class from %u to %u.", i, pOld->Class, pNew->Class);
+                const_cast<ItemPrototype*>(pOld)->Class = pNew->Class;
+            }
+            if(pNew->SubClass != pOld->SubClass)
+            {
+                sLog.outBasic("Item %u: changed SubClass from %u to %u.", i, pOld->SubClass, pNew->SubClass);
+                const_cast<ItemPrototype*>(pOld)->SubClass = pNew->SubClass;
+            }
+            if(pNew->Unk0 != pOld->Unk0)
+            {
+                sLog.outBasic("Item %u: changed Unk0 from %i to %i.", i, pOld->Unk0, pNew->Unk0);
+                const_cast<ItemPrototype*>(pOld)->Unk0 = pNew->Unk0;
+            }
+            if(strcmp(pNew->Name1, pOld->Name1) != 0)
+            {
+                sLog.outBasic("Item %u: changed Name1 from '%s' to '%s'.", i, pOld->Name1, pNew->Name1);
+                const_cast<ItemPrototype*>(pOld)->Name1 = pNew->Name1;
+            }
+            if(pNew->DisplayInfoID != pOld->DisplayInfoID)
+            {
+                sLog.outBasic("Item %u: changed DisplayInfoID from %u to %u.", i, pOld->DisplayInfoID, pNew->DisplayInfoID);
+                const_cast<ItemPrototype*>(pOld)->DisplayInfoID = pNew->DisplayInfoID;
+            }
+            if(pNew->Quality != pOld->Quality)
+            {
+                sLog.outBasic("Item %u: changed Quality from %u to %u.", i, pOld->Quality, pNew->Quality);
+                const_cast<ItemPrototype*>(pOld)->Quality = pNew->Quality;
+            }
+            if(pNew->Flags != pOld->Flags)
+            {
+                sLog.outBasic("Item %u: changed Flags from %u to %u.", i, pOld->Flags, pNew->Flags);
+                const_cast<ItemPrototype*>(pOld)->Flags = pNew->Flags;
+            }
+            if(pNew->BuyCount != pOld->BuyCount)
+            {
+                sLog.outBasic("Item %u: changed BuyCount from %u to %u.", i, pOld->BuyCount, pNew->BuyCount);
+                const_cast<ItemPrototype*>(pOld)->BuyCount = pNew->BuyCount;
+            }
+            if(pNew->BuyPrice != pOld->BuyPrice)
+            {
+                sLog.outBasic("Item %u: changed BuyPrice from %u to %u.", i, pOld->BuyPrice, pNew->BuyPrice);
+                const_cast<ItemPrototype*>(pOld)->BuyPrice = pNew->BuyPrice;
+            }
+            if(pNew->SellPrice != pOld->SellPrice)
+            {
+                sLog.outBasic("Item %u: changed SellPrice from %u to %u.", i, pOld->SellPrice, pNew->SellPrice);
+                const_cast<ItemPrototype*>(pOld)->SellPrice = pNew->SellPrice;
+            }
+            if(pNew->InventoryType != pOld->InventoryType)
+            {
+                sLog.outBasic("Item %u: changed InventoryType from %u to %u.", i, pOld->InventoryType, pNew->InventoryType);
+                const_cast<ItemPrototype*>(pOld)->InventoryType = pNew->InventoryType;
+            }
+            if(pNew->AllowableClass != pOld->AllowableClass)
+            {
+                sLog.outBasic("Item %u: changed AllowableClass from %u to %u.", i, pOld->AllowableClass, pNew->AllowableClass);
+                const_cast<ItemPrototype*>(pOld)->AllowableClass = pNew->AllowableClass;
+            }
+            if(pNew->AllowableRace != pOld->AllowableRace)
+            {
+                sLog.outBasic("Item %u: changed AllowableRace from %u to %u.", i, pOld->AllowableRace, pNew->AllowableRace);
+                const_cast<ItemPrototype*>(pOld)->AllowableRace = pNew->AllowableRace;
+            }
+            if(pNew->ItemLevel != pOld->ItemLevel)
+            {
+                sLog.outBasic("Item %u: changed ItemLevel from %u to %u.", i, pOld->ItemLevel, pNew->ItemLevel);
+                const_cast<ItemPrototype*>(pOld)->ItemLevel = pNew->ItemLevel;
+            }
+            // Requirements
+            if(pNew->RequiredLevel != pOld->RequiredLevel)
+            {
+                sLog.outBasic("Item %u: changed RequiredLevel from %u to %u.", i, pOld->RequiredLevel, pNew->RequiredLevel);
+                const_cast<ItemPrototype*>(pOld)->RequiredLevel = pNew->RequiredLevel;
+            }
+            if(pNew->RequiredSkill != pOld->RequiredSkill)
+            {
+                sLog.outBasic("Item %u: changed RequiredSkill from %u to %u.", i, pOld->RequiredSkill, pNew->RequiredSkill);
+                const_cast<ItemPrototype*>(pOld)->RequiredSkill = pNew->RequiredSkill;
+            }
+            if(pNew->RequiredSkillRank != pOld->RequiredSkillRank)
+            {
+                sLog.outBasic("Item %u: changed RequiredSkillRank from %u to %u.", i, pOld->RequiredSkillRank, pNew->RequiredSkillRank);
+                const_cast<ItemPrototype*>(pOld)->RequiredSkillRank = pNew->RequiredSkillRank;
+            }
+            if(pNew->RequiredSpell != pOld->RequiredSpell)
+            {
+                sLog.outBasic("Item %u: changed RequiredSpell from %u to %u.", i, pOld->RequiredSpell, pNew->RequiredSpell);
+                const_cast<ItemPrototype*>(pOld)->RequiredSpell = pNew->RequiredSpell;
+            }
+            if(pNew->RequiredHonorRank != pOld->RequiredHonorRank)
+            {
+                sLog.outBasic("Item %u: changed RequiredHonorRank from %u to %u.", i, pOld->RequiredHonorRank, pNew->RequiredHonorRank);
+                const_cast<ItemPrototype*>(pOld)->RequiredHonorRank = pNew->RequiredHonorRank;
+            }
+            if(pNew->RequiredCityRank != pOld->RequiredCityRank)
+            {
+                sLog.outBasic("Item %u: changed RequiredCityRank from %u to %u.", i, pOld->RequiredCityRank, pNew->RequiredCityRank);
+                const_cast<ItemPrototype*>(pOld)->RequiredCityRank = pNew->RequiredCityRank;
+            }
+            if(pNew->RequiredReputationFaction != pOld->RequiredReputationFaction)
+            {
+                sLog.outBasic("Item %u: changed RequiredReputationFaction from %u to %u.", i, pOld->RequiredReputationFaction, pNew->RequiredReputationFaction);
+                const_cast<ItemPrototype*>(pOld)->RequiredReputationFaction = pNew->RequiredReputationFaction;
+            }
+            if(pNew->RequiredReputationRank != pOld->RequiredReputationRank)
+            {
+                sLog.outBasic("Item %u: changed RequiredReputationRank from %u to %u.", i, pOld->RequiredReputationRank, pNew->RequiredReputationRank);
+                const_cast<ItemPrototype*>(pOld)->RequiredReputationRank = pNew->RequiredReputationRank;
+            }
+            if(pNew->MaxCount != pOld->MaxCount)
+            {
+                sLog.outBasic("Item %u: changed MaxCount from %i to %i.", i, pOld->MaxCount, pNew->MaxCount);
+                const_cast<ItemPrototype*>(pOld)->MaxCount = pNew->MaxCount;
+            }
+            if(pNew->Stackable != pOld->Stackable)
+            {
+                sLog.outBasic("Item %u: changed Stackable from %i to %i.", i, pOld->Stackable, pNew->Stackable);
+                const_cast<ItemPrototype*>(pOld)->Stackable = pNew->Stackable;
+            }
+            if(pNew->ContainerSlots != pOld->ContainerSlots)
+            {
+                sLog.outBasic("Item %u: changed ContainerSlots from %u to %u.", i, pOld->ContainerSlots, pNew->ContainerSlots);
+                const_cast<ItemPrototype*>(pOld)->ContainerSlots = pNew->ContainerSlots;
+            }
+            if(pNew->StatsCount != pOld->StatsCount)
+            {
+                sLog.outBasic("Item %u: changed StatsCount from %u to %u.", i, pOld->StatsCount, pNew->StatsCount);
+                const_cast<ItemPrototype*>(pOld)->StatsCount = pNew->StatsCount;
+            }
+            if(pNew->ScalingStatDistribution != pOld->ScalingStatDistribution)
+            {
+                sLog.outBasic("Item %u: changed ScalingStatDistribution from %u to %u.", i, pOld->ScalingStatDistribution, pNew->ScalingStatDistribution);
+                const_cast<ItemPrototype*>(pOld)->ScalingStatDistribution = pNew->ScalingStatDistribution;
+            }
+            if(pNew->ScalingStatValue != pOld->ScalingStatValue)
+            {
+                sLog.outBasic("Item %u: changed ScalingStatValue from %u to %u.", i, pOld->ScalingStatValue, pNew->ScalingStatValue);
+                const_cast<ItemPrototype*>(pOld)->ScalingStatValue = pNew->ScalingStatValue;
+            }
+            if(pNew->Armor != pOld->Armor)
+            {
+                sLog.outBasic("Item %u: changed Armor from %u to %u.", i, pOld->Armor, pNew->Armor);
+                const_cast<ItemPrototype*>(pOld)->Armor = pNew->Armor;
+            }
+            if(pNew->HolyRes != pOld->HolyRes)
+            {
+                sLog.outBasic("Item %u: changed HolyRes from %u to %u.", i, pOld->HolyRes, pNew->HolyRes);
+                const_cast<ItemPrototype*>(pOld)->HolyRes = pNew->HolyRes;
+            }
+            if(pNew->FireRes != pOld->FireRes)
+            {
+                sLog.outBasic("Item %u: changed FireRes from %u to %u.", i, pOld->FireRes, pNew->FireRes);
+                const_cast<ItemPrototype*>(pOld)->FireRes = pNew->FireRes;
+            }
+            if(pNew->NatureRes != pOld->NatureRes)
+            {
+                sLog.outBasic("Item %u: changed NatureRes from %u to %u.", i, pOld->NatureRes, pNew->NatureRes);
+                const_cast<ItemPrototype*>(pOld)->NatureRes = pNew->NatureRes;
+            }
+            if(pNew->FrostRes != pOld->FrostRes)
+            {
+                sLog.outBasic("Item %u: changed FrostRes from %u to %u.", i, pOld->FrostRes, pNew->FrostRes);
+                const_cast<ItemPrototype*>(pOld)->FrostRes = pNew->FrostRes;
+            }
+            if(pNew->ShadowRes != pOld->ShadowRes)
+            {
+                sLog.outBasic("Item %u: changed ShadowRes from %u to %u.", i, pOld->ShadowRes, pNew->ShadowRes);
+                const_cast<ItemPrototype*>(pOld)->ShadowRes = pNew->ShadowRes;
+            }
+            if(pNew->ArcaneRes != pOld->ArcaneRes)
+            {
+                sLog.outBasic("Item %u: changed ArcaneRes from %u to %u.", i, pOld->ArcaneRes, pNew->ArcaneRes);
+                const_cast<ItemPrototype*>(pOld)->ArcaneRes = pNew->ArcaneRes;
+            }
+            if(pNew->Delay != pOld->Delay)
+            {
+                sLog.outBasic("Item %u: changed Delay from %u to %u.", i, pOld->Delay, pNew->Delay);
+                const_cast<ItemPrototype*>(pOld)->Delay = pNew->Delay;
+            }
+            if(pNew->AmmoType != pOld->AmmoType)
+            {
+                sLog.outBasic("Item %u: changed AmmoType from %u to %u.", i, pOld->AmmoType, pNew->AmmoType);
+                const_cast<ItemPrototype*>(pOld)->AmmoType = pNew->AmmoType;
+            }
+            if(pNew->RangedModRange != pOld->RangedModRange)
+            {
+                sLog.outBasic("Item %u: changed RangedModRange from %f to %f.", i, pOld->RangedModRange, pNew->RangedModRange);
+                const_cast<ItemPrototype*>(pOld)->RangedModRange = pNew->RangedModRange;
+            }
+            if(pNew->Bonding != pOld->Bonding)
+            {
+                sLog.outBasic("Item %u: changed Bonding from %u to %u.", i, pOld->Bonding, pNew->Bonding);
+                const_cast<ItemPrototype*>(pOld)->Bonding = pNew->Bonding;
+            }
+            if(strcmp(pNew->Description, pOld->Description) != 0)
+            {
+                sLog.outBasic("Item %u: changed Description from '%s' to '%s'.", i, pOld->Description, pNew->Description);
+                const_cast<ItemPrototype*>(pOld)->Description = pNew->Description;
+            }
+            if(pNew->PageText != pOld->PageText)
+            {
+                sLog.outBasic("Item %u: changed PageText from %u to %u.", i, pOld->PageText, pNew->PageText);
+                const_cast<ItemPrototype*>(pOld)->PageText = pNew->PageText;
+            }
+            if(pNew->LanguageID != pOld->LanguageID)
+            {
+                sLog.outBasic("Item %u: changed LanguageID from %u to %u.", i, pOld->LanguageID, pNew->LanguageID);
+                const_cast<ItemPrototype*>(pOld)->LanguageID = pNew->LanguageID;
+            }
+            if(pNew->PageMaterial != pOld->PageMaterial)
+            {
+                sLog.outBasic("Item %u: changed PageMaterial from %u to %u.", i, pOld->PageMaterial, pNew->PageMaterial);
+                const_cast<ItemPrototype*>(pOld)->PageMaterial = pNew->PageMaterial;
+            }
+            if(pNew->StartQuest != pOld->StartQuest)
+            {
+                sLog.outBasic("Item %u: changed StartQuest from %u to %u.", i, pOld->StartQuest, pNew->StartQuest);
+                const_cast<ItemPrototype*>(pOld)->StartQuest = pNew->StartQuest;
+            }
+            if(pNew->LockID != pOld->LockID)
+            {
+                sLog.outBasic("Item %u: changed LockID from %u to %u.", i, pOld->LockID, pNew->LockID);
+                const_cast<ItemPrototype*>(pOld)->LockID = pNew->LockID;
+            }
+            if(pNew->Material != pOld->Material)
+            {
+                sLog.outBasic("Item %u: changed Material from %i to %i.", i, pOld->Material, pNew->Material);
+                const_cast<ItemPrototype*>(pOld)->Material = pNew->Material;
+            }
+            if(pNew->Sheath != pOld->Sheath)
+            {
+                sLog.outBasic("Item %u: changed Sheath from %u to %u.", i, pOld->Sheath, pNew->Sheath);
+                const_cast<ItemPrototype*>(pOld)->Sheath = pNew->Sheath;
+            }
+            if(pNew->RandomProperty != pOld->RandomProperty)
+            {
+                sLog.outBasic("Item %u: changed RandomProperty from %u to %u.", i, pOld->RandomProperty, pNew->RandomProperty);
+                const_cast<ItemPrototype*>(pOld)->RandomProperty = pNew->RandomProperty;
+            }
+            if(pNew->RandomSuffix != pOld->RandomSuffix)
+            {
+                sLog.outBasic("Item %u: changed RandomSuffix from %u to %u.", i, pOld->RandomSuffix, pNew->RandomSuffix);
+                const_cast<ItemPrototype*>(pOld)->RandomSuffix = pNew->RandomSuffix;
+            }
+            if(pNew->Block != pOld->Block)
+            {
+                sLog.outBasic("Item %u: changed Block from %u to %u.", i, pOld->Block, pNew->Block);
+                const_cast<ItemPrototype*>(pOld)->Block = pNew->Block;
+            }
+            if(pNew->ItemSet != pOld->ItemSet)
+            {
+                sLog.outBasic("Item %u: changed ItemSet from %u to %u.", i, pOld->ItemSet, pNew->ItemSet);
+                const_cast<ItemPrototype*>(pOld)->ItemSet = pNew->ItemSet;
+            }
+            if(pNew->MaxDurability != pOld->MaxDurability)
+            {
+                sLog.outBasic("Item %u: changed MaxDurability from %u to %u.", i, pOld->MaxDurability, pNew->MaxDurability);
+                const_cast<ItemPrototype*>(pOld)->MaxDurability = pNew->MaxDurability;
+            }
+            if(pNew->Area != pOld->Area)
+            {
+                sLog.outBasic("Item %u: changed Area from %u to %u.", i, pOld->Area, pNew->Area);
+                const_cast<ItemPrototype*>(pOld)->Area = pNew->Area;
+            }
+            if(pNew->Map != pOld->Map)
+            {
+                sLog.outBasic("Item %u: changed Map from %u to %u.", i, pOld->Map, pNew->Map);
+                const_cast<ItemPrototype*>(pOld)->Map = pNew->Map;
+            }
+            if(pNew->BagFamily != pOld->BagFamily)
+            {
+                sLog.outBasic("Item %u: changed BagFamily from %u to %u.", i, pOld->BagFamily, pNew->BagFamily);
+                const_cast<ItemPrototype*>(pOld)->BagFamily = pNew->BagFamily;
+            }
+            if(pNew->TotemCategory != pOld->TotemCategory)
+            {
+                sLog.outBasic("Item %u: changed TotemCategory from %u to %u.", i, pOld->TotemCategory, pNew->TotemCategory);
+                const_cast<ItemPrototype*>(pOld)->TotemCategory = pNew->TotemCategory;
+            }
+            if(pNew->socketBonus != pOld->socketBonus)
+            {
+                sLog.outBasic("Item %u: changed socketBonus from %u to %u.", i, pOld->socketBonus, pNew->socketBonus);
+                const_cast<ItemPrototype*>(pOld)->socketBonus = pNew->socketBonus;
+            }
+            if(pNew->GemProperties != pOld->GemProperties)
+            {
+                sLog.outBasic("Item %u: changed GemProperties from %u to %u.", i, pOld->GemProperties, pNew->GemProperties);
+                const_cast<ItemPrototype*>(pOld)->GemProperties = pNew->GemProperties;
+            }
+            if(pNew->RequiredDisenchantSkill != pOld->RequiredDisenchantSkill)
+            {
+                sLog.outBasic("Item %u: changed RequiredDisenchantSkill from %u to %u.", i, pOld->RequiredDisenchantSkill, pNew->RequiredDisenchantSkill);
+                const_cast<ItemPrototype*>(pOld)->RequiredDisenchantSkill = pNew->RequiredDisenchantSkill;
+            }
+            if(pNew->ArmorDamageModifier != pOld->ArmorDamageModifier)
+            {
+                sLog.outBasic("Item %u: changed ArmorDamageModifier from %f to %f.", i, pOld->ArmorDamageModifier, pNew->ArmorDamageModifier);
+                const_cast<ItemPrototype*>(pOld)->ArmorDamageModifier = pNew->ArmorDamageModifier;
+            }
+            if(pNew->Duration != pOld->Duration)
+            {
+                sLog.outBasic("Item %u: changed Duration from %i to %i.", i, pOld->Duration, pNew->Duration);
+                const_cast<ItemPrototype*>(pOld)->Duration = pNew->Duration;
+            }
+            if(pNew->ItemLimitCategory != pOld->ItemLimitCategory)
+            {
+                sLog.outBasic("Item %u: changed ItemLimitCategory from %u to %u.", i, pOld->ItemLimitCategory, pNew->ItemLimitCategory);
+                const_cast<ItemPrototype*>(pOld)->ItemLimitCategory = pNew->ItemLimitCategory;
+            }
+            if(pNew->HolidayId != pOld->HolidayId)
+            {
+                sLog.outBasic("Item %u: changed HolidayId from %u to %u.", i, pOld->HolidayId, pNew->HolidayId);
+                const_cast<ItemPrototype*>(pOld)->HolidayId = pNew->HolidayId;
+            }
+            if(pNew->ScriptId != pOld->ScriptId)
+            {
+                sLog.outBasic("Item %u: changed ScriptId from %u to %u.", i, pOld->ScriptId, pNew->ScriptId);
+                const_cast<ItemPrototype*>(pOld)->ScriptId = pNew->ScriptId;
+            }
+            if(pNew->DisenchantID != pOld->DisenchantID)
+            {
+                sLog.outBasic("Item %u: changed DisenchantID from %u to %u.", i, pOld->DisenchantID, pNew->DisenchantID);
+                const_cast<ItemPrototype*>(pOld)->DisenchantID = pNew->DisenchantID;
+            }
+            if(pNew->FoodType != pOld->FoodType)
+            {
+                sLog.outBasic("Item %u: changed FoodType from %u to %u.", i, pOld->FoodType, pNew->FoodType);
+                const_cast<ItemPrototype*>(pOld)->FoodType = pNew->FoodType;
+            }
+            if(pNew->MinMoneyLoot != pOld->MinMoneyLoot)
+            {
+                sLog.outBasic("Item %u: changed MinMoneyLoot from %u to %u.", i, pOld->MinMoneyLoot, pNew->MinMoneyLoot);
+                const_cast<ItemPrototype*>(pOld)->MinMoneyLoot = pNew->MinMoneyLoot;
+            }
+            if(pNew->MaxMoneyLoot != pOld->MaxMoneyLoot)
+            {
+                sLog.outBasic("Item %u: changed MaxMoneyLoot from %u to %u.", i, pOld->MaxMoneyLoot, pNew->MaxMoneyLoot);
+                const_cast<ItemPrototype*>(pOld)->MaxMoneyLoot = pNew->MaxMoneyLoot;
+            }
+            // COMPLICATED VARIABLES
+            // ItemStat
+            for(uint8 j = 0; j < MAX_ITEM_PROTO_STATS; ++j)
+            {
+                if(pNew->ItemStat[j].ItemStatType != pOld->ItemStat[j].ItemStatType)
+                {
+                    sLog.outBasic("Item %u: changed ItemStatType[%u] from %u to %u.", i, j, pOld->ItemStat[j].ItemStatType, pNew->ItemStat[j].ItemStatType);
+                    const_cast<ItemPrototype*>(pOld)->ItemStat[j].ItemStatType = pNew->ItemStat[j].ItemStatType;
+                }
+                if(pNew->ItemStat[j].ItemStatValue != pOld->ItemStat[j].ItemStatValue)
+                {
+                    sLog.outBasic("Item %u: changed ItemStatValue[%u] from %u to %u.", i, j, pOld->ItemStat[j].ItemStatValue, pNew->ItemStat[j].ItemStatValue);
+                    const_cast<ItemPrototype*>(pOld)->ItemStat[j].ItemStatValue = pNew->ItemStat[j].ItemStatValue;
+                }
+            }
+            // Damage
+            for(uint8 j = 0; j < MAX_ITEM_PROTO_DAMAGES; ++j)
+            {
+                if(pNew->Damage[j].DamageType != pOld->Damage[j].DamageType)
+                {
+                    sLog.outBasic("Item %u: changed DamageType[%u] from %u to %u.", i, j, pOld->Damage[j].DamageType, pNew->Damage[j].DamageType);
+                    const_cast<ItemPrototype*>(pOld)->Damage[j].DamageType = pNew->Damage[j].DamageType;
+                }
+                if(pNew->Damage[j].DamageMin != pOld->Damage[j].DamageMin)
+                {
+                    sLog.outBasic("Item %u: changed DamageMin[%u] from %f to %f.", i, j, pOld->Damage[j].DamageMin, pNew->Damage[j].DamageMin);
+                    const_cast<ItemPrototype*>(pOld)->Damage[j].DamageMin = pNew->Damage[j].DamageMin;
+                }
+                if(pNew->Damage[j].DamageMax != pOld->Damage[j].DamageMax)
+                {
+                    sLog.outBasic("Item %u: changed DamageMax[%u] from %f to %f.", i, j, pOld->Damage[j].DamageMax, pNew->Damage[j].DamageMax);
+                    const_cast<ItemPrototype*>(pOld)->Damage[j].DamageMax = pNew->Damage[j].DamageMax;
+                }
+            }
+            // Spells
+            for(uint8 j = 2; j < MAX_ITEM_PROTO_SPELLS; ++j)
+            {
+                if(pNew->Spells[j].SpellId != pOld->Spells[j].SpellId)
+                {
+                    sLog.outBasic("Item %u: changed SpellId[%u] from %u to %u.", i, j, pOld->Spells[j].SpellId, pNew->Spells[j].SpellId);
+                    const_cast<ItemPrototype*>(pOld)->Spells[j].SpellId = pNew->Spells[j].SpellId;
+                }
+                if(pNew->Spells[j].SpellTrigger != pOld->Spells[j].SpellTrigger)
+                {
+                    sLog.outBasic("Item %u: changed SpellTrigger[%u] from %u to %u.", i, j, pOld->Spells[j].SpellTrigger, pNew->Spells[j].SpellTrigger);
+                    const_cast<ItemPrototype*>(pOld)->Spells[j].SpellTrigger = pNew->Spells[j].SpellTrigger;
+                }
+                if(pNew->Spells[j].SpellCharges != pOld->Spells[j].SpellCharges)
+                {
+                    sLog.outBasic("Item %u: changed SpellCharges[%u] from %i to %i.", i, j, pOld->Spells[j].SpellCharges, pNew->Spells[j].SpellCharges);
+                    const_cast<ItemPrototype*>(pOld)->Spells[j].SpellCharges = pNew->Spells[j].SpellCharges;
+                }
+                if(pNew->Spells[j].SpellPPMRate != pOld->Spells[j].SpellPPMRate)
+                {
+                    sLog.outBasic("Item %u: changed SpellPPMRate[%u] from %f to %f.", i, j, pOld->Spells[j].SpellPPMRate, pNew->Spells[j].SpellPPMRate);
+                    const_cast<ItemPrototype*>(pOld)->Spells[j].SpellPPMRate = pNew->Spells[j].SpellPPMRate;
+                }
+                if(pNew->Spells[j].SpellCooldown != pOld->Spells[j].SpellCooldown)
+                {
+                    sLog.outBasic("Item %u: changed SpellCooldown[%u] from %i to %i.", i, j, pOld->Spells[j].SpellCooldown, pNew->Spells[j].SpellCooldown);
+                    const_cast<ItemPrototype*>(pOld)->Spells[j].SpellCooldown = pNew->Spells[j].SpellCooldown;
+                }
+                if(pNew->Spells[j].SpellCategory != pOld->Spells[j].SpellCategory)
+                {
+                    sLog.outBasic("Item %u: changed SpellCategory[%u] from %u to %u.", i, j, pOld->Spells[j].SpellCategory, pNew->Spells[j].SpellCategory);
+                    const_cast<ItemPrototype*>(pOld)->Spells[j].SpellCategory = pNew->Spells[j].SpellCategory;
+                }
+                if(pNew->Spells[j].SpellCategoryCooldown != pOld->Spells[j].SpellCategoryCooldown)
+                {
+                    sLog.outBasic("Item %u: changed SpellCategoryCooldown[%u] from %i to %i.", i, j, pOld->Spells[j].SpellCategoryCooldown, pNew->Spells[j].SpellCategoryCooldown);
+                    const_cast<ItemPrototype*>(pOld)->Spells[j].SpellCategoryCooldown = pNew->Spells[j].SpellCategoryCooldown;
+                }
+            }
+            // Socket
+            for(uint8 j = 0; j < MAX_ITEM_PROTO_SOCKETS; ++j)
+            {
+                if(pNew->Socket[j].Color != pOld->Socket[j].Color)
+                {
+                    sLog.outBasic("Item %u: changed SocketColor[%u] from %u to %u.", i, j, pOld->Socket[j].Color, pNew->Socket[j].Color);
+                    const_cast<ItemPrototype*>(pOld)->Socket[j].Color = pNew->Socket[j].Color;
+                }
+                if(pNew->Socket[j].Content != pOld->Socket[j].Content)
+                {
+                    sLog.outBasic("Item %u: changed SocketContent[%u] from %u to %u.", i, j, pOld->Socket[j].Content, pNew->Socket[j].Content);
+                    const_cast<ItemPrototype*>(pOld)->Socket[j].Content = pNew->Socket[j].Content;
+                }
+            }
+        }
+
+        sItemStorageTmp.Free();
+        sLog.outString( ">> Item Templates modified. Temp storage freed." );
+        sLog.outString( "   Items will be removed from players at next relogin if required." );
+        sLog.outString( ">> Now checking data." );
+    }
+    else
+    {
+        SQLItemLoader loader;
+        loader.Load(sItemStorage);
+        sLog.outString( ">> Loaded %u item prototypes", sItemStorage.RecordCount );
+        sLog.outString();
+    }
 
     // check data correctness
     for(uint32 i = 1; i < sItemStorage.MaxEntry; ++i)
@@ -2079,8 +2521,6 @@ void ObjectMgr::LoadItemPrototypes()
             if(proto->RequiredReputationRank == MIN_REPUTATION_RANK)
                 sLog.outErrorDb("Item (Entry: %u) has min. reputation rank in RequiredReputationRank (0) but RequiredReputationFaction > 0, faction setting is useless.",i);
         }
-        else if(proto->RequiredReputationRank > MIN_REPUTATION_RANK)
-            sLog.outErrorDb("Item (Entry: %u) has RequiredReputationFaction ==0 but RequiredReputationRank > 0, rank setting is useless.",i);
 
         if(proto->MaxCount < -1)
         {
@@ -2339,6 +2779,9 @@ void ObjectMgr::LoadItemPrototypes()
             const_cast<ItemPrototype*>(proto)->HolidayId = 0;
         }
     }
+
+    if(reload)
+        sLog.outString( ">> Loaded data checked, reload complete." );
 }
 
 void ObjectMgr::LoadItemRequiredTarget()
@@ -3829,8 +4272,8 @@ void ObjectMgr::LoadQuests()
                     bool found = false;
                     for(uint8 k = 0; k < 3; ++k)
                     {
-                        if( spellInfo->Effect[k]==SPELL_EFFECT_QUEST_COMPLETE && uint32(spellInfo->EffectMiscValue[k])==qinfo->QuestId ||
-                            spellInfo->Effect[k]==SPELL_EFFECT_SEND_EVENT)
+                        if ((spellInfo->Effect[k] == SPELL_EFFECT_QUEST_COMPLETE && uint32(spellInfo->EffectMiscValue[k]) == qinfo->QuestId) ||
+                            spellInfo->Effect[k] == SPELL_EFFECT_SEND_EVENT)
                         {
                             found = true;
                             break;
@@ -3986,19 +4429,18 @@ void ObjectMgr::LoadQuests()
                 qinfo->RewSpell = 0;                        // no spell reward will display for this quest
             }
 
-            if(!SpellMgr::IsSpellValid(spellInfo))
+            else if(!SpellMgr::IsSpellValid(spellInfo))
             {
                 sLog.outErrorDb("Quest %u has `RewSpell` = %u but spell %u is broken, quest will not have a spell reward.",
                     qinfo->GetQuestId(),qinfo->RewSpell,qinfo->RewSpell);
                 qinfo->RewSpell = 0;                        // no spell reward will display for this quest
             }
 
-            if(GetTalentSpellCost(qinfo->RewSpell))
+            else if(GetTalentSpellCost(qinfo->RewSpell))
             {
                 sLog.outErrorDb("Quest %u has `RewSpell` = %u but spell %u is talent, quest will not have a spell reward.",
                     qinfo->GetQuestId(),qinfo->RewSpell,qinfo->RewSpell);
                 qinfo->RewSpell = 0;                        // no spell reward will display for this quest
-                continue;
             }
         }
 
@@ -4013,19 +4455,18 @@ void ObjectMgr::LoadQuests()
                 qinfo->RewSpellCast = 0;                    // no spell will be casted on player
             }
 
-            if(!SpellMgr::IsSpellValid(spellInfo))
+            else if(!SpellMgr::IsSpellValid(spellInfo))
             {
                 sLog.outErrorDb("Quest %u has `RewSpellCast` = %u but spell %u is broken, quest will not have a spell reward.",
                     qinfo->GetQuestId(),qinfo->RewSpellCast,qinfo->RewSpellCast);
                 qinfo->RewSpellCast = 0;                    // no spell will be casted on player
             }
 
-            if(GetTalentSpellCost(qinfo->RewSpellCast))
+            else if(GetTalentSpellCost(qinfo->RewSpellCast))
             {
                 sLog.outErrorDb("Quest %u has `RewSpell` = %u but spell %u is talent, quest will not have a spell reward.",
                     qinfo->GetQuestId(),qinfo->RewSpellCast,qinfo->RewSpellCast);
                 qinfo->RewSpellCast = 0;                    // no spell will be casted on player
-                continue;
             }
         }
 
@@ -4303,7 +4744,7 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
         {
             case SCRIPT_COMMAND_TALK:
             {
-                if(tmp.datalong > 3)
+                if(tmp.datalong > 4)
                 {
                     sLog.outErrorDb("Table `%s` has invalid talk type (datalong = %u) in SCRIPT_COMMAND_TALK for script id %u",tablename,tmp.datalong,tmp.id);
                     continue;
@@ -4643,7 +5084,7 @@ void ObjectMgr::LoadWaypointScripts()
 
     for(ScriptMapMap::const_iterator itr = sWaypointScripts.begin(); itr != sWaypointScripts.end(); ++itr)
     {
-        QueryResult *query = WorldDatabase.PQuery("SELECT * FROM `waypoint_scripts` WHERE `id` = %u", itr->first);
+        QueryResult *query = WorldDatabase.PQuery("SELECT * FROM waypoint_scripts WHERE id = %u", itr->first);
         if(!query || !query->GetRowCount())
             sLog.outErrorDb("There is no waypoint which links to the waypoint script %u", itr->first);
     }
@@ -5246,18 +5687,18 @@ uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid, u
     {
         TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(i);
 
-        if (!node || node->map_id != mapid)
-            continue;
+        if(!node || node->map_id != mapid) continue;
 
         float dist2 = (node->x - x)*(node->x - x)+(node->y - y)*(node->y - y)+(node->z - z)*(node->z - z);
 
-        if (searched_node != 0 && i == searched_node){
+        if(searched_node != 0 && i == searched_node)
+        {
             id = i;
             dist = dist2;
             break;
         }
 
-        if(!node->MountCreatureID[team == ALLIANCE ? 1 : 0] && node->MountCreatureID[0] != 32981)
+        if(!node->MountCreatureID[team == ALLIANCE ? 1 : 0] && node->MountCreatureID[0] != 32981) // dk flight
             continue;
 
        // float dist2 = (node->x - x)*(node->x - x)+(node->y - y)*(node->y - y)+(node->z - z)*(node->z - z);
@@ -5286,8 +5727,7 @@ uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid, u
     }
 
     //movement anticheat fix
-    if (dist > 3600)
-       id = 0;
+    if(dist > 3600) id = 0;
     //movement anticheat fix
 
     return id;
@@ -5319,34 +5759,28 @@ void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, ui
 
 uint32 ObjectMgr::GetTaxiMountDisplayId( uint32 id, uint32 team, bool allowed_alt_team /* = false */)
 {
-    uint16 mount_entry = 0;
+    uint32 mount_entry = 0;
+    uint32 mount_id = 0;
 
     // select mount creature id
     TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(id);
     if(node)
     {
         if (team == ALLIANCE)
-        {
             mount_entry = node->MountCreatureID[1];
-            if(!mount_entry && allowed_alt_team)
-                mount_entry = node->MountCreatureID[0];
-        }
-        else if (team == HORDE)
-        {
+        else
             mount_entry = node->MountCreatureID[0];
 
-            if(!mount_entry && allowed_alt_team)
-                mount_entry = node->MountCreatureID[1];
+        CreatureInfo const *mount_info = GetCreatureTemplate(mount_entry);
+        if (mount_info)
+        {
+            if (! (mount_id = mount_info->GetRandomValidModelId()))
+            {
+                sLog.outErrorDb("No displayid found for the taxi mount with the entry %u! Can't load it!", mount_entry);
+                return false;
+            }
         }
     }
-
-    CreatureInfo const *mount_info = GetCreatureTemplate(mount_entry);
-    if (!mount_info)
-        return 0;
-
-    uint16 mount_id = objmgr.ChooseDisplayId(team,mount_info);
-    if (!mount_id)
-        return 0;
 
     CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(mount_id);
     if (minfo)
@@ -7655,7 +8089,7 @@ bool PlayerCondition::Meets(Player const * player) const
         case CONDITION_REPUTATION_RANK:
         {
             FactionEntry const* faction = sFactionStore.LookupEntry(value1);
-            return faction && player->GetReputationMgr().GetRank(faction) >= value2;
+            return faction && uint32(player->GetReputationMgr().GetRank(faction)) >= int32(value2);
         }
         case CONDITION_TEAM:
             return player->GetTeam() == value1;
@@ -8401,7 +8835,10 @@ void ObjectMgr::LoadScriptNames()
     }
 
     barGoLink bar( result->GetRowCount() );
-    uint32 count = 0;
+
+    //OnEvent Changes
+    m_scriptNames.push_back("scripted_on_events");
+    uint32 count = 1;
 
     do
     {
@@ -8564,7 +9001,7 @@ void ObjectMgr::LoadGMTickets()
 {
     m_GMTicketList.clear();
     
-    QueryResult *result = CharacterDatabase.Query( "SELECT `guid`, `playerGuid`, `name`, `message`, `createtime`, `map`, `posX`, `posY`, `posZ`, `timestamp`, `closed`, `assignedto`, `comment` FROM `gm_tickets`" );
+    QueryResult *result = CharacterDatabase.Query( "SELECT guid, playerGuid, name, message, createtime, map, posX, posY, posZ, timestamp, closed, assignedto, comment FROM gm_tickets" );
     
     if(!result)
     {
@@ -8599,7 +9036,7 @@ void ObjectMgr::LoadGMTickets()
 
     } while( result->NextRow() );
 
-    result = CharacterDatabase.PQuery("SELECT MAX(`guid`) from `gm_tickets`");
+    result = CharacterDatabase.PQuery("SELECT MAX(guid) from gm_tickets");
     m_GMticketid = (*result)[0].GetUInt64(); 
 
     sLog.outString(">>> %u GM Tickets loaded from the database.", count);
@@ -8621,7 +9058,7 @@ void ObjectMgr::_AddOrUpdateGMTicket(GM_Ticket &ticket)
     CharacterDatabase.escape_string(name);
     CharacterDatabase.escape_string(comment);
     std::ostringstream ss;
-    ss << "REPLACE INTO `gm_tickets` (`guid`, `playerGuid`, `name`, `message`, `createtime`, `map`, `posX`, `posY`, `posZ`, `timestamp`, `closed`, `assignedto`, `comment`) VALUES('";
+    ss << "REPLACE INTO gm_tickets (guid, playerGuid, name, message, createtime, map, posX, posY, posZ, timestamp, closed, assignedto, comment) VALUES('";
     ss << ticket.guid << "', '";
     ss << ticket.playerGuid << "', '";
     ss << name << "', '";
@@ -8647,7 +9084,7 @@ void ObjectMgr::RemoveGMTicket(GM_Ticket *ticket, int64 source, bool permanently
         {
             if(permanently)
             {
-                CharacterDatabase.PExecute("DELETE FROM `gm_tickets` WHERE `guid` = '%u'", ticket->guid);
+                CharacterDatabase.PExecute("DELETE FROM gm_tickets WHERE guid = '%u'", ticket->guid);
                 i = m_GMTicketList.erase(i);
                 ticket = NULL;
                 return;

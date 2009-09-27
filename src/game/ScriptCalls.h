@@ -37,6 +37,22 @@ class InstanceData;
 bool LoadScriptingModule(char const* libName = "");
 void UnloadScriptingModule();
 
+//On Event Handlers
+typedef void(RIBON_IMPORT * scriptCallOnLogin) (Player *pPlayer);
+typedef void(RIBON_IMPORT * scriptCallOnLogout) (Player *pPlayer);
+typedef void(RIBON_IMPORT * scriptCallOnPVPKill) (Player *killer, Player *killed);
+typedef bool(RIBON_IMPORT * scriptCallOnSpellCast)(Unit *pUnitTarget, Item *pItemTarget, GameObject *pGoTarget, uint32 i, SpellEntry const *spell);
+typedef uint32(RIBON_IMPORT * scriptCallOnGetXP) (Player *pPlayer, uint32 amount);
+typedef int32(RIBON_IMPORT * scriptCallOnGetMoney) (Player *pPlayer, int32 amount);
+typedef bool(RIBON_IMPORT * scriptCallOnPlayerChat) (Player *pPlayer, const char *text);
+typedef void(RIBON_IMPORT * scriptCallOnServerStartup) ();
+typedef void(RIBON_IMPORT * scriptCallOnServerShutdown) ();
+typedef void(RIBON_IMPORT * scriptCallOnAreaChange) (Player *pPlayer, AreaTableEntry const *pArea);
+typedef bool(RIBON_IMPORT * scriptCallOnItemClick) (Player *pPlayer, Item *pItem);
+typedef bool(RIBON_IMPORT * scriptCallOnItemOpen) (Player *pPlayer, Item *pItem);
+typedef bool(RIBON_IMPORT * scriptCallOnGoClick) (Player *pPlayer, GameObject *pGameObject);
+typedef void(RIBON_IMPORT * scriptCallOnCreatureKill) (Player *pPlayer, Creature *pCreature);
+
 typedef void(RIBON_IMPORT * scriptCallScriptsInit) (char const*);
 typedef void(RIBON_IMPORT * scriptCallScriptsFree) ();
 typedef char const* (RIBON_IMPORT * scriptCallScriptsVersion) ();
@@ -72,6 +88,20 @@ typedef struct
     scriptCallScriptsFree ScriptsFree;
     scriptCallScriptsVersion ScriptsVersion;
 
+    scriptCallOnLogin OnLogin;
+    scriptCallOnLogout OnLogout;
+    scriptCallOnPVPKill OnPVPKill;
+    scriptCallOnSpellCast OnSpellCast;
+    scriptCallOnGetXP OnGetXP;
+    scriptCallOnGetMoney OnGetMoney;
+    scriptCallOnPlayerChat OnPlayerChat;
+    scriptCallOnServerStartup OnServerStartup;
+    scriptCallOnServerShutdown OnServerShutdown;
+    scriptCallOnAreaChange OnAreaChange;
+    scriptCallOnItemClick OnItemClick;
+    scriptCallOnItemOpen OnItemOpen;
+    scriptCallOnGoClick OnGoClick;
+    scriptCallOnCreatureKill OnCreatureKill;
     scriptCallGossipHello GossipHello;
     scriptCallGOChooseReward GOChooseReward;
     scriptCallQuestAccept QuestAccept;

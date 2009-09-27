@@ -18,6 +18,7 @@ SET(ribonscript_LIB_SRCS
    include/sc_creature.h
    include/sc_gossip.h
    include/sc_instance.h
+   scripts/custom/on_events.cpp
    scripts/eastern_kingdoms/blackrock_depths/blackrock_depths.cpp
    scripts/eastern_kingdoms/blackrock_depths/boss_ambassador_flamelash.cpp
    scripts/eastern_kingdoms/blackrock_depths/boss_anubshiah.cpp
@@ -135,6 +136,9 @@ SET(ribonscript_LIB_SRCS
    scripts/eastern_kingdoms/stratholme/def_stratholme.h
    scripts/eastern_kingdoms/stratholme/instance_stratholme.cpp
    scripts/eastern_kingdoms/stratholme/stratholme.cpp
+   scripts/eastern_kingdoms/sunken_temple/def_sunken_temple.h
+   scripts/eastern_kingdoms/sunken_temple/instance_sunken_temple.cpp
+   scripts/eastern_kingdoms/sunken_temple/sunken_temple.cpp
    scripts/eastern_kingdoms/sunwell_plateau/boss_kiljaeden.cpp
    scripts/eastern_kingdoms/sunwell_plateau/boss_muru.cpp
    scripts/eastern_kingdoms/sunwell_plateau/boss_eredar_twins.cpp
@@ -178,6 +182,7 @@ SET(ribonscript_LIB_SRCS
    scripts/eastern_kingdoms/boss_kruul.cpp
    scripts/eastern_kingdoms/burning_steppes.cpp
    scripts/eastern_kingdoms/dun_morogh.cpp
+   scripts/eastern_kingdoms/duskwood.cpp
    scripts/eastern_kingdoms/eastern_plaguelands.cpp
    scripts/eastern_kingdoms/elwynn_forest.cpp
    scripts/eastern_kingdoms/eversong_woods.cpp

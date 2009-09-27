@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef RIBON_PETAI_H
-#define RIBON_PETAI_H
+#ifndef TRINITY_PETAI_H
+#define TRINITY_PETAI_H
 
 #include "CreatureAI.h"
 #include "Timer.h"
@@ -34,14 +34,13 @@ class RIBON_DLL_DECL PetAI : public CreatureAI
         explicit PetAI(Creature *c);
 
         void EnterEvadeMode();
-        void JustDied(Unit* who) { _stopAttack(); }
+        void JustDied(Unit *who) { _stopAttack(); }
 
         void UpdateAI(const uint32);
         static int Permissible(const Creature *);
 
-        // MrSmite 09-05-2009 PetAI_v1.0
-        void KilledUnit(Unit* victim);
-        void AttackStart(Unit* target);
+        void KilledUnit(Unit *victim);
+        void AttackStart(Unit *target);
         void MovementInform(uint32 moveType, uint32 data);
 
     private:
@@ -56,11 +55,10 @@ class RIBON_DLL_DECL PetAI : public CreatureAI
         std::set<uint64> m_AllySet;
         uint32 m_updateAlliesTimer;
 
-        // MrSmite 09-05-2009 PetAI_v1.0
-        Unit* SelectNextTarget();
+        Unit *SelectNextTarget();
         void HandleReturnMovement();
-        void DoAttack(Unit* target, bool chase);
-        bool _CanAttack(Unit* target);
+        void DoAttack(Unit *target, bool chase);
+        bool _CanAttack(Unit *target);
 };
 #endif
 

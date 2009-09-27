@@ -88,25 +88,40 @@ VendorItem const* VendorItemData::FindItem(uint32 item_id) const
     return NULL;
 }
 
+uint32 CreatureInfo::GetRandomValidModelIdIncludingNativeId(uint32 native_id) const
+{
+    uint8 c = 0;
+    uint32 modelIDs[5];
+
+    if (Modelid1) modelIDs[c++] = Modelid1;
+    if (Modelid2) modelIDs[c++] = Modelid2;
+    if (Modelid3) modelIDs[c++] = Modelid3;
+    if (Modelid4) modelIDs[c++] = Modelid4;
+    if (native_id != Modelid1 && native_id != Modelid2
+    && native_id != Modelid3 && native_id != Modelid4) modelIDs[c++] = native_id;
+
+    return ((c>0) ? modelIDs[urand(0,c-1)] : 0);
+}
+
 uint32 CreatureInfo::GetRandomValidModelId() const
 {
-    uint32 c = 0;
+    uint8 c = 0;
     uint32 modelIDs[4];
 
-    if (DisplayID_A[0]) modelIDs[c++] = DisplayID_A[0];
-    if (DisplayID_A[1]) modelIDs[c++] = DisplayID_A[1];
-    if (DisplayID_H[0]) modelIDs[c++] = DisplayID_H[0];
-    if (DisplayID_H[1]) modelIDs[c++] = DisplayID_H[1];
+    if (Modelid1) modelIDs[c++] = Modelid1;
+    if (Modelid2) modelIDs[c++] = Modelid2;
+    if (Modelid3) modelIDs[c++] = Modelid3;
+    if (Modelid4) modelIDs[c++] = Modelid4;
 
     return ((c>0) ? modelIDs[urand(0,c-1)] : 0);
 }
 
 uint32 CreatureInfo::GetFirstValidModelId() const
 {
-    if(DisplayID_A[0]) return DisplayID_A[0];
-    if(DisplayID_A[1]) return DisplayID_A[1];
-    if(DisplayID_H[0]) return DisplayID_H[0];
-    if(DisplayID_H[1]) return DisplayID_H[1];
+    if(Modelid1) return Modelid1;
+    if(Modelid2) return Modelid2;
+    if(Modelid3) return Modelid3;
+    if(Modelid4) return Modelid4;
     return 0;
 }
 
@@ -182,7 +197,7 @@ void Creature::AddToWorld()
             m_zoneScript->OnCreatureCreate(this, true);
         ObjectAccessor::Instance().AddObject(this);
         Unit::AddToWorld();
-        SearchFormationAndPath();
+        SearchFormation();
         AIM_Initialize();
         if(IsVehicle())
             GetVehicleKit()->Install();
@@ -212,7 +227,7 @@ void Creature::DisappearAndDie()
     RemoveCorpse();
 }
 
-void Creature::SearchFormationAndPath()
+void Creature::SearchFormation()
 {
     if(isSummon())
         return;
@@ -221,33 +236,14 @@ void Creature::SearchFormationAndPath()
     if(!lowguid)
         return;
 
-    bool usePath = (GetDefaultMovementType() == WAYPOINT_MOTION_TYPE);
     CreatureGroupInfoType::iterator frmdata = CreatureGroupMap.find(lowguid);
     if(frmdata != CreatureGroupMap.end())
-    {
-        if(usePath && lowguid != frmdata->second->leaderGUID)
-        {
-            SetDefaultMovementType(IDLE_MOTION_TYPE);
-            usePath = false;
-        }
         formation_mgr.AddCreatureToGroup(frmdata->second->leaderGUID, this);
-    }
-
-    if(usePath)
-    {
-        if(WaypointMgr.GetPath(lowguid * 10))
-            SetWaypointPathId(lowguid * 10);
-        else
-        {
-            sLog.outErrorDb("Creature DBGUID %u has waypoint motion type, but it does not have a waypoint path!", lowguid);
-            SetDefaultMovementType(IDLE_MOTION_TYPE);
-        }
-    }
 }
 
 void Creature::RemoveCorpse()
 {
-    if( getDeathState()!=CORPSE && !m_isDeadByDefault || getDeathState()!=ALIVE && m_isDeadByDefault )
+    if ((getDeathState()!=CORPSE && !m_isDeadByDefault) || (getDeathState()!=ALIVE && m_isDeadByDefault))
         return;
 
     m_deathTimer = 0;
@@ -442,11 +438,11 @@ void Creature::Update(uint32 diff)
     {
         case JUST_ALIVED:
             // Don't must be called, see Creature::setDeathState JUST_ALIVED -> ALIVE promoting.
-            sLog.outError("Creature (GUIDLow: %u Entry: %u ) in wrong state: JUST_ALIVED (4)",GetGUIDLow(),GetEntry());
+            sLog.outError("Creature (GUID: %u Entry: %u ) in wrong state: JUST_ALIVED (4)",GetGUIDLow(),GetEntry());
             break;
         case JUST_DIED:
             // Don't must be called, see Creature::setDeathState JUST_DIED -> CORPSE promoting.
-            sLog.outError("Creature (GUIDLow: %u Entry: %u ) in wrong state: JUST_DEAD (1)",GetGUIDLow(),GetEntry());
+            sLog.outError("Creature (GUID: %u Entry: %u ) in wrong state: JUST_DEAD (1)",GetGUIDLow(),GetEntry());
             break;
         case DEAD:
         {
@@ -548,22 +544,23 @@ void Creature::Update(uint32 diff)
             if(!isAlive())
                 break;
 
-            if(m_regenTimer > diff)
+            bool bNotInCombatOrIsPolymorphed = (!isInCombat() || IsPolymorphed());
+
+            if(m_regenTimer > diff && !bNotInCombatOrIsPolymorphed)
                 m_regenTimer -= diff;
             else
             {
-                if (!isInCombat() || IsPolymorphed())
+                if(bNotInCombatOrIsPolymorphed)
                     RegenerateHealth();
 
                 if(getPowerType() == POWER_ENERGY)
-                {
                     if(!IsVehicle() || GetVehicleKit()->GetVehicleInfo()->m_powerType != POWER_PYRITE)
                         Regenerate(POWER_ENERGY);
-                }
                 else
                     RegenerateMana();
 
-                m_regenTimer += 2000 - diff;
+                if(!bNotInCombatOrIsPolymorphed)
+                    m_regenTimer += 2000 - diff;
             }
 
             break;
@@ -741,6 +738,7 @@ bool Creature::Create(uint32 guidlow, Map *map, uint32 phaseMask, uint32 Entry, 
                 break;
         }
         LoadCreaturesAddon();
+        SetDisplayId(GetCreatureInfo()->GetRandomValidModelIdIncludingNativeId(GetNativeDisplayId()));
     }
     return bResult;
 }
@@ -1314,30 +1312,8 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     CreatureInfo const *cinfo = GetCreatureInfo();
     if (cinfo)
     {
-        if (displayId != cinfo->DisplayID_A[0] && displayId != cinfo->DisplayID_A[1] &&
-            displayId != cinfo->DisplayID_H[0] && displayId != cinfo->DisplayID_H[1])
-        {
-            if (cinfo->DisplayID_A[0])
-                if (CreatureModelInfo const *minfo = objmgr.GetCreatureModelInfo(cinfo->DisplayID_A[0]))
-                    if(displayId == minfo->modelid_other_gender)
-                        displayId = 0;
-
-            if (displayId && cinfo->DisplayID_A[1])
-                if (CreatureModelInfo const *minfo = objmgr.GetCreatureModelInfo(cinfo->DisplayID_A[1]))
-                    if(displayId == minfo->modelid_other_gender)
-                        displayId = 0;
-
-            if (displayId && cinfo->DisplayID_H[0])
-                if (CreatureModelInfo const *minfo = objmgr.GetCreatureModelInfo(cinfo->DisplayID_H[0]))
-                    if(displayId == minfo->modelid_other_gender)
-                        displayId = 0;
-
-            if (displayId && cinfo->DisplayID_H[1])
-                if (CreatureModelInfo const *minfo = objmgr.GetCreatureModelInfo(cinfo->DisplayID_H[1]))
-                    if(displayId == minfo->modelid_other_gender)
-                        displayId = 0;
-        }
-        else
+        if (displayId == cinfo->Modelid1 || displayId == cinfo->Modelid2 ||
+            displayId == cinfo->Modelid3 || displayId == cinfo->Modelid4)
             displayId = 0;
     }
 
@@ -1736,10 +1712,10 @@ float Creature::GetAttackDistance(Unit const* pl) const
     if(aggroRate==0)
         return 0.0f;
 
-    int32 playerlevel   = pl->getLevelForTarget(this);
-    int32 creaturelevel = getLevelForTarget(pl);
+    uint32 playerlevel   = pl->getLevelForTarget(this);
+    uint32 creaturelevel = getLevelForTarget(pl);
 
-    int32 leveldif       = playerlevel - creaturelevel;
+    int32 leveldif       = int32(playerlevel) - int32(creaturelevel);
 
     // "The maximum Aggro Radius has a cap of 25 levels under. Example: A level 30 char has the same Aggro Radius of a level 5 char on a level 60 mob."
     if ( leveldif < - 25)
@@ -1797,7 +1773,7 @@ void Creature::setDeathState(DeathState s)
         if(m_formation && m_formation->getLeader() == this)
             m_formation->FormationReset(true);
 
-        if (canFly() && FallGround())
+        if ((canFly() || IsFlying()) && FallGround())
             return;
 
         Unit::setDeathState(CORPSE);
@@ -1882,6 +1858,8 @@ void Creature::Respawn(bool force)
         }
         else
             setDeathState( JUST_ALIVED );
+
+        SetDisplayId(cinfo->GetRandomValidModelIdIncludingNativeId(GetNativeDisplayId()));
 
         //Call AI respawn virtual function
         AI()->JustRespawned();
@@ -2027,7 +2005,7 @@ bool Creature::IsVisibleInGridForPlayer(Player const* pl) const
     {
         if( GetEntry() == VISUAL_WAYPOINT && !pl->isGameMaster() )
             return false;
-        return isAlive() || m_deathTimer > 0 || m_isDeadByDefault && m_deathState==CORPSE;
+        return (isAlive() || m_deathTimer > 0 || (m_isDeadByDefault && m_deathState==CORPSE));
     }
 
     // Dead player see live creatures near own corpse
@@ -2271,6 +2249,10 @@ bool Creature::LoadCreaturesAddon(bool reload)
     if (cainfo->move_flags != 0)
         SetUnitMovementFlags(cainfo->move_flags);
 
+    //Load Path
+    if (cainfo->path_id != 0)
+        m_path_id = cainfo->path_id;
+
     if(cainfo->auras)
     {
         for (CreatureDataAddonAura const* cAura = cainfo->auras; cAura->spell_id; ++cAura)
@@ -2278,7 +2260,7 @@ bool Creature::LoadCreaturesAddon(bool reload)
             SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(cAura->spell_id);
             if (!AdditionalSpellInfo)
             {
-                sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong spell %u defined in `auras` field.",GetGUIDLow(),GetEntry(),cAura->spell_id);
+                sLog.outErrorDb("Creature (GUID: %u Entry: %u) has wrong spell %u defined in `auras` field.",GetGUIDLow(),GetEntry(),cAura->spell_id);
                 continue;
             }
 
@@ -2286,13 +2268,13 @@ bool Creature::LoadCreaturesAddon(bool reload)
             if(HasAuraEffect(cAura->spell_id,cAura->effect_idx))
             {
                 if(!reload)
-                    sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has duplicate aura (spell %u effect %u) in `auras` field.",GetGUIDLow(),GetEntry(),cAura->spell_id,cAura->effect_idx);
+                    sLog.outErrorDb("Creature (GUID: %u Entry: %u) has duplicate aura (spell %u effect %u) in `auras` field.",GetGUIDLow(),GetEntry(),cAura->spell_id,cAura->effect_idx);
 
                 continue;
             }
 
             AddAuraEffect(AdditionalSpellInfo, cAura->effect_idx, this, this);
-            sLog.outDebug("Spell: %u with Aura %u added to creature (GUIDLow: %u Entry: %u )", cAura->spell_id, AdditionalSpellInfo->EffectApplyAuraName[cAura->effect_idx],GetGUIDLow(),GetEntry());
+            sLog.outDebug("Spell: %u with Aura %u added to creature (GUID: %u Entry: %u)", cAura->spell_id, AdditionalSpellInfo->EffectApplyAuraName[cAura->effect_idx],GetGUIDLow(),GetEntry());
         }
     }
     return true;

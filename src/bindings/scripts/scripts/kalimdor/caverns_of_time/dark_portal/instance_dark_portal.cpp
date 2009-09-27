@@ -178,7 +178,7 @@ struct RIBON_DLL_DECL instance_dark_portal : public ScriptedInstance
             {
                 if (data == IN_PROGRESS)
                 {
-                    debug_log("TSCR: Instance Dark Portal: Starting event.");
+                    debug_log("RSCR: Instance Dark Portal: Starting event.");
                     InitWorldState();
                     m_auiEncounter[1] = IN_PROGRESS;
                     NextPortal_Timer = 15000;
@@ -187,7 +187,7 @@ struct RIBON_DLL_DECL instance_dark_portal : public ScriptedInstance
                 if (data == DONE)
                 {
                     //this may be completed further out in the post-event
-                    debug_log("TSCR: Instance Dark Portal: Event completed.");
+                    debug_log("RSCR: Instance Dark Portal: Event completed.");
                     Map::PlayerList const& players = instance->GetPlayers();
 
                     if (!players.isEmpty())
@@ -252,7 +252,7 @@ struct RIBON_DLL_DECL instance_dark_portal : public ScriptedInstance
         if (entry == RIFT_BOSS)
             entry = RandRiftBoss();
 
-        debug_log("TSCR: Instance Dark Portal: Summoning rift boss entry %u.",entry);
+        debug_log("RSCR: Instance Dark Portal: Summoning rift boss entry %u.",entry);
 
         Position pos;
         m_creature->GetRandomNearPosition(pos, 10.0f);
@@ -263,7 +263,7 @@ struct RIBON_DLL_DECL instance_dark_portal : public ScriptedInstance
         if(Creature *summon = m_creature->SummonCreature(entry, pos, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 600000))
             return summon;
 
-        debug_log("TSCR: Instance Dark Portal: what just happened there? No boss, no loot, no fun...");
+        debug_log("RSCR: Instance Dark Portal: what just happened there? No boss, no loot, no fun...");
         return NULL;
     }
 
@@ -275,7 +275,7 @@ struct RIBON_DLL_DECL instance_dark_portal : public ScriptedInstance
 
             if (tmp >= CurrentRiftId)
                 tmp++;
-                    debug_log("TSCR: Instance Dark Portal: Creating Time Rift at locationId %i (old locationId was %u).",tmp,CurrentRiftId);
+                    debug_log("RSCR: Instance Dark Portal: Creating Time Rift at locationId %i (old locationId was %u).",tmp,CurrentRiftId);
 
                     CurrentRiftId = tmp;
 

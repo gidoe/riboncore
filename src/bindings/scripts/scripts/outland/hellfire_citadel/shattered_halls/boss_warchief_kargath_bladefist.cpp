@@ -197,7 +197,7 @@ struct RIBON_DLL_DECL boss_warchief_kargath_bladefistAI : public ScriptedAI
             return;
 
         if (Assassins_Timer)
-            if (Assassins_Timer < diff)
+            if (Assassins_Timer <= diff)
             {
                 SpawnAssassin();
                 Assassins_Timer = 0;
@@ -206,7 +206,7 @@ struct RIBON_DLL_DECL boss_warchief_kargath_bladefistAI : public ScriptedAI
         if (InBlade)
         {
             if (Wait_Timer)
-                if (Wait_Timer < diff)
+                if (Wait_Timer <= diff)
                 {
                     if (target_num <= 0)
                     {
@@ -235,7 +235,7 @@ struct RIBON_DLL_DECL boss_warchief_kargath_bladefistAI : public ScriptedAI
         else
         {
             if (Blade_Dance_Timer)
-                if (Blade_Dance_Timer < diff)
+                if (Blade_Dance_Timer <= diff)
                 {
                     target_num = TARGET_NUM;
                     Wait_Timer = 1;
@@ -246,7 +246,7 @@ struct RIBON_DLL_DECL boss_warchief_kargath_bladefistAI : public ScriptedAI
                 }else Blade_Dance_Timer -= diff;
 
             if (Charge_timer)
-                if (Charge_timer < diff)
+                if (Charge_timer <= diff)
                 {
                     DoCast(SelectUnit(SELECT_TARGET_RANDOM,0),H_SPELL_CHARGE);
                     Charge_timer = 0;

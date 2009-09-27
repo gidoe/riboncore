@@ -133,6 +133,8 @@ extern void AddSC_boss_dathrohan_balnazzar();
 extern void AddSC_boss_order_of_silver_hand();
 extern void AddSC_instance_stratholme();
 extern void AddSC_stratholme();
+extern void AddSC_sunken_temple();                  // Sunken Temple
+extern void AddSC_instance_sunken_temple();
 extern void AddSC_instance_sunwell_plateau();       //Sunwell Plateau
 extern void AddSC_boss_kalecgos();
 extern void AddSC_boss_brutallus();
@@ -174,6 +176,7 @@ extern void AddSC_blasted_lands();
 extern void AddSC_boss_kruul();
 extern void AddSC_burning_steppes();
 extern void AddSC_dun_morogh();
+extern void AddSC_duskwood();
 extern void AddSC_eastern_plaguelands();
 extern void AddSC_elwynn_forest();
 extern void AddSC_eversong_woods();
@@ -258,8 +261,12 @@ extern void AddSC_ungoro_crater();
 extern void AddSC_winterspring();
 
 //northrend
+extern void AddSC_boss_moorabi();
 extern void AddSC_instance_ahnkahet();          //Azjol-Nerub Ahn'kahet
+extern void AddSC_boss_krik_thir();
+extern void AddSC_boss_taldaram();
 extern void AddSC_boss_elder_nadox();
+extern void AddSC_boss_volazj();
 extern void AddSC_boss_anubrekhan();            //Naxxramas
 extern void AddSC_boss_maexxna();
 extern void AddSC_boss_patchwerk();
@@ -288,6 +295,7 @@ extern void AddSC_boss_loken();
 extern void AddSC_boss_ionar();
 extern void AddSC_boss_volkhan();
 extern void AddSC_instance_halls_of_lightning();
+extern void AddSC_boss_maiden_of_grief();       //Ulduar Halls of Stone
 extern void AddSC_boss_auriaya();               //Ulduar Ulduar
 extern void AddSC_boss_flame_leviathan();
 extern void AddSC_boss_ignis();
@@ -300,6 +308,11 @@ extern void AddSC_boss_keleseth();              //Utgarde Keep
 extern void AddSC_boss_skarvald_dalronn();
 extern void AddSC_boss_ingvar_the_plunderer();
 extern void AddSC_instance_utgarde_keep();
+extern void AddSC_boss_svala();                 //Utgarde pinnacle
+extern void AddSC_boss_palehoof();
+extern void AddSC_boss_skadi();
+extern void AddSC_boss_ymiron();
+extern void AddSC_instance_utgarde_pinnacle();
 extern void AddSC_utgarde_keep();
 extern void AddSC_boss_archavon();              //Vault of Archavon
 extern void AddSC_boss_emalon();
@@ -396,6 +409,7 @@ extern void AddSC_shadowmoon_valley();
 extern void AddSC_shattrath_city();
 extern void AddSC_terokkar_forest();
 extern void AddSC_zangarmarsh();
+extern void AddSC_onevents();
 
 void AddScripts()
 {
@@ -528,6 +542,8 @@ void AddScripts()
     AddSC_boss_order_of_silver_hand();
     AddSC_instance_stratholme();
     AddSC_stratholme();
+    AddSC_sunken_temple();                  // Sunken Temple
+    AddSC_instance_sunken_temple();
     AddSC_instance_sunwell_plateau();       //Sunwell Plateau
     AddSC_boss_kalecgos();
     AddSC_boss_brutallus();
@@ -569,6 +585,7 @@ void AddScripts()
     AddSC_boss_kruul();
     AddSC_burning_steppes();
     AddSC_dun_morogh();
+    AddSC_duskwood();
     AddSC_eastern_plaguelands();
     AddSC_elwynn_forest();
     AddSC_eversong_woods();
@@ -653,8 +670,12 @@ void AddScripts()
     AddSC_winterspring();
 
     //northrend
+    AddSC_boss_moorabi();
     AddSC_instance_ahnkahet();          //Azjol-Nerub Ahn'kahet
+    AddSC_boss_krik_thir();
+    AddSC_boss_taldaram();
     AddSC_boss_elder_nadox();
+    AddSC_boss_volazj();
     AddSC_boss_anubrekhan();            //Naxxramas
     AddSC_boss_maexxna();
     AddSC_boss_patchwerk();
@@ -683,6 +704,7 @@ void AddScripts()
     AddSC_boss_ionar();
     AddSC_boss_volkhan();
     AddSC_instance_halls_of_lightning();
+    AddSC_boss_maiden_of_grief();       //Ulduar Halls of Stone
     AddSC_boss_auriaya();               //Ulduar Ulduar
     AddSC_boss_flame_leviathan();
     AddSC_boss_ignis();
@@ -696,6 +718,11 @@ void AddScripts()
     AddSC_boss_ingvar_the_plunderer();
     AddSC_instance_utgarde_keep();
     AddSC_utgarde_keep();
+    AddSC_boss_svala();                 //Utgarde pinnacle
+//    AddSC_boss_palehoof();
+//    AddSC_boss_skadi();
+//    AddSC_boss_ymiron();
+    AddSC_instance_utgarde_pinnacle();
     AddSC_boss_archavon();              //Vault of Archavon
     AddSC_boss_emalon();
     AddSC_instance_archavon();
@@ -791,4 +818,5 @@ void AddScripts()
     AddSC_shattrath_city();
     AddSC_terokkar_forest();
     AddSC_zangarmarsh();
+    AddSC_onevents();
 }

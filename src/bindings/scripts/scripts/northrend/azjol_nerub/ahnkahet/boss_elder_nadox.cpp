@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Trinity <http://www.trinitycore.org/>
+ * Copyright (C) 2009 Ribon <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ bool DeadAhnkaharGuardian; // needed for achievement: Respect Your Elders(2038)
 
 #define ACHIEVEMENT_RESPECT_YOUR_ELDERS     2038
 
+//not in db
 #define SAY_AGGRO                              -1619014
 #define SAY_SLAY_1                             -1619015
 #define SAY_SLAY_2                             -1619016

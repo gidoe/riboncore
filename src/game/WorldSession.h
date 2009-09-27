@@ -39,12 +39,14 @@ class Item;
 class Object;
 class Player;
 class Unit;
+class GameObject;
 class WorldPacket;
 class WorldSocket;
 class WorldSession;
 class QueryResult;
 class LoginQueryHolder;
 class CharacterHandler;
+struct AreaTableEntry;
 
 enum AccountDataType
 {
@@ -740,7 +742,16 @@ class RIBON_DLL_SPEC WorldSession
         void HandleEquipmentSetDelete(WorldPacket& recv_data);
         void HandleEquipmentSetUse(WorldPacket& recv_data);
         void HandleWorldStateUITimerUpdate(WorldPacket& recv_data);
-        
+
+        void HandleOnPVPKill(Player *killed);
+        bool HandleOnPlayerChat(const char *text);
+        uint32 HandleOnGetXP(uint32 amount);
+        int32 HandleOnGetMoney(int32 amount);
+        void HandleOnAreaChange(AreaTableEntry const *pArea);
+        bool HandleOnItemClick(Item *pItem);
+        bool HandleOnItemOpen(Item *pItem);
+        bool HandleOnGoClick(GameObject *pGameObject);
+        void HandleOnCreatureKill(Creature *pCreature);
     private:
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);

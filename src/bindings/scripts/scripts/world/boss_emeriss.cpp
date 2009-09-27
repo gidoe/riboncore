@@ -26,7 +26,7 @@ EndScriptData */
 enum
 {
     SAY_AGGRO               = -1000401,
-    SAY_CASTCORRUPTION      = -1000402,
+    SAY_CASTCORRUPTION      = -1000402, //signed for 6182
 
     SPELL_SLEEP             = 24777,
     SPELL_NOXIOUSBREATH     = 24818,
@@ -120,7 +120,7 @@ struct RIBON_DLL_DECL boss_emerissAI : public ScriptedAI
         //CorruptionofEarth_Timer
         //CorruptionofEarth at 75%, 50% and 25%
         if ((m_creature->GetHealth()*100 / m_creature->GetMaxHealth()) <= (100-(25*m_uiCorruptionsCasted)))
-        { 
+        {
             ++m_uiCorruptionsCasted;                        // prevent casting twice on same hp
             DoScriptText(SAY_CASTCORRUPTION, m_creature);
             DoCast(m_creature->getVictim(), SPELL_CORRUPTIONOFEARTH);
