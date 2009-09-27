@@ -255,7 +255,10 @@ bool SpellCastTargets::read ( WorldPacket * data, Unit *caster )
 
     if( m_targetMask & TARGET_FLAG_SOURCE_LOCATION )
     {
-        if(data->rpos() + 4 + 4 + 4 > data->size())
+        if(data->rpos() + 1 + 4 + 4 + 4 > data->size())
+            return false;
+
+        if(!data->readPackGUID(m_unitTargetGUID))
             return false;
 
         *data >> m_srcPos.m_positionX >> m_srcPos.m_positionY >> m_srcPos.m_positionZ;
@@ -341,7 +344,14 @@ void SpellCastTargets::write ( WorldPacket * data )
     }
 
     if( m_targetMask & TARGET_FLAG_SOURCE_LOCATION )
+    {
+        if(m_unitTarget)
+            data->append(m_unitTarget->GetPackGUID());
+        else
+            *data << uint8(0);
+
         *data << m_srcPos.m_positionX << m_srcPos.m_positionY << m_srcPos.m_positionZ;
+    }
 
     if( m_targetMask & TARGET_FLAG_DEST_LOCATION )
     {
@@ -3515,6 +3525,12 @@ void Spell::SendSpellStart()
     if ( castFlags & CAST_FLAG_AMMO )
         WriteAmmoToPacket(&data);
 
+    if ( castFlags & CAST_FLAG_UNKNOWN21 )
+    {
+        data << uint32(0);
+        data << uint32(0);
+    }
+
     m_caster->SendMessageToSet(&data, true);
 }
 
@@ -3853,7 +3869,7 @@ void Spell::SendChannelUpdate(uint32 time)
 {
     if(time == 0)
     {
-        m_caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, 0);
+        m_caster->SetChannelObjectGUID(0);
         m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
     }
 
@@ -3904,7 +3920,7 @@ void Spell::SendChannelStart(uint32 duration)
 
     m_timer = duration;
     if(target)
-        m_caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, target->GetGUID());
+        m_caster->SetChannelObjectGUID(target->GetGUID());
     m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, m_spellInfo->Id);
 }
 
