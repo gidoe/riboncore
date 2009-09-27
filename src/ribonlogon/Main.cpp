@@ -347,14 +347,12 @@ void OnSignal(int s)
     {
         case SIGINT:
         case SIGTERM:
-            stopEvent = true;
-            break;
         #ifdef _WIN32
         case SIGBREAK:
             if (m_ServiceStatus != 1)
+        #endif
                 stopEvent = true;
             break;
-        #endif
     }
 
     signal(s, OnSignal);
@@ -389,8 +387,8 @@ void HookSignals()
     signal(SIGINT, OnSignal);
     signal(SIGTERM, OnSignal);
     #ifdef _WIN32
-+    if (m_ServiceStatus != 1)
-+       signal(SIGBREAK, OnSignal);
+    if (m_ServiceStatus != 1)
+       signal(SIGBREAK, OnSignal);
     #endif
 }
 
@@ -401,7 +399,7 @@ void UnhookSignals()
     signal(SIGTERM, 0);
     #ifdef _WIN32
     if (m_ServiceStatus != 1)
-       signal(SIGBREAK, 0);
+        signal(SIGBREAK, 0);
     #endif
 }
 
