@@ -931,7 +931,6 @@ void WorldSession::HandleGuildBankDepositMoney( WorldPacket & recv_data )
 
             pGuild->DisplayGuildBankTabsInfo(this);
             pGuild->DisplayGuildBankContent(this, 0);
-            pGuild->DisplayGuildBankMoneyUpdate();
         }
     }
 }

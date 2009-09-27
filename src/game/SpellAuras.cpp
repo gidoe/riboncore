@@ -2608,7 +2608,7 @@ void AuraEffect::TriggerSpell()
 
 Unit* AuraEffect::GetTriggerTarget() const
 {
-    Unit* target = ObjectAccessor::GetUnit(*m_target, m_target->GetTargetGUID();
+    Unit* target = ObjectAccessor::GetUnit(*m_target, m_target->GetUInt64Value(UNIT_FIELD_TARGET));
     return target ? target : m_target;
 }
 
