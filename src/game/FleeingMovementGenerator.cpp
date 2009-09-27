@@ -306,7 +306,7 @@ FleeingMovementGenerator<T>::Initialize(T &owner)
     owner.CastStop();
     owner.addUnitState(UNIT_STAT_FLEEING | UNIT_STAT_ROAMING);
     owner.SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
-    owner.SetUInt64Value(UNIT_FIELD_TARGET, 0);
+    owner.SetTargetGUID(0);
     owner.RemoveUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
 
     if(Unit * fright = ObjectAccessor::GetUnit(owner, i_frightGUID))

@@ -1145,8 +1145,6 @@ struct MapEntry
     bool IsBattleGroundOrArena() const { return map_type == MAP_BATTLEGROUND || map_type == MAP_ARENA; }
     bool SupportsHeroicMode() const { return true; }
     bool HasResetTime() const { return true; }
-    bool SupportsHeroicMode() const { return true; }
-    bool HasResetTime() const { return true; }
 
     bool IsMountAllowed() const
     {
@@ -1225,7 +1223,7 @@ struct ScalingStatValuesEntry
             if(mask & 0x00000001) return ssdMultiplier[0];
             if(mask & 0x00000002) return ssdMultiplier[1];
             if(mask & 0x00000004) return ssdMultiplier[2];
-            if(mask & 0x00000008) return feralBonus;
+            if(mask & 0x00000008) return ssdMultiplier2;
             if(mask & 0x00000010) return ssdMultiplier[3];
         }
         return 0;
