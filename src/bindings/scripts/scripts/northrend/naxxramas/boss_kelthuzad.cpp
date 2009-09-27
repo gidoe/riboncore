@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_KelThuzud
-SD%Complete: 0
-SDComment: VERIFY SCRIPT
+SD%Complete: 90%
+SDComment: ToDo: Find channeling id and add effect in phase 1
 SDCategory: Naxxramas
 EndScriptData */
 
@@ -42,12 +42,12 @@ EndScriptData */
 
 #define SAY_SUMMON_MINIONS          -1533105                //start of phase 1 not used
 
-#define SAY_AGGRO   RAND(-1533094,-1533095,-1533096)       //start of phase 2
-#define SAY_SLAY    RAND(-1533097,-1533098)
-#define SAY_DEATH   -1533099
-#define SAY_CHAIN   RAND(-1533100,-1533101)
+#define SAY_AGGRO                   RAND(-1533094,-1533095,-1533096)       //start of phase 2
+#define SAY_SLAY                    RAND(-1533097,-1533098)
+#define SAY_DEATH                   -1533099
+#define SAY_CHAIN                   RAND(-1533100,-1533101)
 #define SAY_FROST_BLAST             -1533102
-#define SAY_SPECIAL RAND(-1533106,-1533107,-1533108)
+#define SAY_SPECIAL                 RAND(-1533106,-1533107,-1533108)
 
 #define SAY_REQUEST_AID             -1533103                //start of phase 3
 #define SAY_ANSWER_REQUEST          -1533104                //lich king answer
@@ -78,8 +78,8 @@ enum Event
 #define SPELL_CHAINS_OF_KELTHUZAD   28410 //28408 script effect
 #define SPELL_BERSERK               28498
 
-#define SPELL_WASTE_DARK_BLAST		28457 // Cast spell if it reaches platform
-#define SPELL_WEAVER_WAIL_OF_SOULS	28459 // Cast spell if it reaches platform
+#define SPELL_WASTE_DARK_BLAST		28457 // Cast spell if main target is in combat reach
+#define SPELL_WEAVER_WAIL_OF_SOULS	28459 // Cast spell if main target is in combat reach
 #define H_SPELL_WEAVER_WAIL_OF_SOULS	55714 // Heroic spell
 
 #define MOB_WASTE                   16427 // Soldiers of the Frozen Wastes
@@ -174,7 +174,7 @@ struct RIBON_DLL_DECL boss_kelthuzadAI : public BossAI
                         break;
                     case EVENT_PHASE:
                         events.Reset();
-                        events.ScheduleEvent(EVENT_BOLT, 2000);
+                        events.ScheduleEvent(EVENT_BOLT, 5000);
                         events.ScheduleEvent(EVENT_NOVA, 15000);
                         events.ScheduleEvent(EVENT_DETONATE, 20000);
                         events.ScheduleEvent(EVENT_FISSURE, 25000);
@@ -329,7 +329,7 @@ struct RIBON_DLL_DECL mob_weaverAI : public ScriptedAI
 
 	void InitializeAI()
 	{
-		m_creature->SetSpeed(MOVE_RUN, 0.5f, true);
+		m_creature->SetSpeed(MOVE_RUN, 0.2f, true);
 	}
 
 	void UpdateAI(const uint32 diff)
