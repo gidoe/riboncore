@@ -1677,7 +1677,7 @@ bool BattleGround::AddSpiritGuide(uint32 type, float x, float y, float z, float 
 
     pCreature->setDeathState(DEAD);
 
-    //pCreature->SetChannelObjectGUID(pCreature->GetGUID()); <- not right change.
+    pCreature->SetChannelObjectGUID(pCreature->GetGUID());
     // aura
     //TODO: Fix display here
     //pCreature->SetVisibleAura(0, SPELL_SPIRIT_HEAL_CHANNEL);

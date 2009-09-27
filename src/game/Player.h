@@ -329,12 +329,12 @@ typedef std::list<Item*> ItemDurationList;
 
 enum LfgType
 {
-    LFG_TYPE_NONE           = 0,
-    LFG_TYPE_DUNGEON        = 1,
-    LFG_TYPE_RAID           = 2,
-    LFG_TYPE_QUEST          = 3,
-    LFG_TYPE_ZONE           = 4,
-    LFG_TYPE_HEROIC_DUNGEON = 5
+    LFG_TYPE_NONE                 = 0,
+    LFG_TYPE_DUNGEON              = 1,
+    LFG_TYPE_RAID                 = 2,
+    LFG_TYPE_QUEST                = 3,
+    LFG_TYPE_ZONE                 = 4,
+    LFG_TYPE_HEROIC_DUNGEON       = 5
 };
 
 enum LfgRoles
@@ -438,7 +438,8 @@ enum PlayerFlags
     PLAYER_FLAGS_UNK22          = 0x00200000,
     PLAYER_FLAGS_UNK23          = 0x00400000,
     PLAYER_ALLOW_ONLY_ABILITY   = 0x00800000,                // used by bladestorm and killing spree
-    PLAYER_FLAGS_UNK25          = 0x01000000                 // disabled all melee ability on tab include autoattack
+    PLAYER_FLAGS_UNK25          = 0x01000000,                // disabled all melee ability on tab include autoattack
+    PLAYER_FLAGS_NO_XP_GAIN     = 0x02000000
 };
 
 // used for PLAYER__FIELD_KNOWN_TITLES field (uint64), (1<<bit_index) without (-1)
@@ -519,8 +520,6 @@ enum ActivateTaxiReplies
     ERR_TAXISAMENODE                = 11,
     ERR_TAXINOTSTANDING             = 12
 };
-
-
 
 enum MirrorTimerType
 {
@@ -883,7 +882,7 @@ class RIBON_DLL_SPEC PlayerTaxi
             else
                 return false;
         }
-        void AppendTaximaskTo(ByteBuffer& data,bool all);
+        void AppendTaximaskTo(ByteBuffer& data, bool all);
 
         // Destinations
         bool LoadTaxiDestinationsFromString(const std::string& values, uint32 team);
@@ -918,21 +917,21 @@ struct BGData
         bgTeam(0), mountSpell(0) { ClearTaxiPath(); }
 
 
-    uint32 bgInstanceID;                    ///< This variable is set to bg->m_InstanceID,
-                                            ///  when player is teleported to BG - (it is battleground's GUID)
+    uint32 bgInstanceID;                    /// This variable is set to bg->m_InstanceID,
+                                            /// when player is teleported to BG - (it is battleground's GUID)
     BattleGroundTypeId bgTypeID;
 
     std::set<uint32>   bgAfkReporter;
     uint8              bgAfkReportedCount;
     time_t             bgAfkReportedTimer;
 
-    uint32 bgTeam;                          ///< What side the player will be added to
+    uint32 bgTeam;                          /// What side the player will be added to
 
 
     uint32 mountSpell;
     uint32 taxiPath[2];
 
-    WorldLocation joinPos;                  ///< From where player entered BG
+    WorldLocation joinPos;                  /// From where player entered BG
 
     void ClearTaxiPath()     { taxiPath[0] = taxiPath[1] = 0; }
     bool HasTaxiPath() const { return taxiPath[0] && taxiPath[1]; }
@@ -979,7 +978,7 @@ class RIBON_DLL_SPEC Player : public Unit
 
         void Update( uint32 time );
 
-        static bool BuildEnumData( QueryResult * result,  WorldPacket * p_data );
+        static bool BuildEnumData( QueryResult *result, WorldPacket *p_data );
 
         void SetInWater(bool apply);
 
@@ -997,8 +996,8 @@ class RIBON_DLL_SPEC Player : public Unit
 
         bool ToggleAFK();
         bool ToggleDND();
-        bool isAFK() const { return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); };
-        bool isDND() const { return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); };
+        bool isAFK() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK); };
+        bool isDND() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND); };
         uint8 chatTag() const;
         std::string afkMsg;
         std::string dndMsg;
@@ -1641,9 +1640,10 @@ class RIBON_DLL_SPEC Player : public Unit
         static void RemovePetitionsAndSigns(uint64 guid, uint32 type);
 
         // Arena Team
-        void SetInArenaTeam(uint32 ArenaTeamId, uint8 slot)
+        void SetInArenaTeam(uint32 ArenaTeamId, uint8 slot, uint8 type)
         {
-            SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * ARENA_TEAM_END), ArenaTeamId);
+            SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * ARENA_TEAM_END) + ARENA_TEAM_ID, ArenaTeamId);
+            SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * ARENA_TEAM_END) + ARENA_TEAM_TYPE, type);
         }
         uint32 GetArenaTeamId(uint8 slot) { return GetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * ARENA_TEAM_END)); }
         static uint32 GetArenaTeamIdFromDB(uint64 guid, uint8 slot);
@@ -1935,7 +1935,6 @@ class RIBON_DLL_SPEC Player : public Unit
         uint32 GetBattleGroundId()  const                { return m_bgData.bgInstanceID; }
         BattleGroundTypeId GetBattleGroundTypeId() const { return m_bgData.bgTypeID; }
         BattleGround* GetBattleGround() const;
-
 
         BGQueueIdBasedOnLevel GetBattleGroundQueueIdFromLevel(BattleGroundTypeId bgTypeId) const;
 
@@ -2399,8 +2398,6 @@ Spell * m_spellModTakingSpell;
         bool acceptTrade;
         uint16 tradeItems[TRADE_SLOT_COUNT];
         uint32 tradeGold;
-
-        time_t m_nextThinkTime;
 
         bool   m_DailyQuestChanged;
         time_t m_lastDailyQuestTime;
