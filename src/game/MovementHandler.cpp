@@ -239,7 +239,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     recv_data.hexlike();
 
     Unit *mover = _player->m_mover;
-    Player *plMover = mover->GetTypeId()==TYPEID_PLAYER ? (Player*)mover : NULL;
+    Player *plMover = mover->GetTypeId() == TYPEID_PLAYER ? (Player*)mover : NULL;
 
     // ignore, waiting processing in WorldSession::HandleMoveWorldportAckOpcode and WorldSession::HandleMoveTeleportAck
     if(plMover && plMover->IsBeingTeleported())
@@ -262,13 +262,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     ReadMovementInfo(recv_data, &movementInfo);
     /*----------------*/
 
-   /* if(recv_data.size() != recv_data.rpos())
-    {
-        sLog.outError("MovementHandler: player %s (guid %d, account %u) sent a packet (opcode %u) that is " SIZEFMTD " bytes larger than it should be. Kicked as cheater.", _player->GetName(), _player->GetGUIDLow(), _player->GetSession()->GetAccountId(), recv_data.GetOpcode(), recv_data.size() - recv_data.rpos());
-        KickPlayer();*/
         recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
-    /*    return;
-    }*/
 
     if (!MaNGOS::IsValidMapCoord(movementInfo.x, movementInfo.y, movementInfo.z, movementInfo.o))
     {
@@ -662,10 +656,10 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     /* process position-change */
     if(check_passed)
     {
-    recv_data.put<uint32>(6, getMSTime());                  // fix time, offset flags(4) + unk(2)
-    WorldPacket data(recv_data.GetOpcode(), (mover->GetPackGUID().size()+recv_data.size()));
-    data.append(mover->GetPackGUID());                      // use mover guid
-    data.append(recv_data.contents(), recv_data.size());
+    WorldPacket data(opcode, recv_data.size());
+    movementInfo.time = getMSTime();
+    movementInfo.guid = mover->GetGUID();
+    WriteMovementInfo(&data, &movementInfo);
     GetPlayer()->SendMessageToSet(&data, false);
 
     mover->m_movementInfo = movementInfo;
@@ -766,7 +760,6 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     }
 
     // continue parse packet
-
     recv_data >> unk1;                                      // counter or moveEvent
 
     MovementInfo movementInfo;
@@ -871,8 +864,7 @@ void WorldSession::HandleMoveNotActiveMover(WorldPacket &recv_data)
     MovementInfo mi;
     mi.guid = old_mover_guid;
     ReadMovementInfo(recv_data, &mi);
-    
-    //ReadMovementInfo(recv_data, &_player->m_mover->m_movementInfo);
+
     _player->m_movementInfo = mi;
 }
 
@@ -900,8 +892,6 @@ void WorldSession::HandleDismissControlledVehicle(WorldPacket &recv_data)
 
     _player->m_movementInfo = mi;
      
-    /* 
-    ReadMovementInfo(recv_data, &_player->m_mover->m_movementInfo);*/
     _player->ExitVehicle();
 }
 
@@ -962,7 +952,8 @@ void WorldSession::HandleMoveKnockBackAck( WorldPacket & recv_data )
 {
     sLog.outDebug("CMSG_MOVE_KNOCK_BACK_ACK");
 
-    recv_data.read_skip<uint64>();                          // guid
+    uint64 guid;
+    recv_data.readPackGUID(guid);
     recv_data.read_skip<uint32>();                          // unk
 
     MovementInfo movementInfo;
@@ -987,7 +978,8 @@ void WorldSession::HandleMoveHoverAck( WorldPacket& recv_data )
 {
     sLog.outDebug("CMSG_MOVE_HOVER_ACK");
 
-    recv_data.read_skip<uint64>();                          // guid
+    uint64 guid;
+    recv_data.readPackGUID(guid);
     recv_data.read_skip<uint32>();                          // unk
 
     MovementInfo movementInfo;
@@ -1000,7 +992,8 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
 {
     sLog.outDebug("CMSG_MOVE_WATER_WALK_ACK");
 
-    recv_data.read_skip<uint64>();                          // guid
+    uint64 guid;
+    recv_data.readPackGUID(guid);
     recv_data.read_skip<uint32>();                          // unk
 
     MovementInfo movementInfo;
