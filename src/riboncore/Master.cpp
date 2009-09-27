@@ -217,7 +217,7 @@ int Master::Run()
     sLog.outString( " ##::. ##::: ##:: ##:::: ##: ##:::: ##: ##:. ###:");
     sLog.outString( " ##:::. ##:'####: ########::. #######:: ##::. ##:");
     sLog.outString( "..:::::..::....::........::::.......:::..::::..::");
-    sLog.outString( "          Supports Only 3.2.0a            C O R E");
+    sLog.outString( "          Supports Only 3.2.2a            C O R E");
     sLog.outString( "http://www.dark-resurrection.de/wowsp/         \n");
 
     /// worldd PID file creation

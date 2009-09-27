@@ -161,7 +161,7 @@ extern int main(int argc, char **argv)
     sLog.outString( " ##::. ##::: ##:: ##:::: ##: ##:::: ##: ##:. ###:");
     sLog.outString( " ##:::. ##:'####: ########::. #######:: ##::. ##:");
     sLog.outString( "..:::::..::....::........::::.......:::..::::..::");
-    sLog.outString( "         Supports Only 3.2.0a           L O G O N");
+    sLog.outString( "         Supports Only 3.2.2a           L O G O N");
     sLog.outString( "http://www.dark-resurrection.de/wowsp/         \n");
 
     sLog.outString("Using configuration file %s.", cfg_file);
