@@ -87,8 +87,9 @@ const char SoundEntriesfmt[]="nxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char SpellCastTimefmt[]="nixx";
 const char SpellDurationfmt[]="niii";
 const char SpellEntryfmt[]="niiiiiiiiiixixixiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifxiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiifffiiiiiiiiiiiiixssssssssssssssssxssssssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiiiiiiiiixfffxxxiiiiixxxxxx";
-const std::string CustomSpellEntryfmt="pappppppppaaapaaaaaaaaaaapaaapapppppppaaaaapaapaaaaaaaaaaaaaaaaaappppppppppppppppppppppppppppppppppppppppppaaaaaapppppppppaaapppppppppaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaappppppppapppaaaaappaaa";
-const std::string CustomSpellEntryIndex = "Id";
+//Temp Fix for startup.
+//const std::string CustomSpellEntryfmt="pappppppppaaapaaaaaaaaaaapaaapapppppppaaaaapaapaaaaaaaaaaaaaaaaaappppppppppppppppppppppppppppppppppppppppppaaaaaapppppppppaaapppppppppaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaappppppppapppaaaaappaaa";
+//const std::string CustomSpellEntryIndex = "Id";
 const char SpellFocusObjectfmt[]="nxxxxxxxxxxxxxxxxx";
 const char SpellItemEnchantmentfmt[]="nxiiiiiixxxiiissssssssssssssssxiiiixxx";
 const char SpellItemEnchantmentConditionfmt[]="nbbbbbxxxxxbbbbbbbbbbiiiiiXXXXX";
