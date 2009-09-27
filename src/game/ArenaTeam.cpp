@@ -109,7 +109,7 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
             return false;
         }
 
-        plClass = (uint8)pl->getClass();
+        plClass = pl->getClass();
         plName = pl->GetName();
     }
     else
@@ -160,7 +160,7 @@ bool ArenaTeam::AddMember(const uint64& PlayerGuid)
 
     if(pl)
     {
-        pl->SetInArenaTeam(m_TeamId, GetSlot());
+        pl->SetInArenaTeam(m_TeamId, GetSlot(), GetType());
         pl->SetArenaTeamIdInvited(0);
         pl->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (GetSlot() * ARENA_TEAM_END) + ARENA_TEAM_PERSONAL_RATING, newmember.personal_rating );
 
@@ -291,17 +291,12 @@ void ArenaTeam::DelMember(uint64 guid)
         }
     }
 
-    Player *player = objmgr.GetPlayer(guid);
-
-    if(player)
+    if(Player *player = objmgr.GetPlayer(guid))
     {
-        player->SetInArenaTeam(0, GetSlot());
         player->GetSession()->SendArenaTeamCommandResult(ERR_ARENA_TEAM_QUIT_S, GetName(), "", 0);
         // delete all info regarding this team
-        for(uint32 i = 0; i < ARENA_TEAM_END; ++i)
-        {
+        for(int i = 0; i < ARENA_TEAM_END; ++i)
             player->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (GetSlot() * ARENA_TEAM_END) + i, 0);
-        }
         sLog.outArena("Player: %s [GUID: %u] left arena team type: %u [Id: %u].", player->GetName(), player->GetGUIDLow(), GetType(), GetId());
     }
     CharacterDatabase.PExecute("DELETE FROM arena_team_member WHERE arenateamid = '%u' AND guid = '%u'", GetId(), GUID_LOPART(guid));
@@ -560,7 +555,7 @@ void ArenaTeam::FinishGame(int32 mod)
 int32 ArenaTeam::WonAgainst(uint32 againstRating)
 {
     // called when the team has won
-    //'chance' calculation - to beat the opponent
+    // 'chance' calculation - to beat the opponent
     float chance = GetChanceAgainst(m_stats.rating, againstRating);
     // calculate the rating modification (ELO system with k=32)
     int32 mod = (int32)floor(32.0f * (1.0f - chance));
@@ -599,8 +594,8 @@ void ArenaTeam::MemberLost(Player * plr, uint32 againstRating)
             int32 mod = (int32)ceil(32.0f * (0.0f - chance));
             itr->ModifyPersonalRating(plr, mod, GetSlot());
             // update personal played stats
-            itr->games_week +=1;
-            itr->games_season +=1;
+            itr->games_week += 1;
+            itr->games_season += 1;
             // update the unit fields
             plr->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (GetSlot() * ARENA_TEAM_END) + ARENA_TEAM_GAMES_WEEK, itr->games_week);
             plr->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (GetSlot() * ARENA_TEAM_END) + ARENA_TEAM_GAMES_SEASON, itr->games_season);
@@ -624,8 +619,8 @@ void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstRating)
             else
                 itr->personal_rating += mod;
             // update personal played stats
-            itr->games_week +=1;
-            itr->games_season +=1;
+            itr->games_week += 1;
+            itr->games_season += 1;
             return;
         }
     }
@@ -643,8 +638,8 @@ void ArenaTeam::MemberWon(Player * plr, uint32 againstRating)
             int32 mod = (int32)floor(32.0f * (1.0f - chance));
             itr->ModifyPersonalRating(plr, mod, GetSlot());
             // update personal stats
-            itr->games_week +=1;
-            itr->games_season +=1;
+            itr->games_week += 1;
+            itr->games_season += 1;
             itr->wins_season += 1;
             itr->wins_week += 1;
             // update unit fields
@@ -720,26 +715,3 @@ bool ArenaTeam::IsFighting() const
     }
     return false;
 }
-
-/*
-arenateam fields (id from 2.3.3 client):
-1414 - arena team id 2v2
-1415 - 0=captain, 1=member
-1416 - played this week
-1417 - played this season
-1418 - unk - rank?
-1419 - personal arena rating
-1420 - arena team id 3v3
-1421 - 0=captain, 1=member
-1422 - played this week
-1423 - played this season
-1424 - unk - rank?
-1425 - personal arena rating
-1426 - arena team id 5v5
-1427 - 0=captain, 1=member
-1428 - played this week
-1429 - played this season
-1430 - unk - rank?
-1431 - personal arena rating
-*/
-
