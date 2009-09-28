@@ -217,7 +217,7 @@ void Unit::Update( uint32 p_time )
     {
     m_AurasCheck = 2000;
     _UpdateAura();
-    }else
+    } else
     m_AurasCheck -= p_time;*/
 
     // WARNING! Order of execution here is important, do not change.
@@ -6557,6 +6557,24 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     target = this;
                     break;
                 }
+                // Lava Flows (Rank 1)
+                case 51480:
+                {
+                    triggered_spell_id = 64694;
+                    break;
+                }
+                // Lava Flows (Rank 2)
+                case 51481:
+                {
+                    triggered_spell_id = 65263;
+                    break;
+                }
+                // Lava Flows (Rank 3)
+                case 51482:
+                {
+                    triggered_spell_id = 65264;
+                    break;
+                }
                 // Glyph of Healing Wave
                 case 55440:
                 {
@@ -10784,7 +10802,7 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
 
 bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList, bool is3dDistance) const
 {
-    if(!u)
+    if(!u || !IsInMap(u))
         return false;
 
     return u->canSeeOrDetect(this, detect, inVisibleList, is3dDistance);
@@ -11328,7 +11346,7 @@ Unit* Creature::SelectVictim()
     if (CanHaveThreatList())
     {
         if ( !target && !m_ThreatManager.isThreatListEmpty() )
-            // No taunt aura or taunt aura caster is dead standart target selection
+            // No taunt aura or taunt aura caster is dead standard target selection
             target = m_ThreatManager.getHostilTarget();
     }
     else if(!HasReactState(REACT_PASSIVE))
@@ -11358,7 +11376,7 @@ Unit* Creature::SelectVictim()
     else
         return NULL;
 
-    if(target)
+    if(target && (!target->getVictim() || !target->isAttackingPlayer() || IsFriendlyTo(target->getVictim()))) // if the victim of target is a player, only defend the victim if we are friendly
     {
         SetInFront(target);
         return target;
@@ -11370,7 +11388,9 @@ Unit* Creature::SelectVictim()
     // Note: creature not have targeted movement generator but have attacker in this case
     for(AttackerSet::const_iterator itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
     {
-        if(canCreatureAttack(*itr) && ((*itr)->GetTypeId() != TYPEID_PLAYER && (!((Creature*)(*itr))->HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))))
+        if(canCreatureAttack(*itr) && (*itr)->GetTypeId() != TYPEID_PLAYER
+          && !((Creature*)(*itr))->HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN)
+          && (!(*itr)->getVictim() || !(*itr)->isAttackingPlayer() || IsFriendlyTo(target->getVictim()))) // if the victim of target is a player, only defend the victim if we are friendly
             return NULL;
     }
 
@@ -11381,7 +11401,8 @@ Unit* Creature::SelectVictim()
     // search nearby enemy before enter evade mode
     if(HasReactState(REACT_AGGRESSIVE))
         if(target = SelectNearestTarget())
-            return target;
+            if(!target->getVictim() || !target->isAttackingPlayer() || IsFriendlyTo(target->getVictim())) // if the victim of target is a player, only defend the victim if we are friendly
+                return target;
 
     if(m_invisibilityMask)
     {

@@ -1,4 +1,4 @@
--- Up to RC 832
+-- Up to RC 954
 
 TRUNCATE TABLE `ribon_string`;
 INSERT INTO `ribon_string` (`entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`) VALUES
@@ -62,11 +62,12 @@ INSERT INTO `ribon_string` (`entry`, `content_default`, `content_loc1`, `content
 (58, 'Using script library: %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (59, 'Using creature EventAI: %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (60, 'Online players: %u (max: %u)', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(61, '|c1f40af20 <Mod>|cffff0000[%s]|c1f40af20:|cffffff00 %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(62, '|c1f40af20 <GM>|cffff0000[%s]|c1f40af20:|cffffff00 %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(63, '|c1f40af20 <Admin>|cffff0000[%s]|c1f40af20:|cffffff00 %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(64, '|cffff0000[System]:|cffffff00 %s|r', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(65, '|cffff0000[Console]:|cffff0f00 %s|r', null, null, null, null, null, null, null, null),
+(61, 'Up to %u expansion allowed now.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(62, '|c1f40af20 <Mod>|cffff0000[%s]|c1f40af20:|cffffff00 %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(63, '|c1f40af20 <GM>|cffff0000[%s]|c1f40af20:|cffffff00 %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(64, '|c1f40af20 <Admin>|cffff0000[%s]|c1f40af20:|cffffff00 %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(65, '|cffff0000[System]:|cffffff00 %s|r', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(66, '|cffff0000[Console]:|cffff0f00 %s|r', null, null, null, null, null, null, null, null),
 (100, 'Global notify: ', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (101, 'Map: %u (%s) Zone: %u (%s) Area: %u (%s) Phase: %u\nX: %f Y: %f Z: %f Orientation: %f\ngrid[%u,%u]cell[%u,%u] InstanceID: %u\n ZoneX: %f ZoneY: %f\nGroundZ: %f FloorZ: %f Have height data (Map: %u VMap: %u)', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (102, '%s is already being teleported.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
@@ -802,4 +803,14 @@ INSERT INTO `ribon_string` (`entry`, `content_default`, `content_loc1`, `content
 (10053, 'Take me to Crown Guard Tower.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (10054, 'Give me the flag, I''ll take it to the central beacon for the glory of the Alliance!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (10055, 'Give me the flag, I''ll take it to the central beacon for the glory of the Horde!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(11000, '|cffffff00[|c00077766Autobroadcast|cffffff00]: |cFFF222FF%s|r', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(11000, '|cffffff00[|c00077766Autobroadcast|cffffff00]: |cFFF222FF%s|r', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+
+(12000, 'BattleGround: Player (GUID: %u) not found!', NULL, NULL, 'BattleGround: Die Player (GUID: %u) wurde nicht gefunden!', NULL, NULL, NULL, NULL, NULL),
+(50010, 'Initialize data stores...', NULL, NULL, 'Initialisiere Datenspeicher...', NULL, NULL, NULL, NULL, NULL),
+(50011, 'Loading Script Names...', NULL, NULL, 'Lade Script-Namen...', NULL, NULL, NULL, NULL, NULL),
+(50012, 'Loading InstanceTemplate...', NULL, NULL, 'Lade Instanzvorlagen...', NULL, NULL, NULL, NULL, NULL),
+(50013, 'Loading SkillLineAbilityMultiMap Data...', NULL, NULL, 'Lade SkillLineAbilityMultiMap Daten...', NULL, NULL, NULL, NULL, NULL),
+(50014, 'Cleaning up instances...', NULL, NULL, 'Bereinige Instanzen...', NULL, NULL, NULL, NULL, NULL),
+(50015, 'Packing instances...', NULL, NULL, 'Verpacke Instanzen...', NULL, NULL, NULL, NULL, NULL),
+(50016, 'Loading Localization strings...', NULL, NULL, 'Lade Lokalisierungen...', NULL, NULL, NULL, NULL, NULL);
+

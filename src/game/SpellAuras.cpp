@@ -3899,9 +3899,9 @@ void AuraEffect::HandleFeignDeath(bool apply, bool Real, bool /*changeAmount*/)
         */
 
         std::list<Unit*> targets;
-        Ribon::AnyUnfriendlyUnitInObjectRangeCheck u_check(m_target, m_target, World::GetMaxVisibleDistance());
+        Ribon::AnyUnfriendlyUnitInObjectRangeCheck u_check(m_target, m_target, m_target->GetMap()->GetVisibilityDistance());
         Ribon::UnitListSearcher<Ribon::AnyUnfriendlyUnitInObjectRangeCheck> searcher(m_target, targets, u_check);
-        m_target->VisitNearbyObject(World::GetMaxVisibleDistance(), searcher);
+        m_target->VisitNearbyObject(m_target->GetMap()->GetVisibilityDistance(), searcher);
         for(std::list<Unit*>::iterator iter = targets.begin(); iter != targets.end(); ++iter)
         {
             if(!(*iter)->hasUnitState(UNIT_STAT_CASTING))
@@ -6500,8 +6500,8 @@ void AuraEffect::PeriodicDummyTick()
 
                         CellLock<GridReadGuard> cell_lock(cell, p);
 
-                        cell_lock->Visit(cell_lock, grid_object_checker,  *caster->GetMap());
-                        cell_lock->Visit(cell_lock, world_object_checker, *caster->GetMap());
+                        cell_lock->Visit(cell_lock, grid_object_checker,  *caster->GetMap(), *caster, radius);
+                        cell_lock->Visit(cell_lock, world_object_checker, *caster->GetMap(), *caster, radius);
                     }
 
                     if(targets.empty())

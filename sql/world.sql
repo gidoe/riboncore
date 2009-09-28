@@ -21,7 +21,11 @@
 
 DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
+<<<<<<< HEAD
   `required_954_world_scripts` bit(1) default NULL
+=======
+  `required_975_world_command` bit(1) default NULL
+>>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 
 --

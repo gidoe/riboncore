@@ -236,9 +236,14 @@ struct CreatureInfo
     uint32  MechanicImmuneMask;
     uint32  flags_extra;
     uint32  ScriptID;
+<<<<<<< HEAD
     uint32 GetRandomValidModelIdIncludingNativeId(uint32 native_id) const;
     uint32 GetRandomValidModelId() const;
     uint32 GetFirstValidModelId() const;
+=======
+    uint32  GetRandomValidModelId() const;
+    uint32  GetFirstValidModelId() const;
+>>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
 
     // helpers
     SkillType GetRequiredLootSkill() const

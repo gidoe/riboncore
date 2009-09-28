@@ -31,6 +31,9 @@
 #define SPELL_FRENZY                HEROIC(28798,54100)
 #define SPELL_WIDOWS_EMBRACE        HEROIC(28732,54097)
 
+#define NAXX_BOSS_FAERLINA          HEROIC(15953,29268)
+#define NAXX_MOB_WORSHIPPER         HEROIC(16506,29274)
+
 enum Events
 {
     EVENT_POSION = 1,
@@ -98,6 +101,7 @@ struct RIBON_DLL_DECL boss_faerlinaAI : public BossAI
                     return;
                 case EVENT_FRENZY:
                     DoCast(me,SPELL_FRENZY);
+                    me->SummonCreature(NAXX_MOB_WORSHIPPER, me->GetPositionX()+5, me->GetPositionY()+5, me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
                     events.ScheduleEvent(EVENT_FRENZY, 60000 + rand()%20000);
                     return;
             }
@@ -107,9 +111,35 @@ struct RIBON_DLL_DECL boss_faerlinaAI : public BossAI
     }
 };
 
+struct RIBON_DLL_DECL mob_worshipperAI : public ScriptedAI
+{
+	mob_worshipperAI(Creature *c) : ScriptedAI(c) 
+	{
+		pInstance = c->GetInstanceData();
+	}
+
+	ScriptedInstance* pInstance;
+
+	void JustDied(Unit *killer)
+	{
+		Unit* Faerlina = Unit::GetUnit(*m_creature, GetGUID(NAXX_BOSS_FAERLINA));
+		if (Faerlina && Faerlina->isAlive())
+		{
+			me->CastSpell(Faerlina, SPELL_WIDOWS_EMBRACE, false);
+		}
+		else
+			error_log("Faerlina not found."); // for some reason they always don't find her...
+    }
+};
+
 CreatureAI* GetAI_boss_faerlina(Creature* pCreature)
 {
     return new boss_faerlinaAI (pCreature);
+}
+
+CreatureAI* GetAI_mob_worshipperAI(Creature* pCreature)
+{
+    return new mob_worshipperAI (pCreature);
 }
 
 void AddSC_boss_faerlina()
@@ -118,5 +148,10 @@ void AddSC_boss_faerlina()
     newscript = new Script;
     newscript->Name="boss_faerlina";
     newscript->GetAI = &GetAI_boss_faerlina;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name="mob_worshipper";
+    newscript->GetAI = &GetAI_mob_worshipperAI;
     newscript->RegisterSelf();
 }
