@@ -309,7 +309,7 @@ struct RIBON_DLL_DECL boss_sapphironAI : public BossAI
                         if (iceboltCount)
                             events.ScheduleEvent(EVENT_ICEBOLT, 1000);
                         else
-                            events.ScheduleEvent(EVENT_BREATH, 1000);
+                            events.ScheduleEvent(EVENT_BREATH, 7000);
                         return;
                     }
                     case EVENT_BREATH:
