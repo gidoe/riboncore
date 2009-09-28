@@ -196,11 +196,7 @@ bool OPvPWintergrasp::SetupOutdoorPvP()
                 continue;
             }
 
-<<<<<<< HEAD
-            SiegeWorkshop *workshop = new SiegeWorkshop(this, m_buildingStates[guid]);          
-=======
             SiegeWorkshop *workshop = new SiegeWorkshop(this, m_buildingStates[guid]);
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
             if (!workshop->SetCapturePointData(capturePointEntry, goData->mapid, goData->posX + 40 * cos(goData->orientation + M_PI / 2), goData->posY + 40 * sin(goData->orientation + M_PI / 2), goData->posZ))
             {
                 delete workshop;
@@ -286,10 +282,7 @@ bool OPvPWintergrasp::SetupOutdoorPvP()
     m_wartime = false;
     m_timer = sWorld.getConfig(CONFIG_OUTDOORPVP_WINTERGRASP_START_TIME) * MINUTE * IN_MILISECONDS;
 
-<<<<<<< HEAD
-=======
     // Load custom rewards
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
     if (sWorld.getConfig(CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR))
         for (int i = 0; i < WG_REWARD_EVENT_MAX; ++i)
             m_customHonorReward[i] = sWorld.getConfig(CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR_0 + i);
@@ -326,11 +319,7 @@ void OPvPWintergrasp::ProcessEvent(GameObject *obj, uint32 eventId)
                     {
                         for (PlayerSet::const_iterator itr = m_players[m_defender].begin(); itr != m_players[m_defender].end(); ++itr)
                             if ((*itr)->HasAura(SPELL_LIEUTENANT) && ((*itr)->getLevel() > 69))
-<<<<<<< HEAD
-                                (*itr)->ModifyHonorPoints(m_customHonorReward[DAMAGED_TOWER]);
-=======
                                (*itr)->ModifyHonorPoints(m_customHonorReward[DAMAGED_TOWER]);
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
                     }
                     else
                         LieutenantCastSpell(m_defender, SPELL_DAMAGED_TOWER);
@@ -371,11 +360,7 @@ void OPvPWintergrasp::ProcessEvent(GameObject *obj, uint32 eventId)
 
 void OPvPWintergrasp::RemoveOfflinePlayerWGAuras()
 {
-<<<<<<< HEAD
-    // if server crashed while in battle there could be players with rank, tenacity or wintergrasp essence auras
-=======
     // if server crashed while in battle there could be players with rank or tenacity
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
     CharacterDatabase.PExecute("DELETE FROM character_aura WHERE spell IN (%u,%u,%u, %u)",
         SPELL_RECRUIT, SPELL_CORPORAL, SPELL_LIEUTENANT, SPELL_TENACITY);
 }
@@ -776,10 +761,7 @@ void OPvPWintergrasp::UpdateTenacityStack()
     uint32 allianceNum = m_players[TEAM_ALLIANCE].size();
     uint32 hordeNum = m_players[TEAM_HORDE].size();
     int32 newStack = 0;
-<<<<<<< HEAD
-=======
 
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
     if (allianceNum && hordeNum)
     {
         if (allianceNum < hordeNum)
@@ -799,23 +781,6 @@ void OPvPWintergrasp::UpdateTenacityStack()
     m_tenacityStack = newStack;
 
     // Remove old buff
-<<<<<<< HEAD
-    if (m_tenacityStack > 0) // old buff was on alliance
-    {
-        if (newStack <= 0) // new buff should on horde
-        {
-            TeamCastSpell(TEAM_ALLIANCE, -SPELL_TENACITY);
-            VehicleCastSpell(TEAM_ALLIANCE, -SPELL_TENACITY_VEHICLE);
-        }
-    }
-    else if (m_tenacityStack < 0)
-    {
-        if (newStack >= 0)
-        {
-            TeamCastSpell(TEAM_HORDE, -SPELL_TENACITY);
-            VehicleCastSpell(TEAM_HORDE, -SPELL_TENACITY_VEHICLE);
-        }
-=======
     if (team != TEAM_NEUTRAL)
     {
         for (PlayerSet::const_iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
@@ -824,22 +789,11 @@ void OPvPWintergrasp::UpdateTenacityStack()
 
         for (CreatureSet::const_iterator itr = m_vehicles[team].begin(); itr != m_vehicles[team].end(); ++itr)
             REMOVE_TENACITY_AURA((*itr));
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
     }
 
     // Apply new buff
     if (newStack)
     {
-<<<<<<< HEAD
-        TeamId team = newStack > 0 ? TEAM_ALLIANCE : TEAM_HORDE;
-        if (newStack < 0) newStack = -newStack;
-        int32 auraStack = newStack > 20 ? 20 : newStack; //Dont let it be higher than 20
-        for (PlayerSet::iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
-            if ((*itr)->getLevel() > 69)
-                (*itr)->SetAuraStack(SPELL_TENACITY, *itr, auraStack);
-        for (CreatureSet::iterator itr = m_vehicles[team].begin(); itr != m_vehicles[team].end(); ++itr)
-            (*itr)->SetAuraStack(SPELL_TENACITY_VEHICLE, *itr, auraStack);
-=======
         team = newStack > 0 ? TEAM_ALLIANCE : TEAM_HORDE;
         if (newStack < 0) newStack = -newStack;
         int32 auraStack = newStack > 20 ? 20 : newStack; // Dont let it be higher than 20
@@ -850,7 +804,6 @@ void OPvPWintergrasp::UpdateTenacityStack()
 
         for (CreatureSet::const_iterator itr = m_vehicles[team].begin(); itr != m_vehicles[team].end(); ++itr)
             CastTenacity((*itr), auraStack);
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
     }
 }
 
@@ -950,32 +903,17 @@ void OPvPWintergrasp::StartBattle()
     m_wartime = true;
     m_timer = sWorld.getConfig(CONFIG_OUTDOORPVP_WINTERGRASP_BATTLE_TIME) * MINUTE * IN_MILISECONDS;
 
-<<<<<<< HEAD
-    for (uint32 team = 0; team < 2; ++team)
-    {
-        for (PlayerSet::iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
-        {
-            REMOVE_WARTIME_AURAS(*itr);
-            (*itr)->CastSpell(*itr, SPELL_RECRUIT, true);
-        }
-    }
-=======
     // Add recruit Aura, Add Tenacity
     TeamCastSpell(m_defender, SPELL_RECRUIT);
     TeamCastSpell(OTHER_TEAM(m_defender), SPELL_RECRUIT);
     UpdateTenacityStack();
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
 }
 
 void OPvPWintergrasp::EndBattle()
 {
     m_wartime = false;
     m_timer = sWorld.getConfig(CONFIG_OUTDOORPVP_WINTERGRASP_INTERVAL) * MINUTE * IN_MILISECONDS;
-<<<<<<< HEAD
-   
-=======
 
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
     for (uint32 team = 0; team < 2; ++team)
     {
         // calculate rewards
@@ -1014,32 +952,10 @@ void OPvPWintergrasp::EndBattle()
                     (*itr)->ModifyHonorPoints(honor);
             }
             REMOVE_WARTIME_AURAS(*itr);
-<<<<<<< HEAD
-            (*itr)->CombatStop(true);
-        }
-
-        // destroyed all vehicles
-        while(!m_vehicles[team].empty())
-        {
-            Creature *veh = *m_vehicles[team].begin();
-            m_vehicles[team].erase(m_vehicles[team].begin());
-            veh->CastSpell(veh, SPELL_SHUTDOWN_VEHICLE, true);
-=======
             REMOVE_TENACITY_AURA(*itr);
             (*itr)->CombatStop(true);
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
         }
 
-<<<<<<< HEAD
-    /*TeamId loser = OTHER_TEAM(m_defender);
-    for (PlayerSet::iterator itr = m_players[loser].begin(); itr != m_players[loser].end();)
-    {
-        Player *plr = *itr;
-        ++itr;
-        plr->CastSpell(plr, SPELL_TELEPORT_DALARAN, true);
-    }*/
-
-=======
         // destroyed all vehicles
         while(!m_vehicles[team].empty())
         {
@@ -1050,7 +966,6 @@ void OPvPWintergrasp::EndBattle()
     }
 
     //3.2.0: TeamCastSpell(OTHER_TEAM(m_defender), SPELL_TELEPORT_DALARAN);
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
     RemoveOfflinePlayerWGAuras();
 }
 

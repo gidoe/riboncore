@@ -55,17 +55,10 @@ struct RIBON_DLL_DECL boss_moorabiAI : public ScriptedAI
 {
     boss_moorabiAI(Creature *c) : ScriptedAI(c)
     {
-<<<<<<< HEAD
-        HeroicMode = c->GetMap()->IsHeroic();
-    }
-
-    bool HeroicMode;
-=======
         pInstance = c->GetInstanceData();
     }
 
     ScriptedInstance* pInstance;
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
     bool Phase;
     uint32 SPELL_QUAKE_TIMER;
     uint32 SPELL_NUMBING_SHOUT_TIMER;
@@ -80,24 +73,18 @@ struct RIBON_DLL_DECL boss_moorabiAI : public ScriptedAI
           SPELL_DETERMINED_STAB_TIMER = 20000;
           SPELL_TRANSFORMATION_TIMER = 12000;
           Phase = false;
-<<<<<<< HEAD
-=======
           
           if (pInstance)
             pInstance->SetData(DATA_MOORABI_EVENT, NOT_STARTED);
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
     }
 
     void EnterCombat(Unit *who)
     {
         DoScriptText(SAY_AGGRO, m_creature);
         m_creature->CastSpell(m_creature,SPELL_MOJO_FRENZY,true);
-<<<<<<< HEAD
-=======
         
         if (pInstance)
             pInstance->SetData(DATA_MOORABI_EVENT, IN_PROGRESS);
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
     }
 
     void UpdateAI(const uint32 diff)
@@ -185,12 +172,9 @@ struct RIBON_DLL_DECL boss_moorabiAI : public ScriptedAI
                 }
             }
         }
-<<<<<<< HEAD
-=======
         
         if (pInstance)
             pInstance->SetData(DATA_MOORABI_EVENT, DONE);
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
     }
     void KilledUnit(Unit *victim)
     {

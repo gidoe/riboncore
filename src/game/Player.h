@@ -1764,11 +1764,7 @@ class RIBON_DLL_SPEC Player : public Unit
         Corpse *GetCorpse() const;
         void SpawnCorpseBones();
         void CreateCorpse();
-<<<<<<< HEAD
-        bool FallGround(bool noDeath = false);
-=======
         bool FallGround(uint8 FallMode = 0);
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
         void KillPlayer();
         uint32 GetResurrectionSpellId();
         void ResurrectPlayer(float restore_percent, bool applySickness = false);
@@ -2450,10 +2446,6 @@ Spell * m_spellModTakingSpell;
 
         uint64 m_anti_TransportGUID;            // current transport GUID
     public:
-<<<<<<< HEAD
-=======
-		uint32 m_anti_AntiCheatOffCount;   // set to number of loops anticheat should be disabled for
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
         time_t m_anti_AntiCheatOffUntilTime;    // set to the time (in unix time) anticheat will be re-enabled
     protected:
         uint32 m_anti_TeleToPlane_Count;        // Teleport To Plane alarm counter

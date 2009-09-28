@@ -261,16 +261,12 @@ extern void AddSC_ungoro_crater();
 extern void AddSC_winterspring();
 
 //northrend
-<<<<<<< HEAD
-extern void AddSC_boss_moorabi();
-=======
 extern void AddSC_boss_slad_ran();
 extern void AddSC_boss_moorabi();
 extern void AddSC_boss_drakkari_colossus();
 extern void AddSC_boss_gal_darah();
 extern void AddSC_boss_eck();
 extern void AddSC_instance_gundrak();
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
 extern void AddSC_instance_ahnkahet();          //Azjol-Nerub Ahn'kahet
 extern void AddSC_boss_krik_thir();
 extern void AddSC_boss_taldaram();
@@ -679,14 +675,6 @@ void AddScripts()
     AddSC_winterspring();
 
     //northrend
-<<<<<<< HEAD
-    AddSC_boss_moorabi();
-    AddSC_instance_ahnkahet();          //Azjol-Nerub Ahn'kahet
-    AddSC_boss_krik_thir();
-    AddSC_boss_taldaram();
-    AddSC_boss_elder_nadox();
-    AddSC_boss_volazj();
-=======
     AddSC_boss_slad_ran();               //Gundrak
     AddSC_boss_moorabi();
     AddSC_boss_drakkari_colossus();
@@ -698,7 +686,6 @@ void AddScripts()
     AddSC_boss_volazj();
     AddSC_instance_ahnkahet();          
     AddSC_boss_krik_thir();             //Azjol-Nerub Azjol-Nerub 
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
     AddSC_boss_anubrekhan();            //Naxxramas
     AddSC_boss_maexxna();
     AddSC_boss_patchwerk();

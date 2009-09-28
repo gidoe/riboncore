@@ -424,12 +424,7 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
 
     m_anti_TransportGUID = 0;            // current transport GUID
 
-<<<<<<< HEAD
-    m_anti_AntiCheatOffUntilTime = 0;    // set to the time (in unix time) anticheat will be re-enabled
-=======
-	m_anti_AntiCheatOffCount = 0;
 	m_anti_AntiCheatOffUntilTime = 0;    // set to the time (in unix time) anticheat will be re-enabled
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
     m_anti_TeleToPlane_Count = 0;        // Teleport To Plane alarm counter
 
     m_anti_AlarmCount = 0;               // alarm counter
@@ -4487,12 +4482,6 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     }
 }
 
-<<<<<<< HEAD
-bool Player::FallGround(bool noDeath/* = false*/)
-{
-    // Let's abort after we called this function one time
-    if (getDeathState() == DEAD_FALLING && !noDeath)
-=======
 /**
  * FallMode = 0 implies that the player is dying, or already dead, and the proper death state will be set.
  *          = 1 simply causes the player to plummet towards the ground, and not suffer any damage.
@@ -4503,19 +4492,11 @@ bool Player::FallGround(uint8 FallMode)
 {
     // Let's abort after we called this function one time
     if (getDeathState() == DEAD_FALLING && FallMode == 0)
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
         return false;
 
     float x, y, z;
     GetPosition(x, y, z);
     float ground_Z = GetMap()->GetVmapHeight(x, y, z, true);
-<<<<<<< HEAD
-    if (fabs(ground_Z - z) < 0.1f)
-        return false;
-
-    GetMotionMaster()->MoveFall(ground_Z, EVENT_FALL_GROUND);
-    if(!noDeath) Unit::setDeathState(DEAD_FALLING);
-=======
     float z_diff = 0.0f;
     if ((z_diff = fabs(ground_Z - z)) < 0.1f)
         return false;
@@ -4530,7 +4511,6 @@ bool Player::FallGround(uint8 FallMode)
     }
     else if(FallMode == 0)
         Unit::setDeathState(DEAD_FALLING);
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
     return true;
 }
 
@@ -22205,7 +22185,6 @@ void Player::ActivateSpec(uint8 spec)
     SetPower(pw, 0);
 }
 
-<<<<<<< HEAD
 void Player::SendDuelCountdown(uint32 counter)
 {
     WorldPacket data(SMSG_DUEL_COUNTDOWN, 4);
@@ -22213,8 +22192,6 @@ void Player::SendDuelCountdown(uint32 counter)
     GetSession()->SendPacket(&data);
 }
 
-=======
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
 void Player::SetReputation(uint32 factionentry, uint32 value)
 {
     GetReputationMgr().SetReputation(sFactionStore.LookupEntry(factionentry),value);

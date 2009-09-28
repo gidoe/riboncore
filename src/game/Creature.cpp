@@ -88,21 +88,6 @@ VendorItem const* VendorItemData::FindItem(uint32 item_id) const
     return NULL;
 }
 
-uint32 CreatureInfo::GetRandomValidModelIdIncludingNativeId(uint32 native_id) const
-{
-    uint8 c = 0;
-    uint32 modelIDs[5];
-
-    if (Modelid1) modelIDs[c++] = Modelid1;
-    if (Modelid2) modelIDs[c++] = Modelid2;
-    if (Modelid3) modelIDs[c++] = Modelid3;
-    if (Modelid4) modelIDs[c++] = Modelid4;
-    if (native_id != Modelid1 && native_id != Modelid2
-    && native_id != Modelid3 && native_id != Modelid4) modelIDs[c++] = native_id;
-
-    return ((c>0) ? modelIDs[urand(0,c-1)] : 0);
-}
-
 uint32 CreatureInfo::GetRandomValidModelId() const
 {
     uint8 c = 0;
@@ -544,15 +529,6 @@ void Creature::Update(uint32 diff)
             if(!isAlive())
                 break;
 
-<<<<<<< HEAD
-            bool bNotInCombatOrIsPolymorphed = (!isInCombat() || IsPolymorphed());
-
-            if(m_regenTimer > diff && !bNotInCombatOrIsPolymorphed)
-                m_regenTimer -= diff;
-            else
-            {
-                if(bNotInCombatOrIsPolymorphed)
-=======
             bool bIsPolymorphed = IsPolymorphed();
             bool bInCombat = isInCombat() && (!getVictim() ||                                        // if isInCombat() is true and this has no victim
                              !getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself() ||                // or the victim/owner/charmer is not a player
@@ -563,7 +539,6 @@ void Creature::Update(uint32 diff)
             else
             {
                 if(!bInCombat || bIsPolymorphed) // regenerate health if not in combat or if polymorphed
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
                     RegenerateHealth();
 
                 if(getPowerType() == POWER_ENERGY)
@@ -572,11 +547,7 @@ void Creature::Update(uint32 diff)
                 else
                     RegenerateMana();
 
-<<<<<<< HEAD
-                if(!bNotInCombatOrIsPolymorphed)
-=======
                 if(!bIsPolymorphed) // only increase the timer if not polymorphed
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
                     m_regenTimer += 2000 - diff;
             }
 
@@ -755,9 +726,6 @@ bool Creature::Create(uint32 guidlow, Map *map, uint32 phaseMask, uint32 Entry, 
                 break;
         }
         LoadCreaturesAddon();
-<<<<<<< HEAD
-        SetDisplayId(GetCreatureInfo()->GetRandomValidModelIdIncludingNativeId(GetNativeDisplayId()));
-=======
         CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(GetNativeDisplayId());
         if (minfo)                                             // Cancel load if no model defined
         {
@@ -767,7 +735,6 @@ bool Creature::Create(uint32 guidlow, Map *map, uint32 phaseMask, uint32 Entry, 
             SetNativeDisplayId(display_id);
             SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
         }
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
     }
     return bResult;
 }
@@ -1888,9 +1855,6 @@ void Creature::Respawn(bool force)
         else
             setDeathState( JUST_ALIVED );
 
-<<<<<<< HEAD
-        SetDisplayId(cinfo->GetRandomValidModelIdIncludingNativeId(GetNativeDisplayId()));
-=======
         CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(GetNativeDisplayId());
         if (minfo)                                             // Cancel load if no model defined
         {
@@ -1900,7 +1864,6 @@ void Creature::Respawn(bool force)
             SetNativeDisplayId(display_id);
             SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
         }
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
 
         //Call AI respawn virtual function
         AI()->JustRespawned();

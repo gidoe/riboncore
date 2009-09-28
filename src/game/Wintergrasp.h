@@ -67,22 +67,7 @@ enum WintergraspRewardEvent
     WG_REWARD_EVENT_MAX
 };
 
-<<<<<<< HEAD
-enum WintergraspRewardEvent
-{
-    WIN_BATTLE,
-    LOSE_BATTLE,
-    DAMAGED_TOWER,
-    DESTROYED_TOWER,
-    DAMAGED_BUILDING,
-    INTACT_BUILDING,
-    WG_REWARD_EVENT_MAX
-};
-
-#define MAX_VEHICLE_PER_WORKSHOP    4
-=======
 /* Not used / Not implemented
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
 
 const uint16 GameEventWintergraspDefender[2] = {50, 51};
 

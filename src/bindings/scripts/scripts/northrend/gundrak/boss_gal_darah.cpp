@@ -28,7 +28,6 @@ enum Spells
     H_SPELL_WHIRLING_SLASH                        = 55825
 };
 
-//not in db
 //Yells
 enum Yells
 {

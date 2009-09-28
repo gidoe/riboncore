@@ -23,7 +23,6 @@ enum Spells
     H_SPELL_VENOM_BOLT                          = 59839
 };
 
-//not in db
 //Yell
 enum Yells
 {

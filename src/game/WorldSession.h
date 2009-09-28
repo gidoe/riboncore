@@ -742,11 +742,8 @@ class RIBON_DLL_SPEC WorldSession
         void HandleEquipmentSetSave(WorldPacket& recv_data);
         void HandleEquipmentSetDelete(WorldPacket& recv_data);
         void HandleEquipmentSetUse(WorldPacket& recv_data);
-<<<<<<< HEAD
         void HandleWorldStateUITimerUpdate(WorldPacket& recv_data);
 
-=======
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
         void HandleOnPVPKill(Player *killed);
         bool HandleOnPlayerChat(const char *text);
         uint32 HandleOnGetXP(uint32 amount);
