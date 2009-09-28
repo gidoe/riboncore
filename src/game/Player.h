@@ -2432,6 +2432,7 @@ Spell * m_spellModTakingSpell;
 
         uint64 m_anti_TransportGUID;            // current transport GUID
     public:
+		uint32 m_anti_AntiCheatOffCount;   // set to number of loops anticheat should be disabled for
         time_t m_anti_AntiCheatOffUntilTime;    // set to the time (in unix time) anticheat will be re-enabled
     protected:
         uint32 m_anti_TeleToPlane_Count;        // Teleport To Plane alarm counter
