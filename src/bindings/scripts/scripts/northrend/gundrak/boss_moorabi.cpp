@@ -75,7 +75,7 @@ struct RIBON_DLL_DECL boss_moorabiAI : public ScriptedAI
           Phase = false;
           
           if (pInstance)
-            pInstance->SetData(DATA_DRAKKARI_COLOSSUS_EVENT, NOT_STARTED);
+            pInstance->SetData(DATA_MOORABI_EVENT, NOT_STARTED);
     }
 
     void EnterCombat(Unit *who)
@@ -84,7 +84,7 @@ struct RIBON_DLL_DECL boss_moorabiAI : public ScriptedAI
         m_creature->CastSpell(m_creature,SPELL_MOJO_FRENZY,true);
         
         if (pInstance)
-            pInstance->SetData(DATA_DRAKKARI_COLOSSUS_EVENT, IN_PROGRESS);
+            pInstance->SetData(DATA_MOORABI_EVENT, IN_PROGRESS);
     }
 
     void UpdateAI(const uint32 diff)
@@ -174,7 +174,7 @@ struct RIBON_DLL_DECL boss_moorabiAI : public ScriptedAI
         }
         
         if (pInstance)
-            pInstance->SetData(DATA_DRAKKARI_COLOSSUS_EVENT, DONE);
+            pInstance->SetData(DATA_MOORABI_EVENT, DONE);
     }
     void KilledUnit(Unit *victim)
     {
