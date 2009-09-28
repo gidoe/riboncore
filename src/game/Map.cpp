@@ -522,7 +522,7 @@ void Map::MessageBroadcast(Player *player, WorldPacket *msg, bool to_self)
  
 void Map::MessageBroadcast(WorldObject *obj, WorldPacket *msg)
 {
-    CellPair p = Ribon::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
+    /*CellPair p = Ribon::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
  
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
@@ -542,12 +542,12 @@ void Map::MessageBroadcast(WorldObject *obj, WorldPacket *msg)
     Ribon::ObjectMessageDeliverer post_man(*obj,msg);
     TypeContainerVisitor<Ribon::ObjectMessageDeliverer, WorldTypeMapContainer > message(post_man);
     CellLock<ReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, message, *this, *obj, GetVisibilityDistance());
+    cell_lock->Visit(cell_lock, message, *this, *obj, GetVisibilityDistance());*/
 }
 
 void Map::MessageDistBroadcast(Player *player, WorldPacket *msg, float dist, bool to_self, bool own_team_only)
 {
-    CellPair p = Ribon::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
+    /*CellPair p = Ribon::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
  
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
@@ -588,7 +588,7 @@ void Map::MessageDistBroadcast(WorldObject *obj, WorldPacket *msg, float dist)
     Ribon::ObjectMessageDistDeliverer post_man(*obj, msg, dist);
     TypeContainerVisitor<Ribon::ObjectMessageDistDeliverer, WorldTypeMapContainer > message(post_man);
     CellLock<ReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, message, *this, *obj, dist);
+    cell_lock->Visit(cell_lock, message, *this, *obj, dist);*/
 }
 
 bool Map::loaded(const GridPair &p) const

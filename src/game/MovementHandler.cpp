@@ -487,8 +487,22 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 sLog.outError("AC2-%s, GraviJump exception. JumpHeight = %f, Allowed Veritcal Speed = %f",
                 plMover->GetName(), JumpHeight, plMover->m_anti_Last_VSpeed);
                 #endif
-                //check_passed = false;
-                ((Player *)plMover)->FallGround();
+                check_passed = false;
+                // Tell the player "Sure, you can fly!"
+                {
+                    WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 12);
+                    data.append(plMover->GetPackGUID());
+                    data << uint32(0);
+                    SendPacket(&data);
+                }
+                // Then tell the player "Wait, no, you can't."
+                {
+                    WorldPacket data(SMSG_MOVE_UNSET_CAN_FLY, 12);
+                    data.append(plMover->GetPackGUID());
+                    data << uint32(0);
+                    SendPacket(&data);
+                }
+                plMover->FallGround(2);
             }
 
             //multi jump checks
@@ -496,8 +510,22 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             {
                 if(plMover->m_anti_JumpCount >= 1)
                 {
-                    //check_passed = false; //don't process new jump packet
-                    ((Player *)plMover)->FallGround();
+                    check_passed = false; // don't process new jump packet
+                    // Tell the player "Sure, you can fly!"
+                    {
+                        WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 12);
+                        data.append(plMover->GetPackGUID());
+                        data << uint32(0);
+                        SendPacket(&data);
+                    }
+                    // Then tell the player "Wait, no, you can't."
+                    {
+                        WorldPacket data(SMSG_MOVE_UNSET_CAN_FLY, 12);
+                        data.append(plMover->GetPackGUID());
+                        data << uint32(0);
+                        SendPacket(&data);
+                    }
+                    plMover->FallGround(2);
                 }
                 else
                 {
@@ -544,8 +572,22 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                    plMover->HasAuraType(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED), plMover->HasAuraType(SPELL_AURA_MOD_MOUNTED_FLIGHT_SPEED_ALWAYS),
                    plMover->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK), plMover->GetVehicle());
                 #endif
-                //check_passed = false;
-                ((Player *)plMover)->FallGround();
+                check_passed = false;
+                // Tell the player "Sure, you can fly!"
+                {
+                    WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 12);
+                    data.append(plMover->GetPackGUID());
+                    data << uint32(0);
+                    SendPacket(&data);
+                }
+                // Then tell the player "Wait, no, you can't."
+                {
+                    WorldPacket data(SMSG_MOVE_UNSET_CAN_FLY, 12);
+                    data.append(plMover->GetPackGUID());
+                    data << uint32(0);
+                    SendPacket(&data);
+                }
+                plMover->FallGround(2);
             }
             //Waterwalk checks
             if( ((movementInfo.flags & MOVEMENTFLAG_WATERWALKING) != 0)
@@ -725,7 +767,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     //sLog.outString("Receive Movement Packet %s:", opcodeTable[recv_data.GetOpcode()]);
     //mover->OutMovementInfo();
     }
-    else if(plMover && !(movementInfo.flags & MOVEMENTFLAG_ONTRANSPORT && ( plMover->m_transport || objmgr.GetGOData(plMover->m_anti_TransportGUID) )))
+    else if(plMover)
     {
         ++(plMover->m_anti_AlarmCount);
         WorldPacket data;
