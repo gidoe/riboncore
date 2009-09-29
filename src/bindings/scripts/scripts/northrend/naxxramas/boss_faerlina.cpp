@@ -47,6 +47,14 @@ struct RIBON_DLL_DECL boss_faerlinaAI : public BossAI
 
     bool greet;
 
+    void SetGUID(const uint64 &guid, int32 id)
+    {
+        if(Creature *worshipper = me->GetCreature(*m_creature, guid))
+        {
+            worshipper->AI()->SetGUID(me->GetGUID());
+        }
+    }
+
     void EnterCombat(Unit *who)
     {
         _EnterCombat();
@@ -101,7 +109,6 @@ struct RIBON_DLL_DECL boss_faerlinaAI : public BossAI
                     return;
                 case EVENT_FRENZY:
                     DoCast(me,SPELL_FRENZY);
-                    me->SummonCreature(NAXX_MOB_WORSHIPPER, me->GetPositionX()+5, me->GetPositionY()+5, me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
                     events.ScheduleEvent(EVENT_FRENZY, 60000 + rand()%20000);
                     return;
             }
@@ -113,22 +120,30 @@ struct RIBON_DLL_DECL boss_faerlinaAI : public BossAI
 
 struct RIBON_DLL_DECL mob_worshipperAI : public ScriptedAI
 {
-	mob_worshipperAI(Creature *c) : ScriptedAI(c) 
-	{
-		pInstance = c->GetInstanceData();
-	}
+    mob_worshipperAI(Creature *c) : ScriptedAI(c) {}
 
-	ScriptedInstance* pInstance;
+    uint64 FaerlinaGUID;
 
-	void JustDied(Unit *killer)
-	{
-		Unit* Faerlina = Unit::GetUnit(*m_creature, GetGUID(NAXX_BOSS_FAERLINA));
-		if (Faerlina && Faerlina->isAlive())
-		{
-			me->CastSpell(Faerlina, SPELL_WIDOWS_EMBRACE, false);
-		}
-		else
-			error_log("Faerlina not found."); // for some reason they always don't find her...
+    void SetGUID(const uint64 &guid, int32 id)
+    {
+        FaerlinaGUID = guid;
+    }
+
+    void EnterCombat(Unit *who)
+    {
+        if (Creature *Faerlina = me->FindNearestCreature(NAXX_BOSS_FAERLINA, 30, true))
+        {
+            Faerlina->AI()->SetGUID(me->GetGUID());
+        }
+    }
+
+    void JustDied(Unit* pWho)
+    {
+        Unit* Faerlina = Unit::GetUnit(*m_creature, FaerlinaGUID);
+        if (Faerlina && Faerlina->isAlive())
+        {
+            me->CastSpell(Faerlina, SPELL_WIDOWS_EMBRACE, false);
+        }
     }
 };
 
