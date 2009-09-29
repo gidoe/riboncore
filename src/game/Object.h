@@ -486,6 +486,7 @@ class RIBON_DLL_SPEC WorldObject : public Object, public WorldLocation
             pos.Relocate(x, y, z, GetOrientation());
         }
 
+        uint32 GetMapId() const { return m_mapId; }
         uint32 GetInstanceId() const { return m_InstanceId; }
 
         virtual void SetPhaseMask(uint32 newPhaseMask, bool update);

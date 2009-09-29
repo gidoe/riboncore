@@ -53,7 +53,7 @@ enum eAuthCmd
     XFER_DATA                   = 0x31,
     XFER_ACCEPT                 = 0x32,
     XFER_RESUME                 = 0x33,
-    XFER_CANCEL                 = 0x34
+    XFER_CANCEL                 = 0x34,
 };
 
 enum eStatus

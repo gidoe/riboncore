@@ -94,7 +94,7 @@ void RealmList::UpdateRealms(bool init)
 
             uint8 allowedSecurityLevel = fields[7].GetUInt8();
 
-            UpdateRealm(fields[0].GetUInt32(), fields[1].GetCppString(),fields[2].GetCppString(),fields[3].GetUInt32(),fields[4].GetUInt8(), fields[5].GetUInt8(), fields[6].GetUInt8(), (allowedSecurityLevel <= SEC_ADMINISTRATOR ? AccountTypes(allowedSecurityLevel) : SEC_ADMINISTRATOR), fields[8].GetFloat() ,fields[9].GetUInt32());
+            UpdateRealm(fields[0].GetUInt32(), fields[1].GetCppString(),fields[2].GetCppString(),fields[3].GetUInt32(),fields[4].GetUInt8(), fields[5].GetUInt8(), fields[6].GetUInt8(), (allowedSecurityLevel <= SEC_ADMINISTRATOR ? AccountTypes(allowedSecurityLevel) : SEC_ADMINISTRATOR), fields[8].GetFloat(), fields[9].GetUInt32());
             if(init)
                 sLog.outString("Added realm \"%s\".", fields[1].GetString());
         } while( result->NextRow() );

@@ -314,7 +314,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     // speedup check for heroic class disabled case
     uint32 heroic_free_slots = sWorld.getConfig(CONFIG_HEROIC_CHARACTERS_PER_REALM);
-    if(heroic_free_slots == 0 && GetSecurity()==SEC_PLAYER && class_ == CLASS_DEATH_KNIGHT)
+    if(heroic_free_slots == 0 && GetSecurity() == SEC_PLAYER && class_ == CLASS_DEATH_KNIGHT)
     {
         data << (uint8)CHAR_CREATE_UNIQUE_CLASS_LIMIT;
         SendPacket( &data );
@@ -456,7 +456,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     }
 
     Player * pNewChar = new Player(this);
-    if(!pNewChar->Create(objmgr.GenerateLowGuid(HIGHGUID_PLAYER), name, race_, class_, gender, skin, face, hairStyle, hairColor, facialHair, outfitId ))
+    if(!pNewChar->Create(objmgr.GenerateLowGuid(HIGHGUID_PLAYER), name, race_, class_, gender, skin, face, hairStyle, hairColor, facialHair, outfitId))
     {
         // Player not create (race/class problem?)
         delete pNewChar;
@@ -472,7 +472,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     // Player created, save it now
     pNewChar->SaveToDB();
-    charcount+=1;
+    charcount += 1;
 
     loginDatabase.PExecute("DELETE FROM realmcharacters WHERE acctid= '%d' AND realmid = '%d'", GetAccountId(), realmID);
     loginDatabase.PExecute("INSERT INTO realmcharacters (numchars, acctid, realmid) VALUES (%u, %u, %u)",  charcount, GetAccountId(), realmID);
@@ -531,13 +531,13 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
         return;
 
     std::string IP_str = GetRemoteAddress();
-    sLog.outDetail("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)",GetAccountId(), IP_str.c_str(), name.c_str(), GUID_LOPART(guid));
-    sLog.outChar("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)",GetAccountId(), IP_str.c_str(), name.c_str(), GUID_LOPART(guid));
+    sLog.outDetail("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), GUID_LOPART(guid));
+    sLog.outChar("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), GUID_LOPART(guid));
 
     if(sLog.IsOutCharDump())                                // optimize GetPlayerDump call
     {
         std::string dump = PlayerDumpWriter().GetDump(GUID_LOPART(guid));
-        sLog.outCharDump(dump.c_str(),GetAccountId(),GUID_LOPART(guid), name.c_str());
+        sLog.outCharDump(dump.c_str(), GetAccountId(), GUID_LOPART(guid), name.c_str());
     }
 
     Player::DeleteFromDB(guid, GetAccountId());
@@ -631,10 +631,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
                 data << str_motd.substr(pos, nextpos-pos);
                 ++linecount;
             }
-            pos = nextpos+1;
+            pos = nextpos + 1;
         }
 
-        if (pos<str_motd.length())
+        if (pos < str_motd.length())
         {
             data << str_motd.substr(pos);
             ++linecount;
@@ -811,7 +811,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
 
     std::string IP_str = GetRemoteAddress();
     sLog.outChar("Account: %d (IP: %s) Login Character:[%s] (guid:%u)",
-        GetAccountId(),IP_str.c_str(),pCurrChar->GetName() ,pCurrChar->GetGUIDLow());
+        GetAccountId(), IP_str.c_str(), pCurrChar->GetName(), pCurrChar->GetGUIDLow());
 
     if(!pCurrChar->IsStandState() && !pCurrChar->hasUnitState(UNIT_STAT_STUNNED))
         pCurrChar->SetStandState(UNIT_STAND_STATE_STAND);
