@@ -145,26 +145,8 @@ class RIBON_DLL_SPEC CreatureAI : public UnitAI
 
         ///== Triggered Actions Requested ==================
 
-        // Called when creature attack expected (if creature can and no have current victim)
-        // Note: for reaction at hostile action must be called AttackedBy function.
-        //virtual void AttackStart(Unit *) {}
-
-        // Called at World update tick
-        //virtual void UpdateAI(const uint32 diff ) {}
-
-        ///== State checks =================================
-
-        // Is unit visible for MoveInLineOfSight
-        //virtual bool IsVisible(Unit *) const { return false; }
-
-        // Called when victim entered water and creature can not enter water
-        //virtual bool canReachByRangeAttack(Unit*) { return false; }
-
-        ///== Fields =======================================
-
-        // Pointer to controlled by AI creature
-        //Creature* const m_creature;
-
+        // called when the corpse of this creature gets removed
+        virtual void CorpseRemoved(uint32 & /*respawnDelay*/) {}
         virtual void PassengerBoarded(Unit *who, int8 seatId, bool apply) {}
 
     protected:
