@@ -16,4 +16,9 @@ alter table `item_template`
 insert into `battleground_template`(`id`,`MinPlayersPerTeam`,`MaxPlayersPerTeam`,`MinLvl`,`MaxLvl`,`AllianceStartLoc`,`AllianceStartO`,`HordeStartLoc`,`HordeStartO`) values (30,20,40,71,80,1485,0,1486,0);
 insert into `battleground_template`(`id`,`MinPlayersPerTeam`,`MaxPlayersPerTeam`,`MinLvl`,`MaxLvl`,`AllianceStartLoc`,`AllianceStartO`,`HordeStartLoc`,`HordeStartO`) values (32,0,40,0,80,0,0,0,0);
 
--- EOF
+-- Spell-Elixier
+DELETE FROM `spell_elixir` WHERE `entry`=67019;
+
+/* Flasks added in 3.2.x */
+INSERT INTO `spell_elixir` (`entry`, `mask`) VALUES
+(67019,0x3);

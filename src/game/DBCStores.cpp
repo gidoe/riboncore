@@ -505,6 +505,7 @@ void LoadDBCStores(const std::string& dataPath)
         exit(1);
     }
 
+    //Need Update for 3.2.2a
     if( !sSpellStore.LookupEntry(69016)            ||       // last added spell in 3.2.0a
         !sMapStore.LookupEntry(650)                ||       // last map added in 3.2.0a
         !sGemPropertiesStore.LookupEntry(1629)     ||       // last gem property added in 3.2.0a
