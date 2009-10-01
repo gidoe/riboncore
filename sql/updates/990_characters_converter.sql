@@ -1,3 +1,4 @@
+ALTER TABLE character_db_version CHANGE COLUMN required_990_characters_character_group required_990_characters_converter bit;
 UPDATE characters SET data = REPLACE(data,'  ',' ');
 UPDATE characters SET data = CONCAT(TRIM(data),' ');
 

@@ -424,7 +424,8 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
 
     m_anti_TransportGUID = 0;            // current transport GUID
 
-	m_anti_AntiCheatOffUntilTime = 0;    // set to the time (in unix time) anticheat will be re-enabled
+    m_anti_AntiCheatOffCount = 0;
+    m_anti_AntiCheatOffUntilTime = 0;    // set to the time (in unix time) anticheat will be re-enabled
     m_anti_TeleToPlane_Count = 0;        // Teleport To Plane alarm counter
 
     m_anti_AlarmCount = 0;               // alarm counter

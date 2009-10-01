@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_894_characters_game_event` bit(1) default NULL
+  `required_990_characters_converter` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 
 --
@@ -249,8 +249,8 @@ insert  into `auctionhousebot`(`auctionhouse`,`name`,`minitems`,`maxitems`,`perc
 DROP TABLE IF EXISTS `bugreport`;
 CREATE TABLE `bugreport` (
   `id` int(11) NOT NULL auto_increment COMMENT 'Identifier',
-  `type` varchar(255) NOT NULL default '',
-  `content` varchar(255) NOT NULL default '',
+  `type` longtext NOT NULL,
+  `content` longtext NOT NULL;
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Debug System';
 
@@ -1063,6 +1063,7 @@ CREATE TABLE `groups` (
   `icon8` int(11) unsigned NOT NULL,
   `isRaid` tinyint(1) unsigned NOT NULL,
   `difficulty` tinyint(3) unsigned NOT NULL default '0',
+  `raiddifficulty` int(11) UNSIGNED DEFAULT '0' NOT NULL,
   PRIMARY KEY  (`leaderGuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Groups';
 

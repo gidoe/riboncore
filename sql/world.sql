@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
-  `required_975_world_command` bit(1) default NULL
+  `required_990_world_template` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 
 --
@@ -582,6 +582,8 @@ CREATE TABLE `creature_template` (
   `questItem2` int(11) unsigned NOT NULL default '0',
   `questItem3` int(11) unsigned NOT NULL default '0',
   `questItem4` int(11) unsigned NOT NULL default '0',
+  `questItem5` int(11) unsigned NOT NULL default '0',
+  `questItem6` int(11) unsigned NOT NULL default '0',
   `movementId` int(11) unsigned NOT NULL default '0',
   `RegenHealth` tinyint(3) unsigned NOT NULL default '1',
   `equipment_id` mediumint(8) unsigned NOT NULL default '0',
@@ -1151,6 +1153,8 @@ CREATE TABLE `gameobject_template` (
   `questItem2` int(11) unsigned NOT NULL default '0',
   `questItem3` int(11) unsigned NOT NULL default '0',
   `questItem4` int(11) unsigned NOT NULL default '0',
+  `questItem5` int(11) unsigned NOT NULL default '0',
+  `questItem6` int(11) unsigned NOT NULL default '0',
   `data0` int(10) unsigned NOT NULL default '0',
   `data1` int(10) unsigned NOT NULL default '0',
   `data2` int(10) unsigned NOT NULL default '0',
@@ -1271,13 +1275,14 @@ CREATE TABLE `item_template` (
   `displayid` mediumint(8) unsigned NOT NULL default '0',
   `Quality` tinyint(3) unsigned NOT NULL default '0',
   `Flags` int(10) unsigned NOT NULL default '0',
+  `Faction` int(11) UNSIGNED DEFAULT '0' NOT NULL,
   `BuyCount` tinyint(3) unsigned NOT NULL default '1',
   `BuyPrice` int(10) unsigned NOT NULL default '0',
   `SellPrice` int(10) unsigned NOT NULL default '0',
   `InventoryType` tinyint(3) unsigned NOT NULL default '0',
   `AllowableClass` mediumint(9) NOT NULL default '-1',
   `AllowableRace` mediumint(9) NOT NULL default '-1',
-  `ItemLevel` tinyint(3) unsigned NOT NULL default '0',
+  `smallint(5) unsigned NOT NULL default '0',
   `RequiredLevel` tinyint(3) unsigned NOT NULL default '0',
   `RequiredSkill` smallint(5) unsigned NOT NULL default '0',
   `RequiredSkillRank` smallint(5) unsigned NOT NULL default '0',
