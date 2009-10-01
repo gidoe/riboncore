@@ -106,10 +106,12 @@ struct RIBON_DLL_DECL boss_brutallusAI : public ScriptedAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         Madrigosa = Unit::GetUnit(*m_creature, pInstance->GetData64(DATA_MADRIGOSA));
         //Creature* boss = Unit::GetCreature((*m_creature),AzgalorGUID);
+        if (!Madrigosa) error_log("Madrigosa was not found");
 
         if (Intro && Madrigosa){
             if (!Madrigosa->isAlive())
                 EndIntro();
+            else error_log("Madrigosa is dead");
         }
         else
             EndIntro();
@@ -154,6 +156,7 @@ struct RIBON_DLL_DECL boss_brutallusAI : public ScriptedAI
             Madrigosa->setActive(true);
             IsIntro = true;
         }
+        error_log("Start Intro");
     }
 
     void EndIntro()
@@ -161,6 +164,7 @@ struct RIBON_DLL_DECL boss_brutallusAI : public ScriptedAI
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         Intro = false;
         IsIntro = false;
+        error_log("End Intro");
     }
 
     void DoIntro()
