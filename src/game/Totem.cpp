@@ -93,8 +93,13 @@ void Totem::InitSummon()
         CastSpell(this, GetSpell(), true); 
 
     // Some totems can have both instant effect and passive spell
-    if (GetSpell(1))
-        CastSpell(this, GetSpell(1), true);
+	if (GetSpell(1)) {
+
+		// ToDo: Totem of wrath shouldn't cause owner to be attacked by all nearby units
+		// if (GetSpell(1) == 30708) {
+		CastSpell(this, GetSpell(1), true);
+		
+	}
 }
 
 void Totem::UnSummon()

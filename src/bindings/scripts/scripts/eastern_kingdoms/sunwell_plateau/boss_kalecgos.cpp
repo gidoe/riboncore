@@ -363,7 +363,10 @@ struct RIBON_DLL_DECL boss_kalecgosAI : public ScriptedAI
         }
     }
 
-    void MovementInform(uint32 type,uint32 id)
+// This function causes kalecgos to despawn immediatly after joining combat.
+// I suggesst it belongs to changes in MotionMaster.cpp at rev 891, but can't find
+// a better solution. For now, kalecgos works.
+/*    void MovementInform(uint32 type,uint32 id)
     {
         me->SetVisibility(VISIBILITY_OFF);
         if (isFriendly)
@@ -374,7 +377,7 @@ struct RIBON_DLL_DECL boss_kalecgosAI : public ScriptedAI
             TalkTimer = 1000;
         }
     }
-
+*/
     void GoodEnding()
     {
         switch(TalkSequence)

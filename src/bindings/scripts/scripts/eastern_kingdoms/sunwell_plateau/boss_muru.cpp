@@ -127,6 +127,8 @@ struct RIBON_DLL_DECL boss_entropiusAI : public ScriptedAI
 
     void Reset()
     {
+        me->SetHealth(me->GetMaxHealth());
+
         BlackHoleSummonTimer = 15000;
         DoCastAOE(SPELL_NEGATIVE_ENERGY_E, false);
 

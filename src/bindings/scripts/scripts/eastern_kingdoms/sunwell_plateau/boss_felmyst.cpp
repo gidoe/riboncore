@@ -162,6 +162,7 @@ struct RIBON_DLL_DECL boss_felmystAI : public ScriptedAI
         m_creature->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
         m_creature->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 10);
         m_creature->SetFloatValue(UNIT_FIELD_COMBATREACH, 10);
+        m_creature->SetHealth(m_creature->GetMaxHealth());
 
         DespawnSummons(MOB_VAPOR_TRAIL);
         m_creature->setActive(false);
