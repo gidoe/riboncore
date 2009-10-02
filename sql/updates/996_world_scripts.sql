@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ALTER TABLE db_version CHANGE COLUMN required_990_world_template required_996_world_scripts bit;
+=======
+ALTER TABLE db_version CHANGE COLUMN required_978_world_scripts required_996_world_scripts bit;
+>>>>>>> c1770c61aad10d002385ca781e0396c67caddc5c
 
 -- Azjol-Nerub
 UPDATE `instance_template` SET `script`='instance_azjol_nerub' WHERE `map`=601;
