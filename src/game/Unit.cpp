@@ -9857,7 +9857,7 @@ uint32 Unit::SpellHealingBonus(Unit *pVictim, SpellEntry const *spellProto, uint
             int32 apBonus = std::max(GetTotalAttackPowerValue(BASE_ATTACK), GetTotalAttackPowerValue(RANGED_ATTACK));
             if (apBonus > DoneAdvertisedBenefit)
             {
-                DoneTotal += apBonus * stack;
+                DoneTotal += apBonus * 0.2f;
                 coeff = 0.0f;
             }
             else
@@ -11958,7 +11958,7 @@ void Unit::SetLevel(uint32 lvl)
 
 void Unit::SetHealth(uint32 val)
 {
-    if(getDeathState() == JUST_DIED)
+    if((getDeathState() & (JUST_DIED | DEAD | DEAD_FALLING)) != 0)
         val = 0;
     else
     {
