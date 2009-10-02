@@ -102,8 +102,8 @@ class RIBON_DLL_SPEC Database
         virtual bool DirectExecute(const char* sql) = 0;
         bool DirectPExecute(const char *format,...) ATTR_PRINTF(2,3);
 
-        bool Database::_UpdateDataBlobValue(const uint32 guid, const uint32 field, const uint32 value);
-        bool Database::_SetDataBlobValue(const uint32 guid, const uint32 field, const uint32 value);
+        bool _UpdateDataBlobValue(const uint32 guid, const uint32 field, const int32 value);
+        bool _SetDataBlobValue(const uint32 guid, const uint32 field, const uint32 value);
 
         // Writes SQL commands to a LOG file (see RibonCore.conf "LogSQL")
         bool PExecuteLog(const char *format,...) ATTR_PRINTF(2,3);
