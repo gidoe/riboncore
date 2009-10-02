@@ -1,33 +1,50 @@
-/* Script Data Start
-SDName: Boss maiden_of_grief
-SDAuthor: LordVanMartin
-SD%Complete:
+/* Copyright (C) 2006 - 2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+/* ScriptData
+SDName: Boss Maiden of Grief
+SD%Complete: 80
 SDComment:
-SDCategory:
-Script Data End */
+SDCategory: Ulduar: Halls of Stone
+EndScriptData */
 
-/*** SQL START ***
-update creature_template set scriptname = 'boss_maiden_of_grief' where entry = '';
-*** SQL END ***/
 #include "precompiled.h"
+#include "def_halls_of_stone.h"
 
-//Spell
-#define SPELL_PARTING_SORROW                                59723
-#define SPELL_STORM_OF_GRIEF_N                              50752
-#define SPELL_STORM_OF_GRIEF_H                              59772
-#define SPELL_SHOCK_OF_SORROW_N                             50760
-#define SPELL_SHOCK_OF_SORROW_H                             59726
-#define SPELL_PILLAR_OF_WOE_N                               50761
-#define SPELL_PILLAR_OF_WOE_H                               59727
+enum Spells
+{
+    SPELL_PARTING_SORROW                                = 59723,
+    SPELL_STORM_OF_GRIEF_N                              = 50752,
+    SPELL_STORM_OF_GRIEF_H                              = 59772,
+    SPELL_SHOCK_OF_SORROW_N                             = 50760,
+    SPELL_SHOCK_OF_SORROW_H                             = 59726,
+    SPELL_PILLAR_OF_WOE_N                               = 50761,
+    SPELL_PILLAR_OF_WOE_H                               = 59727
+};
 
-//Yell
-#define SAY_AGGRO                                        -1603000
-#define SAY_SLAY_1                                       -1603001
-#define SAY_SLAY_2                                       -1603002
-#define SAY_SLAY_3                                       -1603003
-#define SAY_SLAY_4                                       -1603004
-#define SAY_DEATH                                        -1603005
-#define SAY_STUN                                         -1603006
+enum Yells
+{
+    SAY_AGGRO                                        = -1603000,
+    SAY_SLAY_1                                       = -1603001,
+    SAY_SLAY_2                                       = -1603002,
+    SAY_SLAY_3                                       = -1603003,
+    SAY_SLAY_4                                       = -1603004,
+    SAY_DEATH                                        = -1603005,
+    SAY_STUN                                         = -1603006
+};
 
 struct RIBON_DLL_DECL boss_maiden_of_griefAI : public ScriptedAI
 {
@@ -52,14 +69,16 @@ struct RIBON_DLL_DECL boss_maiden_of_griefAI : public ScriptedAI
         ShockOfSorrowTimer = 20000+rand()%5000;
         PillarOfWoeTimer = 5000 + rand()%10000;
 
-        //Missing support for instance data (and door?)
+        if (pInstance)
+            pInstance->SetData(DATA_MAIDEN_OF_GRIEF_EVENT, NOT_STARTED);
     }
 
     void EnterCombat(Unit* who)
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        //Missing support for instance data (and door?)
+        if (pInstance)
+            pInstance->SetData(DATA_MAIDEN_OF_GRIEF_EVENT, IN_PROGRESS);
     }
 
     void UpdateAI(const uint32 diff)
@@ -113,7 +132,8 @@ struct RIBON_DLL_DECL boss_maiden_of_griefAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        //Missing support for instance data (and door?)
+        if (pInstance)
+            pInstance->SetData(DATA_MAIDEN_OF_GRIEF_EVENT, DONE);
     }
     void KilledUnit(Unit *victim)
     {
