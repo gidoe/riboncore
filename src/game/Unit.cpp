@@ -9889,7 +9889,7 @@ uint32 Unit::SpellHealingBonus(Unit *pVictim, SpellEntry const *spellProto, uint
             int32 apBonus = std::max(GetTotalAttackPowerValue(BASE_ATTACK), GetTotalAttackPowerValue(RANGED_ATTACK));
             if (apBonus > DoneAdvertisedBenefit)
             {
-                DoneTotal += apBonus * stack;
+                DoneTotal += apBonus * 0.2f;
                 coeff = 0.0f;
             }
             else
@@ -11337,7 +11337,7 @@ Unit* Creature::SelectVictim()
                     target = caster;
                     break;
                 }
-            }while (aura != tauntAuras.begin());
+            } while (aura != tauntAuras.begin());
         }
         else
             target = getVictim();
@@ -11376,7 +11376,7 @@ Unit* Creature::SelectVictim()
     else
         return NULL;
 
-    if(target && (!target->getVictim() || !target->isAttackingPlayer() || IsFriendlyTo(target->getVictim()))) // if the victim of target is a player, only defend the victim if we are friendly
+    if(target && _IsTargetAcceptable(target))
     {
         SetInFront(target);
         return target;
@@ -11388,9 +11388,8 @@ Unit* Creature::SelectVictim()
     // Note: creature not have targeted movement generator but have attacker in this case
     for(AttackerSet::const_iterator itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
     {
-        if(canCreatureAttack(*itr) && (*itr)->GetTypeId() != TYPEID_PLAYER
-          && !((Creature*)(*itr))->HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN)
-          && (!(*itr)->getVictim() || !(*itr)->isAttackingPlayer() || IsFriendlyTo(target->getVictim()))) // if the victim of target is a player, only defend the victim if we are friendly
+        if((*itr) && canCreatureAttack(*itr) && (*itr)->GetTypeId() != TYPEID_PLAYER
+          && !((Creature*)(*itr))->HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
             return NULL;
     }
 
@@ -11401,7 +11400,7 @@ Unit* Creature::SelectVictim()
     // search nearby enemy before enter evade mode
     if(HasReactState(REACT_AGGRESSIVE))
         if(target = SelectNearestTarget())
-            if(!target->getVictim() || !target->isAttackingPlayer() || IsFriendlyTo(target->getVictim())) // if the victim of target is a player, only defend the victim if we are friendly
+            if(_IsTargetAcceptable(target))
                 return target;
 
     if(m_invisibilityMask)
@@ -11991,8 +11990,10 @@ void Unit::SetLevel(uint32 lvl)
 
 void Unit::SetHealth(uint32 val)
 {
-    if(getDeathState() == JUST_DIED)
+    if((getDeathState() & JUST_DIED) != 0)
         val = 0;
+    else if((getDeathState() & (DEAD | DEAD_FALLING)) != 0)
+        val = 1;
     else
     {
         uint32 maxHealth = GetMaxHealth();
