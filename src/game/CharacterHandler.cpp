@@ -646,7 +646,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
         // send server info
         if(sWorld.getConfig(CONFIG_ENABLE_SINFO_LOGIN) == 1)
-            chH.PSendSysMessage(_FULLVERSION);
+			chH.PSendSysMessage("Server is using RibonCore revision: %s", _FULLVERSION);
 
         DEBUG_LOG( "WORLD: Sent server info" );
     }
