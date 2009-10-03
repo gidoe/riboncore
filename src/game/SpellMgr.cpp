@@ -1274,7 +1274,7 @@ void SpellMgr::LoadSpellProcEvents()
         barGoLink bar( 1 );
         bar.step();
         sLog.outString();
-        sLog.outString( ">> Loaded %u spell proc event conditions", count  );
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_PROC_EVENT_EMPTY), count);
         return;
     }
 
@@ -1326,9 +1326,9 @@ void SpellMgr::LoadSpellProcEvents()
 
     sLog.outString();
     if (customProc)
-        sLog.outString( ">> Loaded %u extra spell proc event conditions +%u custom",  count, customProc );
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_PROC_EVENT_LOADED_1), count, customProc);
     else
-        sLog.outString( ">> Loaded %u extra spell proc event conditions", count );
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_PROC_EVENT_LOADED_2), count);
 }
 
 void SpellMgr::LoadSpellBonusess()
@@ -1342,7 +1342,7 @@ void SpellMgr::LoadSpellBonusess()
         barGoLink bar( 1 );
         bar.step();
         sLog.outString();
-        sLog.outString( ">> Loaded %u spell bonus data", count);
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_BONUS_EMPTY), count);
         return;
     }
 
@@ -1374,7 +1374,7 @@ void SpellMgr::LoadSpellBonusess()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u extra spell bonus data",  count);
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_BONUS_LOADED), count);
 }
 
 bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellProcEvent, uint32 EventProcFlag, SpellEntry const * procSpell, uint32 procFlags, uint32 procExtra, bool active)
@@ -1522,7 +1522,7 @@ void SpellMgr::LoadSpellElixirs()
         bar.step();
 
         sLog.outString();
-        sLog.outString( ">> Loaded %u spell elixir definitions", count );
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_ELIXIR_TYPES_EMPTY), count);
         return;
     }
 
@@ -1553,7 +1553,7 @@ void SpellMgr::LoadSpellElixirs()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u spell elixir definitions", count );
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_ELIXIR_TYPES_LOADED), count);
 }
 
 void SpellMgr::LoadSpellThreats()
@@ -1795,7 +1795,7 @@ void SpellMgr::LoadSpellLearnSkills()
     }
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u Spell Learn Skills from DBC", dbc_count );
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_LEARN_SKILLS_LOADED), dbc_count);
 }
 
 void SpellMgr::LoadSpellLearnSpells()
@@ -1810,7 +1810,7 @@ void SpellMgr::LoadSpellLearnSpells()
         bar.step();
 
         sLog.outString();
-        sLog.outString( ">> Loaded 0 spell learn spells" );
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_LEARN_SPELLS_EMPTY));
         sLog.outErrorDb("`spell_learn_spell` table is empty!");
         return;
     }
@@ -1905,7 +1905,7 @@ void SpellMgr::LoadSpellLearnSpells()
     }
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u spell learn spells + %u found in DBC", count, dbc_count );
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_LEARN_SPELLS_LOADED), count, dbc_count);
 }
 
 void SpellMgr::LoadSpellScriptTarget()
@@ -3184,7 +3184,7 @@ void SpellMgr::LoadSpellEnchantProcData()
         bar.step();
 
         sLog.outString();
-        sLog.outString( ">> Loaded %u spell enchant proc event conditions", count );
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_ENCHANT_SPELLS_PROC_LOADED_1), count);
         return;
     }
 
@@ -3217,7 +3217,7 @@ void SpellMgr::LoadSpellEnchantProcData()
 
     delete result;
 
-    sLog.outString( ">> Loaded %u enchant proc data definitions", count);
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_ENCHANT_SPELLS_PROC_LOADED_2), count);
 }
 
 void SpellMgr::LoadSpellRequired()
@@ -3233,7 +3233,7 @@ void SpellMgr::LoadSpellRequired()
         bar.step();
 
         sLog.outString();
-        sLog.outString( ">> Loaded 0 spell required records" );
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_REQUIRED_EMPTY));
         sLog.outErrorDb("`spell_required` table is empty!");
         return;
     }
@@ -3255,7 +3255,7 @@ void SpellMgr::LoadSpellRequired()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u spell required records", rows );
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_REQUIRED_LOADED), rows);
 }
 
 struct SpellRankEntry
@@ -3551,7 +3551,7 @@ void SpellMgr::LoadSpellChains()
        //sLog.outString( "Id: %u, Rank: %d , %s, %u, %u, %u, %u",itr->first,itr->second.rank, sSpellStore.LookupEntry(itr->first)->Rank[sWorld.GetDefaultDbcLocale()], itr->second.first, itr->second.last,itr->second.next ,itr->second.prev);
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u spell chains",count);
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_CHAIN_LOADED), count);
 }
 
 // set data in core for now

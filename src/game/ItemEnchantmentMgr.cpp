@@ -79,12 +79,12 @@ void LoadRandomEnchantmentsTable()
         delete result;
 
         sLog.outString();
-        sLog.outString( ">> Loaded %u Item Enchantment definitions", count );
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_ITEM_RANDOM_ENCHANT_LOADED), count);
     }
     else
     {
         sLog.outString();
-        sLog.outErrorDb( ">> Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
+        sLog.outErrorDb(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_ITEM_RANDOM_ENCHANT_EMPTY));
     }
 }
 
