@@ -224,7 +224,7 @@ void ObjectMgr::LoadPlayerInfoInCache()
     QueryResult *result = CharacterDatabase.PQuery("SELECT guid, name, data, class FROM characters");
     if(!result)
     {
-        sLog.outError( "Loading Player Cache failed.");
+        sLog.outError(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_PLAYER_INFO_CACHE_FAILED));
         return;
     }
 
@@ -261,7 +261,7 @@ void ObjectMgr::LoadPlayerInfoInCache()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded info about %d players", m_mPlayerInfoMap.size());
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_PLAYER_INFO_CACHE_LOADED), m_mPlayerInfoMap.size());
 }
 
 PCachePlayerInfo ObjectMgr::GetPlayerInfoFromCache(uint32 unPlayerGuid) const
@@ -384,7 +384,7 @@ void ObjectMgr::LoadCreatureLocales()
         bar.step();
 
         sLog.outString();
-        sLog.outString(">> Loaded 0 creature locale strings. DB table `locales_creature` is empty.");
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_CREATURE_EMPTY));
         return;
     }
 
@@ -431,7 +431,7 @@ void ObjectMgr::LoadCreatureLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %lu creature locale strings", (unsigned long)mCreatureLocaleMap.size() );
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_CREATURE_LOADED), (unsigned long)mCreatureLocaleMap.size());
 }
 
 void ObjectMgr::LoadNpcOptionLocales()
@@ -452,7 +452,7 @@ void ObjectMgr::LoadNpcOptionLocales()
         bar.step();
 
         sLog.outString();
-        sLog.outString(">> Loaded 0 npc_option locale strings. DB table `locales_npc_option` is empty.");
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_NPC_OPTION_EMPTY));
         return;
     }
 
@@ -499,7 +499,7 @@ void ObjectMgr::LoadNpcOptionLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %lu npc_option locale strings", (unsigned long)mNpcOptionLocaleMap.size() );
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_NPC_OPTION_LOADED), (unsigned long)mNpcOptionLocaleMap.size());
 }
 
 void ObjectMgr::LoadPointOfInterestLocales()
@@ -515,7 +515,7 @@ void ObjectMgr::LoadPointOfInterestLocales()
         bar.step();
 
         sLog.outString();
-        sLog.outString(">> Loaded 0 points_of_interest locale strings. DB table `locales_points_of_interest` is empty.");
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_POI_EMPTY));
         return;
     }
 
@@ -550,7 +550,7 @@ void ObjectMgr::LoadPointOfInterestLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %lu points_of_interest locale strings", (unsigned long)mPointOfInterestLocaleMap.size() );
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_POI_LOADED), (unsigned long)mPointOfInterestLocaleMap.size());
 }
 
 struct SQLCreatureLoader : public SQLStorageLoaderBase<SQLCreatureLoader>
@@ -567,7 +567,7 @@ void ObjectMgr::LoadCreatureTemplates()
     SQLCreatureLoader loader;
     loader.Load(sCreatureStorage);
 
-    sLog.outString( ">> Loaded %u creature definitions", sCreatureStorage.RecordCount );
+    sLog.outString(">> Loaded %u creature definitions", sCreatureStorage.RecordCount);
     sLog.outString();
 
     std::set<uint32> heroicEntries;                         // already loaded heroic value in creatures
@@ -1860,7 +1860,7 @@ void ObjectMgr::LoadItemLocales()
         bar.step();
 
         sLog.outString();
-        sLog.outString(">> Loaded 0 Item locale strings. DB table `locales_item` is empty.");
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_ITEM_EMPTY));
         return;
     }
 
@@ -1908,7 +1908,7 @@ void ObjectMgr::LoadItemLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %lu Item locale strings", (unsigned long)mItemLocaleMap.size() );
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_ITEM_LOADED), (unsigned long)mItemLocaleMap.size());
 }
 
 struct SQLItemLoader : public SQLStorageLoaderBase<SQLItemLoader>
@@ -1925,10 +1925,10 @@ void ObjectMgr::LoadItemPrototypes(bool reload)
     if(reload)
     {
         // Loading tmp storage
-        sLog.outString( ">> Loading temporary ItemStorage" );
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_ITEMS_STORAGE_LOADING));
         SQLItemLoader loader;
         loader.Load(sItemStorageTmp);
-        sLog.outString( ">> Temporary ItemStorage loaded, modifying..." );
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_ITEMS_STORAGE_LOADED));
 
         for(uint32 i = 1; i < sItemStorageTmp.MaxEntry; ++i)
         {
@@ -2376,15 +2376,15 @@ void ObjectMgr::LoadItemPrototypes(bool reload)
         }
 
         sItemStorageTmp.Free();
-        sLog.outString( ">> Item Templates modified. Temp storage freed." );
-        sLog.outString( "   Items will be removed from players at next relogin if required." );
-        sLog.outString( ">> Now checking data." );
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_ITEMS_MODIFIED_1));
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_ITEMS_MODIFIED_2));
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_ITEMS_MODIFIED_3));
     }
     else
     {
         SQLItemLoader loader;
         loader.Load(sItemStorage);
-        sLog.outString( ">> Loaded %u item prototypes", sItemStorage.RecordCount );
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_ITEMS_LOADED), sItemStorage.RecordCount);
         sLog.outString();
     }
 
@@ -4596,7 +4596,7 @@ void ObjectMgr::LoadQuestLocales()
         bar.step();
 
         sLog.outString();
-        sLog.outString(">> Loaded 0 Quest locale strings. DB table `locales_quest` is empty.");
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_QUEST_EMPTY));
         return;
     }
 
@@ -4706,7 +4706,7 @@ void ObjectMgr::LoadQuestLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %lu Quest locale strings", (unsigned long)mQuestLocaleMap.size() );
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_QUEST_LOADED), (unsigned long)mQuestLocaleMap.size());
 }
 
 void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
@@ -5144,7 +5144,7 @@ void ObjectMgr::LoadPageTexts()
     sPageTextStore.Free();                                  // for reload case
 
     sPageTextStore.Load();
-    sLog.outString( ">> Loaded %u page texts", sPageTextStore.RecordCount );
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_PAGE_TEXTS_LOADED), sPageTextStore.RecordCount);
     sLog.outString();
 
     for(uint32 i = 1; i < sPageTextStore.MaxEntry; ++i)
@@ -5196,7 +5196,7 @@ void ObjectMgr::LoadPageTextLocales()
         bar.step();
 
         sLog.outString();
-        sLog.outString(">> Loaded 0 PageText locale strings. DB table `locales_page_text` is empty.");
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_PAGE_TEXT_STRINGS_EMPTY));
         return;
     }
 
@@ -5232,7 +5232,7 @@ void ObjectMgr::LoadPageTextLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %lu PageText locale strings", (unsigned long)mPageTextLocaleMap.size() );
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_PAGE_TEXT_STRINGS_LOADED), (unsigned long)mPageTextLocaleMap.size());
 }
 
 struct SQLInstanceLoader : public SQLStorageLoaderBase<SQLInstanceLoader>
@@ -5377,7 +5377,7 @@ void ObjectMgr::LoadNpcTextLocales()
         bar.step();
 
         sLog.outString();
-        sLog.outString(">> Loaded 0 NpcText locale strings. DB table `locales_npc_text` is empty.");
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_NPC_TEXT_EMPTY));
         return;
     }
 
@@ -5427,7 +5427,7 @@ void ObjectMgr::LoadNpcTextLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %lu NpcText locale strings", (unsigned long)mNpcTextLocaleMap.size() );
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_NPC_TEXT_LOADED), (unsigned long)mNpcTextLocaleMap.size() );
 }
 
 //not very fast function but it is called only once a day, or on starting-up
@@ -6575,7 +6575,7 @@ void ObjectMgr::LoadGameObjectLocales()
         bar.step();
 
         sLog.outString();
-        sLog.outString(">> Loaded 0 gameobject locale strings. DB table `locales_gameobject` is empty.");
+        sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_GO_EMPTY));
         return;
     }
 
@@ -6627,7 +6627,7 @@ void ObjectMgr::LoadGameObjectLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %lu gameobject locale strings", (unsigned long)mGameObjectLocaleMap.size() );
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_GO_LOADED), (unsigned long)mGameObjectLocaleMap.size());
 }
 
 struct SQLGameObjectLoader : public SQLStorageLoaderBase<SQLGameObjectLoader>
@@ -6862,7 +6862,7 @@ void ObjectMgr::LoadGameobjectInfo()
         }
     }
 
-    sLog.outString( ">> Loaded %u game object templates", sGOStorage.RecordCount );
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_GO_TEMPLATES_LOADED), sGOStorage.RecordCount);
     sLog.outString();
 }
 

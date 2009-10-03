@@ -1330,7 +1330,7 @@ void World::SetInitialWorldSettings()
     sInstanceSaveManager.PackInstances();
 
     sLog.outString();
-    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCALIZATION));
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_STRINGS_LOADING));
     objmgr.LoadCreatureLocales();
     objmgr.LoadGameObjectLocales();
     objmgr.LoadItemLocales();
@@ -1340,52 +1340,52 @@ void World::SetInitialWorldSettings()
     objmgr.LoadNpcOptionLocales();
     objmgr.LoadPointOfInterestLocales();
     objmgr.SetDBCLocaleIndex(GetDefaultDbcLocale());        // Get once for all the locale index of DBC language (console/broadcasts)
-    sLog.outString(">>> Localization strings loaded");
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_LOCAL_STRINGS_LOADED));
     sLog.outString();
 
-    sLog.outString("Loading Page Texts...");
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_PAGE_TEXTS_LOADING));
     objmgr.LoadPageTexts();
 
-    sLog.outString("Loading Player info in cache...");
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_PLAYER_INFO_CACHE_LOADING));
     objmgr.LoadPlayerInfoInCache();
 
-    sLog.outString("Loading Game Object Templates...");   // must be after LoadPageTexts
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_GO_TEMPLATES_LOADING));   // must be after LoadPageTexts
     objmgr.LoadGameobjectInfo();
 
-    sLog.outString("Loading Spell Chain Data...");
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_CHAIN_LOADING));
     spellmgr.LoadSpellChains();
 
-    sLog.outString("Loading Spell Required Data...");
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_REQUIRED_LOADING));
     spellmgr.LoadSpellRequired();
 
-    sLog.outString("Loading Spell Elixir types...");
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_ELIXIR_TYPES_LOADING));
     spellmgr.LoadSpellElixirs();
 
-    sLog.outString("Loading Spell Learn Skills...");
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_LEARN_SKILLS_LOADING));
     spellmgr.LoadSpellLearnSkills();                        // must be after LoadSpellChains
 
-    sLog.outString("Loading Spell Learn Spells...");
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_LEARN_SPELLS_LOADING));
     spellmgr.LoadSpellLearnSpells();
 
-    sLog.outString("Loading Spell Proc Event conditions...");
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_PROC_EVENT_LOADING));
     spellmgr.LoadSpellProcEvents();
 
-    sLog.outString("Loading Spell Bonus Data...");
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_SPELL_BONUS_LOADING));
     spellmgr.LoadSpellBonusess();
 
-    sLog.outString("Loading Aggro Spells Definitions...");
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_AGGRO_SPELL_LOADING));
     spellmgr.LoadSpellThreats();
 
-    sLog.outString("Loading NPC Texts...");
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_NPC_TEXTS_LOADING));
     objmgr.LoadGossipText();
 
-    sLog.outString("Loading Enchant Spells Proc datas...");
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_ENCHANT_SPELLS_PROC_LOADING));
     spellmgr.LoadSpellEnchantProcData();
 
-    sLog.outString("Loading Item Random Enchantments Table...");
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_ITEM_RANDOM_ENCHANT_LOADING));
     LoadRandomEnchantmentsTable();
 
-    sLog.outString("Loading Items...");                   // must be after LoadRandomEnchantmentsTable and LoadPageTexts
+    sLog.outString(objmgr.GetRibonStringForDBCLocale(LANG_WORLD_LOAD_ITEMS_LOADING)); // must be after LoadRandomEnchantmentsTable and LoadPageTexts
     objmgr.LoadItemPrototypes();
 
     sLog.outString("Loading Item Texts...");
@@ -1778,7 +1778,7 @@ void World::DetectDBCLang()
 
     if (default_locale >= MAX_LOCALE)
     {
-        sLog.outError("Unable to determine your DBC Locale! (corrupt DBC?)");
+        sLog.outError("Unable to determine your DBC Locale! (corrupt DBC?)\nDie Sprache der DBC-Lokalisierung konnte nicht ermittelt werden! (DBC-Dateien kaputt?)");
         exit(1);
     }
 
