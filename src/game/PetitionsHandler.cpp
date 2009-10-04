@@ -53,7 +53,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
     recv_data.hexlike();
 
     uint64 guidNPC;
-    uint32 unk2;
+    uint32 clientIndex;
     std::string name;
 
     recv_data >> guidNPC;                                   // NPC GUID
@@ -76,7 +76,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
     for (int i = 0; i < 10; ++i)
         recv_data.read_skip<std::string>();
 
-    recv_data >> unk2;                                      // index
+    recv_data >> clientIndex;                               // index
     recv_data.read_skip<uint32>();                          // 0
     sLog.outDebug("Petitioner with GUID %u tried sell petition: name %s", GUID_LOPART(guidNPC), name.c_str());
 
@@ -115,7 +115,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
             return;
         }
 
-        switch(unk2)
+        switch(clientIndex)        // arenaSlot + 1 as received from client
         {
             case 1:
                 charterid = ARENA_TEAM_CHARTER_2v2;
@@ -133,11 +133,11 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
                 type = 5;                                   // 5v5
                 break;
             default:
-                sLog.outDebug("unknown selection at buy petition: %u", unk2);
+                sLog.outDebug("unknown selection at buy petition: %u", clientIndex);
                 return;
         }
 
-        if(_player->GetArenaTeamId(unk2 - 1))
+        if(_player->GetArenaTeamId(clientIndex - 1))
         {
             SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, name, "", ERR_ALREADY_IN_ARENA_TEAM);
             return;
@@ -212,7 +212,6 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
 
     if (result)
     {
-
         do
         {
             Field *fields = result->Fetch();
@@ -332,11 +331,11 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
         return;
     }
 
-    WorldPacket data(SMSG_PETITION_QUERY_RESPONSE, (4+8+name.size()+1+1+4*13));
-    data << GUID_LOPART(petitionguid);                      // guild/team guid (in Ribon always same as GUID_LOPART(petition guid)
-    data << ownerguid;                                      // charter owner guid
+    WorldPacket data(SMSG_PETITION_QUERY_RESPONSE, (4+8+name.size()+1+1+4*12+2+10));
+    data << uint32(GUID_LOPART(petitionguid));              // guild/team guid (in mangos always same as GUID_LOPART(petition guid)
+    data << uint64(ownerguid);                              // charter owner guid
     data << name;                                           // name (guild/arena team)
-    data << uint8(0);                                       // 1
+    data << uint8(0);                                       // some string
     if(type == 9)
     {
         data << uint32(9);
@@ -345,9 +344,9 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
     }
     else
     {
-        data << type-1;
-        data << type-1;
-        data << type;                                       // bypass client - side limitation, a different value is needed here for each petition
+        data << uint32(type-1);
+        data << uint32(type-1);
+        data << uint32(type);                               // bypass client - side limitation, a different value is needed here for each petition
     }
     data << uint32(0);                                      // 5
     data << uint32(0);                                      // 6
@@ -357,11 +356,17 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
     data << uint32(0);                                      // 10
     data << uint32(0);                                      // 11
     data << uint32(0);                                      // 13 count of next strings?
+
+    for(int i = 0; i < 10; ++i)
+        data << uint8(0);                                   // some string
+
     data << uint32(0);                                      // 14
+
     if(type == 9)
         data << uint32(0);                                  // 15 0 - guild, 1 - arena team
     else
         data << uint32(1);
+
     SendPacket(&data);
 }
 

@@ -524,10 +524,6 @@ UPDATE `creature_template` SET `ScriptName`='boss_olm_the_summoner' WHERE `entry
 UPDATE `creature_template` SET `ScriptName`='boss_krosh_firehand' WHERE `entry`=18832;
 
 /* GUNDRAK */
-<<<<<<< HEAD
-/* Moorabi */
-UPDATE `creature_template` SET `ScriptName`='boss_moorabi' where entry=29305;
-=======
 UPDATE `instance_template` SET `script`='instance_gundrak' WHERE `map`=604;
 /* Moorabi */
 UPDATE `creature_template` SET `ScriptName`='boss_moorabi' WHERE `entry`=29305;
@@ -545,7 +541,6 @@ UPDATE `creature_template` SET `ScriptName`='boss_eck' WHERE `entry`=29932;
 UPDATE `gameobject_template` SET `ScriptName`='go_gundrak_altar' WHERE `entry`=192518;
 UPDATE `gameobject_template` SET `ScriptName`='go_gundrak_altar' WHERE `entry`=192519;
 UPDATE `gameobject_template` SET `ScriptName`='go_gundrak_altar' WHERE `entry`=192520;
->>>>>>> 6fe576165f7f12337ac547fe1c5e36ce4ba701b7
 
 /* HALLS OF LIGHTNING */
 UPDATE `instance_template` SET `script`='instance_halls_of_lightning' WHERE `map`=602;

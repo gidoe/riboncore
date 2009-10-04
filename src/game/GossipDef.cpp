@@ -547,13 +547,13 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
 
     WorldPacket data( SMSG_QUEST_QUERY_RESPONSE, 100 );     // guess size
 
-    data << uint32(pQuest->GetQuestId());
+    data << uint32(pQuest->GetQuestId());                   // quest id
     data << uint32(pQuest->GetQuestMethod());               // Accepted values: 0, 1 or 2. 0==IsAutoComplete() (skip objectives/details)
     data << uint32(pQuest->GetQuestLevel());                // may be 0, static data, in other cases must be used dynamic level: Player::GetQuestLevel
     data << uint32(pQuest->GetZoneOrSort());                // zone or sort to display in quest log
 
-    data << uint32(pQuest->GetType());
-    data << uint32(pQuest->GetSuggestedPlayers());
+    data << uint32(pQuest->GetType());                      // quest type
+    data << uint32(pQuest->GetSuggestedPlayers());          // suggested players count
 
     data << uint32(pQuest->GetRepObjectiveFaction());       // shown in quest log as part of quest objective
     data << uint32(pQuest->GetRepObjectiveValue());         // shown in quest log as part of quest objective
@@ -574,8 +574,8 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
 
     // rewarded honor points
     data << uint32(Ribon::Honor::hk_honor_at_level(pSession->GetPlayer()->getLevel(), pQuest->GetRewHonorableKills()));
-    data << uint32(pQuest->GetSrcItemId());
-    data << uint32(pQuest->GetFlags() & 0xFFFF);
+    data << uint32(pQuest->GetSrcItemId());                 // source item id
+    data << uint32(pQuest->GetFlags() & 0xFFFF);            // quest flags
     data << uint32(pQuest->GetCharTitleId());               // CharTitleId, new 2.4.0, player gets this title (id from CharTitles)
     data << uint32(pQuest->GetPlayersSlain());              // players slain
     data << uint32(pQuest->GetBonusTalents());              // bonus talents
@@ -635,6 +635,8 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
     }
 
     data << uint32(0);                                      // TODO: 5 item objective
+    data << uint32(0);
+    data << uint32(0);                                      // TODO: 6 item objective
     data << uint32(0);
 
     for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; ++iI)
