@@ -27,7 +27,7 @@
 #include "ByteBuffer.h"
 #include "Config/ConfigEnv.h"
 #include "Log.h"
-#include "RealmList.h"
+#include "LogonList.h"
 #include "AuthSocket.h"
 #include "AuthCodes.h"
 #include <openssl/md5.h>

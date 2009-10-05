@@ -631,23 +631,7 @@
 			Name="doc"
 			>
 			<File
-				RelativePath="..\..\Authors"
-				>
-			</File>
-			<File
-				RelativePath="..\..\ChangeLog"
-				>
-			</File>
-			<File
 				RelativePath="..\..\Copying"
-				>
-			</File>
-			<File
-				RelativePath="..\..\Install"
-				>
-			</File>
-			<File
-				RelativePath="..\..\News"
 				>
 			</File>
 			<File

@@ -26,7 +26,7 @@
 #include "Database/DatabaseEnv.h"
 #include "revision_nr.h"
 #include "revision_sql.h"
-#include "RealmList.h"
+#include "LogonList.h"
 
 #include "Config/ConfigEnv.h"
 #include "Log.h"
