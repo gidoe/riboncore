@@ -42,7 +42,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\logon__$(PlatformName)_$(ConfigurationName)\logon.tlb"
+				TypeLibraryName=".\logon__$(PlatformName)_$(ConfigurationName)\Logon.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -55,7 +55,7 @@
 				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="1"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\logon.pch"
+				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\Logon.pch"
 				AssemblerListingLocation=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				ObjectFile=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				ProgramDataBaseFileName=".\logon__$(PlatformName)_$(ConfigurationName)\"
@@ -81,14 +81,14 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRT.LIB msvcrt.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.map"
 				SubSystem="1"
 				LargeAddressAware="2"
 				RandomizedBaseAddress="1"
@@ -114,7 +114,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\src\logon\logon.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.conf"
+				CommandLine="copy ..\..\src\logon\logon.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.conf"
 			/>
 		</Configuration>
 		<Configuration
@@ -153,7 +153,7 @@
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\logon.pch"
+				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\Logon.pch"
 				AssemblerListingLocation=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				ObjectFile=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				ProgramDataBaseFileName=".\logon__$(PlatformName)_$(ConfigurationName)\"
@@ -179,14 +179,14 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRTD.LIB msvcrtd.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.map"
 				SubSystem="1"
 				LargeAddressAware="2"
 				RandomizedBaseAddress="1"
@@ -213,7 +213,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\src\logon\logon.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.conf"
+				CommandLine="copy ..\..\src\logon\logon.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.conf"
 			/>
 		</Configuration>
 		<Configuration
@@ -239,7 +239,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\logon__$(PlatformName)_$(ConfigurationName)\logon.tlb"
+				TypeLibraryName=".\logon__$(PlatformName)_$(ConfigurationName)\Logon.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -252,7 +252,7 @@
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\logon.pch"
+				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\Logon.pch"
 				AssemblerListingLocation=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				ObjectFile=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				ProgramDataBaseFileName=".\logon__$(PlatformName)_$(ConfigurationName)\"
@@ -278,14 +278,14 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRTD.LIB msvcrtd.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_debug"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.map"
 				SubSystem="1"
 				LargeAddressAware="2"
 				RandomizedBaseAddress="1"
@@ -338,7 +338,7 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\logon__$(PlatformName)_$(ConfigurationName)\logon.tlb"
+				TypeLibraryName=".\logon__$(PlatformName)_$(ConfigurationName)\Logon.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -351,7 +351,7 @@
 				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="0"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\logon.pch"
+				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\Logon.pch"
 				AssemblerListingLocation=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				ObjectFile=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				ProgramDataBaseFileName=".\logon__$(PlatformName)_$(ConfigurationName)\"
@@ -376,14 +376,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRT.LIB msvcrt.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.map"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -409,7 +409,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\src\logon\logon.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.conf"
+				CommandLine="copy ..\..\src\logon\logon.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.conf"
 			/>
 		</Configuration>
 		<Configuration
@@ -436,7 +436,7 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\logon__$(PlatformName)_$(ConfigurationName)\logon.tlb"
+				TypeLibraryName=".\logon__$(PlatformName)_$(ConfigurationName)\Logon.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -449,7 +449,7 @@
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\logon.pch"
+				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\Logon.pch"
 				AssemblerListingLocation=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				ObjectFile=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				ProgramDataBaseFileName=".\logon__$(PlatformName)_$(ConfigurationName)\"
@@ -474,14 +474,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRTD.LIB msvcrtd.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.map"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				FixedBaseAddress="1"
@@ -535,7 +535,7 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\tibonlogon__$(PlatformName)_$(ConfigurationName)\logon.tlb"
+				TypeLibraryName=".\tibonlogon__$(PlatformName)_$(ConfigurationName)\Logon.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -548,7 +548,7 @@
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\logon.pch"
+				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\Logon.pch"
 				AssemblerListingLocation=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				ObjectFile=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				ProgramDataBaseFileName=".\logon__$(PlatformName)_$(ConfigurationName)\"
@@ -573,14 +573,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRTD.LIB msvcrtd.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_debug"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\Logon.map"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				FixedBaseAddress="1"

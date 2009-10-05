@@ -33,9 +33,9 @@
 #include "Log.h"
 #include "Master.h"
 
-#ifndef _RIBON_CORE_CONFIG
-# define _RIBON_CORE_CONFIG  "RibonCore.conf"
-#endif //_RIBON_CORE_CONFIG
+#ifndef _WORLD_CONFIG
+# define _WORLD_CONFIG  "World.conf"
+#endif //_WORLD_CONFIG
 
 #ifdef WIN32
 #include "ServiceWin32.h"
@@ -75,7 +75,7 @@ void usage(const char *prog)
 extern int main(int argc, char **argv)
 {
     ///- Command line parsing to get the configuration file name
-    char const* cfg_file = _RIBON_CORE_CONFIG;
+    char const* cfg_file = _WORLD_CONFIG;
     int c=1;
     while( c < argc )
     {
@@ -139,10 +139,10 @@ extern int main(int argc, char **argv)
     sLog.outString("Using configuration file %s.", cfg_file);
 
     uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
-    if (confVersion < _RIBONDCONFVERSION)
+    if (confVersion < _WORLDCONFVERSION)
     {
         sLog.outError("*****************************************************************************");
-        sLog.outError(" WARNING: Your RibonCore.conf version indicates your conf file is out of date!");
+        sLog.outError(" WARNING: Your World.conf version indicates your conf file is out of date!");
         sLog.outError("          Please check for updates, as your current default values may cause");
         sLog.outError("          strange behavior.");
         sLog.outError("*****************************************************************************");

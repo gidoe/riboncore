@@ -1,7 +1,7 @@
 ##########################################
-#     RibonLogon configuration file      #
+#        Logon configuration file        #
 ##########################################
-ConfVersion=2009082815
+ConfVersion=2009100516
 
 ###################################################################################################################
 # REALMD SETTINGS
@@ -101,14 +101,14 @@ ConfVersion=2009082815
 #
 ###################################################################################################################
 
-LoginDatabaseInfo = "127.0.0.1;3306;root;ribon;logon"
+LoginDatabaseInfo = "127.0.0.1;3306;root;logon;logon"
 LogsDir = "Logs"
 MaxPingTime = 30
 RealmServerPort = 3724
 BindIP = "0.0.0.0"
 PidFile = ""
 LogLevel = 1
-LogFile = "logon.log"
+LogFile = "Logon.log"
 LogTimestamp = 0
 LogFileLevel = 0
 UseProcessors = 0

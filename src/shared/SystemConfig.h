@@ -39,11 +39,11 @@
 
 // Format is YYYYMMDDRR where RR is the change in the conf file
 // for that day.
-#ifndef _RIBONDCONFVERSION
-# define _RIBONDCONFVERSION 2009092426
+#ifndef _WORLDCONFVERSION
+# define _WORLDCONFVERSION 2009100527
 #endif
-#ifndef _REALMDCONFVERSION
-# define _REALMDCONFVERSION 2009082815
+#ifndef _LOGONCONFVERSION
+# define _LOGONCONFVERSION 2009100516
 #endif
 
 #if MANGOS_ENDIAN == MANGOS_BIGENDIAN
@@ -73,8 +73,8 @@
 # else
 #  define _ENDIAN_PLATFORM "Win32 (" _ENDIAN_STRING ")"
 # endif
-# define _MANGOSD_CONFIG  SYSCONFDIR"RibonCore.conf"
-# define _REALMD_CONFIG   SYSCONFDIR"RibonLogon.conf"
+# define _WORLD_CONFIG  SYSCONFDIR"World.conf"
+# define _LOGON_CONFIG   SYSCONFDIR"Logon.conf"
 #else
 # if defined  (__FreeBSD__)
 #  define _ENDIAN_PLATFORM "FreeBSD_"ARCHITECTURE" (" _ENDIAN_STRING ")"
@@ -91,10 +91,9 @@
 # else
 #  define _ENDIAN_PLATFORM "Unix_"ARCHITECTURE" (" _ENDIAN_STRING ")"
 # endif
-# define _MANGOSD_CONFIG  SYSCONFDIR"RibonCore.conf"
-# define _REALMD_CONFIG  SYSCONFDIR"RibonLogon.conf"
+# define _WORLD_CONFIG  SYSCONFDIR"World.conf"
+# define _LOGON_CONFIG  SYSCONFDIR"Logon.conf"
 #endif
-
 
 #define DEFAULT_PLAYER_LIMIT 100
 #define DEFAULT_WORLDSERVER_PORT 8085                       //8129
