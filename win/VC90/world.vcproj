@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="RibonCore"
+	Name="RWorld"
 	ProjectGUID="{A3A04E47-43A2-4C08-90B3-029CEF558594}"
-	RootNamespace="riboncore"
+	RootNamespace="world"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="0"
 	>
@@ -21,8 +21,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\riboncore__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\riboncore__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\world__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\world__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -42,23 +42,23 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\..\bin\Release\RibonCore.tlb"
+				TypeLibraryName=".\..\..\bin\Release\world.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\riboncore;..\..\dep\ACE_wrappers"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\world;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.14.0-SVN&quot;;WIN32;NDEBUG;_CONSOLE;ENABLE_CLI;_SECURE_SCL=0"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="1"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\riboncore__$(PlatformName)_$(ConfigurationName)\riboncore.pch"
-				AssemblerListingLocation=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\world__$(PlatformName)_$(ConfigurationName)\world.pch"
+				AssemblerListingLocation=".\world__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\world__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\world__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
@@ -81,20 +81,20 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib ssleay32.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRT.LIB msvcrt.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.map"
 				SubSystem="1"
 				LargeAddressAware="2"
 				LinkTimeCodeGeneration="0"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)\RibonCore.lib"
+				ImportLibrary="$(OutDir)\world.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -116,13 +116,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\dep\lib\$(PlatformName)_$(ConfigurationName)\*.dll ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;copy ..\..\src\riboncore\riboncore.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.conf&#x0D;&#x0A;copy ..\..\README.* ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;"
+				CommandLine="copy ..\..\dep\lib\$(PlatformName)_$(ConfigurationName)\*.dll ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;copy ..\..\src\world\world.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\world.conf&#x0D;&#x0A;copy ..\..\README.* ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\riboncore__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\riboncore__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\world__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\world__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -142,23 +142,23 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\riboncore__$(PlatformName)_$(ConfigurationName)\RibonCore.tlb"
+				TypeLibraryName=".\world__$(PlatformName)_$(ConfigurationName)\world.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\riboncore;..\..\dep\ACE_wrappers"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\world;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.14.0-SVN&quot;;WIN32;_DEBUG;RIBON_DEBUG;_CONSOLE;ENABLE_CLI"
 				IgnoreStandardIncludePath="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\riboncore__$(PlatformName)_$(ConfigurationName)\RibonCore.pch"
-				AssemblerListingLocation=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\world__$(PlatformName)_$(ConfigurationName)\world.pch"
+				AssemblerListingLocation=".\world__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\world__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\world__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
@@ -181,21 +181,21 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib ssleay32.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRTD.LIB msvcrtd.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.exe"
 				Version=""
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.map"
 				SubSystem="1"
 				LargeAddressAware="2"
 				RandomizedBaseAddress="1"
 				FixedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)\RibonCore.lib"
+				ImportLibrary="$(OutDir)\world.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -217,13 +217,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\dep\lib\$(PlatformName)_$(ConfigurationName)\*.dll ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;copy ..\..\src\riboncore\riboncore.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.conf&#x0D;&#x0A;copy ..\..\README.* ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;"
+				CommandLine="copy ..\..\dep\lib\$(PlatformName)_$(ConfigurationName)\*.dll ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;copy ..\..\src\world\world.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\world.conf&#x0D;&#x0A;copy ..\..\README.* ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug_NoPCH|Win32"
-			OutputDirectory=".\riboncore__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\riboncore__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\world__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\world__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -243,23 +243,23 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\riboncore__$(PlatformName)_$(ConfigurationName)\RibonCore.tlb"
+				TypeLibraryName=".\world__$(PlatformName)_$(ConfigurationName)\world.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\riboncore;..\..\dep\ACE_wrappers"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\world;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.13.0-DEV&quot;;WIN32;_DEBUG;RIBON_DEBUG;_CONSOLE;ENABLE_CLI"
 				IgnoreStandardIncludePath="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\riboncore__$(PlatformName)_$(ConfigurationName)\RibonCore.pch"
-				AssemblerListingLocation=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\world__$(PlatformName)_$(ConfigurationName)\world.pch"
+				AssemblerListingLocation=".\world__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\world__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\world__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
@@ -282,21 +282,21 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib ssleay32.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRTD.LIB msvcrtd.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.exe"
 				Version=""
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_debug"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.map"
 				SubSystem="1"
 				LargeAddressAware="2"
 				RandomizedBaseAddress="1"
 				FixedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)\RibonCore.lib"
+				ImportLibrary="$(OutDir)\world.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -323,8 +323,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory=".\riboncore__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\riboncore__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\world__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\world__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -345,23 +345,23 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\..\..\bin\Release\RibonCore.tlb"
+				TypeLibraryName=".\..\..\bin\Release\world.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\riboncore;..\..\dep\ACE_wrappers"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\world;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.14.0-SVN&quot;;WIN32;NDEBUG;_CONSOLE;ENABLE_CLI;_SECURE_SCL=0"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="0"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\riboncore__$(PlatformName)_$(ConfigurationName)\riboncore.pch"
-				AssemblerListingLocation=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\world__$(PlatformName)_$(ConfigurationName)\world.pch"
+				AssemblerListingLocation=".\world__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\world__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\world__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
@@ -383,19 +383,19 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libmySQL.lib ssleay32.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRT.LIB msvcrt.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.map"
 				SubSystem="1"
 				LinkTimeCodeGeneration="0"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)\RibonCore.lib"
+				ImportLibrary="$(OutDir)\world.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -418,13 +418,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\dep\lib\$(PlatformName)_$(ConfigurationName)\*.dll ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;copy ..\..\src\riboncore\riboncore.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.conf&#x0D;&#x0A;copy ..\..\README.* ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;"
+				CommandLine="copy ..\..\dep\lib\$(PlatformName)_$(ConfigurationName)\*.dll ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;copy ..\..\src\world\world.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\world.conf&#x0D;&#x0A;copy ..\..\README.* ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory=".\riboncore__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\riboncore__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\world__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\world__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -445,23 +445,23 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\riboncore__$(PlatformName)_$(ConfigurationName)\RibonCore.tlb"
+				TypeLibraryName=".\world__$(PlatformName)_$(ConfigurationName)\world.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\riboncore;..\..\dep\ACE_wrappers"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\world;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.14.0-SVN&quot;;WIN32;_DEBUG;RIBON_DEBUG;_CONSOLE;ENABLE_CLI"
 				IgnoreStandardIncludePath="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\riboncore__$(PlatformName)_$(ConfigurationName)\RibonCore.pch"
-				AssemblerListingLocation=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\world__$(PlatformName)_$(ConfigurationName)\world.pch"
+				AssemblerListingLocation=".\world__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\world__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\world__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
@@ -483,20 +483,20 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libmySQL.lib ssleay32.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRTD.LIB msvcrtd.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.exe"
 				Version=""
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.map"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				FixedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)\RibonCore.lib"
+				ImportLibrary="$(OutDir)\world.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -519,13 +519,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\dep\lib\$(PlatformName)_$(ConfigurationName)\*.dll ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;copy ..\..\src\riboncore\riboncore.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.conf&#x0D;&#x0A;copy ..\..\README.* ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;"
+				CommandLine="copy ..\..\dep\lib\$(PlatformName)_$(ConfigurationName)\*.dll ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;copy ..\..\src\world\world.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\world.conf&#x0D;&#x0A;copy ..\..\README.* ..\..\bin\$(PlatformName)_$(ConfigurationName)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug_NoPCH|x64"
-			OutputDirectory=".\riboncore__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\riboncore__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\world__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\world__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -546,23 +546,23 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\riboncore__$(PlatformName)_$(ConfigurationName)\RibonCore.tlb"
+				TypeLibraryName=".\world__$(PlatformName)_$(ConfigurationName)\world.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\riboncore;..\..\dep\ACE_wrappers"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\world;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.14.0-DEV&quot;;WIN32;_DEBUG;RIBON_DEBUG;_CONSOLE;ENABLE_CLI"
 				IgnoreStandardIncludePath="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\riboncore__$(PlatformName)_$(ConfigurationName)\riboncore.pch"
-				AssemblerListingLocation=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\riboncore__$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\world__$(PlatformName)_$(ConfigurationName)\world.pch"
+				AssemblerListingLocation=".\world__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\world__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\world__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
@@ -584,20 +584,20 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libmySQL.lib ssleay32.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRTD.LIB msvcrtd.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.exe"
 				Version=""
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_debug"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonCore.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\world.map"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				FixedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)\riboncore.lib"
+				ImportLibrary="$(OutDir)\world.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -660,43 +660,35 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath="..\..\src\riboncore\CliRunnable.cpp"
+			RelativePath="..\..\src\world\CliRunnable.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\riboncore\CliRunnable.h"
+			RelativePath="..\..\src\world\CliRunnable.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\riboncore\Main.cpp"
+			RelativePath="..\..\src\world\Main.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\riboncore\Master.cpp"
+			RelativePath="..\..\src\world\Master.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\riboncore\Master.h"
+			RelativePath="..\..\src\world\Master.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\riboncore\RASocket.cpp"
+			RelativePath="..\..\src\world\RASocket.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\riboncore\RASocket.h"
+			RelativePath="..\..\src\world\RASocket.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\riboncore\resource.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\riboncore\riboncore.conf.dist"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\riboncore\RibonCore.rc"
+			RelativePath="..\..\src\world\resource.h"
 			>
 		</File>
 		<File
@@ -708,11 +700,19 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\riboncore\WorldRunnable.cpp"
+			RelativePath="..\..\src\world\world.conf.dist"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\riboncore\WorldRunnable.h"
+			RelativePath="..\..\src\world\World.rc"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\world\WorldRunnable.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\world\WorldRunnable.h"
 			>
 		</File>
 	</Files>

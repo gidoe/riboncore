@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="RibonLogon"
+	Name="RLogon"
 	ProjectGUID="{563E9905-3657-460C-AE63-0AC39D162E23}"
-	RootNamespace="RibonLogon"
+	RootNamespace="Logon"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="0"
 	>
@@ -21,8 +21,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\ribonlogon__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\ribonlogon__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\logon__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\logon__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -42,23 +42,23 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\RibonLogon__$(PlatformName)_$(ConfigurationName)\RibonLogon.tlb"
+				TypeLibraryName=".\logon__$(PlatformName)_$(ConfigurationName)\logon.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\ribonlogon;..\..\dep\ACE_wrappers"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\logon;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.14.0-SVN&quot;,WIN32,NDEBUG,_CONSOLE;_SECURE_SCL=0"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="1"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\RibonLogon.pch"
-				AssemblerListingLocation=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\logon.pch"
+				AssemblerListingLocation=".\logon__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\logon__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
@@ -81,14 +81,14 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRT.LIB msvcrt.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.map"
 				SubSystem="1"
 				LargeAddressAware="2"
 				RandomizedBaseAddress="1"
@@ -114,13 +114,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\src\ribonlogon\ribonlogon.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.conf"
+				CommandLine="copy ..\..\src\logon\logon.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.conf"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\ribonlogon__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\ribonlogon__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\logon__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\logon__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -140,23 +140,23 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\RibonLogon.tlb"
+				TypeLibraryName=".\logon__$(PlatformName)_$(ConfigurationName)\logon.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\ribonlogon;..\..\dep\ACE_wrappers"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\logon;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.14.0-SVN&quot;;WIN32;_DEBUG;RIBON_DEBUG;_CONSOLE"
 				IgnoreStandardIncludePath="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\RibonLogon.pch"
-				AssemblerListingLocation=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\logon.pch"
+				AssemblerListingLocation=".\logon__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\logon__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
@@ -179,14 +179,14 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRTD.LIB msvcrtd.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.map"
 				SubSystem="1"
 				LargeAddressAware="2"
 				RandomizedBaseAddress="1"
@@ -213,13 +213,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\src\ribonlogon\ribonlogon.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.conf"
+				CommandLine="copy ..\..\src\logon\logon.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.conf"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug_NoPCH|Win32"
-			OutputDirectory=".\ribonLogon__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\ribonLogon__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\logon__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\logon__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -239,23 +239,23 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\RibonLogon.tlb"
+				TypeLibraryName=".\logon__$(PlatformName)_$(ConfigurationName)\logon.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\ribonlogon;..\..\dep\ACE_wrappers"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\logon;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.14.0-SVN&quot;;WIN32;_DEBUG;RIBON_DEBUG;_CONSOLE"
 				IgnoreStandardIncludePath="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\RibonLogon.pch"
-				AssemblerListingLocation=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\logon.pch"
+				AssemblerListingLocation=".\logon__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\logon__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
@@ -278,14 +278,14 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRTD.LIB msvcrtd.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_debug"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.map"
 				SubSystem="1"
 				LargeAddressAware="2"
 				RandomizedBaseAddress="1"
@@ -316,8 +316,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory=".\ribonlogon__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\ribonlogon__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\logon__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\logon__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -338,23 +338,23 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\RibonLogon.tlb"
+				TypeLibraryName=".\logon__$(PlatformName)_$(ConfigurationName)\logon.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\ribonlogon;..\..\dep\ACE_wrappers"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\logon;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.14.0-SVN&quot;,WIN32,NDEBUG,_CONSOLE;_SECURE_SCL=0"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="0"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\RibonLogon.pch"
-				AssemblerListingLocation=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\logon.pch"
+				AssemblerListingLocation=".\logon__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\logon__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
@@ -376,14 +376,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRT.LIB msvcrt.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.map"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -409,13 +409,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\src\ribonlogon\ribonlogon.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.conf"
+				CommandLine="copy ..\..\src\logon\logon.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.conf"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory=".\ribonlogon__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\ribonlogon__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\logon__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\logon__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -436,23 +436,23 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\RibonLogon.tlb"
+				TypeLibraryName=".\logon__$(PlatformName)_$(ConfigurationName)\logon.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\ribonlogon;..\..\dep\ACE_wrappers"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\logon;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.14.0-SVN&quot;;WIN32;_DEBUG;RIBON_DEBUG;_CONSOLE"
 				IgnoreStandardIncludePath="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\RibonLogon.pch"
-				AssemblerListingLocation=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\logon.pch"
+				AssemblerListingLocation=".\logon__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\logon__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
@@ -474,14 +474,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRTD.LIB msvcrtd.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.map"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				FixedBaseAddress="1"
@@ -508,13 +508,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\src\ribonlogon\ribonlogon.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.conf"
+				CommandLine="copy ..\..\src\logon\logon.conf.dist ..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.conf"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug_NoPCH|x64"
-			OutputDirectory=".\ribonlogon__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\ribonlogon__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\logon__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\logon__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -535,23 +535,23 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName=".\tibonlogon__$(PlatformName)_$(ConfigurationName)\RibonLogon.tlb"
+				TypeLibraryName=".\tibonlogon__$(PlatformName)_$(ConfigurationName)\logon.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\ribonlogon;..\..\dep\ACE_wrappers"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\logon;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.14.0-SVN&quot;;WIN32;_DEBUG;RIBON_DEBUG;_CONSOLE"
 				IgnoreStandardIncludePath="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\RibonLogon.pch"
-				AssemblerListingLocation=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\ribonlogon__$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\logon__$(PlatformName)_$(ConfigurationName)\logon.pch"
+				AssemblerListingLocation=".\logon__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\logon__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\logon__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
@@ -573,14 +573,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib MSVCPRTD.LIB msvcrtd.lib"
-				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_debug"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.pdb"
 				GenerateMapFile="true"
-				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\RibonLogon.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\logon.map"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				FixedBaseAddress="1"
@@ -614,35 +614,35 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\src\ribonlogon\AuthCodes.h"
+			RelativePath="..\..\src\logon\AuthCodes.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\ribonlogon\AuthSocket.cpp"
+			RelativePath="..\..\src\logon\AuthSocket.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\ribonlogon\AuthSocket.h"
+			RelativePath="..\..\src\logon\AuthSocket.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\ribonlogon\Main.cpp"
+			RelativePath="..\..\src\logon\logon.conf.dist"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\ribonlogon\RealmList.cpp"
+			RelativePath="..\..\src\logon\logon.rc"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\ribonlogon\RealmList.h"
+			RelativePath="..\..\src\logon\Main.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\ribonlogon\ribonlogon.conf.dist"
+			RelativePath="..\..\src\logon\LogonList.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\ribonlogon\RibonLogon.rc"
+			RelativePath="..\..\src\logon\LogonList.h"
 			>
 		</File>
 		<File

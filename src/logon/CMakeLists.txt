@@ -1,35 +1,35 @@
 ########### next target ###############
 
-SET(ribon-logon_SRCS
+SET(logon_SRCS
 AuthCodes.h
 AuthSocket.cpp
 AuthSocket.h
 Main.cpp
-RealmList.cpp
-RealmList.h
+LogonList.cpp
+LogonList.h
 )
 
-SET(ribon-logon_LINK_FLAGS "")
+SET(logon_LINK_FLAGS "")
 
-add_executable(ribon-logon ${ribon-logon_SRCS})
+add_executable(logon ${logon_SRCS})
 add_definitions(
--D_RIBON_REALM_CONFIG='"${CONF_DIR}/ribonlogon.conf"'
+-D_LOGON_CONFIG = '"${CONF_DIR}/logon.conf"'
 )
 IF (DO_MYSQL)
-   SET(ribon-logon_LINK_FLAGS "-pthread ${ribon-logon_LINK_FLAGS}")
+   SET(logon_LINK_FLAGS "-pthread ${logon_LINK_FLAGS}")
 ENDIF(DO_MYSQL)
 IF (DO_POSTGRESQL)
-   SET(ribon-logon_LINK_FLAGS "-pthread ${ribon-logon_LINK_FLAGS}")
+   SET(logon_LINK_FLAGS "-pthread ${logon_LINK_FLAGS}")
 ENDIF(DO_POSTGRESQL)
 
 IF (CMAKE_SYSTEM_NAME MATCHES "Darwin")
-   SET(ribon-logon_LINK_FLAGS "-framework Carbon ${ribon-logon_LINK_FLAGS}")
+   SET(logon_LINK_FLAGS "-framework Carbon ${logon_LINK_FLAGS}")
 ENDIF (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 
-SET_TARGET_PROPERTIES(ribon-logon PROPERTIES LINK_FLAGS "${ribon-logon_LINK_FLAGS}")
+SET_TARGET_PROPERTIES(logon PROPERTIES LINK_FLAGS "${logon_LINK_FLAGS}")
 
 target_link_libraries(
-ribon-logon
+logon
 shared
 ribonframework
 ribonsockets
@@ -44,10 +44,10 @@ ${POSTGRESQL_LIBRARIES}
 ${OSX_LIBS}
 )
 
-install(TARGETS ribon-logon DESTINATION bin)
+install(TARGETS logon DESTINATION bin)
 
 
 ########### install files ###############
 
-install(FILES  ribonlogon.conf.dist DESTINATION etc)
+install(FILES  logon.conf.dist DESTINATION etc)
 

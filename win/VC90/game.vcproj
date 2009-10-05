@@ -1604,7 +1604,7 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="BattleGround"
+			Name="BattleGrounds"
 			>
 			<File
 				RelativePath="..\..\src\game\BattleGround.cpp"

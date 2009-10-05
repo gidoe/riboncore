@@ -88,23 +88,6 @@ typedef struct AUTH_LOGON_CHALLENGE_C
     uint8   I[1];
 } sAuthLogonChallenge_C;
 
-//typedef sAuthLogonChallenge_C sAuthReconnectChallenge_C;
-/*
-typedef struct
-{
-    uint8   cmd;
-    uint8   error;
-    uint8   unk2;
-    uint8   B[32];
-    uint8   g_len;
-    uint8   g[1];
-    uint8   N_len;
-    uint8   N[32];
-    uint8   s[32];
-    uint8   unk3[16];
-} sAuthLogonChallenge_S;
-*/
-
 typedef struct AUTH_LOGON_PROOF_C
 {
     uint8   cmd;
@@ -114,15 +97,7 @@ typedef struct AUTH_LOGON_PROOF_C
     uint8   number_of_keys;
     uint8   securityFlags;                                  // 0x00-0x04
 } sAuthLogonProof_C;
-/*
-typedef struct
-{
-    uint16  unk1;
-    uint32  unk2;
-    uint8   unk3[4];
-    uint16  unk4[20];
-}  sAuthLogonProofKey_C;
-*/
+
 typedef struct AUTH_LOGON_PROOF_S
 {
     uint8   cmd;
@@ -708,7 +683,7 @@ bool AuthSocket::_HandleLogonProof()
         sha.UpdateBigNumbers(&A, &M, &K, NULL);
         sha.Finalize();
 
-        if(_build == 8606 || _build == 9947 || _build == 10314)//2.4.3 and 3.1.3 and 3.2.0a clients
+        if(_build == 8606 || _build == 9947 || _build == 10505)//2.4.3 and 3.1.3 and 3.2.0a clients
         {
             sAuthLogonProof_S proof;
             memcpy(proof.M2, sha.GetDigest(), 20);
@@ -911,7 +886,7 @@ bool AuthSocket::_HandleRealmList()
     RealmList built_realmList;
     for( rlm = m_realmList.begin(); rlm != m_realmList.end(); ++rlm )
     {
-        if(_build == 8606 || _build == 9947 || _build == 10314)//2.4.3 and 3.1.3 and 3.2.0a clients
+        if(_build == 8606 || _build == 9947 || _build == 10505)//2.4.3 and 3.1.3 and 3.2.0a clients
         {
             if(rlm->second.gamebuild == _build)
                 built_realmList.AddRealm(rlm->second);
@@ -926,7 +901,7 @@ bool AuthSocket::_HandleRealmList()
     ///- Circle through realms in the RealmList and construct the return packet (including # of user characters in each realm)
     ByteBuffer pkt;
     pkt << (uint32) 0;
-    if(_build == 8606 || _build == 9947 || _build == 10314)//2.4.3 and 3.1.3 and 3.2.0a clients
+    if(_build == 8606 || _build == 9947 || _build == 10505)//2.4.3 and 3.1.3 and 3.2.2a clients
         pkt << (uint16) built_realmList.size();
     else
         pkt << (uint32) built_realmList.size();
@@ -949,7 +924,7 @@ bool AuthSocket::_HandleRealmList()
         uint8 lock = (i->second.allowedSecurityLevel > _accountSecurityLevel) ? 1 : 0;
 
         pkt << i->second.icon;                             // realm type
-        if(i->second.gamebuild == 10314 || i->second.gamebuild == 9947 || i->second.gamebuild == 8606)//only 2.4.3 and 3.1.3 and 3.2.0a clients
+        if(i->second.gamebuild == 10505 || i->second.gamebuild == 9947 || i->second.gamebuild == 8606)//2.4.3 and 3.1.3 and 3.2.2a clients
             pkt << lock;                                       // if 1, then realm locked
         pkt << i->second.color;                            // if 2, then realm is offline
         pkt << i->first;
@@ -957,12 +932,12 @@ bool AuthSocket::_HandleRealmList()
         pkt << i->second.populationLevel;
         pkt << AmountOfCharacters;
         pkt << i->second.timezone;                          // realm category
-        if(i->second.gamebuild == 10314 || i->second.gamebuild == 9947 || i->second.gamebuild == 8606)//2.4.3 and 3.1.3 clients
+        if(i->second.gamebuild == 10505 || i->second.gamebuild == 9947 || i->second.gamebuild == 8606)//2.4.3 and 3.1.3 and 3.2.2a clients
             pkt << (uint8) 0x2C;                                // unk, may be realm number/id?
         else
             pkt << (uint8) 0x0; //1.12.1 and 1.12.2 clients
     }
-    if(_build == 10314 || _build == 9947 || _build == 8606)//2.4.3 and 3.1.3 and 3.2.0a clients
+    if(_build == 10505 || _build == 9947 || _build == 8606)//2.4.3 and 3.1.3 and 3.2.2a clients
     {
         pkt << (uint8) 0x10;
         pkt << (uint8) 0x00;
