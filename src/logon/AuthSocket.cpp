@@ -683,11 +683,7 @@ bool AuthSocket::_HandleLogonProof()
         sha.UpdateBigNumbers(&A, &M, &K, NULL);
         sha.Finalize();
 
-<<<<<<< HEAD:src/ribonlogon/AuthSocket.cpp
         if(_build == 8606 || _build == 9947 || _build == 10505)//2.4.3 and 3.1.3 and 3.2.2a clients
-=======
-        if(_build == 8606 || _build == 9947 || _build == 10505)//2.4.3 and 3.1.3 and 3.2.0a clients
->>>>>>> 6e2e2aafd4ce78f92bfbf082b42bf8f12eff1b88:src/logon/AuthSocket.cpp
         {
             sAuthLogonProof_S proof;
             memcpy(proof.M2, sha.GetDigest(), 20);
@@ -890,11 +886,7 @@ bool AuthSocket::_HandleRealmList()
     RealmList built_realmList;
     for( rlm = m_realmList.begin(); rlm != m_realmList.end(); ++rlm )
     {
-<<<<<<< HEAD:src/ribonlogon/AuthSocket.cpp
         if(_build == 8606 || _build == 9947 || _build == 10505)//2.4.3 and 3.1.3 and 3.2.2a clients
-=======
-        if(_build == 8606 || _build == 9947 || _build == 10505)//2.4.3 and 3.1.3 and 3.2.0a clients
->>>>>>> 6e2e2aafd4ce78f92bfbf082b42bf8f12eff1b88:src/logon/AuthSocket.cpp
         {
             if(rlm->second.gamebuild == _build)
                 built_realmList.AddRealm(rlm->second);
@@ -932,11 +924,7 @@ bool AuthSocket::_HandleRealmList()
         uint8 lock = (i->second.allowedSecurityLevel > _accountSecurityLevel) ? 1 : 0;
 
         pkt << i->second.icon;                             // realm type
-<<<<<<< HEAD:src/ribonlogon/AuthSocket.cpp
-        if(i->second.gamebuild == 10505 || i->second.gamebuild == 9947 || i->second.gamebuild == 8606)//only 2.4.3 and 3.1.3 and 3.2.2a clients
-=======
         if(i->second.gamebuild == 10505 || i->second.gamebuild == 9947 || i->second.gamebuild == 8606)//2.4.3 and 3.1.3 and 3.2.2a clients
->>>>>>> 6e2e2aafd4ce78f92bfbf082b42bf8f12eff1b88:src/logon/AuthSocket.cpp
             pkt << lock;                                       // if 1, then realm locked
         pkt << i->second.color;                            // if 2, then realm is offline
         pkt << i->first;
@@ -944,11 +932,7 @@ bool AuthSocket::_HandleRealmList()
         pkt << i->second.populationLevel;
         pkt << AmountOfCharacters;
         pkt << i->second.timezone;                          // realm category
-<<<<<<< HEAD:src/ribonlogon/AuthSocket.cpp
-        if(i->second.gamebuild == 10505 || i->second.gamebuild == 9947 || i->second.gamebuild == 8606)//only 2.4.3 and 3.1.3 and 3.2.2a clients
-=======
         if(i->second.gamebuild == 10505 || i->second.gamebuild == 9947 || i->second.gamebuild == 8606)//2.4.3 and 3.1.3 and 3.2.2a clients
->>>>>>> 6e2e2aafd4ce78f92bfbf082b42bf8f12eff1b88:src/logon/AuthSocket.cpp
             pkt << (uint8) 0x2C;                                // unk, may be realm number/id?
         else
             pkt << (uint8) 0x0; //1.12.1 and 1.12.2 clients
