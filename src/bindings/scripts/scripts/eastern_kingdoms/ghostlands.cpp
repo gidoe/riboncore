@@ -151,7 +151,7 @@ enum
     FACTION_SMOON_E     = 1603,
 };
 
-struct RIBON_DLL_DECL npc_ranger_lilathaAI : public npc_escortAI
+struct SCRIPTS_DLL_DECL npc_ranger_lilathaAI : public npc_escortAI
 {
     npc_ranger_lilathaAI(Creature *c) : npc_escortAI(c) {}
 

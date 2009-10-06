@@ -30,7 +30,7 @@ EndScriptData */
 #define SPELL_LIVINGBOMB            20475
 #define SPELL_ARMAGEDDOM            20479
 
-struct RIBON_DLL_DECL boss_baron_geddonAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_baron_geddonAI : public ScriptedAI
 {
     boss_baron_geddonAI(Creature *c) : ScriptedAI(c) {}
 

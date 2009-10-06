@@ -27,7 +27,7 @@
 class Creature;
 class Spell;
 
-class RIBON_DLL_DECL PetAI : public CreatureAI
+class SCRIPTS_DLL_DECL PetAI : public CreatureAI
 {
     public:
 

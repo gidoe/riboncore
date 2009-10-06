@@ -42,7 +42,7 @@ EndScriptData */
 //Ohgans Spells
 #define SPELL_SUNDERARMOR       24317
 
-struct RIBON_DLL_DECL boss_mandokirAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_mandokirAI : public ScriptedAI
 {
     boss_mandokirAI(Creature *c) : ScriptedAI(c)
     {
@@ -266,7 +266,7 @@ struct RIBON_DLL_DECL boss_mandokirAI : public ScriptedAI
 };
 
 //Ohgan
-struct RIBON_DLL_DECL mob_ohganAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_ohganAI : public ScriptedAI
 {
     mob_ohganAI(Creature *c) : ScriptedAI(c)
     {

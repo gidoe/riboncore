@@ -35,7 +35,7 @@ EndScriptData */
 #define SPELL_HEAL      25807
 #define SPELL_FEAR      19408
 
-struct RIBON_DLL_DECL boss_kriAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_kriAI : public ScriptedAI
 {
     boss_kriAI(Creature *c) : ScriptedAI(c)
     {
@@ -120,7 +120,7 @@ struct RIBON_DLL_DECL boss_kriAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL boss_vemAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_vemAI : public ScriptedAI
 {
     boss_vemAI(Creature *c) : ScriptedAI(c)
     {
@@ -201,7 +201,7 @@ struct RIBON_DLL_DECL boss_vemAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL boss_yaujAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_yaujAI : public ScriptedAI
 {
     boss_yaujAI(Creature *c) : ScriptedAI(c)
     {

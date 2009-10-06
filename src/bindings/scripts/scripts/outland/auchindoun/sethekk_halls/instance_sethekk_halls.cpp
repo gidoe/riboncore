@@ -30,7 +30,7 @@ enum
     IKISS_DOOR = 177203,
 };
 
-struct RIBON_DLL_DECL instance_sethekk_halls : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_sethekk_halls : public ScriptedInstance
 {
     instance_sethekk_halls(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 

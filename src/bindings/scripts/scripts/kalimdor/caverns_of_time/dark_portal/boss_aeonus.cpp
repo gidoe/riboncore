@@ -41,7 +41,7 @@ enum
     H_SPELL_SAND_BREATH = 39049
 };
 
-struct RIBON_DLL_DECL boss_aeonusAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_aeonusAI : public ScriptedAI
 {
     boss_aeonusAI(Creature *c) : ScriptedAI(c)
     {

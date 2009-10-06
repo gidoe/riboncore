@@ -49,7 +49,7 @@ enum
     SAY_CRYSTAL_NOVA                                = -1576044
 };
 
-struct RIBON_DLL_DECL boss_keristraszaAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_keristraszaAI : public ScriptedAI
 {
     boss_keristraszaAI(Creature *c) : ScriptedAI(c)
     {

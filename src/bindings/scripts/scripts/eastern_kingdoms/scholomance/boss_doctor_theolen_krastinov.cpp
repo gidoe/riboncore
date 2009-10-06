@@ -33,7 +33,7 @@ enum
     SPELL_FRENZY                = 8269
 };
 
-struct RIBON_DLL_DECL boss_theolenkrastinovAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_theolenkrastinovAI : public ScriptedAI
 {
     boss_theolenkrastinovAI(Creature *c) : ScriptedAI(c) {}
 

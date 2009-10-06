@@ -31,7 +31,7 @@ namespace Ribon
     void RIBON_DLL_SPEC at_exit( void (*func)() );
 
     template <class T>
-        class RIBON_DLL_DECL ObjectLifeTime
+        class SCRIPTS_DLL_DECL ObjectLifeTime
     {
         public:
             static void ScheduleCall(void (*destroyer)() )

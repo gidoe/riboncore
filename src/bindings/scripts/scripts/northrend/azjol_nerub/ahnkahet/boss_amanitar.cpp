@@ -36,7 +36,7 @@ update creature_template set scriptname = 'boss_amanitar' where entry = '';
 #define SPELL_MINI                                   57055
 #define SPELL_VENOM_BOLT_VOLLEY                      57088
 
-struct RIBON_DLL_DECL boss_amanitarAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_amanitarAI : public ScriptedAI
 {
     boss_amanitarAI(Creature *c) : ScriptedAI(c) {}
 

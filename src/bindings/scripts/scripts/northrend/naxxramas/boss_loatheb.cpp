@@ -31,7 +31,7 @@ enum Events
     EVENT_DOOM,
 };
 
-struct RIBON_DLL_DECL boss_loathebAI : public BossAI
+struct SCRIPTS_DLL_DECL boss_loathebAI : public BossAI
 {
     boss_loathebAI(Creature *c) : BossAI(c, BOSS_LOATHEB) {}
 

@@ -18,7 +18,7 @@ enum eFollowState
     STATE_FOLLOW_POSTEVENT  = 0x020                         //can be set at complete and allow post event to run
 };
 
-class RIBON_DLL_DECL FollowerAI : public ScriptedAI
+class SCRIPTS_DLL_DECL FollowerAI : public ScriptedAI
 {
     public:
         explicit FollowerAI(Creature* pCreature);

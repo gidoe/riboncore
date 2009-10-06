@@ -24,7 +24,7 @@
 
 #define SAY_AGGRO                   -1000000
 #define SAY_SLAY                    -1000001
-struct RIBON_DLL_DECL boss_xt002_AI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_xt002_AI : public ScriptedAI
 {
     boss_xt002_AI(Creature *c) : ScriptedAI(c) {}
 

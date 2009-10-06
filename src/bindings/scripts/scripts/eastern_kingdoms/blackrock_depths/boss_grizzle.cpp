@@ -28,7 +28,7 @@ EndScriptData */
 #define SPELL_GROUNDTREMOR          6524
 #define SPELL_FRENZY                28371
 
-struct RIBON_DLL_DECL boss_grizzleAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_grizzleAI : public ScriptedAI
 {
     boss_grizzleAI(Creature *c) : ScriptedAI(c) {}
 

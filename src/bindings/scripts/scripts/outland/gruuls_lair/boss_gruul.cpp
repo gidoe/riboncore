@@ -52,7 +52,7 @@ enum
     SPELL_KNOCK_BACK            = 24199,                    //Knockback spell until correct implementation is made
 };
 
-struct RIBON_DLL_DECL boss_gruulAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_gruulAI : public ScriptedAI
 {
     boss_gruulAI(Creature *c) : ScriptedAI(c)
     {

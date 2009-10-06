@@ -70,7 +70,7 @@ enum
 ## Boss Volkhan
 ######*/
 
-struct RIBON_DLL_DECL boss_volkhanAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_volkhanAI : public ScriptedAI
 {
     boss_volkhanAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
@@ -361,7 +361,7 @@ bool EffectDummyCreature_npc_volkhan_anvil(Unit* pCaster, uint32 uiSpellId, uint
 ## mob_molten_golem
 ######*/
 
-struct RIBON_DLL_DECL mob_molten_golemAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_molten_golemAI : public ScriptedAI
 {
     mob_molten_golemAI(Creature *pCreature) : ScriptedAI(pCreature)
     {

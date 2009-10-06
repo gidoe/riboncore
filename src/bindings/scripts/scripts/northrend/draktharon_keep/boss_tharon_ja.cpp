@@ -48,7 +48,7 @@ update creature_template set scriptname = 'boss_tharon_ja' where entry = '';
 #define SAY_SKELETON_2                              -1600017
 #define SAY_DEATH                                   -1600018
 
-struct RIBON_DLL_DECL boss_tharon_jaAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_tharon_jaAI : public ScriptedAI
 {
     boss_tharon_jaAI(Creature *c) : ScriptedAI(c) {}
 

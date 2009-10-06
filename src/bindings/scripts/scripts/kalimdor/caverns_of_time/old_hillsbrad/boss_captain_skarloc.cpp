@@ -38,7 +38,7 @@ EndScriptData */
 #define SPELL_DEVOTION_AURA         8258
 #define SPELL_CONSECRATION          38385
 
-struct RIBON_DLL_DECL boss_captain_skarlocAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_captain_skarlocAI : public ScriptedAI
 {
     boss_captain_skarlocAI(Creature *c) : ScriptedAI(c)
     {

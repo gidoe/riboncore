@@ -31,7 +31,7 @@ enum
 };
 
 
-struct RIBON_DLL_DECL npc_agnetta_tyrsdottarAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_agnetta_tyrsdottarAI : public ScriptedAI
 {
     npc_agnetta_tyrsdottarAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 

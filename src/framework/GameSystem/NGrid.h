@@ -70,7 +70,7 @@ class WORLD_OBJECT_TYPES,
 class GRID_OBJECT_TYPES,
 class ThreadModel = Ribon::SingleThreaded<ACTIVE_OBJECT>
 >
-class RIBON_DLL_DECL NGrid
+class SCRIPTS_DLL_DECL NGrid
 {
     public:
 

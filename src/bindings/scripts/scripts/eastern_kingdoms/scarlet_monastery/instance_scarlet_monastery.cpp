@@ -32,7 +32,7 @@ EndScriptData */
 
 #define MAX_ENCOUNTER 1
 
-struct RIBON_DLL_DECL instance_scarlet_monastery : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_scarlet_monastery : public ScriptedInstance
 {
     instance_scarlet_monastery(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 

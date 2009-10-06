@@ -124,7 +124,7 @@ static EventFelmyst MaxTimer[]=
     EVENT_SUMMON_FOG,
 };
 
-struct RIBON_DLL_DECL boss_felmystAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_felmystAI : public ScriptedAI
 {
     boss_felmystAI(Creature *c) : ScriptedAI(c)
     {
@@ -550,7 +550,7 @@ struct RIBON_DLL_DECL boss_felmystAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL mob_felmyst_vaporAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_felmyst_vaporAI : public ScriptedAI
 {
     mob_felmyst_vaporAI(Creature *c) : ScriptedAI(c)
     {
@@ -570,7 +570,7 @@ struct RIBON_DLL_DECL mob_felmyst_vaporAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL mob_felmyst_trailAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_felmyst_trailAI : public ScriptedAI
 {
     mob_felmyst_trailAI(Creature *c) : ScriptedAI(c)
     {

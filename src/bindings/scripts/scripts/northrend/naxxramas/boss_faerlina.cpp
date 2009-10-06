@@ -41,7 +41,7 @@ enum Events
     EVENT_FRENZY,
 };
 
-struct RIBON_DLL_DECL boss_faerlinaAI : public BossAI
+struct SCRIPTS_DLL_DECL boss_faerlinaAI : public BossAI
 {
     boss_faerlinaAI(Creature *c) : BossAI(c, BOSS_FAERLINA), greet(false) {}
 
@@ -118,7 +118,7 @@ struct RIBON_DLL_DECL boss_faerlinaAI : public BossAI
     }
 };
 
-struct RIBON_DLL_DECL mob_worshipperAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_worshipperAI : public ScriptedAI
 {
     mob_worshipperAI(Creature *c) : ScriptedAI(c) {}
 

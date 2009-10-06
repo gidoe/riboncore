@@ -58,7 +58,7 @@ enum
     GCD_YELL                        = 2
 };
 
-struct RIBON_DLL_DECL boss_najentusAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_najentusAI : public ScriptedAI
 {
     boss_najentusAI(Creature *c) : ScriptedAI(c)
     {

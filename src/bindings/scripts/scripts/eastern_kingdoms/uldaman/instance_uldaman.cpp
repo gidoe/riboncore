@@ -29,7 +29,7 @@
 
 #define ANCIENT_VAULT_DOOR              124369
 
-struct RIBON_DLL_DECL instance_uldaman : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_uldaman : public ScriptedInstance
 {
     instance_uldaman(Map* pMap) : ScriptedInstance(pMap)
     {

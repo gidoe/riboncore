@@ -50,7 +50,7 @@ EndScriptData */
 #define SPELL_ARCANE_EXPLOSION      38197
 #define H_SPELL_ARCANE_EXPLOSION    40425
 
-struct RIBON_DLL_DECL boss_talon_king_ikissAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_talon_king_ikissAI : public ScriptedAI
 {
     boss_talon_king_ikissAI(Creature *c) : ScriptedAI(c)
     {

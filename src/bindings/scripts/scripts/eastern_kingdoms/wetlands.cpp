@@ -43,7 +43,7 @@ enum
     NPC_TAPOKE_SLIM_JAHN        = 4962
 };
 
-struct RIBON_DLL_DECL npc_tapoke_slim_jahnAI : public npc_escortAI
+struct SCRIPTS_DLL_DECL npc_tapoke_slim_jahnAI : public npc_escortAI
 {
     npc_tapoke_slim_jahnAI(Creature* pCreature) : npc_escortAI(pCreature) { }
 

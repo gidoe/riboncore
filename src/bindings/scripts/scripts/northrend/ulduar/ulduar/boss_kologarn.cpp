@@ -37,7 +37,7 @@ enum Events
     EVENT_SWEEP,
 };
 
-struct RIBON_DLL_DECL boss_kologarnAI : public BossAI
+struct SCRIPTS_DLL_DECL boss_kologarnAI : public BossAI
 {
     boss_kologarnAI(Creature *c) : BossAI(c, BOSS_KOLOGARN), vehicle(me->GetVehicleKit()),
         left(false), right(false)

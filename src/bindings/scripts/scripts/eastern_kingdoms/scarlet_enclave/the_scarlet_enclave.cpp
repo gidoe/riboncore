@@ -24,7 +24,7 @@
 #define SPELL_REVIVE 51918
 #define VALK_WHISPER "It is not yet your time, champion. Rise! Rise and fight once more!"
 
-struct RIBON_DLL_DECL npc_valkyr_battle_maidenAI : public PassiveAI
+struct SCRIPTS_DLL_DECL npc_valkyr_battle_maidenAI : public PassiveAI
 {
     npc_valkyr_battle_maidenAI(Creature *c) : PassiveAI(c) {}
 

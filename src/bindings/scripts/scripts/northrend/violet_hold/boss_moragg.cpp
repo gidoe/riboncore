@@ -15,7 +15,7 @@ update creature_template set scriptname = '' where entry = '';
 #define SPELL_CORROSICE_SALIVA                     54527
 #define SPELL_OPTIC_LINK                           54396
 
-struct RIBON_DLL_DECL boss_moraggAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_moraggAI : public ScriptedAI
 {
     boss_moraggAI(Creature *c) : ScriptedAI(c) {}
     

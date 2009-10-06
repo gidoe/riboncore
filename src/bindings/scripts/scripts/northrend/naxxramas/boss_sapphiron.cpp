@@ -69,7 +69,7 @@ enum Events
 
 typedef std::map<uint64, uint64> IceBlockMap;
 
-struct RIBON_DLL_DECL boss_sapphironAI : public BossAI
+struct SCRIPTS_DLL_DECL boss_sapphironAI : public BossAI
 {
     boss_sapphironAI(Creature* c) : BossAI(c, BOSS_SAPPHIRON)
         , phase(PHASE_NULL)

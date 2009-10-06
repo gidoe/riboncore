@@ -34,7 +34,7 @@ EndContentData */
 // signed for 6172
 #define SAY_HEAL -1000280
 
-struct RIBON_DLL_DECL npc_narm_faulkAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_narm_faulkAI : public ScriptedAI
 {
     uint32 lifeTimer;
     bool spellHit;

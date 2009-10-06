@@ -23,7 +23,7 @@ EndScriptData */
 5 - Kil'Jaeden
 */
 
-struct RIBON_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_sunwell_plateau : public ScriptedInstance
 {
     instance_sunwell_plateau(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 

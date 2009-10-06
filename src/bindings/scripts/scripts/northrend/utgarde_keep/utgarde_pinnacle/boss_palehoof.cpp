@@ -72,7 +72,7 @@ enum
 ## Mob Gortok Palehoof
 ######*/
 
-struct RIBON_DLL_DECL boss_palehoofAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_palehoofAI : public ScriptedAI
 {
     boss_palehoofAI(Creature *pCreature) : ScriptedAI(pCreature)
     {
@@ -286,7 +286,7 @@ struct RIBON_DLL_DECL boss_palehoofAI : public ScriptedAI
 /*######
 ## Mob Massive Jormungar
 ######*/
-struct RIBON_DLL_DECL mob_massive_jormungarAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_massive_jormungarAI : public ScriptedAI
 {
     mob_massive_jormungarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -380,7 +380,7 @@ struct RIBON_DLL_DECL mob_massive_jormungarAI : public ScriptedAI
 /*######
 ## Mob Ferocious Rhino
 ######*/
-struct RIBON_DLL_DECL mob_ferocious_rhinoAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_ferocious_rhinoAI : public ScriptedAI
 {
     mob_ferocious_rhinoAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -460,7 +460,7 @@ struct RIBON_DLL_DECL mob_ferocious_rhinoAI : public ScriptedAI
 /*######
 ## Mob Ravenous Furbolg
 ######*/
-struct RIBON_DLL_DECL mob_ravenous_furbolgAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_ravenous_furbolgAI : public ScriptedAI
 {
     mob_ravenous_furbolgAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -540,7 +540,7 @@ struct RIBON_DLL_DECL mob_ravenous_furbolgAI : public ScriptedAI
 /*######
 ## Mob Frenzied Worgen
 ######*/
-struct RIBON_DLL_DECL mob_frenzied_worgenAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_frenzied_worgenAI : public ScriptedAI
 {
     mob_frenzied_worgenAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

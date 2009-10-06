@@ -25,7 +25,7 @@ EndScriptData */
 
 #define SPELL_FIREBLAST            15573
 
-struct RIBON_DLL_DECL boss_ambassador_flamelashAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_ambassador_flamelashAI : public ScriptedAI
 {
     boss_ambassador_flamelashAI(Creature *c) : ScriptedAI(c) {}
 

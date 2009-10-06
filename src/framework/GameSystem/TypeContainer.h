@@ -97,7 +97,7 @@ template<class H, class T> struct ContainerList<TypeList<H, T> >
  */
 
 template<class OBJECT_TYPES>
-class RIBON_DLL_DECL TypeMapContainer
+class SCRIPTS_DLL_DECL TypeMapContainer
 {
     public:
         template<class SPECIFIC_TYPE> size_t Count() const { return Ribon::Count(i_elements, (SPECIFIC_TYPE*)NULL); }

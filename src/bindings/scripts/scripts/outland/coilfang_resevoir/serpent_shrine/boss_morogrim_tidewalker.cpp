@@ -96,7 +96,7 @@ float MurlocCords[10][5] =
 #define TIDEWALKER_LURKER           21920
 
 //Morogrim Tidewalker AI
-struct RIBON_DLL_DECL boss_morogrim_tidewalkerAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_morogrim_tidewalkerAI : public ScriptedAI
 {
     boss_morogrim_tidewalkerAI(Creature *c) : ScriptedAI(c)
     {
@@ -293,7 +293,7 @@ struct RIBON_DLL_DECL boss_morogrim_tidewalkerAI : public ScriptedAI
 //Water Globule AI
 #define SPELL_GLOBULE_EXPLOSION 37871
 
-struct RIBON_DLL_DECL mob_water_globuleAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_water_globuleAI : public ScriptedAI
 {
     mob_water_globuleAI(Creature *c) : ScriptedAI(c) {}
 

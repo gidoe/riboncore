@@ -31,7 +31,7 @@ update creature_template set scriptname = '' where entry = '';
 #define SAY_ADD_KILED                               -1608016
 #define SAY_BOTH_ADDS_KILED                         -1608017
 
-struct RIBON_DLL_DECL boss_erekemAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_erekemAI : public ScriptedAI
 {
     boss_erekemAI(Creature *c) : ScriptedAI(c) {}
 

@@ -91,7 +91,7 @@ enum Creatures
     LADY_SACROLASH          =   25165
 };
 
-struct RIBON_DLL_DECL boss_sacrolashAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_sacrolashAI : public ScriptedAI
 {
     boss_sacrolashAI(Creature *c) : ScriptedAI(c)
     {
@@ -349,7 +349,7 @@ CreatureAI* GetAI_boss_sacrolash(Creature* pCreature)
     return new boss_sacrolashAI (pCreature);
 };
 
-struct RIBON_DLL_DECL boss_alythessAI : public Scripted_NoMovementAI
+struct SCRIPTS_DLL_DECL boss_alythessAI : public Scripted_NoMovementAI
 {
     boss_alythessAI(Creature *c) : Scripted_NoMovementAI(c)
     {
@@ -667,7 +667,7 @@ CreatureAI* GetAI_boss_alythess(Creature* pCreature)
     return new boss_alythessAI (pCreature);
 };
 
-struct RIBON_DLL_DECL mob_shadow_imageAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_shadow_imageAI : public ScriptedAI
 {
     mob_shadow_imageAI(Creature *c) : ScriptedAI(c) {}
 

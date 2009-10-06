@@ -51,7 +51,7 @@ Script Data End */
 #define SAY_QUAKE                                 -1604016
 #define EMOTE_TRANSFORM                           -1604017
 
-struct RIBON_DLL_DECL boss_moorabiAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_moorabiAI : public ScriptedAI
 {
     boss_moorabiAI(Creature *c) : ScriptedAI(c)
     {

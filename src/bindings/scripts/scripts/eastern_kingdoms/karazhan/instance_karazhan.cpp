@@ -41,7 +41,7 @@ EndScriptData */
 11 - Nightbane
 */
 
-struct RIBON_DLL_DECL instance_karazhan : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_karazhan : public ScriptedInstance
 {
     instance_karazhan(Map* pMap) : ScriptedInstance(pMap) {Initialize();}
 

@@ -29,7 +29,7 @@
 
 class ObjectWorldLoader;
 
-class RIBON_DLL_DECL ObjectGridLoader
+class SCRIPTS_DLL_DECL ObjectGridLoader
 {
     friend class ObjectWorldLoader;
 
@@ -56,7 +56,7 @@ class RIBON_DLL_DECL ObjectGridLoader
         uint32 i_corpses;
 };
 
-class RIBON_DLL_DECL ObjectGridUnloader
+class SCRIPTS_DLL_DECL ObjectGridUnloader
 {
     public:
         ObjectGridUnloader(NGridType &grid) : i_grid(grid) {}
@@ -80,7 +80,7 @@ class RIBON_DLL_DECL ObjectGridUnloader
         NGridType &i_grid;
 };
 
-class RIBON_DLL_DECL ObjectGridStoper
+class SCRIPTS_DLL_DECL ObjectGridStoper
 {
     public:
         ObjectGridStoper(NGridType &grid) : i_grid(grid) {}
@@ -105,7 +105,7 @@ class RIBON_DLL_DECL ObjectGridStoper
         NGridType &i_grid;
 };
 
-class RIBON_DLL_DECL ObjectGridCleaner
+class SCRIPTS_DLL_DECL ObjectGridCleaner
 {
     public:
         ObjectGridCleaner(NGridType &grid) : i_grid(grid) {}

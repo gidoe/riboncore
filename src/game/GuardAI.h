@@ -26,7 +26,7 @@
 
 class Creature;
 
-class RIBON_DLL_DECL GuardAI : public CreatureAI
+class SCRIPTS_DLL_DECL GuardAI : public CreatureAI
 {
     enum GuardState
     {

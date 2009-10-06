@@ -28,7 +28,7 @@ EndScriptData */
 
 #define DOOR_NETHEKURSE     1
 
-struct RIBON_DLL_DECL instance_shattered_halls : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_shattered_halls : public ScriptedInstance
 {
     instance_shattered_halls(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 

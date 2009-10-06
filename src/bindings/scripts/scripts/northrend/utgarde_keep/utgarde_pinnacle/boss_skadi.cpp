@@ -70,7 +70,7 @@ static Locations SpawnLoc[]=
     {468.931, -513.555, 104.723}
 };
 
-struct RIBON_DLL_DECL boss_skadiAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_skadiAI : public ScriptedAI
 {
     boss_skadiAI(Creature *pCreature) : ScriptedAI(pCreature)
     {

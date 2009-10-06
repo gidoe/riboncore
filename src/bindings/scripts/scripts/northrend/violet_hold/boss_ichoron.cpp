@@ -30,7 +30,7 @@ update creature_template set scriptname = '' where entry = '';
 #define SAY_SHATTER                                 -1608025
 #define SAY_BUBBLE                                  -1608026
 
-struct RIBON_DLL_DECL boss_ichoronAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_ichoronAI : public ScriptedAI
 {
     boss_ichoronAI(Creature *c) : ScriptedAI(c) {}
 

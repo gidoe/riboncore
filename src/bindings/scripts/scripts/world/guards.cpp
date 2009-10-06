@@ -2991,7 +2991,7 @@ CreatureAI* GetAI_guard_shattrath(Creature* pCreature)
 #define SPELL_BANISH_TELEPORT       36643
 #define SPELL_EXILE                 39533
 
-struct RIBON_DLL_DECL guard_shattrath_aldorAI : public guardAI
+struct SCRIPTS_DLL_DECL guard_shattrath_aldorAI : public guardAI
 {
     guard_shattrath_aldorAI(Creature *c) : guardAI(c) {}
 
@@ -3187,7 +3187,7 @@ CreatureAI* GetAI_guard_shattrath_aldor(Creature* pCreature)
  * guard_shattrath_scryer
  *******************************************************/
 
-struct RIBON_DLL_DECL guard_shattrath_scryerAI : public guardAI
+struct SCRIPTS_DLL_DECL guard_shattrath_scryerAI : public guardAI
 {
     guard_shattrath_scryerAI(Creature *c) : guardAI(c) {}
 

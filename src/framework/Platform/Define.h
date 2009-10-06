@@ -82,16 +82,16 @@
 
 #if PLATFORM == PLATFORM_WINDOWS
 #  ifdef RIBON_WIN32_DLL_IMPORT
-#    define RIBON_DLL_DECL __declspec(dllimport)
+#    define SCRIPTS_DLL_DECL __declspec(dllimport)
 #  else //!RIBON_WIN32_DLL_IMPORT
 #    ifdef RIBON_WIND_DLL_EXPORT
-#      define RIBON_DLL_DECL __declspec(dllexport)
+#      define SCRIPTS_DLL_DECL __declspec(dllexport)
 #    else //!RIBON_WIND_DLL_EXPORT
-#      define RIBON_DLL_DECL
+#      define SCRIPTS_DLL_DECL
 #    endif //RIBON_WIND_DLL_EXPORT
 #  endif //RIBON_WIN32_DLL_IMPORT
 #else //PLATFORM != PLATFORM_WINDOWS
-#  define RIBON_DLL_DECL
+#  define SCRIPTS_DLL_DECL
 #endif //PLATFORM
 
 #if PLATFORM == PLATFORM_WINDOWS
@@ -138,7 +138,7 @@ typedef uint32      DWORD;
 typedef uint64 OBJECT_HANDLE;
 
 #define MaNGOS              Ribon
-#define MANGOS_DLL_DECL     RIBON_DLL_DECL
+#define MANGOS_DLL_DECL     SCRIPTS_DLL_DECL
 #define MANGOS_DLL_SPEC     RIBON_DLL_SPEC
 #define GetMangosString     GetRibonString
 

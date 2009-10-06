@@ -25,7 +25,7 @@ EndScriptData */
 
 #define GENERIC_CREATURE_COOLDOWN   5000
 
-struct RIBON_DLL_DECL generic_creatureAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL generic_creatureAI : public ScriptedAI
 {
     generic_creatureAI(Creature *c) : ScriptedAI(c) {}
 
@@ -162,7 +162,7 @@ CreatureAI* GetAI_generic_creature(Creature* pCreature)
     return new generic_creatureAI (pCreature);
 }
 
-struct RIBON_DLL_DECL trigger_periodicAI : public NullCreatureAI
+struct SCRIPTS_DLL_DECL trigger_periodicAI : public NullCreatureAI
 {
     trigger_periodicAI(Creature* c) : NullCreatureAI(c)
     {
@@ -187,7 +187,7 @@ struct RIBON_DLL_DECL trigger_periodicAI : public NullCreatureAI
     }
 };
 
-struct RIBON_DLL_DECL trigger_deathAI : public NullCreatureAI
+struct SCRIPTS_DLL_DECL trigger_deathAI : public NullCreatureAI
 {
     trigger_deathAI(Creature* c) : NullCreatureAI(c) {}
     void JustDied(Unit *killer)
@@ -197,7 +197,7 @@ struct RIBON_DLL_DECL trigger_deathAI : public NullCreatureAI
     }
 };
 
-struct RIBON_DLL_DECL mob_webwrapAI : public NullCreatureAI
+struct SCRIPTS_DLL_DECL mob_webwrapAI : public NullCreatureAI
 {
     mob_webwrapAI(Creature *c) : NullCreatureAI(c), victimGUID(0) {}
 

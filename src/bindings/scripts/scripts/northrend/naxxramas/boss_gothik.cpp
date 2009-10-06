@@ -101,7 +101,7 @@ const Position PosSummonDead[POS_DEAD] =
 const float PosGround[4] = {2691.2, -3362.7, 267.68, 1.7};
 const float PosPlatform[4] = {2640.5, -3360.6, 285.26, 0};
 
-struct RIBON_DLL_DECL boss_gothikAI : public BossAI
+struct SCRIPTS_DLL_DECL boss_gothikAI : public BossAI
 {
     boss_gothikAI(Creature *c) : BossAI(c, BOSS_GOTHIK) {}
 
@@ -265,7 +265,7 @@ struct RIBON_DLL_DECL boss_gothikAI : public BossAI
     }
 };
 
-struct RIBON_DLL_DECL mob_gothik_minionAI : public CombatAI
+struct SCRIPTS_DLL_DECL mob_gothik_minionAI : public CombatAI
 {
     mob_gothik_minionAI(Creature *c) : CombatAI(c)
     {

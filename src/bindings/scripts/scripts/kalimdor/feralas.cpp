@@ -79,7 +79,7 @@ enum
     FACTION_ESCORTEE_H      = 775
 };
 
-struct RIBON_DLL_DECL npc_oox22feAI : public npc_escortAI
+struct SCRIPTS_DLL_DECL npc_oox22feAI : public npc_escortAI
 {
     npc_oox22feAI(Creature* pCreature) : npc_escortAI(pCreature) { }
 

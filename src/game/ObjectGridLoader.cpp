@@ -30,7 +30,7 @@
 #include "CellImpl.h"
 #include "CreatureAI.h"
 
-class RIBON_DLL_DECL ObjectGridRespawnMover
+class SCRIPTS_DLL_DECL ObjectGridRespawnMover
 {
     public:
         ObjectGridRespawnMover() {}

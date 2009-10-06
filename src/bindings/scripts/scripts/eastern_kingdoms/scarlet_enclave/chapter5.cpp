@@ -284,7 +284,7 @@ static Locations LightofDawnLoc[]=
     {2273.972, -5257.676, 78.862, 0}      // 29 Lich king moves forward
 };
 
-struct RIBON_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
+struct SCRIPTS_DLL_DECL npc_highlord_darion_mograineAI : public npc_escortAI
 {
     npc_highlord_darion_mograineAI(Creature *pCreature) : npc_escortAI(pCreature)
     {
@@ -1624,7 +1624,7 @@ bool GossipSelect_npc_highlord_darion_mograine(Player* pPlayer, Creature* pCreat
 /*######
 ## npc the lich king in dawn of light
 ######*/
-struct RIBON_DLL_DECL npc_the_lich_king_tirion_dawnAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_the_lich_king_tirion_dawnAI : public ScriptedAI
 {
     npc_the_lich_king_tirion_dawnAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
     void Reset() {}

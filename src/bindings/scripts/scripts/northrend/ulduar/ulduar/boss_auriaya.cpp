@@ -27,7 +27,7 @@
 #define SAY_AGGRO                   -2615016
 #define SAY_SLAY_1                  -2615017
 
-struct RIBON_DLL_DECL boss_auriaya_AI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_auriaya_AI : public ScriptedAI
 {
     boss_auriaya_AI(Creature *c) : ScriptedAI(c) {}
 

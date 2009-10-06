@@ -59,7 +59,7 @@ EndContentData */
 #define SPELL_FROSTBOLT             15497
 #define SPELL_PYROBLAST             33975
 
-struct RIBON_DLL_DECL npc_millhouse_manastormAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_millhouse_manastormAI : public ScriptedAI
 {
     npc_millhouse_manastormAI(Creature *c) : ScriptedAI(c)
     {
@@ -250,7 +250,7 @@ CreatureAI* GetAI_npc_millhouse_manastorm(Creature* pCreature)
 #define SPELL_TARGET_OMEGA  36852
 #define SPELL_BUBBLE_VISUAL 36849
 
-struct RIBON_DLL_DECL npc_warden_mellicharAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_warden_mellicharAI : public ScriptedAI
 {
     npc_warden_mellicharAI(Creature *c) : ScriptedAI(c)
     {
@@ -479,7 +479,7 @@ CreatureAI* GetAI_npc_warden_mellichar(Creature* pCreature)
 
 #define SPELL_VOID_ZONE_DAMAGE 36120
 
-struct RIBON_DLL_DECL mob_zerekethvoidzoneAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_zerekethvoidzoneAI : public ScriptedAI
 {
     mob_zerekethvoidzoneAI(Creature *c) : ScriptedAI(c) {}
 

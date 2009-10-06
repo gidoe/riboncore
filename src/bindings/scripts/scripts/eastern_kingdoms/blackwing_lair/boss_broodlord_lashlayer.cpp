@@ -31,7 +31,7 @@ EndScriptData */
 #define SPELL_MORTALSTRIKE      24573
 #define SPELL_KNOCKBACK         25778
 
-struct RIBON_DLL_DECL boss_broodlordAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_broodlordAI : public ScriptedAI
 {
     boss_broodlordAI(Creature *c) : ScriptedAI(c) {}
 

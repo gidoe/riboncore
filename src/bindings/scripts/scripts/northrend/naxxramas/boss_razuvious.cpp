@@ -52,7 +52,7 @@ enum Events
     EVENT_COMMAND,
 };
 
-struct RIBON_DLL_DECL boss_razuviousAI : public BossAI
+struct SCRIPTS_DLL_DECL boss_razuviousAI : public BossAI
 {
     boss_razuviousAI(Creature *c) : BossAI(c, BOSS_RAZUVIOUS) {}
 

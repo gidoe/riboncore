@@ -33,7 +33,7 @@ enum
     SPELL_SLEEP                     = 8399
 };
 
-struct RIBON_DLL_DECL boss_high_inquisitor_fairbanksAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_high_inquisitor_fairbanksAI : public ScriptedAI
 {
     boss_high_inquisitor_fairbanksAI(Creature *c) : ScriptedAI(c) {}
 

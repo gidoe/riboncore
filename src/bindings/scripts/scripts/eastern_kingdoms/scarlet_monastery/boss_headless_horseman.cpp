@@ -131,7 +131,7 @@ static Summon Text[]=
 
 #define EMOTE_LAUGHS    "laughs"
 
-struct RIBON_DLL_DECL mob_wisp_invisAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_wisp_invisAI : public ScriptedAI
 {
     mob_wisp_invisAI(Creature *c) : ScriptedAI(c)
     {
@@ -198,7 +198,7 @@ struct RIBON_DLL_DECL mob_wisp_invisAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL mob_headAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_headAI : public ScriptedAI
 {
     mob_headAI(Creature *c) : ScriptedAI(c) {}
 
@@ -320,7 +320,7 @@ struct RIBON_DLL_DECL mob_headAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL boss_headless_horsemanAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_headless_horsemanAI : public ScriptedAI
 {
     boss_headless_horsemanAI(Creature *c) : ScriptedAI(c)
     {
@@ -727,7 +727,7 @@ void mob_headAI::Disappear()
     }
 }
 
-struct RIBON_DLL_DECL mob_pulsing_pumpkinAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_pulsing_pumpkinAI : public ScriptedAI
 {
     mob_pulsing_pumpkinAI(Creature *c) : ScriptedAI(c) {}
 

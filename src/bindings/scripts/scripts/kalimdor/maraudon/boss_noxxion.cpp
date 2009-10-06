@@ -26,7 +26,7 @@ EndScriptData */
 #define SPELL_TOXICVOLLEY           21687
 #define SPELL_UPPERCUT              22916
 
-struct RIBON_DLL_DECL boss_noxxionAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_noxxionAI : public ScriptedAI
 {
     boss_noxxionAI(Creature *c) : ScriptedAI(c) {}
 

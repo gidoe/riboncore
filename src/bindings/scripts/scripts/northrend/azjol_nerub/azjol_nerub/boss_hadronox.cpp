@@ -67,7 +67,7 @@ This is the timed gauntlet - waves of non-elite spiders
  main room, it is recommended to just stay in it, kill the occasional non-elites that will attack you instead of the boss, and wait for
  Hadronox to make his way to you. When Hadronox enters the main room, she will web the doors, and no more non-elites will spawn.*/
 
-struct RIBON_DLL_DECL boss_hadronoxAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_hadronoxAI : public ScriptedAI
 {
     boss_hadronoxAI(Creature *c) : ScriptedAI(c) {}
 

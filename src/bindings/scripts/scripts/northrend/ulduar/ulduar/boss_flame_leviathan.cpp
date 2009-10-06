@@ -70,7 +70,7 @@ enum Seats
     SEAT_DEVICE = 2,
 };
 
-struct RIBON_DLL_DECL boss_flame_leviathanAI : public BossAI
+struct SCRIPTS_DLL_DECL boss_flame_leviathanAI : public BossAI
 {
     boss_flame_leviathanAI(Creature *c) : BossAI(c, BOSS_LEVIATHAN), vehicle(me->GetVehicleKit())
     {
@@ -183,7 +183,7 @@ struct RIBON_DLL_DECL boss_flame_leviathanAI : public BossAI
 
 //#define BOSS_DEBUG
 
-struct RIBON_DLL_DECL boss_flame_leviathan_seatAI : public PassiveAI
+struct SCRIPTS_DLL_DECL boss_flame_leviathan_seatAI : public PassiveAI
 {
     boss_flame_leviathan_seatAI(Creature *c) : PassiveAI(c), vehicle(c->GetVehicleKit())
     {
@@ -240,7 +240,7 @@ struct RIBON_DLL_DECL boss_flame_leviathan_seatAI : public PassiveAI
     }
 };
 
-struct RIBON_DLL_DECL boss_flame_leviathan_defense_turretAI : public TurretAI
+struct SCRIPTS_DLL_DECL boss_flame_leviathan_defense_turretAI : public TurretAI
 {
     boss_flame_leviathan_defense_turretAI(Creature *c) : TurretAI(c) {}
 
@@ -258,7 +258,7 @@ struct RIBON_DLL_DECL boss_flame_leviathan_defense_turretAI : public TurretAI
     }
 };
 
-struct RIBON_DLL_DECL boss_flame_leviathan_overload_deviceAI : public PassiveAI
+struct SCRIPTS_DLL_DECL boss_flame_leviathan_overload_deviceAI : public PassiveAI
 {
     boss_flame_leviathan_overload_deviceAI(Creature *c) : PassiveAI(c) {}
 
@@ -282,7 +282,7 @@ struct RIBON_DLL_DECL boss_flame_leviathan_overload_deviceAI : public PassiveAI
     }
 };
 
-struct RIBON_DLL_DECL boss_flame_leviathan_safety_containerAI : public PassiveAI
+struct SCRIPTS_DLL_DECL boss_flame_leviathan_safety_containerAI : public PassiveAI
 {
     boss_flame_leviathan_safety_containerAI(Creature *c) : PassiveAI(c) {}
 
@@ -303,7 +303,7 @@ struct RIBON_DLL_DECL boss_flame_leviathan_safety_containerAI : public PassiveAI
     }
 };
 
-struct RIBON_DLL_DECL spell_pool_of_tarAI : public TriggerAI
+struct SCRIPTS_DLL_DECL spell_pool_of_tarAI : public TriggerAI
 {
     spell_pool_of_tarAI(Creature *c) : TriggerAI(c)
     {

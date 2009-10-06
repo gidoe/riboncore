@@ -29,7 +29,7 @@ EndScriptData */
 #define SPELL_SUNDERINCLEAVE    25174
 #define SPELL_KNOCKAWAY         10101
 
-struct RIBON_DLL_DECL boss_theravenianAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_theravenianAI : public ScriptedAI
 {
     boss_theravenianAI(Creature *c) : ScriptedAI(c) {}
 

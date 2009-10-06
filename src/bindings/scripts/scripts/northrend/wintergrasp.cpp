@@ -22,7 +22,7 @@
 #define GOSSIP_HELLO_DEMO3  "Build siege engine."
 #define GOSSIP_HELLO_DEMO4  "I cannot build more!"
 
-struct RIBON_DLL_DECL npc_demolisher_engineererAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_demolisher_engineererAI : public ScriptedAI
 {
     npc_demolisher_engineererAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -52,7 +52,7 @@ enum
     C_AERANAS               = 17085
 };
 
-struct RIBON_DLL_DECL npc_aeranasAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_aeranasAI : public ScriptedAI
 {
     npc_aeranasAI(Creature* c) : ScriptedAI(c) {}
 
@@ -133,7 +133,7 @@ enum
     NPC_RYGA                        = 17123
 };
 
-struct RIBON_DLL_DECL npc_ancestral_wolfAI : public npc_escortAI
+struct SCRIPTS_DLL_DECL npc_ancestral_wolfAI : public npc_escortAI
 {
     npc_ancestral_wolfAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
@@ -333,7 +333,7 @@ enum
     QUEST_ROAD_TO_FALCON_WATCH  = 9375
 };
 
-struct RIBON_DLL_DECL npc_wounded_blood_elfAI : public npc_escortAI
+struct SCRIPTS_DLL_DECL npc_wounded_blood_elfAI : public npc_escortAI
 {
     npc_wounded_blood_elfAI(Creature *c) : npc_escortAI(c) {}
 

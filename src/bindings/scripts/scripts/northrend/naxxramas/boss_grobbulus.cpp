@@ -31,7 +31,7 @@
 
 #define MOB_FALLOUT_SLIME   16290
 
-struct RIBON_DLL_DECL boss_grobbulusAI : public BossAI
+struct SCRIPTS_DLL_DECL boss_grobbulusAI : public BossAI
 {
     boss_grobbulusAI(Creature *c) : BossAI(c, BOSS_GROBBULUS) {}
 

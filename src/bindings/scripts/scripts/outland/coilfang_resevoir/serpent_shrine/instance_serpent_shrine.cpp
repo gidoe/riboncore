@@ -48,7 +48,7 @@ bool GOHello_go_bridge_console(Player* pPlayer, GameObject* pGo)
     return true;
 }
 
-struct RIBON_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_serpentshrine_cavern : public ScriptedInstance
 {
     instance_serpentshrine_cavern(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 

@@ -76,7 +76,7 @@ static Locations TeleportPoint[]=
     {965.997, 278.398, 195.777}
 };
 
-struct RIBON_DLL_DECL boss_shahrazAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_shahrazAI : public ScriptedAI
 {
     boss_shahrazAI(Creature *c) : ScriptedAI(c)
     {

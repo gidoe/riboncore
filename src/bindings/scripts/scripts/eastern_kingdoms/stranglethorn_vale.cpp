@@ -31,7 +31,7 @@ EndContentData */
 ## mob_yenniku
 ######*/
 
-struct RIBON_DLL_DECL mob_yennikuAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_yennikuAI : public ScriptedAI
 {
     mob_yennikuAI(Creature *c) : ScriptedAI(c)
     {

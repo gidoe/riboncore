@@ -139,7 +139,7 @@ static Locations SpawnLocations[]=
     {960.748, 382.944, 208.374},
 };
 
-struct RIBON_DLL_DECL mob_tribuna_controllerAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_tribuna_controllerAI : public ScriptedAI
 {
     mob_tribuna_controllerAI(Creature *c) : ScriptedAI(c)
     {
@@ -255,7 +255,7 @@ struct RIBON_DLL_DECL mob_tribuna_controllerAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL npc_brann_hosAI : public npc_escortAI
+struct SCRIPTS_DLL_DECL npc_brann_hosAI : public npc_escortAI
 {
     npc_brann_hosAI(Creature *c) : npc_escortAI(c)
     {

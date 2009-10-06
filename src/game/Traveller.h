@@ -31,7 +31,7 @@
 #define PLAYER_FLIGHT_SPEED        32.0f
 
 template<class T>
-struct RIBON_DLL_DECL Traveller
+struct SCRIPTS_DLL_DECL Traveller
 {
     T &i_traveller;
     Traveller(T &t) : i_traveller(t) {}

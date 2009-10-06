@@ -50,7 +50,7 @@ enum
 #define GOSSIP_ITEM_2   "Click to Test Escort(NoAttack, Walk)"
 #define GOSSIP_ITEM_3   "Click to Test Escort(NoAttack, Run)"
 
-struct RIBON_DLL_DECL example_escortAI : public npc_escortAI
+struct SCRIPTS_DLL_DECL example_escortAI : public npc_escortAI
 {
     // CreatureAI functions
     example_escortAI(Creature* pCreature) : npc_escortAI(pCreature) { }

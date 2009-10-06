@@ -7,7 +7,7 @@
 
 #define GENERIC_CREATURE_COOLDOWN 5000
 
-struct RIBON_DLL_DECL guardAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL guardAI : public ScriptedAI
 {
     public:
         explicit guardAI(Creature* pCreature);
@@ -28,14 +28,14 @@ struct RIBON_DLL_DECL guardAI : public ScriptedAI
     void DoReplyToTextEmote(uint32 em);
 };
 
-struct RIBON_DLL_DECL guardAI_orgrimmar : public guardAI
+struct SCRIPTS_DLL_DECL guardAI_orgrimmar : public guardAI
 {
     guardAI_orgrimmar(Creature *c) : guardAI(c) {}
 
     void ReceiveEmote(Player *player, uint32 text_emote);
 };
 
-struct RIBON_DLL_DECL guardAI_stormwind : public guardAI
+struct SCRIPTS_DLL_DECL guardAI_stormwind : public guardAI
 {
     guardAI_stormwind(Creature *c) : guardAI(c) {}
 

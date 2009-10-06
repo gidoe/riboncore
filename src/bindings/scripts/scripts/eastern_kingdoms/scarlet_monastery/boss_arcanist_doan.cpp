@@ -35,7 +35,7 @@ enum
     SPELL_ARCANEBUBBLE          = 9438,
 };
 
-struct RIBON_DLL_DECL boss_arcanist_doanAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_arcanist_doanAI : public ScriptedAI
 {
     boss_arcanist_doanAI(Creature *c) : ScriptedAI(c) {}
 

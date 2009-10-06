@@ -27,7 +27,7 @@ update creature_template set scriptname = 'boss_meathook' where entry = '';
 #define SAY_SPAWN                                 -1595030
 #define SAY_DEATH                                 -1595031
 
-struct RIBON_DLL_DECL boss_meathookAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_meathookAI : public ScriptedAI
 {
     boss_meathookAI(Creature *c) : ScriptedAI(c) {}
 

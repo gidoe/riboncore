@@ -76,7 +76,7 @@ enum CombatPhase
     FEEDING
 };
 
-struct RIBON_DLL_DECL boss_taldaramAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_taldaramAI : public ScriptedAI
 {
     boss_taldaramAI(Creature *c) : ScriptedAI(c)
     {
@@ -334,7 +334,7 @@ struct RIBON_DLL_DECL boss_taldaramAI : public ScriptedAI
 
  	
 
-struct RIBON_DLL_DECL mob_taldaram_flamesphereAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_taldaram_flamesphereAI : public ScriptedAI
 {
     mob_taldaram_flamesphereAI(Creature *c) : ScriptedAI(c) 
     {

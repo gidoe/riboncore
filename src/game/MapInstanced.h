@@ -24,7 +24,7 @@
 #include "Map.h"
 #include "InstanceSaveMgr.h"
 
-class RIBON_DLL_DECL MapInstanced : public Map
+class SCRIPTS_DLL_DECL MapInstanced : public Map
 {
     friend class MapManager;
     public:

@@ -466,7 +466,7 @@ static SpawnSpells SpawnCast[]=//
 /*#####
 # npc_anachronos_the_ancient
 ######*/
-struct RIBON_DLL_DECL npc_anachronos_the_ancientAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_anachronos_the_ancientAI : public ScriptedAI
 {
     npc_anachronos_the_ancientAI(Creature* c) : ScriptedAI(c) {}
 
@@ -775,7 +775,7 @@ struct RIBON_DLL_DECL npc_anachronos_the_ancientAI : public ScriptedAI
 # mob_qiraj_war_spawn
 ######*/
 
-struct RIBON_DLL_DECL mob_qiraj_war_spawnAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_qiraj_war_spawnAI : public ScriptedAI
 {
     mob_qiraj_war_spawnAI(Creature* c) : ScriptedAI(c) {}
 
@@ -879,7 +879,7 @@ struct RIBON_DLL_DECL mob_qiraj_war_spawnAI : public ScriptedAI
 # npc_anachronos_quest_trigger
 #####*/
 
-struct RIBON_DLL_DECL npc_anachronos_quest_triggerAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_anachronos_quest_triggerAI : public ScriptedAI
 {
     npc_anachronos_quest_triggerAI(Creature* c) : ScriptedAI(c) {}
 

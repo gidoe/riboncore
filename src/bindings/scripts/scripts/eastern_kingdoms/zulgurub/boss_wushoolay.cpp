@@ -27,7 +27,7 @@ EndScriptData */
 #define SPELL_LIGHTNINGCLOUD         25033
 #define SPELL_LIGHTNINGWAVE          24819
 
-struct RIBON_DLL_DECL boss_wushoolayAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_wushoolayAI : public ScriptedAI
 {
     boss_wushoolayAI(Creature *c) : ScriptedAI(c) {}
 
