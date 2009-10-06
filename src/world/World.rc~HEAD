@@ -35,7 +35,7 @@
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_APPICON             ICON                    "RibonCore.ico"
+IDI_APPICON             ICON                    "World.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 // Neutre (Par défaut système) resources
@@ -68,12 +68,12 @@ BEGIN
     BEGIN
         BLOCK "080004b0"
         BEGIN
-            VALUE "FileDescription", "RibonCore"
+            VALUE "FileDescription", "World"
             VALUE "FileVersion", "0, 4, 6743, 685"
-            VALUE "InternalName", "RibonCore"
+            VALUE "InternalName", "World"
             VALUE "LegalCopyright", "Copyright (C) 2009"
-            VALUE "OriginalFilename", "RibonCore.exe"
-            VALUE "ProductName", "RibonCore"
+            VALUE "OriginalFilename", "World.exe"
+            VALUE "ProductName", "World"
             VALUE "ProductVersion", "0, 4, 6743, 685"
         END
     END

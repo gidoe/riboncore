@@ -1,7 +1,7 @@
 ##########################################
-#  RibonCore worldd configuration file   #
+#        World configuration file        #
 ##########################################
-ConfVersion=2009092827
+ConfVersion=2009100527
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -49,9 +49,9 @@ ConfVersion=2009092827
 RealmID = 1
 DataDir = "Data"
 LogsDir = "Logs"
-LoginDatabaseInfo     = "127.0.0.1;3306;root;ribon;logon"
-WorldDatabaseInfo     = "127.0.0.1;3306;root;ribon;world"
-CharacterDatabaseInfo = "127.0.0.1;3306;root;ribon;characters"
+LoginDatabaseInfo     = "127.0.0.1;3306;root;world;logon"
+WorldDatabaseInfo     = "127.0.0.1;3306;root;world;world"
+CharacterDatabaseInfo = "127.0.0.1;3306;root;world;characters"
 MaxPingTime = 30
 WorldServerPort = 8085
 BindIP = "0.0.0.0"

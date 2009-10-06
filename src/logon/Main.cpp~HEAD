@@ -26,7 +26,7 @@
 #include "Database/DatabaseEnv.h"
 #include "revision_nr.h"
 #include "revision_sql.h"
-#include "RealmList.h"
+#include "LogonList.h"
 
 #include "Config/ConfigEnv.h"
 #include "Log.h"
@@ -39,9 +39,9 @@
 
 #define _FULLVERSION (REVISION_NR)
 
-#ifndef _RIBON_REALM_CONFIG
-# define _RIBON_REALM_CONFIG  "RibonLogon.conf"
-#endif //_RIBON_REALM_CONFIG
+#ifndef _LOGON_CONFIG
+# define _LOGON_CONFIG  "Logon.conf"
+#endif //_LOGON_CONFIG
 
 #ifdef WIN32
 #include "ServiceWin32.h"
@@ -85,7 +85,7 @@ extern int main(int argc, char **argv)
 {
     sLog.SetLogDB(false);
     ///- Command line parsing to get the configuration file name
-    char const* cfg_file = _RIBON_REALM_CONFIG;
+    char const* cfg_file = _LOGON_CONFIG;
     int c=1;
     while( c < argc )
     {
@@ -168,12 +168,12 @@ extern int main(int argc, char **argv)
 
     ///- Check the version of the configuration file
     uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
-    if (confVersion < _REALMDCONFVERSION)
+    if (confVersion < _LOGONCONFVERSION)
     {
         sLog.outError("*****************************************************************************");
-        sLog.outError(" WARNING: Your RibonLogon.conf version indicates your conf file is out of date!");
-        sLog.outError("          Please check for updates, as your current default values may cause");
-        sLog.outError("          strange behavior.");
+        sLog.outError(" WARNING: Your Logon.conf version indicates your conf file is out of date!   ");
+        sLog.outError("          Please check for updates, as your current default values may cause ");
+        sLog.outError("          strange behavior.                                                  ");
         sLog.outError("*****************************************************************************");
         clock_t pause = 3000 + clock();
 

@@ -23,7 +23,7 @@
 */
 
 #include "Common.h"
-#include "RealmList.h"
+#include "LogonList.h"
 #include "Policies/SingletonImp.h"
 #include "Database/DatabaseEnv.h"
 

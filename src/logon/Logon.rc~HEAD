@@ -35,7 +35,7 @@
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_APPICON             ICON                    "RibonLogon.ico"
+IDI_APPICON             ICON                    "Logon.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 // Neutre (Par défaut système) resources
@@ -68,12 +68,12 @@ BEGIN
     BEGIN
         BLOCK "080004b0"
         BEGIN
-            VALUE "FileDescription", "RibonLogon"
+            VALUE "FileDescription", "Logon"
             VALUE "FileVersion", "0, 4, 6743, 685"
-            VALUE "InternalName", "RibonLogon"
+            VALUE "InternalName", "Logon"
             VALUE "LegalCopyright", "Copyright (C) 2009"
-            VALUE "OriginalFilename", "RibonLogon.exe"
-            VALUE "ProductName", "RibonLogon"
+            VALUE "OriginalFilename", "Logon.exe"
+            VALUE "ProductName", "Logon"
             VALUE "ProductVersion", "0, 4, 6743, 685"
         END
     END
