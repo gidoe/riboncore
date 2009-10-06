@@ -1,4 +1,4 @@
--- Up to RC 954
+-- Up to RC 1008
 
 -- This file contains all waypoints used by escortAI scripts
 /*
