@@ -85,7 +85,7 @@ extern int main(int argc, char **argv)
 {
     sLog.SetLogDB(false);
     ///- Command line parsing to get the configuration file name
-    char const* cfg_file = _WORLD_CONFIG;
+    char const* cfg_file = _LOGON_CONFIG;
     int c=1;
     while( c < argc )
     {
