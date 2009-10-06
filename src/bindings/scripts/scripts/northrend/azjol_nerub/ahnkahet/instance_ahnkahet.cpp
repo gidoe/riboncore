@@ -36,7 +36,7 @@ EndScriptData */
 4 - Amanitar (Heroic only)
 */
 
-struct RIBON_DLL_DECL instance_ahnkahet : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_ahnkahet : public ScriptedInstance
 {
     instance_ahnkahet(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 

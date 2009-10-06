@@ -32,7 +32,7 @@
 /** ObjectRegistry holds all registry item of the same type
  */
 template<class T, class Key = std::string>
-class RIBON_DLL_DECL ObjectRegistry
+class SCRIPTS_DLL_DECL ObjectRegistry
 {
     public:
         typedef std::map<Key, T *> RegistryMapType;

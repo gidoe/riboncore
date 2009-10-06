@@ -64,7 +64,7 @@ enum Events
     EVENT_BERSERK,
 };
 
-struct RIBON_DLL_DECL boss_thaddiusAI : public BossAI
+struct SCRIPTS_DLL_DECL boss_thaddiusAI : public BossAI
 {
     boss_thaddiusAI(Creature *c) : BossAI(c, BOSS_THADDIUS)
     {

@@ -48,7 +48,7 @@ enum
     FACTION_ESCORTEE_H                  = 775
 };
 
-struct RIBON_DLL_DECL npc_injured_rainspeaker_oracleAI : public npc_escortAI
+struct SCRIPTS_DLL_DECL npc_injured_rainspeaker_oracleAI : public npc_escortAI
 {
     npc_injured_rainspeaker_oracleAI(Creature* c) : npc_escortAI(c) { c_guid = c->GetGUID(); }
 

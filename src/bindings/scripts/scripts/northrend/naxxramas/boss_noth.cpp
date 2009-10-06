@@ -61,7 +61,7 @@ enum Events
     EVENT_GROUND,
 };
 
-struct RIBON_DLL_DECL boss_nothAI : public BossAI
+struct SCRIPTS_DLL_DECL boss_nothAI : public BossAI
 {
     boss_nothAI(Creature *c) : BossAI(c, BOSS_NOTH) {}
 

@@ -29,7 +29,7 @@ EndScriptData */
 #define SPELL_SILENCE           15487
 #define SPELL_FEAR              6215
 
-struct RIBON_DLL_DECL boss_illuciabarovAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_illuciabarovAI : public ScriptedAI
 {
     boss_illuciabarovAI(Creature *c) : ScriptedAI(c) {}
 

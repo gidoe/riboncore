@@ -70,7 +70,7 @@ enum
     QUEST_BEAT          = 1640
 };
 
-struct RIBON_DLL_DECL npc_bartlebyAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_bartlebyAI : public ScriptedAI
 {
     npc_bartlebyAI(Creature *c) : ScriptedAI(c)
     {
@@ -135,7 +135,7 @@ enum
     FACTION_HOSTILE             = 168
 };
 
-struct RIBON_DLL_DECL npc_dashel_stonefistAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_dashel_stonefistAI : public ScriptedAI
 {
     npc_dashel_stonefistAI(Creature *c) : ScriptedAI(c)
     {

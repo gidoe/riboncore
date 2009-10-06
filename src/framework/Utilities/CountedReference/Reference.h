@@ -42,7 +42,7 @@ template
 typename T,
 class THREADING_MODEL = Ribon::SingleThreaded<T>
 >
-class RIBON_DLL_DECL Referencer
+class SCRIPTS_DLL_DECL Referencer
 {
     typedef typename THREADING_MODEL::Lock Lock;
     typedef ReferenceHolder<T, THREADING_MODEL> ReferenceeHolder;

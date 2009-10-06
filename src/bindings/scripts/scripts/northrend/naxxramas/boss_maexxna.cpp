@@ -45,7 +45,7 @@ enum Events
     EVENT_SUMMON,
 };
 
-struct RIBON_DLL_DECL boss_maexxnaAI : public BossAI
+struct SCRIPTS_DLL_DECL boss_maexxnaAI : public BossAI
 {
     boss_maexxnaAI(Creature *c) : BossAI(c, BOSS_MAEXXNA) {}
 

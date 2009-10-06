@@ -17,7 +17,7 @@ update creature_template set scriptname = '' where entry = '';
 #define SPELL_EMERGE_2                                        54851
 #define SPELL_MIGHTY_BLOW                                     54719
 
-struct RIBON_DLL_DECL boss_drakkari_colossusAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_drakkari_colossusAI : public ScriptedAI
 {
     boss_drakkari_colossusAI(Creature *c) : ScriptedAI(c)
     {

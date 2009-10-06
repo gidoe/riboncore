@@ -42,7 +42,7 @@ class ACTIVE_OBJECT,
 class WORLD_OBJECT_TYPES,
 class GRID_OBJECT_TYPES
 >
-class RIBON_DLL_DECL GridLoader
+class SCRIPTS_DLL_DECL GridLoader
 {
     public:
 

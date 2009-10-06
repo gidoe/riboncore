@@ -95,7 +95,7 @@ inline uint32 GetEruptionSection(float x, float y)
     return 3;
 }
 
-struct RIBON_DLL_DECL instance_naxxramas : public InstanceData
+struct SCRIPTS_DLL_DECL instance_naxxramas : public InstanceData
 {
     instance_naxxramas(Map* pMap) : InstanceData(pMap)
         , Sapphiron(NULL), pGothikGate(NULL), HorsemenChest(NULL), HorsemenNum(0)

@@ -66,7 +66,7 @@ static float SpawnLocations[4][3]=
     {626.6, -271.5, 391.4},
 };
 
-struct RIBON_DLL_DECL boss_razorscaleAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_razorscaleAI : public ScriptedAI
 {
     boss_razorscaleAI(Creature* c) : ScriptedAI(c) {}
 

@@ -57,7 +57,7 @@ EndScriptData */
 #define SPELL_BLIZZARD              26607
 #define SPELL_ARCANEBURST           568
 
-struct RIBON_DLL_DECL boss_twinemperorsAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_twinemperorsAI : public ScriptedAI
 {
     boss_twinemperorsAI(Creature *c): ScriptedAI(c)
     {
@@ -384,7 +384,7 @@ struct RIBON_DLL_DECL boss_twinemperorsAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL boss_veknilashAI : public boss_twinemperorsAI
+struct SCRIPTS_DLL_DECL boss_veknilashAI : public boss_twinemperorsAI
 {
     bool IAmVeklor() {return false;}
     boss_veknilashAI(Creature *c) : boss_twinemperorsAI(c) {}
@@ -466,7 +466,7 @@ struct RIBON_DLL_DECL boss_veknilashAI : public boss_twinemperorsAI
     }
 };
 
-struct RIBON_DLL_DECL boss_veklorAI : public boss_twinemperorsAI
+struct SCRIPTS_DLL_DECL boss_veklorAI : public boss_twinemperorsAI
 {
     bool IAmVeklor() {return true;}
     boss_veklorAI(Creature *c) : boss_twinemperorsAI(c) {}

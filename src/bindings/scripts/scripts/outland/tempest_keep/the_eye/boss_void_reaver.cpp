@@ -40,7 +40,7 @@ enum
     SPELL_BERSERK               = 27680
 };
 
-struct RIBON_DLL_DECL boss_void_reaverAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_void_reaverAI : public ScriptedAI
 {
     boss_void_reaverAI(Creature *c) : ScriptedAI(c)
     {

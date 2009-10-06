@@ -29,7 +29,7 @@
 /** FactoryHolder holds a factory object of a specific type
  */
 template<class T, class Key = std::string>
-class RIBON_DLL_DECL FactoryHolder
+class SCRIPTS_DLL_DECL FactoryHolder
 {
     public:
         typedef ObjectRegistry<FactoryHolder<T, Key >, Key > FactoryHolderRegistry;

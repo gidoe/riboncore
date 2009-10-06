@@ -35,7 +35,7 @@ EndScriptData */
 // Enrage for his spawns
 #define SPELL_ENRAGE       28798
 
-struct RIBON_DLL_DECL boss_fankrissAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_fankrissAI : public ScriptedAI
 {
     boss_fankrissAI(Creature *c) : ScriptedAI(c) {}
 

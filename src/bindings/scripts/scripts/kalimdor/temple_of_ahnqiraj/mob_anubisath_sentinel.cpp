@@ -53,8 +53,8 @@ EndScriptData */
 #define SPELL_STORM_BUFF        2148
 #define SPELL_STORM             26546
 
-struct RIBON_DLL_DECL aqsentinelAI;
-class RIBON_DLL_DECL SentinelAbilityAura : public Aura
+struct SCRIPTS_DLL_DECL aqsentinelAI;
+class SCRIPTS_DLL_DECL SentinelAbilityAura : public Aura
 {
     public:
         ~SentinelAbilityAura();
@@ -66,7 +66,7 @@ class RIBON_DLL_DECL SentinelAbilityAura : public Aura
         uint32 abilityId;
 };
 
-struct RIBON_DLL_DECL aqsentinelAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL aqsentinelAI : public ScriptedAI
 {
     uint32 ability;
     int abselected;

@@ -31,7 +31,7 @@ EndScriptData */
 2 - Gruul event
 */
 
-struct RIBON_DLL_DECL instance_gruuls_lair : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_gruuls_lair : public ScriptedInstance
 {
     instance_gruuls_lair(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 

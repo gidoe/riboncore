@@ -19,7 +19,7 @@
 #include "precompiled.h"
 #include "def_ulduar.h"
 
-struct RIBON_DLL_DECL instance_ulduar : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_ulduar : public ScriptedInstance
 {
     instance_ulduar(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 

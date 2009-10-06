@@ -27,7 +27,7 @@ EndScriptData */
 #define SPELL_IMMOLATE              20294
 #define SPELL_TERRIFYINGROAR        14100
 
-struct RIBON_DLL_DECL boss_thebeastAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_thebeastAI : public ScriptedAI
 {
     boss_thebeastAI(Creature *c) : ScriptedAI(c) {}
 

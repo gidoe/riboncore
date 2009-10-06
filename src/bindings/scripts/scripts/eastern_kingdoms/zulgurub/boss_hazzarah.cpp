@@ -27,7 +27,7 @@ EndScriptData */
 #define SPELL_MANABURN         26046
 #define SPELL_SLEEP            24664
 
-struct RIBON_DLL_DECL boss_hazzarahAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_hazzarahAI : public ScriptedAI
 {
     boss_hazzarahAI(Creature *c) : ScriptedAI(c) {}
 

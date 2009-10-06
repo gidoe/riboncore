@@ -1,7 +1,7 @@
 #include "precompiled.h"
 #include "def_oculus.h"
 
-struct RIBON_DLL_DECL instance_oculus : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_oculus : public ScriptedInstance
 {
     instance_oculus(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 };

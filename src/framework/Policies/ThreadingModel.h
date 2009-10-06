@@ -32,7 +32,7 @@ namespace Ribon
 {
     inline void Guard(void *) {}
 
-    template<typename MUTEX> class RIBON_DLL_DECL GeneralLock
+    template<typename MUTEX> class SCRIPTS_DLL_DECL GeneralLock
     {
         public:
             GeneralLock(MUTEX &m) : i_mutex(m)
@@ -51,7 +51,7 @@ namespace Ribon
     };
 
     template <class T>
-        class RIBON_DLL_DECL SingleThreaded
+        class SCRIPTS_DLL_DECL SingleThreaded
     {
         public:
 
@@ -69,7 +69,7 @@ namespace Ribon
 
     // object level lockable
     template<class T, class MUTEX>
-        class RIBON_DLL_DECL ObjectLevelLockable
+        class SCRIPTS_DLL_DECL ObjectLevelLockable
     {
         public:
             ObjectLevelLockable() : i_mtx() {}
@@ -98,7 +98,7 @@ namespace Ribon
     };
 
     template<class T, class MUTEX>
-        class RIBON_DLL_DECL ClassLevelLockable
+        class SCRIPTS_DLL_DECL ClassLevelLockable
     {
         public:
             class Lock;
@@ -125,6 +125,6 @@ namespace Ribon
 template<class T, class MUTEX> MUTEX Ribon::ClassLevelLockable<T, MUTEX>::si_mtx;
 
 #define INSTANTIATE_CLASS_MUTEX(CTYPE,MUTEX) \
-    template class RIBON_DLL_DECL Ribon::ClassLevelLockable<CTYPE, MUTEX >
+    template class SCRIPTS_DLL_DECL Ribon::ClassLevelLockable<CTYPE, MUTEX >
 #endif
 

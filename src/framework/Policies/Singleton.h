@@ -38,7 +38,7 @@ namespace Ribon
         class CreatePolicy = Ribon::OperatorNew<T>,
         class LifeTimePolicy = Ribon::ObjectLifeTime<T>
         >
-        class RIBON_DLL_DECL Singleton
+        class SCRIPTS_DLL_DECL Singleton
     {
         public:
             static T& Instance();

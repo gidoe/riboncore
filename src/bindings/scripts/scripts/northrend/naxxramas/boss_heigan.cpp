@@ -43,7 +43,7 @@ enum Phases
 //Spell by eye stalks
 #define SPELL_MIND_FLAY     26143
 
-struct RIBON_DLL_DECL boss_heiganAI : public BossAI
+struct SCRIPTS_DLL_DECL boss_heiganAI : public BossAI
 {
     boss_heiganAI(Creature *c) : BossAI(c, BOSS_HEIGAN) {}
 

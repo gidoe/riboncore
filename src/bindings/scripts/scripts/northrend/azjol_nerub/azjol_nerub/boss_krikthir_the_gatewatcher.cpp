@@ -91,7 +91,7 @@ enum Yells
 
 };
 
-struct RIBON_DLL_DECL boss_krik_thirAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_krik_thirAI : public ScriptedAI
 {
     boss_krik_thirAI(Creature *c) : ScriptedAI(c)
     {
@@ -211,7 +211,7 @@ struct RIBON_DLL_DECL boss_krik_thirAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL npc_skittering_infectorAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_skittering_infectorAI : public ScriptedAI
 {
     npc_skittering_infectorAI(Creature *c) : ScriptedAI(c) {}
 
@@ -222,7 +222,7 @@ struct RIBON_DLL_DECL npc_skittering_infectorAI : public ScriptedAI
 
 };
 
-struct RIBON_DLL_DECL npc_anub_ar_skirmisherAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_anub_ar_skirmisherAI : public ScriptedAI
 {
     npc_anub_ar_skirmisherAI(Creature *c) : ScriptedAI(c) {}
         
@@ -267,7 +267,7 @@ struct RIBON_DLL_DECL npc_anub_ar_skirmisherAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL npc_anub_ar_shadowcasterAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_anub_ar_shadowcasterAI : public ScriptedAI
 {
     npc_anub_ar_shadowcasterAI(Creature *c) : ScriptedAI(c) {}
     
@@ -309,7 +309,7 @@ struct RIBON_DLL_DECL npc_anub_ar_shadowcasterAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL npc_anub_ar_warriorAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_anub_ar_warriorAI : public ScriptedAI
 {
     npc_anub_ar_warriorAI(Creature *c) : ScriptedAI(c){}
 
@@ -349,7 +349,7 @@ struct RIBON_DLL_DECL npc_anub_ar_warriorAI : public ScriptedAI
 
 };
 
-struct RIBON_DLL_DECL npc_watcher_gashraAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_watcher_gashraAI : public ScriptedAI
 {
     npc_watcher_gashraAI(Creature *c) : ScriptedAI(c) {}
 
@@ -398,7 +398,7 @@ struct RIBON_DLL_DECL npc_watcher_gashraAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL npc_watcher_narjilAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_watcher_narjilAI : public ScriptedAI
 {
     npc_watcher_narjilAI(Creature *c) : ScriptedAI(c) {}
 
@@ -449,7 +449,7 @@ struct RIBON_DLL_DECL npc_watcher_narjilAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL npc_watcher_silthikAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_watcher_silthikAI : public ScriptedAI
 {
     npc_watcher_silthikAI(Creature *c) : ScriptedAI(c) {}
 

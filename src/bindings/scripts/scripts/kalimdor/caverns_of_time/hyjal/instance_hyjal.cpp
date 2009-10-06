@@ -39,7 +39,7 @@ enum
 4 - Archimonde event
 */
 
-struct RIBON_DLL_DECL instance_mount_hyjal : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_mount_hyjal : public ScriptedInstance
 {
     instance_mount_hyjal(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 

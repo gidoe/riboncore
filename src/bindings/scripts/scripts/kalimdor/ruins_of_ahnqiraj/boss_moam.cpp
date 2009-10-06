@@ -32,7 +32,7 @@ EndScriptData */
 #define SPELL_SUMMONMANA        25681
 #define SPELL_GRDRSLEEP         24360                       //Greater Dreamless Sleep
 
-struct RIBON_DLL_DECL boss_moamAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_moamAI : public ScriptedAI
 {
     boss_moamAI(Creature *c) : ScriptedAI(c) {}
 

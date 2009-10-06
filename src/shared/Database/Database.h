@@ -105,7 +105,7 @@ class RIBON_DLL_SPEC Database
         bool _UpdateDataBlobValue(const uint32 guid, const uint32 field, const int32 value);
         bool _SetDataBlobValue(const uint32 guid, const uint32 field, const uint32 value);
 
-        // Writes SQL commands to a LOG file (see RibonCore.conf "LogSQL")
+        // Writes SQL commands to a LOG file (see World.conf "LogSQL")
         bool PExecuteLog(const char *format,...) ATTR_PRINTF(2,3);
 
         virtual bool BeginTransaction()                     // nothing do if DB not support transactions

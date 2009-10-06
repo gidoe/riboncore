@@ -47,7 +47,7 @@ enum District
 
 template<class T> struct CellLock;
 
-struct RIBON_DLL_DECL CellArea
+struct SCRIPTS_DLL_DECL CellArea
 {
     CellArea() : right_offset(0), left_offset(0), upper_offset(0), lower_offset(0) {}
     CellArea(int right, int left, int upper, int lower) : right_offset(right), left_offset(left), upper_offset(upper), lower_offset(lower) {}
@@ -68,7 +68,7 @@ struct RIBON_DLL_DECL CellArea
 };
  
 
-struct RIBON_DLL_DECL Cell
+struct SCRIPTS_DLL_DECL Cell
 {
     Cell() { data.All = 0; }
     Cell(const Cell &cell) { data.All = cell.data.All; }
@@ -176,7 +176,7 @@ private:
 };
 
 template<class T>
-struct RIBON_DLL_DECL CellLock
+struct SCRIPTS_DLL_DECL CellLock
 {
     const Cell& i_cell;
     const CellPair &i_cellPair;

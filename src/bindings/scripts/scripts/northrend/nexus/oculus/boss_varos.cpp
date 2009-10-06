@@ -35,7 +35,7 @@ update creature_template set scriptname = '' where entry = '';
 #define SAY_SPAWN                              -1578029
 
 
-struct RIBON_DLL_DECL boss_varosAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_varosAI : public ScriptedAI
 {
     boss_varosAI(Creature *c) : ScriptedAI(c) {}
 

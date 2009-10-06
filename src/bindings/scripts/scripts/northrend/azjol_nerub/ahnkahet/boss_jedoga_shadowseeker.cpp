@@ -55,7 +55,7 @@ update creature_template set scriptname = 'boss_jedoga' where entry = '';
 #define SAY_PREACHING_4                           -1619012
 #define SAY_PREACHING_5                           -1619013
 
-struct RIBON_DLL_DECL boss_jedogaAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_jedogaAI : public ScriptedAI
 {
     boss_jedogaAI(Creature *c) : ScriptedAI(c) {}
 

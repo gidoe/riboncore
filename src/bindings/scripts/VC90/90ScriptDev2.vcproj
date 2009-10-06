@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="RibonScript"
+	Name="Scripts"
 	ProjectGUID="{4295C8A9-79B7-4354-8064-F05FB9CA0C96}"
 	RootNamespace="ScriptDev2"
 	Keyword="Win32Proj"
@@ -68,16 +68,16 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="riboncore.lib aced.lib"
-				OutputFile="$(OutDir)/RibonScript.dll"
+				AdditionalDependencies="world.lib aced.lib"
+				OutputFile="$(OutDir)/Scripts.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\..\win\VC90\riboncore__$(PlatformName)_$(ConfigurationName);..\..\..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/RibonScript.pdb"
+				ProgramDatabaseFile="$(OutDir)/Scripts.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)/RibonScript.lib"
+				ImportLibrary="$(OutDir)/Scripts.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -150,17 +150,17 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="riboncore.lib ace.lib"
-				OutputFile="$(OutDir)/RibonScript.dll"
+				AdditionalDependencies="world.lib ace.lib"
+				OutputFile="$(OutDir)/Scripts.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\win\VC90\riboncore__$(PlatformName)_$(ConfigurationName);..\..\..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
+				AdditionalLibraryDirectories="..\..\..\..\win\VC90\world__$(PlatformName)_$(ConfigurationName);..\..\..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="false"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)/RibonScript.lib"
+				ImportLibrary="$(OutDir)/Scripts.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -235,16 +235,16 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="riboncore.lib aced.lib"
-				OutputFile="$(OutDir)/RibonScript.dll"
+				AdditionalDependencies="world.lib aced.lib"
+				OutputFile="$(OutDir)/Scripts.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\..\win\VC90\riboncore__$(PlatformName)_$(ConfigurationName);..\..\..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/RibonScript.pdb"
+				ProgramDatabaseFile="$(OutDir)/Scripts.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)/RibonScript.lib"
+				ImportLibrary="$(OutDir)/Scripts.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -318,8 +318,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="riboncore.lib ace.lib"
-				OutputFile="$(OutDir)/RibonScript.dll"
+				AdditionalDependencies="world.lib ace.lib"
+				OutputFile="$(OutDir)/Scripts.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\win\VC90\riboncore__$(PlatformName)_$(ConfigurationName);..\..\..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="false"
@@ -328,7 +328,7 @@
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary="$(OutDir)/RibonScript.lib"
+				ImportLibrary="$(OutDir)/Scripts.lib"
 				TargetMachine="17"
 			/>
 			<Tool

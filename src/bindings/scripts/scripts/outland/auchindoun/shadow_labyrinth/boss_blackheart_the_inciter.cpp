@@ -52,7 +52,7 @@ EndScriptData */
 #define SAY2_HELP           -1555026
 #define SAY2_DEATH          -1555027
 
-struct RIBON_DLL_DECL boss_blackheart_the_inciterAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_blackheart_the_inciterAI : public ScriptedAI
 {
     boss_blackheart_the_inciterAI(Creature *c) : ScriptedAI(c)
     {

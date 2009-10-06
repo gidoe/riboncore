@@ -30,7 +30,7 @@ class Map;
 #define TRAVELLER_UPDATE_INTERVAL  300
 
 template<typename TRAVELLER>
-class RIBON_DLL_DECL DestinationHolder
+class SCRIPTS_DLL_DECL DestinationHolder
 {
     TimeTrackerSmall i_tracker;
     uint32 i_totalTravelTime;

@@ -51,7 +51,7 @@ update creature_template set scriptname = 'boss_anub_arak' where entry = '';
 #define SAY_SUBMERGE_2                             -1601009
 #define SAY_DEATH                                  -1601004
 
-struct RIBON_DLL_DECL boss_anub_arakAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_anub_arakAI : public ScriptedAI
 {
     boss_anub_arakAI(Creature *c) : ScriptedAI(c) {}
 

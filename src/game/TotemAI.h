@@ -27,7 +27,7 @@
 class Creature;
 class Totem;
 
-class RIBON_DLL_DECL TotemAI : public CreatureAI
+class SCRIPTS_DLL_DECL TotemAI : public CreatureAI
 {
     public:
 

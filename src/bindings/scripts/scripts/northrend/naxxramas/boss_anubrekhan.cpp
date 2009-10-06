@@ -31,7 +31,7 @@
 
 #define MOB_CRYPT_GUARD     16573
 
-struct RIBON_DLL_DECL boss_anubrekhanAI : public BossAI
+struct SCRIPTS_DLL_DECL boss_anubrekhanAI : public BossAI
 {
     boss_anubrekhanAI(Creature *c) : BossAI(c, BOSS_ANUBREKHAN) { HasTaunted = false; }
 

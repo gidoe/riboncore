@@ -34,7 +34,7 @@ EndScriptData */
 2 - Anub'arak
 */
 
-struct RIBON_DLL_DECL instance_azjol_nerub : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_azjol_nerub : public ScriptedInstance
 {
     instance_azjol_nerub(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 

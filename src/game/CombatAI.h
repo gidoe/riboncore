@@ -26,7 +26,7 @@
 
 class Creature;
 
-class RIBON_DLL_DECL AggressorAI : public CreatureAI
+class SCRIPTS_DLL_DECL AggressorAI : public CreatureAI
 {
     public:
         explicit AggressorAI(Creature *c) : CreatureAI(c) {}

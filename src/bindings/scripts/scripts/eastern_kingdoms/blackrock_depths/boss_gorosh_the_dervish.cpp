@@ -26,7 +26,7 @@ EndScriptData */
 #define SPELL_WHIRLWIND             15589
 #define SPELL_MORTALSTRIKE          24573
 
-struct RIBON_DLL_DECL boss_gorosh_the_dervishAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_gorosh_the_dervishAI : public ScriptedAI
 {
     boss_gorosh_the_dervishAI(Creature *c) : ScriptedAI(c) {}
 

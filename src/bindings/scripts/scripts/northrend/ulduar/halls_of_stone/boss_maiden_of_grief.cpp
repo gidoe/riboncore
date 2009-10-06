@@ -46,7 +46,7 @@ enum Yells
     SAY_STUN                                         = -1603006
 };
 
-struct RIBON_DLL_DECL boss_maiden_of_griefAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_maiden_of_griefAI : public ScriptedAI
 {
     boss_maiden_of_griefAI(Creature *c) : ScriptedAI(c) 
     {

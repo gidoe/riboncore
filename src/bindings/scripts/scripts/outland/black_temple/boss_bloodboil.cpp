@@ -53,7 +53,7 @@ EndScriptData */
 
 //This is used to sort the players by distance in preparation for the Bloodboil cast.
 
-struct RIBON_DLL_DECL boss_gurtogg_bloodboilAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_gurtogg_bloodboilAI : public ScriptedAI
 {
     boss_gurtogg_bloodboilAI(Creature *c) : ScriptedAI(c)
     {

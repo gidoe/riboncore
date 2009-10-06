@@ -30,7 +30,7 @@ namespace Ribon
      * OperatorNew policy creates an object on the heap using new.
      */
     template <class T>
-        class RIBON_DLL_DECL OperatorNew
+        class SCRIPTS_DLL_DECL OperatorNew
     {
         public:
             static T* Create(void) { return (new T); }
@@ -42,7 +42,7 @@ namespace Ribon
      * the first time call Create.
      */
     template <class T>
-        class RIBON_DLL_DECL LocalStaticCreation
+        class SCRIPTS_DLL_DECL LocalStaticCreation
     {
         union MaxAlign
         {
@@ -71,7 +71,7 @@ namespace Ribon
      * CreateUsingMalloc by pass the memory manger.
      */
     template<class T>
-        class RIBON_DLL_DECL CreateUsingMalloc
+        class SCRIPTS_DLL_DECL CreateUsingMalloc
     {
         public:
             static T* Create()
@@ -92,7 +92,7 @@ namespace Ribon
      * CreateOnCallBack creates the object base on the call back.
      */
     template<class T, class CALL_BACK>
-        class RIBON_DLL_DECL CreateOnCallBack
+        class SCRIPTS_DLL_DECL CreateOnCallBack
     {
         public:
             static T* Create()

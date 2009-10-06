@@ -31,7 +31,7 @@ update creature_template set scriptname = '' where entry = '';
 #define SAY_REPEAT_SUMMON_2                         -1608035
 #define SAY_SUMMON_ENERGY                           -1608036
 
-struct RIBON_DLL_DECL boss_xevozzAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_xevozzAI : public ScriptedAI
 {
     boss_xevozzAI(Creature *c) : ScriptedAI(c) {}
 

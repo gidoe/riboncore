@@ -57,7 +57,7 @@ EndScriptData */
 #define SE_LOC_Y_MAX 1435
 #define SE_LOC_Y_MIN 1370
 
-struct RIBON_DLL_DECL boss_akilzonAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_akilzonAI : public ScriptedAI
 {
     boss_akilzonAI(Creature *c) : ScriptedAI(c)
     {
@@ -364,7 +364,7 @@ struct RIBON_DLL_DECL boss_akilzonAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL mob_soaring_eagleAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_soaring_eagleAI : public ScriptedAI
 {
     mob_soaring_eagleAI(Creature *c) : ScriptedAI(c) {}
 

@@ -27,7 +27,7 @@ EndScriptData */
 #define SPELL_SANDTRAP 25656
 #define SPELL_ENRAGE 28798
 
-struct RIBON_DLL_DECL boss_kurinnaxxAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_kurinnaxxAI : public ScriptedAI
 {
     boss_kurinnaxxAI(Creature *c) : ScriptedAI(c) {}
 

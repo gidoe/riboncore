@@ -71,22 +71,22 @@ Ribon::Singleton<T, ThreadingModel, CreatePolicy, LifeTimePolicy>::DestroySingle
 }
 
 #define INSTANTIATE_SINGLETON_1(TYPE) \
-    template class RIBON_DLL_DECL Ribon::Singleton<TYPE, Ribon::SingleThreaded<TYPE>, Ribon::OperatorNew<TYPE>, Ribon::ObjectLifeTime<TYPE> >; \
+    template class SCRIPTS_DLL_DECL Ribon::Singleton<TYPE, Ribon::SingleThreaded<TYPE>, Ribon::OperatorNew<TYPE>, Ribon::ObjectLifeTime<TYPE> >; \
     template<> TYPE* Ribon::Singleton<TYPE, Ribon::SingleThreaded<TYPE>, Ribon::OperatorNew<TYPE>, Ribon::ObjectLifeTime<TYPE> >::si_instance = 0; \
     template<> bool Ribon::Singleton<TYPE, Ribon::SingleThreaded<TYPE>, Ribon::OperatorNew<TYPE>, Ribon::ObjectLifeTime<TYPE> >::si_destroyed = false
 
 #define INSTANTIATE_SINGLETON_2(TYPE, THREADINGMODEL) \
-    template class RIBON_DLL_DECL Ribon::Singleton<TYPE, THREADINGMODEL, Ribon::OperatorNew<TYPE>, Ribon::ObjectLifeTime<TYPE> >; \
+    template class SCRIPTS_DLL_DECL Ribon::Singleton<TYPE, THREADINGMODEL, Ribon::OperatorNew<TYPE>, Ribon::ObjectLifeTime<TYPE> >; \
     template<> TYPE* Ribon::Singleton<TYPE, THREADINGMODEL, Ribon::OperatorNew<TYPE>, Ribon::ObjectLifeTime<TYPE> >::si_instance = 0; \
     template<> bool Ribon::Singleton<TYPE, THREADINGMODEL, Ribon::OperatorNew<TYPE>, Ribon::ObjectLifeTime<TYPE> >::si_destroyed = false
 
 #define INSTANTIATE_SINGLETON_3(TYPE, THREADINGMODEL, CREATIONPOLICY ) \
-    template class RIBON_DLL_DECL Ribon::Singleton<TYPE, THREADINGMODEL, CREATIONPOLICY, Ribon::ObjectLifeTime<TYPE> >; \
+    template class SCRIPTS_DLL_DECL Ribon::Singleton<TYPE, THREADINGMODEL, CREATIONPOLICY, Ribon::ObjectLifeTime<TYPE> >; \
     template<> TYPE* Ribon::Singleton<TYPE, THREADINGMODEL, CREATIONPOLICY, Ribon::ObjectLifeTime<TYPE> >::si_instance = 0; \
     template<> bool Ribon::Singleton<TYPE, THREADINGMODEL, CREATIONPOLICY, Ribon::ObjectLifeType<TYPE> >::si_destroyed = false
 
 #define INSTANTIATE_SINGLETON_4(TYPE, THREADINGMODEL, CREATIONPOLICY, OBJECTLIFETIME) \
-    template class RIBON_DLL_DECL Ribon::Singleton<TYPE, THREADINGMODEL, CREATIONPOLICY, OBJECTLIFETIME >; \
+    template class SCRIPTS_DLL_DECL Ribon::Singleton<TYPE, THREADINGMODEL, CREATIONPOLICY, OBJECTLIFETIME >; \
     template<> TYPE* Ribon::Singleton<TYPE, THREADINGMODEL, CREATIONPOLICY, OBJECTLIFETIME >::si_instance = 0; \
     template<> bool Ribon::Singleton<TYPE, THREADINGMODEL, CREATIONPOLICY, OBJECTLIFETIME >::si_destroyed = false
 #endif

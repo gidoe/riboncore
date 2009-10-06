@@ -68,7 +68,7 @@ static Locations PipeLocations[] =
   {1297.7,  595.6,  199.9} //right
 };
 
-struct RIBON_DLL_DECL boss_sjonnirAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_sjonnirAI : public ScriptedAI
 {
     boss_sjonnirAI(Creature *c) : ScriptedAI(c)
     {

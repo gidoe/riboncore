@@ -25,7 +25,7 @@
 
 class Unit;
 
-class RIBON_DLL_DECL ReactorAI : public CreatureAI
+class SCRIPTS_DLL_DECL ReactorAI : public CreatureAI
 {
     public:
 

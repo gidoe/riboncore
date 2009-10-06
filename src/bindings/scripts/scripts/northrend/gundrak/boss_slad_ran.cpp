@@ -65,7 +65,7 @@ static Locations SpawnLoc[]=
   {1716.76, 635.159, 129.282, 0.191986}
 };
 
-struct RIBON_DLL_DECL boss_slad_ranAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_slad_ranAI : public ScriptedAI
 {
     boss_slad_ranAI(Creature *c) : ScriptedAI(c)
     {
@@ -173,7 +173,7 @@ struct RIBON_DLL_DECL boss_slad_ranAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL mob_slad_ran_constrictorAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_slad_ran_constrictorAI : public ScriptedAI
 {
     mob_slad_ran_constrictorAI(Creature *c) : ScriptedAI(c) {}
     
@@ -198,7 +198,7 @@ struct RIBON_DLL_DECL mob_slad_ran_constrictorAI : public ScriptedAI
     ScriptedInstance* pInstance;
 };
 
-struct RIBON_DLL_DECL mob_slad_ran_viperAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_slad_ran_viperAI : public ScriptedAI
 {
     mob_slad_ran_viperAI(Creature *c) : ScriptedAI(c) {}
     

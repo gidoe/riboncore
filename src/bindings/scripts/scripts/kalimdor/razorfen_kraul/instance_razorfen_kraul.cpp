@@ -27,7 +27,7 @@ EndScriptData */
 
 #define WARD_KEEPERS_NR 2
 
-struct RIBON_DLL_DECL instance_razorfen_kraul : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_razorfen_kraul : public ScriptedInstance
 {
     instance_razorfen_kraul(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 

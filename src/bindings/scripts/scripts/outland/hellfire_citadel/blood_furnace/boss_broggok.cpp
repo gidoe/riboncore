@@ -35,7 +35,7 @@ enum
     SPELL_POISON            = 30914
 };
 
-struct RIBON_DLL_DECL boss_broggokAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_broggokAI : public ScriptedAI
 {
     boss_broggokAI(Creature *c) : ScriptedAI(c) 
     {

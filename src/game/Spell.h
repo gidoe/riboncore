@@ -663,7 +663,7 @@ class Spell
 
 namespace Ribon
 {
-    struct RIBON_DLL_DECL SpellNotifierCreatureAndPlayer
+    struct SCRIPTS_DLL_DECL SpellNotifierCreatureAndPlayer
     {
         std::list<Unit*> *i_data;
         SpellNotifyPushType i_push_type;

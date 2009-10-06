@@ -36,7 +36,7 @@ class RIBON_DLL_SPEC PassiveAI : public CreatureAI
         static int Permissible(const Creature *) { return PERMIT_BASE_IDLE;  }
 };
 
-class RIBON_DLL_DECL PossessedAI : public CreatureAI
+class SCRIPTS_DLL_DECL PossessedAI : public CreatureAI
 {
     public:
         explicit PossessedAI(Creature *c);
@@ -66,7 +66,7 @@ class RIBON_DLL_SPEC NullCreatureAI : public CreatureAI
         static int Permissible(const Creature *) { return PERMIT_BASE_IDLE;  }
 };
 
-class RIBON_DLL_DECL CritterAI : public PassiveAI
+class SCRIPTS_DLL_DECL CritterAI : public PassiveAI
 {
     public:
         explicit CritterAI(Creature *c) : PassiveAI(c) {}

@@ -54,7 +54,7 @@ EndScriptData */
 #define SPELL_FRENZY                28371                   //The frenzy spell may be wrong
 #define SPELL_ENRAGE                28747
 
-struct RIBON_DLL_DECL boss_chromaggusAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_chromaggusAI : public ScriptedAI
 {
     boss_chromaggusAI(Creature *c) : ScriptedAI(c)
     {

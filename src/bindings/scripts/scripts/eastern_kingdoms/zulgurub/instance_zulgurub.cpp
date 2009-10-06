@@ -24,7 +24,7 @@ EndScriptData */
 #include "precompiled.h"
 #include "def_zulgurub.h"
 
-struct RIBON_DLL_DECL instance_zulgurub : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_zulgurub : public ScriptedInstance
 {
     instance_zulgurub(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 

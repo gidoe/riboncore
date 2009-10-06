@@ -7,7 +7,7 @@
 0 - Sartharion
 */
 
-struct RIBON_DLL_DECL instance_obsidian_sanctum : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_obsidian_sanctum : public ScriptedInstance
 {
     instance_obsidian_sanctum(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 

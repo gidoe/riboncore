@@ -70,7 +70,7 @@ static Locations RitualChannelerLoc[]=
 /*######
 ## Boss Svala
 ######*/
-struct RIBON_DLL_DECL boss_svalaAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_svalaAI : public ScriptedAI
 {
     boss_svalaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -183,7 +183,7 @@ struct RIBON_DLL_DECL boss_svalaAI : public ScriptedAI
 /*######
 ## Mob Ritual Channeler
 ######*/
-struct RIBON_DLL_DECL mob_ritual_channelerAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_ritual_channelerAI : public ScriptedAI
 {
     mob_ritual_channelerAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
@@ -216,7 +216,7 @@ struct RIBON_DLL_DECL mob_ritual_channelerAI : public ScriptedAI
 /*######
 ## Boss Svala Sorrowgrave
 ######*/
-struct RIBON_DLL_DECL boss_svala_sorrowgraveAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_svala_sorrowgraveAI : public ScriptedAI
 {
     boss_svala_sorrowgraveAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

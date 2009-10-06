@@ -32,7 +32,7 @@ enum
     NPC_RAGECLAW               = 29686
 };
 
-struct RIBON_DLL_DECL npc_drakuru_shacklesAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_drakuru_shacklesAI : public ScriptedAI
 {
     npc_drakuru_shacklesAI(Creature *c) : ScriptedAI(c) {}
 
@@ -108,7 +108,7 @@ const char * SAY_RAGECLAW_2 =      "ARRRROOOOGGGGAAAA!";
 const char * SAY_RAGECLAW_3 =      "No more mister nice wolvar!";
 #define SAY_RAGECLAW RAND(SAY_RAGECLAW_1,SAY_RAGECLAW_2,SAY_RAGECLAW_3)
 
-struct RIBON_DLL_DECL npc_captured_rageclawAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL npc_captured_rageclawAI : public ScriptedAI
 {
     npc_captured_rageclawAI(Creature *c) : ScriptedAI(c) {}
 

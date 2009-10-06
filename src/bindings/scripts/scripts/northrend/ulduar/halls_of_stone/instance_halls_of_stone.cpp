@@ -33,7 +33,7 @@ EndScriptData */
 3- Sjonnir The Ironshaper
 */
 
-struct RIBON_DLL_DECL instance_halls_of_stone : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_halls_of_stone : public ScriptedInstance
 {
     instance_halls_of_stone(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
     

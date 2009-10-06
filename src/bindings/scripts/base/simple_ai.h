@@ -19,7 +19,7 @@ enum CastTarget
     CAST_JUSTDIED_KILLER,           //Only works within JustDied function
 };
 
-struct RIBON_DLL_DECL SimpleAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL SimpleAI : public ScriptedAI
 {
     SimpleAI(Creature *c);// : ScriptedAI(c);
 

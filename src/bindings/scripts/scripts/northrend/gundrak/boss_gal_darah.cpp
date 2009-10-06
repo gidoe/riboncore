@@ -49,7 +49,7 @@ enum CombatPhase
     RHINO
 };
 
-struct RIBON_DLL_DECL boss_gal_darahAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_gal_darahAI : public ScriptedAI
 {
     boss_gal_darahAI(Creature *c) : ScriptedAI(c)
     {

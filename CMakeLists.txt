@@ -25,7 +25,7 @@ OPTION(LARGE_CELL "Large cell size" 0)
 OPTION(SHORT_SLEEP "Short sleep" 0)
 OPTION(CENTOS "CENTOS" 0)
 
-message("* RibonCore revision: ${REVISION_NR}")
+message("* RibonCore Revision: ${REVISION_NR}")
 
 IF (PREFIX)
     SET(CMAKE_INSTALL_PREFIX ${PREFIX})

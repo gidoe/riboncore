@@ -41,7 +41,7 @@ EndScriptData */
 
 #define SPELL_BOMB                40332                     //Wrong ID but Magmadars bomb is not working...
 
-struct RIBON_DLL_DECL boss_jeklikAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_jeklikAI : public ScriptedAI
 {
     boss_jeklikAI(Creature *c) : ScriptedAI(c)
     {
@@ -208,7 +208,7 @@ struct RIBON_DLL_DECL boss_jeklikAI : public ScriptedAI
 };
 
 //Flying Bat
-struct RIBON_DLL_DECL mob_batriderAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_batriderAI : public ScriptedAI
 {
     mob_batriderAI(Creature *c) : ScriptedAI(c)
     {

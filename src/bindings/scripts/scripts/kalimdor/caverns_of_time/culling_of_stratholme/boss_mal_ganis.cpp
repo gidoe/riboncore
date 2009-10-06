@@ -39,7 +39,7 @@ update creature_template set scriptname = 'boss_mal_ganis' where entry = '';
 #define SAY_ESCAPE_SPEECH_1                          -1595024
 #define SAY_ESCAPE_SPEECH_2                          -1595025
 
-struct RIBON_DLL_DECL boss_mal_ganisAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_mal_ganisAI : public ScriptedAI
 {
     boss_mal_ganisAI(Creature *c) : ScriptedAI(c) {}
 

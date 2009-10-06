@@ -108,7 +108,7 @@ enum SWPActions
 
 uint32 WildMagic[]= { 44978, 45001, 45002, 45004, 45006, 45010 };
 
-struct RIBON_DLL_DECL boss_kalecgosAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_kalecgosAI : public ScriptedAI
 {
     boss_kalecgosAI(Creature *c) : ScriptedAI(c)
     {
@@ -422,7 +422,7 @@ struct RIBON_DLL_DECL boss_kalecgosAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL boss_sathrovarrAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_sathrovarrAI : public ScriptedAI
 {
     boss_sathrovarrAI(Creature *c) : ScriptedAI(c)
     {
@@ -650,7 +650,7 @@ struct RIBON_DLL_DECL boss_sathrovarrAI : public ScriptedAI
     }
 };
 
-struct RIBON_DLL_DECL boss_kalecAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_kalecAI : public ScriptedAI
 {
     ScriptedInstance *pInstance;
 

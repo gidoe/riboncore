@@ -38,7 +38,7 @@ class Player;
 
 namespace Ribon
 {
-    struct RIBON_DLL_DECL PlayerVisibilityNotifier
+    struct SCRIPTS_DLL_DECL PlayerVisibilityNotifier
     {
         Player &i_player;
         UpdateData i_data;
@@ -52,7 +52,7 @@ namespace Ribon
         void Notify(void);
     };
 
-    struct RIBON_DLL_DECL PlayerRelocationNotifier : public PlayerVisibilityNotifier
+    struct SCRIPTS_DLL_DECL PlayerRelocationNotifier : public PlayerVisibilityNotifier
     {
         PlayerRelocationNotifier(Player &player) : PlayerVisibilityNotifier(player) {}
         template<class T> inline void Visit(GridRefManager<T> &m) { PlayerVisibilityNotifier::Visit(m); }
@@ -62,7 +62,7 @@ namespace Ribon
         #endif
     };
 
-    struct RIBON_DLL_DECL CreatureRelocationNotifier
+    struct SCRIPTS_DLL_DECL CreatureRelocationNotifier
     {
         Creature &i_creature;
         CreatureRelocationNotifier(Creature &c) : i_creature(c) {}
@@ -73,7 +73,7 @@ namespace Ribon
         #endif
     };
 
-    struct RIBON_DLL_DECL VisibleChangesNotifier
+    struct SCRIPTS_DLL_DECL VisibleChangesNotifier
     {
         WorldObject &i_object;
 
@@ -84,7 +84,7 @@ namespace Ribon
         void Visit(DynamicObjectMapType &);
     };
 
-    struct RIBON_DLL_DECL GridUpdater
+    struct SCRIPTS_DLL_DECL GridUpdater
     {
         GridType &i_grid;
         uint32 i_timeDiff;
@@ -103,7 +103,7 @@ namespace Ribon
         void Visit(CorpseMapType &m) { updateObjects<Corpse>(m); }
     };
 
-    struct RIBON_DLL_DECL MessageDistDeliverer
+    struct SCRIPTS_DLL_DECL MessageDistDeliverer
     {
         WorldObject *i_source;
         WorldPacket *i_message;
@@ -130,7 +130,7 @@ namespace Ribon
         }
     };
 
-    struct RIBON_DLL_DECL ObjectUpdater
+    struct SCRIPTS_DLL_DECL ObjectUpdater
     {
         uint32 i_timeDiff;
         explicit ObjectUpdater(const uint32 &diff) : i_timeDiff(diff) {}
@@ -141,7 +141,7 @@ namespace Ribon
     };
 
     template<class T>
-        struct RIBON_DLL_DECL ObjectAccessorNotifier
+        struct SCRIPTS_DLL_DECL ObjectAccessorNotifier
     {
         T *& i_object;
 
@@ -167,7 +167,7 @@ namespace Ribon
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
-    struct RIBON_DLL_DECL DynamicObjectUpdater
+    struct SCRIPTS_DLL_DECL DynamicObjectUpdater
     {
         DynamicObject &i_dynobject;
         Unit* i_check;
@@ -193,7 +193,7 @@ namespace Ribon
     // WorldObject searchers & workers
 
     template<class Check>
-        struct RIBON_DLL_DECL WorldObjectSearcher
+        struct SCRIPTS_DLL_DECL WorldObjectSearcher
     {
         uint32 i_phaseMask;
         WorldObject* &i_object;
@@ -212,7 +212,7 @@ namespace Ribon
     };
 
     template<class Check>
-        struct RIBON_DLL_DECL WorldObjectListSearcher
+        struct SCRIPTS_DLL_DECL WorldObjectListSearcher
     {
         uint32 i_phaseMask;
         std::list<WorldObject*> &i_objects;
@@ -231,7 +231,7 @@ namespace Ribon
     };
 
     template<class Do>
-        struct RIBON_DLL_DECL WorldObjectWorker
+        struct SCRIPTS_DLL_DECL WorldObjectWorker
     {
         uint32 i_phaseMask;
         Do const& i_do;
@@ -279,7 +279,7 @@ namespace Ribon
     // Gameobject searchers
 
     template<class Check>
-        struct RIBON_DLL_DECL GameObjectSearcher
+        struct SCRIPTS_DLL_DECL GameObjectSearcher
     {
         uint32 i_phaseMask;
         GameObject* &i_object;
@@ -295,7 +295,7 @@ namespace Ribon
 
     // Last accepted by Check GO if any (Check can change requirements at each call)
     template<class Check>
-        struct RIBON_DLL_DECL GameObjectLastSearcher
+        struct SCRIPTS_DLL_DECL GameObjectLastSearcher
     {
         uint32 i_phaseMask;
         GameObject* &i_object;
@@ -310,7 +310,7 @@ namespace Ribon
     };
 
     template<class Check>
-        struct RIBON_DLL_DECL GameObjectListSearcher
+        struct SCRIPTS_DLL_DECL GameObjectListSearcher
     {
         uint32 i_phaseMask;
         std::list<GameObject*> &i_objects;
@@ -328,7 +328,7 @@ namespace Ribon
 
     // First accepted by Check Unit if any
     template<class Check>
-        struct RIBON_DLL_DECL UnitSearcher
+        struct SCRIPTS_DLL_DECL UnitSearcher
     {
         uint32 i_phaseMask;
         Unit* &i_object;
@@ -345,7 +345,7 @@ namespace Ribon
 
     // Last accepted by Check Unit if any (Check can change requirements at each call)
     template<class Check>
-        struct RIBON_DLL_DECL UnitLastSearcher
+        struct SCRIPTS_DLL_DECL UnitLastSearcher
     {
         uint32 i_phaseMask;
         Unit* &i_object;
@@ -362,7 +362,7 @@ namespace Ribon
 
     // All accepted by Check units if any
     template<class Check>
-        struct RIBON_DLL_DECL UnitListSearcher
+        struct SCRIPTS_DLL_DECL UnitListSearcher
     {
         uint32 i_phaseMask;
         std::list<Unit*> &i_objects;
@@ -380,7 +380,7 @@ namespace Ribon
     // Creature searchers
 
     template<class Check>
-        struct RIBON_DLL_DECL CreatureSearcher
+        struct SCRIPTS_DLL_DECL CreatureSearcher
     {
         uint32 i_phaseMask;
         Creature* &i_object;
@@ -396,7 +396,7 @@ namespace Ribon
 
     // Last accepted by Check Creature if any (Check can change requirements at each call)
     template<class Check>
-        struct RIBON_DLL_DECL CreatureLastSearcher
+        struct SCRIPTS_DLL_DECL CreatureLastSearcher
     {
         uint32 i_phaseMask;
         Creature* &i_object;
@@ -411,7 +411,7 @@ namespace Ribon
     };
 
     template<class Check>
-        struct RIBON_DLL_DECL CreatureListSearcher
+        struct SCRIPTS_DLL_DECL CreatureListSearcher
     {
         uint32 i_phaseMask;
         std::list<Creature*> &i_objects;
@@ -447,7 +447,7 @@ namespace Ribon
     // Player searchers
 
     template<class Check>
-    struct RIBON_DLL_DECL PlayerSearcher
+    struct SCRIPTS_DLL_DECL PlayerSearcher
     {
         uint32 i_phaseMask;
         Player* &i_object;
@@ -462,7 +462,7 @@ namespace Ribon
     };
 
     template<class Check>
-        struct RIBON_DLL_DECL PlayerListSearcher
+        struct SCRIPTS_DLL_DECL PlayerListSearcher
     {
         uint32 i_phaseMask;
         std::list<Player*> &i_objects;
@@ -477,7 +477,7 @@ namespace Ribon
     };
 
     template<class Do>
-    struct RIBON_DLL_DECL PlayerWorker
+    struct SCRIPTS_DLL_DECL PlayerWorker
     {
         uint32 i_phaseMask;
         Do& i_do;
@@ -496,7 +496,7 @@ namespace Ribon
     };
 
     template<class Do>
-    struct RIBON_DLL_DECL PlayerDistWorker
+    struct SCRIPTS_DLL_DECL PlayerDistWorker
     {
         WorldObject const* i_searcher;
         float i_dist;

@@ -33,7 +33,7 @@ EndScriptData */
 
 #define ENTRY_SPORE_STRIDER        22299
 
-struct RIBON_DLL_DECL boss_the_black_stalkerAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_the_black_stalkerAI : public ScriptedAI
 {
     boss_the_black_stalkerAI(Creature *c) : ScriptedAI(c)
     {

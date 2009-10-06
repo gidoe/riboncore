@@ -39,7 +39,7 @@ enum
     SPELL_DOMINATION            = 25772                     // ???
 };
 
-struct RIBON_DLL_DECL boss_the_makerAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_the_makerAI : public ScriptedAI
 {
     boss_the_makerAI(Creature *c) : ScriptedAI(c)
     {

@@ -44,7 +44,7 @@ enum Yells
     SAY_SHATTER                                 = -1603010
 };
 
-struct RIBON_DLL_DECL boss_krystallusAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_krystallusAI : public ScriptedAI
 {
     boss_krystallusAI(Creature *c) : ScriptedAI(c)
     {

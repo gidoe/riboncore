@@ -14,7 +14,7 @@
 #define ENTRY_KING_YMIRON_DOOR             192174
 #define ENTRY_GORK_PALEHOOF_SPHERE         188593
 
-struct RIBON_DLL_DECL instance_utgarde_pinnacle : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_utgarde_pinnacle : public ScriptedInstance
 {
     instance_utgarde_pinnacle(Map *pMap) : ScriptedInstance(pMap) {Initialize();};
 

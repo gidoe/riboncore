@@ -47,7 +47,7 @@ EndScriptData */
 
 #define MAX_ENCOUNTER              6
 
-struct RIBON_DLL_DECL instance_stratholme : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_stratholme : public ScriptedInstance
 {
     instance_stratholme(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
 

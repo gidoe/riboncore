@@ -33,7 +33,7 @@ EndScriptData */
 3  - Kael'thas Sunstrider
 */
 
-struct RIBON_DLL_DECL instance_magisters_terrace : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_magisters_terrace : public ScriptedInstance
 {
     instance_magisters_terrace(Map* pMap) : ScriptedInstance(pMap) {Initialize();}
 

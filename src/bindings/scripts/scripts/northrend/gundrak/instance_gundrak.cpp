@@ -11,7 +11,7 @@
 4 - Eck the Ferocious
 */
 
-struct RIBON_DLL_DECL instance_gundrak : public ScriptedInstance
+struct SCRIPTS_DLL_DECL instance_gundrak : public ScriptedInstance
 {
     instance_gundrak(Map* pMap) : ScriptedInstance(pMap)
     {

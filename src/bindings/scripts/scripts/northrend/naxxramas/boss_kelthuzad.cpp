@@ -103,7 +103,7 @@ const Position Pos[12] =
     {3739.500000,-5141.883989,142.0141130, 2.121412}//RIGHT_NEAR
 };
 
-struct RIBON_DLL_DECL boss_kelthuzadAI : public BossAI
+struct SCRIPTS_DLL_DECL boss_kelthuzadAI : public BossAI
 {
     boss_kelthuzadAI(Creature* c) : BossAI(c, BOSS_KELTHUZAD) {}
 
@@ -288,7 +288,7 @@ CreatureAI* GetAI_boss_kelthuzadAI(Creature* pCreature)
     return new boss_kelthuzadAI (pCreature);
 }
 
-struct RIBON_DLL_DECL mob_wasteAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_wasteAI : public ScriptedAI
 {
     mob_wasteAI(Creature *c) : ScriptedAI(c) {}
 
@@ -316,7 +316,7 @@ CreatureAI* GetAI_mob_wasteAI(Creature* pCreature)
     return new mob_wasteAI (pCreature);
 }
 
-struct RIBON_DLL_DECL mob_weaverAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL mob_weaverAI : public ScriptedAI
 {
     mob_weaverAI(Creature *c) : ScriptedAI(c) {}
 

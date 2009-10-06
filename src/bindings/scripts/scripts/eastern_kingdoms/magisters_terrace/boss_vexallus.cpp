@@ -57,7 +57,7 @@ enum
     INTERVAL_SWITCH                 = 6
 };
 
-struct  RIBON_DLL_DECL boss_vexallusAI : public ScriptedAI
+struct  SCRIPTS_DLL_DECL boss_vexallusAI : public ScriptedAI
 {
     boss_vexallusAI(Creature *c) : ScriptedAI(c)
     {
@@ -187,7 +187,7 @@ CreatureAI* GetAI_boss_vexallus(Creature* pCreature)
     return new boss_vexallusAI (pCreature);
 };
 
-struct  RIBON_DLL_DECL mob_pure_energyAI : public ScriptedAI
+struct  SCRIPTS_DLL_DECL mob_pure_energyAI : public ScriptedAI
 {
     mob_pure_energyAI(Creature *c) : ScriptedAI(c) {}
 

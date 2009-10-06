@@ -38,7 +38,7 @@ enum
     QUEST_SNIFF_OUT_ENEMY        = 11253
 };
 
-struct RIBON_DLL_DECL npc_plaguehound_trackerAI : public npc_escortAI
+struct SCRIPTS_DLL_DECL npc_plaguehound_trackerAI : public npc_escortAI
 {
     npc_plaguehound_trackerAI(Creature* pCreature) : npc_escortAI(pCreature) { }
 

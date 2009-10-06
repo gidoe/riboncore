@@ -28,7 +28,7 @@ EndScriptData */
 #define SPELL_SHADOWOFEBONROC       23340
 #define SPELL_HEAL                  41386                   //Thea Heal spell of his Shadow
 
-struct RIBON_DLL_DECL boss_ebonrocAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_ebonrocAI : public ScriptedAI
 {
     boss_ebonrocAI(Creature *c) : ScriptedAI(c) {}
 

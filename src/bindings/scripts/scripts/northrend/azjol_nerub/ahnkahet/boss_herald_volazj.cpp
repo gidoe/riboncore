@@ -47,7 +47,7 @@ EndScriptData */
 #define SAY_DEATH_2                             -1619035
 #define SAY_PHASE                               -1619036
 
-struct RIBON_DLL_DECL boss_volazjAI : public ScriptedAI
+struct SCRIPTS_DLL_DECL boss_volazjAI : public ScriptedAI
 {
     boss_volazjAI(Creature* pCreature) : ScriptedAI(pCreature)
     {

@@ -2782,7 +2782,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
 SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
 {
     // Can`t miss on dead target (on skinning for example)
-    if (!pVictim->isAlive())
+    if (!pVictim->isAlive() && pVictim->GetTypeId() != TYPEID_PLAYER)
         return SPELL_MISS_NONE;
 
     SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
@@ -6802,7 +6802,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             // Improved Blood Presence
             if (dummySpell->SpellIconID == 2636)
             {
-                if (GetTypeId() != TYPEID_PLAYER || !((Player*)this)->isHonorOrXPTarget(pVictim))
+                if (GetTypeId() != TYPEID_PLAYER)
                     return false;
                 basepoints0 = triggerAmount * damage / 100;
                 // Blood Aura
@@ -7551,8 +7551,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 {
                     if (GetTypeId() != TYPEID_PLAYER)
                         return false;
-                    if (!((Player*)this)->isHonorOrXPTarget(pVictim))
-                        return false;
+
                     trigger_spell_id = 50475;
                     basepoints0 = damage * triggerAmount / 100;
                 }
@@ -11990,10 +11989,11 @@ void Unit::SetLevel(uint32 lvl)
 
 void Unit::SetHealth(uint32 val)
 {
-    if((getDeathState() & JUST_DIED) != 0)
+    if(getDeathState() == JUST_DIED)
         val = 0;
-    else if((getDeathState() & (DEAD | DEAD_FALLING)) != 0)
-        val = 1;
+    // causes instant permadeath if you exit game while in combat?! :-|
+    //else if((getDeathState() & (DEAD | DEAD_FALLING)) != 0)
+    //    val = 1;
     else
     {
         uint32 maxHealth = GetMaxHealth();
