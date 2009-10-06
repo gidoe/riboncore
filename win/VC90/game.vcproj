@@ -890,6 +890,10 @@
 				RelativePath="..\..\src\game\World.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\game\WorldThreads.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Object"

@@ -36,7 +36,7 @@
 #if (defined(WIN32) || defined(SHORT_SLEEP))
 #define WORLD_SLEEP_CONST 50
 #else
-#define WORLD_SLEEP_CONST 100                               //Is this still needed?? [On linux some time ago not working 50ms]
+#define WORLD_SLEEP_CONST 50                               //Is this still needed?? [On linux some time ago not working 50ms]
 #endif
 
 #ifdef WIN32
@@ -87,6 +87,7 @@ void WorldRunnable::run()
         #endif
     }
 
+    sWorld.ThreadEnd();    
     sWorld.KickAll();                                       // save and kick all players
     sWorld.UpdateSessions( 1 );                             // real players unload required UpdateSessions call
 

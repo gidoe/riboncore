@@ -68,6 +68,7 @@
 #include "CreatureGroups.h"
 #include "Transports.h"
 #include "ProgressBar.h"
+#include "WorldThreads.h"
 
 INSTANTIATE_SINGLETON_1(World);
 #define _FULLVERSION (REVISION_NR)
@@ -1730,6 +1731,7 @@ void World::SetInitialWorldSettings()
 
     Script->OnServerStartup();
 
+    ThreadStarter();
     sLog.outString("WORLD: World initialized");
 }
 
@@ -1955,6 +1957,7 @@ void World::Update(uint32 diff)
         MapManager::Instance().DoDelayedMovesAndRemoves();
     }*/
 
+    DiffTime = diff;
     static uint32 autobroadcaston = 0;
     autobroadcaston = sConfig.GetIntDefault("AutoBroadcast.On", 0);
     if (autobroadcaston == 1)
@@ -1965,14 +1968,6 @@ void World::Update(uint32 diff)
           SendRNDBroadcast();
        }
     }
-
-    sBattleGroundMgr.Update(diff);
-    RecordTimeDiff("UpdateBattleGroundMgr");
-
-
-    sOutdoorPvPMgr.Update(diff);
-    RecordTimeDiff("UpdateOutdoorPvPMgr");
-
 
     // execute callbacks from sql queries that were queued recently
     UpdateResultQueue();
@@ -1997,9 +1992,6 @@ void World::Update(uint32 diff)
 
     // update the instance reset times
     sInstanceSaveManager.Update();
-
-    // And last, but not least handle the issued cli commands
-    ProcessCliCommands();
 }
 
 void World::ForceGameEventUpdate()

@@ -438,6 +438,11 @@ class World
         void AddSession(WorldSession *s);
         void SendRNDBroadcast();
         bool RemoveSession(uint32 id);
+        ///Thread Tests
+        uint32 DiffTime;
+        uint32 CLIThreadTimer;
+        void ThreadStarter();
+        void ThreadEnd();
         /// Get the number of current active sessions
         void UpdateMaxSessionCounters();
         uint32 GetActiveAndQueuedSessionCount() const { return m_sessions.size(); }

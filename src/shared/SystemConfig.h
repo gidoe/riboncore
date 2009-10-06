@@ -74,7 +74,7 @@
 #  define _ENDIAN_PLATFORM "Win32 (" _ENDIAN_STRING ")"
 # endif
 # define _WORLD_CONFIG  SYSCONFDIR"World.conf"
-# define _LOGON_CONFIG   SYSCONFDIR"Logon.conf"
+# define _LOGON_CONFIG  SYSCONFDIR"Logon.conf"
 #else
 # if defined  (__FreeBSD__)
 #  define _ENDIAN_PLATFORM "FreeBSD_"ARCHITECTURE" (" _ENDIAN_STRING ")"
